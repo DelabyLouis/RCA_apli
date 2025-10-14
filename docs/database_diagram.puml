@@ -4,97 +4,99 @@ title Base de données ApliRCA
 
 ' Tables de référence
 entity "Role" as Role {
-  **id_role** <<PK>>
+  **id** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
-  libelle
-  description
+  libelle : VARCHAR(50) NOT NULL UNIQUE
+  description : VARCHAR(255) NULL
 }
 
 entity "TypeTransaction" as TypeTransaction {
-  **id_type** <<PK>>
+  **id_type** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
-  libelle
-  description
+  libelle : VARCHAR(100) NOT NULL UNIQUE
+  description : VARCHAR(255) NULL
 }
 
 entity "Exercice" as Exercice {
-  **id_exercice** <<PK>>
+  **id_exercice** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
-  libelle
-  date_debut
-  date_fin
+  libelle : VARCHAR(100) NOT NULL
+  date_debut : DATE NOT NULL
+  date_fin : DATE NULL
 }
 
 ' Tables principales
 entity "Personne" as Personne {
-  **id_personne** <<PK>>
+  **id** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
-  civilite
-  nom
-  prenom
-  numero_voie
-  rue
-  complement_adresse
-  ville
-  code_postal
-  pays
-  telephone
-  email
+  civilite : VARCHAR(10) NULL
+  nom : VARCHAR(100) NOT NULL
+  prenom : VARCHAR(100) NOT NULL
+  numero_voie : VARCHAR(10) NULL
+  rue : VARCHAR(200) NULL
+  complement_adresse : VARCHAR(100) NULL
+  ville : VARCHAR(100) NULL
+  code_postal : INT NULL
+  pays : VARCHAR(50) NULL DEFAULT 'France'
+  telephone : INT NULL
+  email : VARCHAR(255) NULL
 }
 
 entity "Entreprise" as Entreprise {
-  **id_entreprise** <<PK>>
+  **id_entreprise** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
-  nom_entreprise
-  siret
-  siren
-  numero_voie
-  rue
-  complement_adresse
-  ville
-  code_postal
-  pays
-  telephone
-  email
+  nom_entreprise : VARCHAR(255) NOT NULL
+  siret : VARCHAR(14) NULL UNIQUE
+  siren : VARCHAR(9) NULL
+  numero_voie : VARCHAR(10) NULL
+  rue : VARCHAR(200) NULL
+  complement_adresse : VARCHAR(100) NULL
+  ville : VARCHAR(100) NULL
+  code_postal : INT NULL
+  pays : VARCHAR(50) NULL DEFAULT 'France'
+  telephone : INT NULL
+  email : VARCHAR(255) NULL
 }
 
 entity "User" as User {
-  **id_user** <<PK>>
+  **id_user** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
-  username
-  password
-  //id_personne// <<FK>>
-  //id_role// <<FK>>
+  username : VARCHAR(50) NOT NULL UNIQUE
+  password : VARCHAR(255) NOT NULL
+  //id_personne// : INT <<FK>> NOT NULL
+  //id_role// : INT <<FK>> NOT NULL
 }
 
 entity "PersonneEntreprise" as PersonneEntreprise {
-  //id_personne// <<FK>>
-  //id_entreprise// <<FK>>
+  //id_personne// : INT <<FK>> NOT NULL
+  //id_entreprise// : INT <<FK>> NOT NULL
+  --
+  PRIMARY KEY (id_personne, id_entreprise)
 }
 
 entity "Transaction" as Transaction {
-  **id_transaction** <<PK>>
+  **id_transaction** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
-  numero_ordre
-  date_transaction
-  montant
-  //id_exercice// <<FK>>
-  //id_type// <<FK>>
-  //id_personne// <<FK>> (XOR)
-  //id_entreprise// <<FK>> (XOR)
+  numero_ordre : INT NOT NULL
+  date_transaction : DATE NOT NULL
+  montant : DECIMAL(15,2) NOT NULL
+  //id_exercice// : INT <<FK>> NOT NULL
+  //id_type// : INT <<FK>> NOT NULL
+  //id_personne// : INT <<FK>> NULL (XOR)
+  //id_entreprise// : INT <<FK>> NULL (XOR)
 }
 
 ' Relations
-User ||--|| Personne
-User }|--|| Role
+User ||--|| Personne : "1,1" "1,1"
+User }o--|| Role : "0,n" "1,1"
 
-PersonneEntreprise }|--|| Personne
-PersonneEntreprise }|--|| Entreprise
+PersonneEntreprise }o--|| Personne : "0,n" "1,1"
+PersonneEntreprise }o--|| Entreprise : "0,n" "1,1"
 
-Transaction }|--|| Exercice
-Transaction }|--|| TypeTransaction
-Transaction }|--o| Personne
-Transaction }|--o| Entreprise
+Transaction }o--|| Exercice : "0,n" "1,1"
+Transaction }o--|| TypeTransaction : "0,n" "1,1"
+Transaction }o--o| Personne : "0,n" "0,1"
+Transaction }o--o| Entreprise : "0,n" "0,1"
 
 note right of Transaction : XOR: soit Personne\nsoit Entreprise
 
