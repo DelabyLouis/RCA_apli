@@ -1,0 +1,101 @@
+@startuml ApliRCA_Database_Diagram
+
+title Base de données ApliRCA
+
+' Tables de référence
+entity "Role" as Role {
+  **id_role** <<PK>>
+  --
+  libelle
+  description
+}
+
+entity "TypeTransaction" as TypeTransaction {
+  **id_type** <<PK>>
+  --
+  libelle
+  description
+}
+
+entity "Exercice" as Exercice {
+  **id_exercice** <<PK>>
+  --
+  libelle
+  date_debut
+  date_fin
+}
+
+' Tables principales
+entity "Personne" as Personne {
+  **id_personne** <<PK>>
+  --
+  civilite
+  nom
+  prenom
+  numero_voie
+  rue
+  complement_adresse
+  ville
+  code_postal
+  pays
+  telephone
+  email
+}
+
+entity "Entreprise" as Entreprise {
+  **id_entreprise** <<PK>>
+  --
+  nom_entreprise
+  siret
+  siren
+  numero_voie
+  rue
+  complement_adresse
+  ville
+  code_postal
+  pays
+  telephone
+  email
+}
+
+entity "User" as User {
+  **id_user** <<PK>>
+  --
+  username
+  password
+  //id_personne// <<FK>>
+  //id_role// <<FK>>
+}
+
+entity "PersonneEntreprise" as PersonneEntreprise {
+  //id_personne// <<FK>>
+  //id_entreprise// <<FK>>
+}
+
+entity "Transaction" as Transaction {
+  **id_transaction** <<PK>>
+  --
+  numero_ordre
+  date_transaction
+  montant
+  //id_exercice// <<FK>>
+  //id_type// <<FK>>
+  //id_personne// <<FK>> (XOR)
+  //id_entreprise// <<FK>> (XOR)
+}
+
+' Relations
+User ||--|| Personne
+User }|--|| Role
+
+PersonneEntreprise }|--|| Personne
+PersonneEntreprise }|--|| Entreprise
+
+Transaction }|--|| Exercice
+Transaction }|--|| TypeTransaction
+Transaction }|--o| Personne
+Transaction }|--o| Entreprise
+
+note right of Transaction : XOR: soit Personne\nsoit Entreprise
+
+@enduml
