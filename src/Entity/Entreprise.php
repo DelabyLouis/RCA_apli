@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\EntrepriseRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EntrepriseRepository::class)]
@@ -16,7 +18,7 @@ class Entreprise
     #[ORM\Column(length: 255)]
     private ?string $nom_entreprise = null;
 
-    #[ORM\Column(length: 14, nullable: true)]
+    #[ORM\Column(length: 14, nullable: true, unique: true)]
     private ?string $siret = null;
 
     #[ORM\Column(length: 9, nullable: true)]
@@ -37,14 +39,25 @@ class Entreprise
     #[ORM\Column(nullable: true)]
     private ?int $code_postal = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $pays = null;
+    #[ORM\Column(length: 50, nullable: true, options: ['default' => 'France'])]
+    private ?string $pays = 'France';
 
     #[ORM\Column(nullable: true)]
-    private ?int $tel = null;
+    private ?int $telephone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
+
+    /**
+     * @var Collection<int, Personne>
+     */
+    #[ORM\ManyToMany(targetEntity: Personne::class, mappedBy: 'entreprise')]
+    private Collection $personnes;
+
+    public function __construct()
+    {
+        $this->personnes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -159,14 +172,14 @@ class Entreprise
         return $this;
     }
 
-    public function getTel(): ?int
+    public function getTelephone(): ?int
     {
-        return $this->tel;
+        return $this->telephone;
     }
 
-    public function setTel(?int $tel): static
+    public function setTelephone(?int $telephone): static
     {
-        $this->tel = $tel;
+        $this->telephone = $telephone;
 
         return $this;
     }
@@ -179,6 +192,33 @@ class Entreprise
     public function setEmail(?string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Personne>
+     */
+    public function getPersonnes(): Collection
+    {
+        return $this->personnes;
+    }
+
+    public function addPersonne(Personne $personne): static
+    {
+        if (!$this->personnes->contains($personne)) {
+            $this->personnes->add($personne);
+            $personne->addEntreprise($this);
+        }
+
+        return $this;
+    }
+
+    public function removePersonne(Personne $personne): static
+    {
+        if ($this->personnes->removeElement($personne)) {
+            $personne->removeEntreprise($this);
+        }
 
         return $this;
     }

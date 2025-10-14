@@ -4,7 +4,7 @@ title Base de données ApliRCA
 
 ' Tables de référence
 entity "Role" as Role {
-  **id** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  **id_role** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
   libelle : VARCHAR(50) NOT NULL UNIQUE
   description : VARCHAR(255) NULL
@@ -27,7 +27,7 @@ entity "Exercice" as Exercice {
 
 ' Tables principales
 entity "Personne" as Personne {
-  **id** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  **id_personne** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
   civilite : VARCHAR(10) NULL
   nom : VARCHAR(100) NOT NULL

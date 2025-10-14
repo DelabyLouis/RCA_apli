@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PersonneRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PersonneRepository::class)]
@@ -45,6 +47,17 @@ class Personne
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
+
+    /**
+     * @var Collection<int, Entreprise>
+     */
+    #[ORM\ManyToMany(targetEntity: Entreprise::class, inversedBy: 'personnes')]
+    private Collection $entreprise;
+
+    public function __construct()
+    {
+        $this->entreprise = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -179,6 +192,30 @@ class Personne
     public function setEmail(?string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Entreprise>
+     */
+    public function getEntreprise(): Collection
+    {
+        return $this->entreprise;
+    }
+
+    public function addEntreprise(Entreprise $entreprise): static
+    {
+        if (!$this->entreprise->contains($entreprise)) {
+            $this->entreprise->add($entreprise);
+        }
+
+        return $this;
+    }
+
+    public function removeEntreprise(Entreprise $entreprise): static
+    {
+        $this->entreprise->removeElement($entreprise);
 
         return $this;
     }
