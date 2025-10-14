@@ -7,14 +7,14 @@ entity "Role" as Role {
   **id_role** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
   libelle : VARCHAR(50) NOT NULL UNIQUE
-  description : VARCHAR(255) NULL
+  description : TEXT NULL
 }
 
 entity "TypeTransaction" as TypeTransaction {
   **id_type** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
   libelle : VARCHAR(100) NOT NULL UNIQUE
-  description : VARCHAR(255) NULL
+  description : TEXT NULL
 }
 
 entity "Exercice" as Exercice {
