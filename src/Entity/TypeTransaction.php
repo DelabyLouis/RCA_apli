@@ -11,18 +11,18 @@ class TypeTransaction
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_type')]
+    private ?int $id_type = null;
 
     #[ORM\Column(length: 100, unique: true)]
     private ?string $libelle = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
-    public function getId(): ?int
+    public function getIdType(): ?int
     {
-        return $this->id;
+        return $this->id_type;
     }
 
     public function getLibelle(): ?string

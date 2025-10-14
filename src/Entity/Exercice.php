@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ExerciceRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -11,8 +13,8 @@ class Exercice
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_exercice')]
+    private ?int $id_exercice = null;
 
     #[ORM\Column(length: 100)]
     private ?string $libelle = null;
@@ -23,9 +25,20 @@ class Exercice
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $date_fin = null;
 
-    public function getId(): ?int
+    /**
+     * @var Collection<int, Transaction>
+     */
+    #[ORM\OneToMany(targetEntity: Transaction::class, mappedBy: 'exercice')]
+    private Collection $transactions;
+
+    public function __construct()
     {
-        return $this->id;
+        $this->transactions = new ArrayCollection();
+    }
+
+    public function getIdExercice(): ?int
+    {
+        return $this->id_exercice;
     }
 
     public function getLibelle(): ?string
@@ -60,6 +73,36 @@ class Exercice
     public function setDateFin(?\DateTime $date_fin): static
     {
         $this->date_fin = $date_fin;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Transaction>
+     */
+    public function getTransactions(): Collection
+    {
+        return $this->transactions;
+    }
+
+    public function addTransaction(Transaction $transaction): static
+    {
+        if (!$this->transactions->contains($transaction)) {
+            $this->transactions->add($transaction);
+            $transaction->setExercice($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransaction(Transaction $transaction): static
+    {
+        if ($this->transactions->removeElement($transaction)) {
+            // set the owning side to null (unless already changed)
+            if ($transaction->getExercice() === $this) {
+                $transaction->setExercice(null);
+            }
+        }
 
         return $this;
     }

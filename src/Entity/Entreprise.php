@@ -12,8 +12,8 @@ class Entreprise
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_entreprise')]
+    private ?int $id_entreprise = null;
 
     #[ORM\Column(length: 255)]
     private ?string $nom_entreprise = null;
@@ -59,9 +59,9 @@ class Entreprise
         $this->personnes = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getIdEntreprise(): ?int
     {
-        return $this->id;
+        return $this->id_entreprise;
     }
 
     public function getNomEntreprise(): ?string

@@ -14,8 +14,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_user')]
+    private ?int $id_user = null;
 
     #[ORM\Column(length: 50)]
     private ?string $username = null;
@@ -29,20 +29,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      */
-    #[ORM\Column]
+    #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_personne', nullable: false)]
     private ?Personne $personne = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'id_role', nullable: false)]
     private ?Role $role = null;
 
-    public function getId(): ?int
+    public function getIdUser(): ?int
     {
-        return $this->id;
+        return $this->id_user;
     }
 
     public function getUsername(): ?string

@@ -1,0 +1,130 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\TransactionRepository;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: TransactionRepository::class)]
+class Transaction
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(name: 'id_transaction')]
+    private ?int $id_transaction = null;
+
+    #[ORM\Column]
+    private ?int $numero_ordre = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTime $date_transaction = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2)]
+    private ?string $montant = null;
+
+    #[ORM\ManyToOne(inversedBy: 'transactions')]
+    #[ORM\JoinColumn(name: 'id_exercice', nullable: false)]
+    private ?Exercice $exercice = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_type', nullable: false)]
+    private ?TypeTransaction $type_transaction = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_personne', nullable: true)]
+    private ?Personne $personne = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_entreprise', nullable: true)]
+    private ?Entreprise $entreprise = null;
+
+    public function getIdTransaction(): ?int
+    {
+        return $this->id_transaction;
+    }
+
+    public function getNumeroOrdre(): ?int
+    {
+        return $this->numero_ordre;
+    }
+
+    public function setNumeroOrdre(int $numero_ordre): static
+    {
+        $this->numero_ordre = $numero_ordre;
+
+        return $this;
+    }
+
+    public function getDateTransaction(): ?\DateTime
+    {
+        return $this->date_transaction;
+    }
+
+    public function setDateTransaction(\DateTime $date_transaction): static
+    {
+        $this->date_transaction = $date_transaction;
+
+        return $this;
+    }
+
+    public function getMontant(): ?string
+    {
+        return $this->montant;
+    }
+
+    public function setMontant(string $montant): static
+    {
+        $this->montant = $montant;
+
+        return $this;
+    }
+
+    public function getExercice(): ?Exercice
+    {
+        return $this->exercice;
+    }
+
+    public function setExercice(?Exercice $exercice): static
+    {
+        $this->exercice = $exercice;
+
+        return $this;
+    }
+
+    public function getTypeTransaction(): ?TypeTransaction
+    {
+        return $this->type_transaction;
+    }
+
+    public function setTypeTransaction(?TypeTransaction $type_transaction): static
+    {
+        $this->type_transaction = $type_transaction;
+
+        return $this;
+    }
+
+    public function getPersonne(): ?Personne
+    {
+        return $this->personne;
+    }
+
+    public function setPersonne(?Personne $personne): static
+    {
+        $this->personne = $personne;
+
+        return $this;
+    }
+
+    public function getEntreprise(): ?Entreprise
+    {
+        return $this->entreprise;
+    }
+
+    public function setEntreprise(?Entreprise $entreprise): static
+    {
+        $this->entreprise = $entreprise;
+
+        return $this;
+    }
+}
