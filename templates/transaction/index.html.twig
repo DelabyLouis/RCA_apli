@@ -9,6 +9,7 @@
         <thead>
             <tr>
                 <th>Id_transaction</th>
+                <th>Libelle</th>
                 <th>Numero_ordre</th>
                 <th>Date_transaction</th>
                 <th>Montant</th>
@@ -19,6 +20,7 @@
         {% for transaction in transactions %}
             <tr>
                 <td>{{ transaction.idTransaction }}</td>
+                <td>{{ transaction.libelle }}</td>
                 <td>{{ transaction.numeroOrdre }}</td>
                 <td>{{ transaction.dateTransaction ? transaction.dateTransaction|date('Y-m-d') : '' }}</td>
                 <td>{{ transaction.montant }}</td>
@@ -29,7 +31,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="5">no records found</td>
+                <td colspan="6">no records found</td>
             </tr>
         {% endfor %}
         </tbody>

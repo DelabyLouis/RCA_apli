@@ -16,6 +16,9 @@ class Transaction
     #[ORM\Column(name: 'id_transaction')]
     private ?int $id_transaction = null;
 
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $libelle = null;
+
     #[ORM\Column]
     private ?int $numero_ordre = null;
 
@@ -44,6 +47,18 @@ class Transaction
     public function getIdTransaction(): ?int
     {
         return $this->id_transaction;
+    }
+
+    public function getLibelle(): ?string
+    {
+        return $this->libelle;
+    }
+
+    public function setLibelle(string $libelle): static
+    {
+        $this->libelle = $libelle;
+
+        return $this;
     }
 
     public function getNumeroOrdre(): ?int

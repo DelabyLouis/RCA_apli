@@ -17,6 +17,7 @@ class TransactionType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('libelle')
             ->add('numero_ordre')
             ->add('date_transaction')
             ->add('montant')
