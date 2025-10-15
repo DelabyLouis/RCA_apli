@@ -26,12 +26,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_personne', nullable: false)]
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    #[ORM\JoinColumn(name: 'id_personne', referencedColumnName: 'id_personne', nullable: false)]
     private ?Personne $personne = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_role', nullable: false)]
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    #[ORM\JoinColumn(name: 'id_role', referencedColumnName: 'id_role', nullable: false)]
     private ?Role $role = null;
 
     public function getIdUser(): ?int

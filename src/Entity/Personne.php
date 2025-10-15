@@ -52,6 +52,9 @@ class Personne
      * @var Collection<int, Entreprise>
      */
     #[ORM\ManyToMany(targetEntity: Entreprise::class, inversedBy: 'personnes')]
+    #[ORM\JoinTable(name: 'personne_entreprise')]
+    #[ORM\JoinColumn(name: 'id_personne', referencedColumnName: 'id_personne')]
+    #[ORM\InverseJoinColumn(name: 'id_entreprise', referencedColumnName: 'id_entreprise')]
     private Collection $entreprise;
 
     /**

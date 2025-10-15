@@ -26,19 +26,19 @@ class Transaction
     private ?string $montant = null;
 
     #[ORM\ManyToOne(inversedBy: 'transactions')]
-    #[ORM\JoinColumn(name: 'id_exercice', nullable: false)]
+    #[ORM\JoinColumn(name: 'id_exercice', referencedColumnName: 'id_exercice', nullable: false)]
     private ?Exercice $exercice = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_type', nullable: false)]
+    #[ORM\ManyToOne(inversedBy: 'transactions')]
+    #[ORM\JoinColumn(name: 'id_type', referencedColumnName: 'id_type', nullable: false)]
     private ?TypeTransaction $type_transaction = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_personne', nullable: true)]
+    #[ORM\ManyToOne(inversedBy: 'transactions')]
+    #[ORM\JoinColumn(name: 'id_personne', referencedColumnName: 'id_personne', nullable: true)]
     private ?Personne $personne = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_entreprise', nullable: true)]
+    #[ORM\ManyToOne(inversedBy: 'transactions')]
+    #[ORM\JoinColumn(name: 'id_entreprise', referencedColumnName: 'id_entreprise', nullable: true)]
     private ?Entreprise $entreprise = null;
 
     public function getIdTransaction(): ?int
