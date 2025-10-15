@@ -54,9 +54,16 @@ class Entreprise
     #[ORM\ManyToMany(targetEntity: Personne::class, mappedBy: 'entreprise')]
     private Collection $personnes;
 
+    /**
+     * @var Collection<int, Transaction>
+     */
+    #[ORM\OneToMany(targetEntity: Transaction::class, mappedBy: 'entreprise')]
+    private Collection $transactions;
+
     public function __construct()
     {
         $this->personnes = new ArrayCollection();
+        $this->transactions = new ArrayCollection();
     }
 
     public function getIdEntreprise(): ?int
@@ -221,5 +228,40 @@ class Entreprise
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Transaction>
+     */
+    public function getTransactions(): Collection
+    {
+        return $this->transactions;
+    }
+
+    public function addTransaction(Transaction $transaction): static
+    {
+        if (!$this->transactions->contains($transaction)) {
+            $this->transactions->add($transaction);
+            $transaction->setEntreprise($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransaction(Transaction $transaction): static
+    {
+        if ($this->transactions->removeElement($transaction)) {
+            // set the owning side to null (unless already changed)
+            if ($transaction->getEntreprise() === $this) {
+                $transaction->setEntreprise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->nom_entreprise ?? '';
     }
 }

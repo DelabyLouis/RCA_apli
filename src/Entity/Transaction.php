@@ -5,8 +5,10 @@ namespace App\Entity;
 use App\Repository\TransactionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
+#[Assert\Callback(method: 'validatePersonneOrEntreprise')]
 class Transaction
 {
     #[ORM\Id]
@@ -126,5 +128,25 @@ class Transaction
         $this->entreprise = $entreprise;
 
         return $this;
+    }
+
+    /**
+     * Validation XOR : soit Personne soit Entreprise, mais pas les deux
+     */
+    public function validatePersonneOrEntreprise(\Symfony\Component\Validator\Context\ExecutionContextInterface $context): void
+    {
+        // Si ni personne ni entreprise n'est définie
+        if ($this->personne === null && $this->entreprise === null) {
+            $context->buildViolation('Une transaction doit être liée soit à une personne soit à une entreprise.')
+                ->atPath('personne')
+                ->addViolation();
+        }
+
+        // Si les deux sont définies
+        if ($this->personne !== null && $this->entreprise !== null) {
+            $context->buildViolation('Une transaction ne peut pas être liée à la fois à une personne et à une entreprise.')
+                ->atPath('personne')
+                ->addViolation();
+        }
     }
 }

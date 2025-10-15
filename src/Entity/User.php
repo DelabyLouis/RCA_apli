@@ -21,12 +21,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $username = null;
 
     /**
-     * @var list<string> The user roles
-     */
-    #[ORM\Column]
-    private array $roles = [];
-
-    /**
      * @var string The hashed password
      */
     #[ORM\Column(length: 255)]
@@ -72,21 +66,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        // Utiliser la relation avec l'entité Role
+        $roles = ['ROLE_USER']; // rôle par défaut
+        if ($this->role) {
+            $roles[] = 'ROLE_' . strtoupper($this->role->getLibelle());
+        }
 
         return array_unique($roles);
-    }
-
-    /**
-     * @param list<string> $roles
-     */
-    public function setRoles(array $roles): static
-    {
-        $this->roles = $roles;
-
-        return $this;
     }
 
     /**
@@ -126,7 +112,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->personne;
     }
 
-    public function setPersonne(Personne $personne): static
+    public function setPersonne(?Personne $personne): static
     {
         $this->personne = $personne;
 
