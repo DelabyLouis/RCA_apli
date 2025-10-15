@@ -1,3 +1,153 @@
 body {
     background-color: skyblue;
 }
+
+/* Styles pour les listes déroulantes avec cases à cocher */
+.form-check-list-dropdown {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+/* Bouton principal pour ouvrir/fermer */
+.dropdown-toggle-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #495057;
+    text-align: left;
+    position: relative;
+}
+
+.dropdown-toggle-btn:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-toggle-btn::after {
+    content: "▼";
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.dropdown-toggle-btn.open::after {
+    content: "▲";
+}
+
+/* Conteneur des options */
+.dropdown-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-options.show {
+    display: block;
+}
+
+.dropdown-options .form-check {
+    margin: 0;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.dropdown-options .form-check:last-child {
+    border-bottom: none;
+}
+
+.dropdown-options .form-check:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-options .form-check-input {
+    margin-right: 8px;
+}
+
+.dropdown-options .form-check-label {
+    cursor: pointer;
+    margin: 0;
+    font-weight: normal;
+    width: 100%;
+}
+
+/* Styles pour les montants comptables */
+.montant-debit {
+    color: #006400;
+    font-weight: bold;
+    text-align: right;
+}
+
+.montant-credit {
+    color: #dc3545;
+    font-weight: bold;
+    text-align: right;
+}
+
+.montant-null {
+    color: #6c757d;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Amélioration du tableau des transactions */
+.transaction-table th:nth-child(5),
+.transaction-table th:nth-child(6),
+.transaction-table th:nth-child(7),
+.transaction-table td:nth-child(5),
+.transaction-table td:nth-child(6),
+.transaction-table td:nth-child(7) {
+    text-align: right;
+    min-width: 100px;
+}
+
+/* Styles pour la colonne solde */
+.montant-solde {
+    font-weight: bold;
+    font-size: 0.95em;
+}
+
+.solde-positif {
+    color: #198754;
+    background-color: #d1e7dd;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.solde-negatif {
+    color: #dc3545;
+    background-color: #f8d7da;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.solde-nul {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Styles pour la colonne tiers */
+.badge {
+    font-size: 0.8em;
+    padding: 0.4em 0.6em;
+}
+
+.badge i {
+    margin-right: 4px;
+}

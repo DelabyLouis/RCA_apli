@@ -43,16 +43,28 @@ final class RoleController extends AbstractController
     }
 
     #[Route('/{id_role}', name: 'app_role_show', methods: ['GET'])]
-    public function show(Role $role): Response
+    public function show(int $id_role, RoleRepository $roleRepository): Response
     {
+        $role = $roleRepository->findOneBy(['id_role' => $id_role]);
+        
+        if (!$role) {
+            throw $this->createNotFoundException('Rôle non trouvé');
+        }
+
         return $this->render('role/show.html.twig', [
             'role' => $role,
         ]);
     }
 
     #[Route('/{id_role}/edit', name: 'app_role_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Role $role, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id_role, RoleRepository $roleRepository, EntityManagerInterface $entityManager): Response
     {
+        $role = $roleRepository->findOneBy(['id_role' => $id_role]);
+        
+        if (!$role) {
+            throw $this->createNotFoundException('Rôle non trouvé');
+        }
+
         $form = $this->createForm(RoleType::class, $role);
         $form->handleRequest($request);
 
@@ -69,9 +81,15 @@ final class RoleController extends AbstractController
     }
 
     #[Route('/{id_role}', name: 'app_role_delete', methods: ['POST'])]
-    public function delete(Request $request, Role $role, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $id_role, RoleRepository $roleRepository, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$role->getId_role(), $request->getPayload()->getString('_token'))) {
+        $role = $roleRepository->findOneBy(['id_role' => $id_role]);
+        
+        if (!$role) {
+            throw $this->createNotFoundException('Rôle non trouvé');
+        }
+
+        if ($this->isCsrfTokenValid('delete'.$role->getIdRole(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($role);
             $entityManager->flush();
         }

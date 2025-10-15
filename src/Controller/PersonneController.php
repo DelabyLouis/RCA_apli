@@ -17,8 +17,11 @@ final class PersonneController extends AbstractController
     #[Route(name: 'app_personne_index', methods: ['GET'])]
     public function index(PersonneRepository $personneRepository): Response
     {
+        // Récupération des personnes avec leurs relations pour éviter les requêtes N+1
+        $personnes = $personneRepository->findAllWithRelations();
+        
         return $this->render('personne/index.html.twig', [
-            'personnes' => $personneRepository->findAll(),
+            'personnes' => $personnes,
         ]);
     }
 

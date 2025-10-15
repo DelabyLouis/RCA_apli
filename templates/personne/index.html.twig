@@ -20,6 +20,9 @@
                 <th>Pays</th>
                 <th>Telephone</th>
                 <th>Email</th>
+                <th>Entreprise(s)</th>
+                <th>Est utilisateur</th>
+                <th>Nb transactions</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -38,6 +41,25 @@
                 <td>{{ personne.pays }}</td>
                 <td>{{ personne.telephone }}</td>
                 <td>{{ personne.email }}</td>
+                <td>
+                    {% if personne.entreprise|length > 0 %}
+                        {% for entreprise in personne.entreprise %}
+                            <span class="badge bg-primary me-1">{{ entreprise.nomEntreprise }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-muted">Aucune</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if personne.users|length > 0 %}
+                        <span class="badge bg-success">Oui</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Non</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge bg-info">{{ personne.transactions|length }}</span>
+                </td>
                 <td>
                     <a href="{{ path('app_personne_show', {'id_personne': personne.idPersonne}) }}">show</a>
                     <a href="{{ path('app_personne_edit', {'id_personne': personne.idPersonne}) }}">edit</a>

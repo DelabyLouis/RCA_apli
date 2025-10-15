@@ -1,4 +1,90 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+    {{ form_row(form.nom_entreprise) }}
+    {{ form_row(form.siret) }}
+    {{ form_row(form.siren) }}
+    {{ form_row(form.numero_voie) }}
+    {{ form_row(form.rue) }}
+    {{ form_row(form.complement_adresse) }}
+    {{ form_row(form.ville) }}
+    {{ form_row(form.code_postal) }}
+    {{ form_row(form.pays) }}
+    {{ form_row(form.telephone) }}
+    {{ form_row(form.email) }}
+    
+    <div class="form-group mb-3">
+        {{ form_label(form.personnes) }}
+        <div class="form-check-list-dropdown">
+            <button type="button" class="dropdown-toggle-btn">
+                Sélectionner les personnes
+            </button>
+            <div class="dropdown-options">
+                {% for child in form.personnes %}
+                    <div class="form-check">
+                        {{ form_widget(child) }}
+                        {{ form_label(child, null, {label_attr: {class: 'form-check-label'}}) }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {{ form_errors(form.personnes) }}
+    </div>
+    
+    <button class="btn btn-primary">{{ button_label|default('Save') }}</button>
 {{ form_end(form) }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion des dropdowns avec cases à cocher
+    document.querySelectorAll('.form-check-list-dropdown').forEach(function(dropdown) {
+        const toggleBtn = dropdown.querySelector('.dropdown-toggle-btn');
+        const options = dropdown.querySelector('.dropdown-options');
+        
+        toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const isOpen = options.classList.contains('show');
+            
+            // Fermer tous les autres dropdowns
+            document.querySelectorAll('.dropdown-options').forEach(opt => opt.classList.remove('show'));
+            document.querySelectorAll('.dropdown-toggle-btn').forEach(btn => btn.classList.remove('open'));
+            
+            if (!isOpen) {
+                options.classList.add('show');
+                toggleBtn.classList.add('open');
+            }
+            
+            updateButtonText();
+        });
+        
+        // Fermer quand on clique ailleurs
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) {
+                options.classList.remove('show');
+                toggleBtn.classList.remove('open');
+            }
+        });
+        
+        // Mettre à jour le texte du bouton selon les sélections
+        function updateButtonText() {
+            const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+            const checkedBoxes = dropdown.querySelectorAll('input[type="checkbox"]:checked');
+            
+            if (checkedBoxes.length === 0) {
+                toggleBtn.textContent = 'Sélectionner les personnes';
+            } else if (checkedBoxes.length === 1) {
+                const label = checkedBoxes[0].parentNode.querySelector('label').textContent.trim();
+                toggleBtn.textContent = label;
+            } else {
+                toggleBtn.textContent = checkedBoxes.length + ' personnes sélectionnées';
+            }
+        }
+        
+        // Écouter les changements de cases à cocher
+        dropdown.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', updateButtonText);
+        });
+        
+        // Initialiser le texte
+        updateButtonText();
+    });
+});
+</script>

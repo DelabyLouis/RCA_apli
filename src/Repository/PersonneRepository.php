@@ -16,6 +16,25 @@ class PersonneRepository extends ServiceEntityRepository
         parent::__construct($registry, Personne::class);
     }
 
+    /**
+     * Récupère toutes les personnes avec leurs relations pour éviter les requêtes N+1
+     * @return Personne[]
+     */
+    public function findAllWithRelations(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.entreprise', 'e')
+            ->leftJoin('p.users', 'u')
+            ->leftJoin('p.transactions', 't')
+            ->addSelect('e')
+            ->addSelect('u')
+            ->addSelect('t')
+            ->orderBy('p.nom', 'ASC')
+            ->addOrderBy('p.prenom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Personne[] Returns an array of Personne objects
     //     */

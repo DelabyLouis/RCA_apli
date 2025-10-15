@@ -43,16 +43,28 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id_user}', name: 'app_user_show', methods: ['GET'])]
-    public function show(User $user): Response
+    public function show(int $id_user, UserRepository $userRepository): Response
     {
+        $user = $userRepository->findOneBy(['id_user' => $id_user]);
+        
+        if (!$user) {
+            throw $this->createNotFoundException('Utilisateur non trouvé');
+        }
+
         return $this->render('user/show.html.twig', [
             'user' => $user,
         ]);
     }
 
     #[Route('/{id_user}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id_user, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
     {
+        $user = $userRepository->findOneBy(['id_user' => $id_user]);
+        
+        if (!$user) {
+            throw $this->createNotFoundException('Utilisateur non trouvé');
+        }
+
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
@@ -69,8 +81,14 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id_user}', name: 'app_user_delete', methods: ['POST'])]
-    public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $id_user, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
     {
+        $user = $userRepository->findOneBy(['id_user' => $id_user]);
+        
+        if (!$user) {
+            throw $this->createNotFoundException('Utilisateur non trouvé');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$user->getIdUser(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($user);
             $entityManager->flush();

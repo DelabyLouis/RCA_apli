@@ -31,7 +31,11 @@ class EntrepriseType extends AbstractType
                     return $personne->getPrenom() . ' ' . $personne->getNom();
                 },
                 'multiple' => true,
+                'expanded' => true,
                 'required' => false,
+                'attr' => [
+                    'class' => 'form-check-list-dropdown'
+                ]
             ])
         ;
     }

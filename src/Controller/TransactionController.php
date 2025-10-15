@@ -17,8 +17,30 @@ final class TransactionController extends AbstractController
     #[Route(name: 'app_transaction_index', methods: ['GET'])]
     public function index(TransactionRepository $transactionRepository): Response
     {
+        // Récupérer les transactions triées par numéro d'ordre avec leurs relations pour éviter les requêtes N+1
+        $transactions = $transactionRepository->createQueryBuilder('t')
+            ->leftJoin('t.personne', 'p')
+            ->leftJoin('t.entreprise', 'e')
+            ->addSelect('p')
+            ->addSelect('e')
+            ->orderBy('t.numero_ordre', 'ASC')
+            ->getQuery()
+            ->getResult();
+        
+        // Calculer le solde cumulé pour chaque transaction
+        $solde = 0;
+        $transactionsAvecSolde = [];
+        
+        foreach ($transactions as $transaction) {
+            $solde += $transaction->getMontant();
+            $transactionsAvecSolde[] = [
+                'transaction' => $transaction,
+                'solde' => $solde
+            ];
+        }
+        
         return $this->render('transaction/index.html.twig', [
-            'transactions' => $transactionRepository->findAll(),
+            'transactions_avec_solde' => $transactionsAvecSolde,
         ]);
     }
 

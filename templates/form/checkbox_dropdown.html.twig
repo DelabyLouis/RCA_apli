@@ -1,0 +1,38 @@
+{% block choice_widget_expanded %}
+    <div class="form-check-list-dropdown" data-toggle="dropdown">
+        <div class="dropdown-header">Sélectionner les options ▼</div>
+        <div class="form-check-container" style="display: none;">
+            {% for child in form %}
+                <div class="form-check">
+                    {{ form_widget(child) }}
+                    {{ form_label(child, null, {label_attr: {class: 'form-check-label'}}) }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.form-check-list-dropdown').forEach(function(dropdown) {
+            const header = dropdown.querySelector('.dropdown-header');
+            const container = dropdown.querySelector('.form-check-container');
+            
+            header.addEventListener('click', function() {
+                const isVisible = container.style.display !== 'none';
+                container.style.display = isVisible ? 'none' : 'block';
+                header.textContent = isVisible ? 'Sélectionner les options ▼' : 'Sélectionner les options ▲';
+                dropdown.classList.toggle('open', !isVisible);
+            });
+            
+            // Fermer quand on clique ailleurs
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target)) {
+                    container.style.display = 'none';
+                    header.textContent = 'Sélectionner les options ▼';
+                    dropdown.classList.remove('open');
+                }
+            });
+        });
+    });
+    </script>
+{% endblock %}

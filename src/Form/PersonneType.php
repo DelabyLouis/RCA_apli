@@ -29,7 +29,11 @@ class PersonneType extends AbstractType
                 'class' => Entreprise::class,
                 'choice_label' => 'nom_entreprise',
                 'multiple' => true,
+                'expanded' => true,
                 'required' => false,
+                'attr' => [
+                    'class' => 'form-check-list-dropdown'
+                ]
             ])
         ;
     }
