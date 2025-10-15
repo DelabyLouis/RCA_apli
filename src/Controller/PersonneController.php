@@ -43,16 +43,27 @@ final class PersonneController extends AbstractController
     }
 
     #[Route('/{id_personne}', name: 'app_personne_show', methods: ['GET'])]
-    public function show(Personne $personne): Response
+    public function show(int $id_personne, PersonneRepository $personneRepository): Response
     {
+        $personne = $personneRepository->findOneBy(['id_personne' => $id_personne]);
+        
+        if (!$personne) {
+            throw $this->createNotFoundException('Personne non trouvée');
+        }
+
         return $this->render('personne/show.html.twig', [
             'personne' => $personne,
         ]);
     }
 
     #[Route('/{id_personne}/edit', name: 'app_personne_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Personne $personne, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id_personne, PersonneRepository $personneRepository, EntityManagerInterface $entityManager): Response
     {
+        $personne = $personneRepository->findOneBy(['id_personne' => $id_personne]);
+        
+        if (!$personne) {
+            throw $this->createNotFoundException('Personne non trouvée');
+        }
         $form = $this->createForm(PersonneType::class, $personne);
         $form->handleRequest($request);
 
@@ -69,8 +80,13 @@ final class PersonneController extends AbstractController
     }
 
     #[Route('/{id_personne}', name: 'app_personne_delete', methods: ['POST'])]
-    public function delete(Request $request, Personne $personne, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $id_personne, PersonneRepository $personneRepository, EntityManagerInterface $entityManager): Response
     {
+        $personne = $personneRepository->findOneBy(['id_personne' => $id_personne]);
+        
+        if (!$personne) {
+            throw $this->createNotFoundException('Personne non trouvée');
+        }
         if ($this->isCsrfTokenValid('delete'.$personne->getIdPersonne(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($personne);
             $entityManager->flush();

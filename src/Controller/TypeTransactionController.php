@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/type/transaction')]
+#[Route('/typetransaction')]
 final class TypeTransactionController extends AbstractController
 {
     #[Route(name: 'app_type_transaction_index', methods: ['GET'])]
@@ -43,16 +43,28 @@ final class TypeTransactionController extends AbstractController
     }
 
     #[Route('/{id_type}', name: 'app_type_transaction_show', methods: ['GET'])]
-    public function show(TypeTransaction $typeTransaction): Response
+    public function show(int $id_type, TypeTransactionRepository $typeTransactionRepository): Response
     {
+        $typeTransaction = $typeTransactionRepository->findOneBy(['id_type' => $id_type]);
+        
+        if (!$typeTransaction) {
+            throw $this->createNotFoundException('Type de transaction non trouvé');
+        }
+
         return $this->render('type_transaction/show.html.twig', [
             'type_transaction' => $typeTransaction,
         ]);
     }
 
     #[Route('/{id_type}/edit', name: 'app_type_transaction_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, TypeTransaction $typeTransaction, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id_type, TypeTransactionRepository $typeTransactionRepository, EntityManagerInterface $entityManager): Response
     {
+        $typeTransaction = $typeTransactionRepository->findOneBy(['id_type' => $id_type]);
+        
+        if (!$typeTransaction) {
+            throw $this->createNotFoundException('Type de transaction non trouvé');
+        }
+
         $form = $this->createForm(TypeTransactionType::class, $typeTransaction);
         $form->handleRequest($request);
 
@@ -69,9 +81,14 @@ final class TypeTransactionController extends AbstractController
     }
 
     #[Route('/{id_type}', name: 'app_type_transaction_delete', methods: ['POST'])]
-    public function delete(Request $request, TypeTransaction $typeTransaction, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $id_type, TypeTransactionRepository $typeTransactionRepository, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$typeTransaction->getId_type(), $request->getPayload()->getString('_token'))) {
+        $typeTransaction = $typeTransactionRepository->findOneBy(['id_type' => $id_type]);
+        
+        if (!$typeTransaction) {
+            throw $this->createNotFoundException('Type de transaction non trouvé');
+        }
+        if ($this->isCsrfTokenValid('delete'.$typeTransaction->getIdType(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($typeTransaction);
             $entityManager->flush();
         }

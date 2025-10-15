@@ -43,16 +43,28 @@ final class TransactionController extends AbstractController
     }
 
     #[Route('/{id_transaction}', name: 'app_transaction_show', methods: ['GET'])]
-    public function show(Transaction $transaction): Response
+    public function show(int $id_transaction, TransactionRepository $transactionRepository): Response
     {
+        $transaction = $transactionRepository->findOneBy(['id_transaction' => $id_transaction]);
+        
+        if (!$transaction) {
+            throw $this->createNotFoundException('Transaction non trouvée');
+        }
+
         return $this->render('transaction/show.html.twig', [
             'transaction' => $transaction,
         ]);
     }
 
     #[Route('/{id_transaction}/edit', name: 'app_transaction_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Transaction $transaction, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id_transaction, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager): Response
     {
+        $transaction = $transactionRepository->findOneBy(['id_transaction' => $id_transaction]);
+        
+        if (!$transaction) {
+            throw $this->createNotFoundException('Transaction non trouvée');
+        }
+
         $form = $this->createForm(TransactionType::class, $transaction);
         $form->handleRequest($request);
 
@@ -69,9 +81,14 @@ final class TransactionController extends AbstractController
     }
 
     #[Route('/{id_transaction}', name: 'app_transaction_delete', methods: ['POST'])]
-    public function delete(Request $request, Transaction $transaction, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $id_transaction, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$transaction->getId_transaction(), $request->getPayload()->getString('_token'))) {
+        $transaction = $transactionRepository->findOneBy(['id_transaction' => $id_transaction]);
+        
+        if (!$transaction) {
+            throw $this->createNotFoundException('Transaction non trouvée');
+        }
+        if ($this->isCsrfTokenValid('delete'.$transaction->getIdTransaction(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($transaction);
             $entityManager->flush();
         }

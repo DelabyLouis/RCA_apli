@@ -25,9 +25,13 @@ final class ExerciceController extends AbstractController
     }
 
     #[Route('/new', name: 'app_exercice_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): Response
     {
         $exercice = new Exercice();
+        
+        // Calculer les dates par défaut basées sur le dernier exercice
+        $this->setDefaultDates($exercice, $exerciceRepository);
+        
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->handleRequest($request);
 
@@ -119,5 +123,38 @@ final class ExerciceController extends AbstractController
         }
 
         return $this->redirectToRoute('app_exercice_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
+     * Définit les dates par défaut pour un nouvel exercice basé sur le dernier exercice existant
+     */
+    private function setDefaultDates(Exercice $exercice, ExerciceRepository $exerciceRepository): void
+    {
+        // Récupérer le dernier exercice par date de fin
+        $lastExercice = $exerciceRepository->createQueryBuilder('e')
+            ->orderBy('e.date_fin', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($lastExercice && $lastExercice->getDateFin()) {
+            // Date de début = jour après la date de fin du dernier exercice
+            $dateDebut = clone $lastExercice->getDateFin();
+            $dateDebut->modify('+1 day');
+        } else {
+            // Si aucun exercice précédent, commencer au 1er janvier de l'année courante
+            $dateDebut = new \DateTime('first day of January this year');
+        }
+
+        // Date de fin = un an après la date de début (moins un jour pour finir le 31 décembre)
+        $dateFin = clone $dateDebut;
+        $dateFin->modify('+1 year -1 day');
+
+        $exercice->setDateDebut($dateDebut);
+        $exercice->setDateFin($dateFin);
+        
+        // Générer un libellé par défaut basé sur l'année
+        $annee = $dateDebut->format('Y');
+        $exercice->setLibelle("Exercice {$annee}");
     }
 }
