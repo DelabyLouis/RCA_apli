@@ -1,18 +1,24 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Exercice index{% endblock %}
+{% block title %}Exercices et Transactions{% endblock %}
 
 {% block body %}
-    <h1>Exercice index</h1>
+    <h1>Gestion des Exercices et Transactions</h1>
+
+    <div class="mb-3">
+        <a href="{{ path('app_exercice_all_transactions') }}" class="btn btn-info">Voir toutes les transactions</a>
+        <a href="{{ path('app_exercice_new') }}" class="btn btn-primary">Créer un nouvel exercice</a>
+    </div>
 
     <table class="table">
         <thead>
             <tr>
-                <th>Id_exercice</th>
-                <th>Libelle</th>
-                <th>Date_debut</th>
-                <th>Date_fin</th>
-                <th>actions</th>
+                <th>ID</th>
+                <th>Libellé</th>
+                <th>Date début</th>
+                <th>Date fin</th>
+                <th>Nb transactions</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -23,17 +29,19 @@
                 <td>{{ exercice.dateDebut ? exercice.dateDebut|date('Y-m-d') : '' }}</td>
                 <td>{{ exercice.dateFin ? exercice.dateFin|date('Y-m-d') : '' }}</td>
                 <td>
-                    <a href="{{ path('app_exercice_show', {'id_exercice': exercice.idExercice}) }}">show</a>
-                    <a href="{{ path('app_exercice_edit', {'id_exercice': exercice.idExercice}) }}">edit</a>
+                    <span class="badge bg-secondary">{{ exercice.transactions|length }}</span>
+                </td>
+                <td>
+                    <a href="{{ path('app_exercice_transactions', {'id_exercice': exercice.idExercice}) }}" class="btn btn-sm btn-success">Voir transactions</a>
+                    <a href="{{ path('app_exercice_show', {'id_exercice': exercice.idExercice}) }}" class="btn btn-sm btn-info">Détails</a>
+                    <a href="{{ path('app_exercice_edit', {'id_exercice': exercice.idExercice}) }}" class="btn btn-sm btn-warning">Modifier</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="5">no records found</td>
+                <td colspan="6">Aucun exercice trouvé</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_exercice_new') }}">Create new</a>
 {% endblock %}

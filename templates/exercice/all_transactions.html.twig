@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Toutes les transactions{% endblock %}
+
+{% block body %}
+    <h1>Toutes les transactions</h1>
+
+    <div class="mb-3">
+        <a href="{{ path('app_exercice_index') }}" class="btn btn-secondary">← Retour aux exercices</a>
+        <a href="{{ path('app_transaction_new') }}" class="btn btn-primary">Créer nouvelle transaction</a>
+    </div>
+
+    {% if transactions|length > 0 %}
+        <div class="mb-3">
+            <p class="text-muted">Total : {{ transactions|length }} transaction(s)</p>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Libellé</th>
+                    <th>Exercice</th>
+                    <th>N° Ordre</th>
+                    <th>Date</th>
+                    <th>Montant</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.idTransaction }}</td>
+                    <td>{{ transaction.libelle }}</td>
+                    <td>
+                        {% if transaction.exercice %}
+                            <a href="{{ path('app_exercice_transactions', {'id_exercice': transaction.exercice.idExercice}) }}" class="text-decoration-none">
+                                {{ transaction.exercice.libelle }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">Aucun exercice</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ transaction.numeroOrdre }}</td>
+                    <td>{{ transaction.dateTransaction ? transaction.dateTransaction|date('d/m/Y') : '' }}</td>
+                    <td class="text-end">
+                        <span class="{% if transaction.montant >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ transaction.montant|number_format(2, ',', ' ') }} €
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ path('app_transaction_show', {'id_transaction': transaction.idTransaction}) }}" class="btn btn-sm btn-info">Voir</a>
+                        <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-info">
+                    <td colspan="5"><strong>Total général</strong></td>
+                    <td class="text-end">
+                        {% set total = 0 %}
+                        {% for transaction in transactions %}
+                            {% set total = total + transaction.montant %}
+                        {% endfor %}
+                        <strong>
+                            <span class="{% if total >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ total|number_format(2, ',', ' ') }} €
+                            </span>
+                        </strong>
+                    </td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- Résumé par exercice -->
+        <div class="mt-4">
+            <h3>Résumé par exercice</h3>
+            <div class="row">
+                {% set processed_exercices = [] %}
+                {% for transaction in transactions %}
+                    {% if transaction.exercice and transaction.exercice.idExercice not in processed_exercices %}
+                        {% set processed_exercices = processed_exercices|merge([transaction.exercice.idExercice]) %}
+                        
+                        {% set exercice_count = 0 %}
+                        {% set exercice_total = 0 %}
+                        
+                        {% for t in transactions %}
+                            {% if t.exercice and t.exercice.idExercice == transaction.exercice.idExercice %}
+                                {% set exercice_count = exercice_count + 1 %}
+                                {% set exercice_total = exercice_total + t.montant %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ transaction.exercice.libelle }}</h5>
+                                    <p class="card-text">
+                                        <small class="text-muted">{{ exercice_count }} transaction(s)</small><br>
+                                        <span class="{% if exercice_total >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                            <strong>{{ exercice_total|number_format(2, ',', ' ') }} €</strong>
+                                        </span>
+                                    </p>
+                                    <a href="{{ path('app_exercice_transactions', {'id_exercice': transaction.exercice.idExercice}) }}" class="btn btn-sm btn-primary">Voir détails</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <h5>Aucune transaction</h5>
+            <p>Il n'y a encore aucune transaction dans le système.</p>
+            <a href="{{ path('app_transaction_new') }}" class="btn btn-primary">Créer la première transaction</a>
+        </div>
+    {% endif %}
+{% endblock %}

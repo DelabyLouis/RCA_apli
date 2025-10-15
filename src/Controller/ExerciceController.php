@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Entity\Exercice;
 use App\Form\ExerciceType;
 use App\Repository\ExerciceRepository;
+use App\Repository\TransactionRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,17 +44,52 @@ final class ExerciceController extends AbstractController
         ]);
     }
 
-    #[Route('/{id_exercice}', name: 'app_exercice_show', methods: ['GET'])]
-    public function show(Exercice $exercice): Response
+    #[Route('/transactions', name: 'app_exercice_all_transactions', methods: ['GET'])]
+    public function allTransactions(TransactionRepository $transactionRepository): Response
     {
+        return $this->render('exercice/all_transactions.html.twig', [
+            'transactions' => $transactionRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/{id_exercice}/transactions', name: 'app_exercice_transactions', methods: ['GET'])]
+    public function exerciceTransactions(int $id_exercice, ExerciceRepository $exerciceRepository): Response
+    {
+        $exercice = $exerciceRepository->findOneBy(['id_exercice' => $id_exercice]);
+        
+        if (!$exercice) {
+            throw $this->createNotFoundException('Exercice non trouvé');
+        }
+
+        return $this->render('exercice/transactions.html.twig', [
+            'exercice' => $exercice,
+            'transactions' => $exercice->getTransactions(),
+        ]);
+    }
+
+    #[Route('/{id_exercice}', name: 'app_exercice_show', methods: ['GET'])]
+    public function show(int $id_exercice, ExerciceRepository $exerciceRepository): Response
+    {
+        $exercice = $exerciceRepository->findOneBy(['id_exercice' => $id_exercice]);
+        
+        if (!$exercice) {
+            throw $this->createNotFoundException('Exercice non trouvé');
+        }
+
         return $this->render('exercice/show.html.twig', [
             'exercice' => $exercice,
         ]);
     }
 
     #[Route('/{id_exercice}/edit', name: 'app_exercice_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Exercice $exercice, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id_exercice, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): Response
     {
+        $exercice = $exerciceRepository->findOneBy(['id_exercice' => $id_exercice]);
+        
+        if (!$exercice) {
+            throw $this->createNotFoundException('Exercice non trouvé');
+        }
+        
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->handleRequest($request);
 
@@ -69,9 +106,14 @@ final class ExerciceController extends AbstractController
     }
 
     #[Route('/{id_exercice}', name: 'app_exercice_delete', methods: ['POST'])]
-    public function delete(Request $request, Exercice $exercice, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $id_exercice, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$exercice->getId_exercice(), $request->getPayload()->getString('_token'))) {
+        $exercice = $exerciceRepository->findOneBy(['id_exercice' => $id_exercice]);
+        
+        if (!$exercice) {
+            throw $this->createNotFoundException('Exercice non trouvé');
+        }
+        if ($this->isCsrfTokenValid('delete'.$exercice->getIdExercice(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($exercice);
             $entityManager->flush();
         }
