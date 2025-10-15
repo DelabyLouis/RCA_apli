@@ -25,8 +25,8 @@
                 <td>{{ transaction.dateTransaction ? transaction.dateTransaction|date('Y-m-d') : '' }}</td>
                 <td>{{ transaction.montant }}</td>
                 <td>
-                    <a href="{{ path('app_transaction_show', {'id_transaction': transaction.id_transaction}) }}">show</a>
-                    <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.id_transaction}) }}">edit</a>
+                    <a href="{{ path('app_transaction_show', {'id_transaction': transaction.idTransaction}) }}">show</a>
+                    <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}">edit</a>
                 </td>
             </tr>
         {% else %}

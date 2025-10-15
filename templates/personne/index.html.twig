@@ -39,8 +39,8 @@
                 <td>{{ personne.telephone }}</td>
                 <td>{{ personne.email }}</td>
                 <td>
-                    <a href="{{ path('app_personne_show', {'id_personne': personne.id_personne}) }}">show</a>
-                    <a href="{{ path('app_personne_edit', {'id_personne': personne.id_personne}) }}">edit</a>
+                    <a href="{{ path('app_personne_show', {'id_personne': personne.idPersonne}) }}">show</a>
+                    <a href="{{ path('app_personne_edit', {'id_personne': personne.idPersonne}) }}">edit</a>
                 </td>
             </tr>
         {% else %}

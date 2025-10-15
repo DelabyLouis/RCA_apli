@@ -21,8 +21,8 @@
                 <td>{{ type_transaction.libelle }}</td>
                 <td>{{ type_transaction.description }}</td>
                 <td>
-                    <a href="{{ path('app_type_transaction_show', {'id_type': type_transaction.id_type}) }}">show</a>
-                    <a href="{{ path('app_type_transaction_edit', {'id_type': type_transaction.id_type}) }}">edit</a>
+                    <a href="{{ path('app_type_transaction_show', {'id_type': type_transaction.idType}) }}">show</a>
+                    <a href="{{ path('app_type_transaction_edit', {'id_type': type_transaction.idType}) }}">edit</a>
                 </td>
             </tr>
         {% else %}

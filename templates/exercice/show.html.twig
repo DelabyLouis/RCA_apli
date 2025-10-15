@@ -28,7 +28,7 @@
 
     <a href="{{ path('app_exercice_index') }}">back to list</a>
 
-    <a href="{{ path('app_exercice_edit', {'id_exercice': exercice.id_exercice}) }}">edit</a>
+    <a href="{{ path('app_exercice_edit', {'id_exercice': exercice.idExercice}) }}">edit</a>
 
     {{ include('exercice/_delete_form.html.twig') }}
 {% endblock %}

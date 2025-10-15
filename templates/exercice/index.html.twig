@@ -23,8 +23,8 @@
                 <td>{{ exercice.dateDebut ? exercice.dateDebut|date('Y-m-d') : '' }}</td>
                 <td>{{ exercice.dateFin ? exercice.dateFin|date('Y-m-d') : '' }}</td>
                 <td>
-                    <a href="{{ path('app_exercice_show', {'id_exercice': exercice.id_exercice}) }}">show</a>
-                    <a href="{{ path('app_exercice_edit', {'id_exercice': exercice.id_exercice}) }}">edit</a>
+                    <a href="{{ path('app_exercice_show', {'id_exercice': exercice.idExercice}) }}">show</a>
+                    <a href="{{ path('app_exercice_edit', {'id_exercice': exercice.idExercice}) }}">edit</a>
                 </td>
             </tr>
         {% else %}

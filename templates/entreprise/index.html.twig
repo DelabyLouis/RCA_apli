@@ -39,8 +39,8 @@
                 <td>{{ entreprise.telephone }}</td>
                 <td>{{ entreprise.email }}</td>
                 <td>
-                    <a href="{{ path('app_entreprise_show', {'id_entreprise': entreprise.id_entreprise}) }}">show</a>
-                    <a href="{{ path('app_entreprise_edit', {'id_entreprise': entreprise.id_entreprise}) }}">edit</a>
+                    <a href="{{ path('app_entreprise_show', {'id_entreprise': entreprise.idEntreprise}) }}">show</a>
+                    <a href="{{ path('app_entreprise_edit', {'id_entreprise': entreprise.idEntreprise}) }}">edit</a>
                 </td>
             </tr>
         {% else %}

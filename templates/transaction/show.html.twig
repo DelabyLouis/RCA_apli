@@ -32,7 +32,7 @@
 
     <a href="{{ path('app_transaction_index') }}">back to list</a>
 
-    <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.id_transaction}) }}">edit</a>
+    <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}">edit</a>
 
     {{ include('transaction/_delete_form.html.twig') }}
 {% endblock %}
