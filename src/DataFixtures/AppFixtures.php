@@ -171,6 +171,7 @@ class AppFixtures extends Fixture
         $transaction1->setDateTransaction(new \DateTime('2024-03-15'));
         $transaction1->setTypeTransaction($typeVente);
         $transaction1->setExercice($exercice2024);
+        $transaction1->setEntreprise($entreprise1); // Transaction avec une entreprise
         $manager->persist($transaction1);
 
         $transaction2 = new Transaction();
@@ -180,6 +181,7 @@ class AppFixtures extends Fixture
         $transaction2->setDateTransaction(new \DateTime('2024-02-10'));
         $transaction2->setTypeTransaction($typeAchat);
         $transaction2->setExercice($exercice2024);
+        $transaction2->setEntreprise($entreprise2); // Transaction avec une entreprise
         $manager->persist($transaction2);
 
         $transaction3 = new Transaction();
@@ -189,6 +191,7 @@ class AppFixtures extends Fixture
         $transaction3->setDateTransaction(new \DateTime('2024-03-31'));
         $transaction3->setTypeTransaction($typeSalaire);
         $transaction3->setExercice($exercice2024);
+        $transaction3->setPersonne($personne1); // Transaction avec une personne
         $manager->persist($transaction3);
 
         $transaction4 = new Transaction();
@@ -198,6 +201,7 @@ class AppFixtures extends Fixture
         $transaction4->setDateTransaction(new \DateTime('2024-01-20'));
         $transaction4->setTypeTransaction($typeAchat);
         $transaction4->setExercice($exercice2024);
+        $transaction4->setPersonne($personne2); // Transaction avec une personne
         $manager->persist($transaction4);
 
         // Sauvegarde finale
