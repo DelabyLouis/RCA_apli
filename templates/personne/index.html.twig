@@ -2,8 +2,66 @@
 
 {% block title %}Personne index{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .editable-field {
+            cursor: pointer;
+            padding: 5px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        .editable-field:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+        }
+        
+        .editable-field.editing {
+            background-color: #fff;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .editable-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: inherit;
+            font-family: inherit;
+        }
+        
+        .saving {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .alert {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <h1>Personne index</h1>
+    
+    <div id="message-container"></div>
 
     <table class="table">
         <thead>
@@ -28,19 +86,19 @@
         </thead>
         <tbody>
         {% for personne in personnes %}
-            <tr>
+            <tr data-id="{{ personne.idPersonne }}">
                 <td>{{ personne.idPersonne }}</td>
-                <td>{{ personne.nom }}</td>
-                <td>{{ personne.prenom }}</td>
-                <td>{{ personne.civilite }}</td>
-                <td>{{ personne.numeroVoie }}</td>
-                <td>{{ personne.rue }}</td>
-                <td>{{ personne.complementAdresse }}</td>
-                <td>{{ personne.ville }}</td>
-                <td>{{ personne.codePostal }}</td>
-                <td>{{ personne.pays }}</td>
-                <td>{{ personne.telephone }}</td>
-                <td>{{ personne.email }}</td>
+                <td class="editable-field" data-field="nom">{{ personne.nom }}</td>
+                <td class="editable-field" data-field="prenom">{{ personne.prenom }}</td>
+                <td class="editable-field" data-field="civilite">{{ personne.civilite }}</td>
+                <td class="editable-field" data-field="numero_voie">{{ personne.numeroVoie }}</td>
+                <td class="editable-field" data-field="rue">{{ personne.rue }}</td>
+                <td class="editable-field" data-field="complement_adresse">{{ personne.complementAdresse }}</td>
+                <td class="editable-field" data-field="ville">{{ personne.ville }}</td>
+                <td class="editable-field" data-field="code_postal">{{ personne.codePostal }}</td>
+                <td class="editable-field" data-field="pays">{{ personne.pays }}</td>
+                <td class="editable-field" data-field="telephone">{{ personne.telephone }}</td>
+                <td class="editable-field" data-field="email">{{ personne.email }}</td>
                 <td>
                     {% if personne.entreprise|length > 0 %}
                         {% for entreprise in personne.entreprise %}
@@ -74,4 +132,132 @@
     </table>
 
     <a href="{{ path('app_personne_new') }}">Create new</a>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentEditingCell = null;
+            let originalValue = '';
+            
+            function showMessage(message, type) {
+                const container = document.getElementById('message-container');
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type}`;
+                alert.textContent = message;
+                container.appendChild(alert);
+                
+                setTimeout(() => {
+                    alert.remove();
+                }, 3000);
+            }
+            
+            function saveField(cell, field, value, personneId) {
+                const row = cell.closest('tr');
+                row.classList.add('saving');
+                
+                fetch(`/personne/${personneId}/update-field`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    row.classList.remove('saving');
+                    
+                    if (data.success) {
+                        cell.textContent = value || '';
+                        showMessage(data.message, 'success');
+                    } else {
+                        cell.textContent = originalValue;
+                        showMessage(data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    row.classList.remove('saving');
+                    cell.textContent = originalValue;
+                    showMessage('Erreur de communication avec le serveur', 'danger');
+                    console.error('Error:', error);
+                });
+            }
+            
+            function startEditing(cell) {
+                if (currentEditingCell && currentEditingCell !== cell) {
+                    stopEditing(currentEditingCell, false);
+                }
+                
+                currentEditingCell = cell;
+                originalValue = cell.textContent;
+                
+                cell.classList.add('editing');
+                
+                const input = document.createElement('input');
+                input.className = 'editable-input';
+                input.type = 'text';
+                input.value = originalValue;
+                
+                cell.textContent = '';
+                cell.appendChild(input);
+                
+                input.focus();
+                input.select();
+                
+                input.addEventListener('blur', function() {
+                    stopEditing(cell, true);
+                });
+                
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        stopEditing(cell, true);
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        stopEditing(cell, false);
+                    }
+                });
+            }
+            
+            function stopEditing(cell, save) {
+                if (!cell || !cell.classList.contains('editing')) return;
+                
+                const input = cell.querySelector('input');
+                const newValue = input ? input.value.trim() : '';
+                
+                cell.classList.remove('editing');
+                
+                if (save && newValue !== originalValue) {
+                    const field = cell.dataset.field;
+                    const personneId = cell.closest('tr').dataset.id;
+                    
+                    if ((field === 'nom' || field === 'prenom') && !newValue) {
+                        showMessage('Le nom et le prénom ne peuvent pas être vides', 'danger');
+                        cell.textContent = originalValue;
+                    } else {
+                        saveField(cell, field, newValue, personneId);
+                    }
+                } else {
+                    cell.textContent = originalValue;
+                }
+                
+                currentEditingCell = null;
+            }
+            
+            document.querySelectorAll('.editable-field').forEach(cell => {
+                cell.addEventListener('click', function() {
+                    if (!this.classList.contains('editing')) {
+                        startEditing(this);
+                    }
+                });
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (currentEditingCell && !currentEditingCell.contains(e.target)) {
+                    stopEditing(currentEditingCell, false);
+                }
+            });
+        });
+    </script>
 {% endblock %}

@@ -11,6 +11,7 @@ use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/exercice')]
@@ -156,5 +157,62 @@ final class ExerciceController extends AbstractController
         // Générer un libellé par défaut basé sur l'année
         $annee = $dateDebut->format('Y');
         $exercice->setLibelle("Exercice {$annee}");
+    }
+
+    #[Route('/{id_exercice}/update-field', name: 'app_exercice_update_field', methods: ['POST'])]
+    public function updateField(Request $request, int $id_exercice, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $exercice = $exerciceRepository->findOneBy(['id_exercice' => $id_exercice]);
+        
+        if (!$exercice) {
+            return new JsonResponse(['success' => false, 'message' => 'Exercice non trouvé'], 404);
+        }
+
+        $field = $request->request->get('field');
+        $value = $request->request->get('value');
+
+        try {
+            switch ($field) {
+                case 'libelle':
+                    if (empty(trim($value))) {
+                        return new JsonResponse(['success' => false, 'message' => 'Le libellé ne peut pas être vide'], 400);
+                    }
+                    $exercice->setLibelle(trim($value));
+                    break;
+                case 'date_debut':
+                    try {
+                        $date = new \DateTime($value);
+                        $exercice->setDateDebut($date);
+                    } catch (\Exception $e) {
+                        return new JsonResponse(['success' => false, 'message' => 'Format de date invalide'], 400);
+                    }
+                    break;
+                case 'date_fin':
+                    if (empty($value)) {
+                        $exercice->setDateFin(null);
+                    } else {
+                        try {
+                            $date = new \DateTime($value);
+                            $exercice->setDateFin($date);
+                        } catch (\Exception $e) {
+                            return new JsonResponse(['success' => false, 'message' => 'Format de date invalide'], 400);
+                        }
+                    }
+                    break;
+                default:
+                    return new JsonResponse(['success' => false, 'message' => 'Champ non autorisé'], 400);
+            }
+
+            $entityManager->flush();
+            
+            return new JsonResponse([
+                'success' => true, 
+                'message' => 'Modification enregistrée',
+                'value' => $value
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
+        }
     }
 }

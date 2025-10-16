@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/entreprise')]
@@ -95,5 +96,72 @@ final class EntrepriseController extends AbstractController
         }
 
         return $this->redirectToRoute('app_entreprise_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id_entreprise}/update-field', name: 'app_entreprise_update_field', methods: ['POST'])]
+    public function updateField(Request $request, int $id_entreprise, EntrepriseRepository $entrepriseRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $entreprise = $entrepriseRepository->findOneBy(['id_entreprise' => $id_entreprise]);
+        
+        if (!$entreprise) {
+            return new JsonResponse(['success' => false, 'message' => 'Entreprise non trouvée'], 404);
+        }
+
+        $field = $request->request->get('field');
+        $value = $request->request->get('value');
+
+        try {
+            switch ($field) {
+                case 'nom_entreprise':
+                    if (empty(trim($value))) {
+                        return new JsonResponse(['success' => false, 'message' => 'Le nom de l\'entreprise ne peut pas être vide'], 400);
+                    }
+                    $entreprise->setNomEntreprise(trim($value));
+                    break;
+                case 'siret':
+                    $entreprise->setSiret($value ? trim($value) : null);
+                    break;
+                case 'siren':
+                    $entreprise->setSiren($value ? trim($value) : null);
+                    break;
+                case 'numero_voie':
+                    $entreprise->setNumeroVoie($value ? trim($value) : null);
+                    break;
+                case 'rue':
+                    $entreprise->setRue($value ? trim($value) : null);
+                    break;
+                case 'complement_adresse':
+                    $entreprise->setComplementAdresse($value ? trim($value) : null);
+                    break;
+                case 'ville':
+                    $entreprise->setVille($value ? trim($value) : null);
+                    break;
+                case 'code_postal':
+                    $entreprise->setCodePostal($value ? (int)$value : null);
+                    break;
+                case 'pays':
+                    $entreprise->setPays($value ? trim($value) : 'France');
+                    break;
+                case 'telephone':
+                    $entreprise->setTelephone($value ? (int)$value : null);
+                    break;
+                case 'email':
+                    $entreprise->setEmail($value ? trim($value) : null);
+                    break;
+                default:
+                    return new JsonResponse(['success' => false, 'message' => 'Champ non autorisé'], 400);
+            }
+
+            $entityManager->flush();
+            
+            return new JsonResponse([
+                'success' => true, 
+                'message' => 'Modification enregistrée',
+                'value' => $value
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
+        }
     }
 }

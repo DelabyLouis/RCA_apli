@@ -2,8 +2,66 @@
 
 {% block title %}Entreprise index{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .editable-field {
+            cursor: pointer;
+            padding: 5px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        .editable-field:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+        }
+        
+        .editable-field.editing {
+            background-color: #fff;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .editable-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: inherit;
+            font-family: inherit;
+        }
+        
+        .saving {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .alert {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <h1>Entreprise index</h1>
+    
+    <div id="message-container"></div>
 
     <table class="table">
         <thead>
@@ -25,19 +83,19 @@
         </thead>
         <tbody>
         {% for entreprise in entreprises %}
-            <tr>
+            <tr data-id="{{ entreprise.idEntreprise }}">
                 <td>{{ entreprise.idEntreprise }}</td>
-                <td>{{ entreprise.nomEntreprise }}</td>
-                <td>{{ entreprise.siret }}</td>
-                <td>{{ entreprise.siren }}</td>
-                <td>{{ entreprise.numeroVoie }}</td>
-                <td>{{ entreprise.rue }}</td>
-                <td>{{ entreprise.complementAdresse }}</td>
-                <td>{{ entreprise.ville }}</td>
-                <td>{{ entreprise.codePostal }}</td>
-                <td>{{ entreprise.pays }}</td>
-                <td>{{ entreprise.telephone }}</td>
-                <td>{{ entreprise.email }}</td>
+                <td class="editable-field" data-field="nom_entreprise">{{ entreprise.nomEntreprise }}</td>
+                <td class="editable-field" data-field="siret">{{ entreprise.siret }}</td>
+                <td class="editable-field" data-field="siren">{{ entreprise.siren }}</td>
+                <td class="editable-field" data-field="numero_voie">{{ entreprise.numeroVoie }}</td>
+                <td class="editable-field" data-field="rue">{{ entreprise.rue }}</td>
+                <td class="editable-field" data-field="complement_adresse">{{ entreprise.complementAdresse }}</td>
+                <td class="editable-field" data-field="ville">{{ entreprise.ville }}</td>
+                <td class="editable-field" data-field="code_postal">{{ entreprise.codePostal }}</td>
+                <td class="editable-field" data-field="pays">{{ entreprise.pays }}</td>
+                <td class="editable-field" data-field="telephone">{{ entreprise.telephone }}</td>
+                <td class="editable-field" data-field="email">{{ entreprise.email }}</td>
                 <td>
                     <a href="{{ path('app_entreprise_show', {'id_entreprise': entreprise.idEntreprise}) }}">show</a>
                     <a href="{{ path('app_entreprise_edit', {'id_entreprise': entreprise.idEntreprise}) }}">edit</a>
@@ -52,4 +110,138 @@
     </table>
 
     <a href="{{ path('app_entreprise_new') }}">Create new</a>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentEditingCell = null;
+            let originalValue = '';
+            
+            // Fonction pour afficher les messages
+            function showMessage(message, type) {
+                const container = document.getElementById('message-container');
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type}`;
+                alert.textContent = message;
+                container.appendChild(alert);
+                
+                setTimeout(() => {
+                    alert.remove();
+                }, 3000);
+            }
+            
+            // Fonction pour sauvegarder la modification
+            function saveField(cell, field, value, entrepriseId) {
+                const row = cell.closest('tr');
+                row.classList.add('saving');
+                
+                fetch(`/entreprise/${entrepriseId}/update-field`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    row.classList.remove('saving');
+                    
+                    if (data.success) {
+                        cell.textContent = value || '';
+                        showMessage(data.message, 'success');
+                    } else {
+                        cell.textContent = originalValue;
+                        showMessage(data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    row.classList.remove('saving');
+                    cell.textContent = originalValue;
+                    showMessage('Erreur de communication avec le serveur', 'danger');
+                    console.error('Error:', error);
+                });
+            }
+            
+            // Fonction pour entrer en mode édition
+            function startEditing(cell) {
+                if (currentEditingCell && currentEditingCell !== cell) {
+                    stopEditing(currentEditingCell, false);
+                }
+                
+                currentEditingCell = cell;
+                originalValue = cell.textContent;
+                
+                cell.classList.add('editing');
+                
+                const input = document.createElement('input');
+                input.className = 'editable-input';
+                input.type = 'text';
+                input.value = originalValue;
+                
+                cell.textContent = '';
+                cell.appendChild(input);
+                
+                input.focus();
+                input.select();
+                
+                input.addEventListener('blur', function() {
+                    stopEditing(cell, true);
+                });
+                
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        stopEditing(cell, true);
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        stopEditing(cell, false);
+                    }
+                });
+            }
+            
+            // Fonction pour sortir du mode édition
+            function stopEditing(cell, save) {
+                if (!cell || !cell.classList.contains('editing')) return;
+                
+                const input = cell.querySelector('input');
+                const newValue = input ? input.value.trim() : '';
+                
+                cell.classList.remove('editing');
+                
+                if (save && newValue !== originalValue) {
+                    const field = cell.dataset.field;
+                    const entrepriseId = cell.closest('tr').dataset.id;
+                    
+                    if (field === 'nom_entreprise' && !newValue) {
+                        showMessage('Le nom de l\'entreprise ne peut pas être vide', 'danger');
+                        cell.textContent = originalValue;
+                    } else {
+                        saveField(cell, field, newValue, entrepriseId);
+                    }
+                } else {
+                    cell.textContent = originalValue;
+                }
+                
+                currentEditingCell = null;
+            }
+            
+            // Ajouter les événements de clic sur les cellules éditables
+            document.querySelectorAll('.editable-field').forEach(cell => {
+                cell.addEventListener('click', function() {
+                    if (!this.classList.contains('editing')) {
+                        startEditing(this);
+                    }
+                });
+            });
+            
+            // Annuler l'édition si on clique ailleurs
+            document.addEventListener('click', function(e) {
+                if (currentEditingCell && !currentEditingCell.contains(e.target)) {
+                    stopEditing(currentEditingCell, false);
+                }
+            });
+        });
+    </script>
 {% endblock %}

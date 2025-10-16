@@ -2,8 +2,77 @@
 
 {% block title %}Role index{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .editable-field {
+            cursor: pointer;
+            padding: 5px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        .editable-field:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+        }
+        
+        .editable-field.editing {
+            background-color: #fff;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .editable-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: inherit;
+            font-family: inherit;
+        }
+        
+        .editable-textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: inherit;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 20px;
+        }
+        
+        .saving {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .alert {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <h1>Role index</h1>
+    
+    <div id="message-container"></div>
 
     <table class="table">
         <thead>
@@ -16,10 +85,10 @@
         </thead>
         <tbody>
         {% for role in roles %}
-            <tr>
+            <tr data-id="{{ role.idRole }}">
                 <td>{{ role.idRole }}</td>
-                <td>{{ role.libelle }}</td>
-                <td>{{ role.description }}</td>
+                <td class="editable-field" data-field="libelle">{{ role.libelle }}</td>
+                <td class="editable-field" data-field="description">{{ role.description ?? 'Aucune description' }}</td>
                 <td>
                     <a href="{{ path('app_role_show', {'id_role': role.idRole}) }}">show</a>
                     <a href="{{ path('app_role_edit', {'id_role': role.idRole}) }}">edit</a>
@@ -28,6 +97,155 @@
         {% else %}
             <tr>
                 <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_role_new') }}">Create new</a>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentEditingCell = null;
+            let originalValue = '';
+            
+            function showMessage(message, type) {
+                const container = document.getElementById('message-container');
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type}`;
+                alert.textContent = message;
+                container.appendChild(alert);
+                
+                setTimeout(() => {
+                    alert.remove();
+                }, 3000);
+            }
+            
+            function saveField(cell, field, value, roleId) {
+                const row = cell.closest('tr');
+                row.classList.add('saving');
+                
+                fetch(`/role/${roleId}/update-field`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    row.classList.remove('saving');
+                    
+                    if (data.success) {
+                        cell.textContent = value || (field === 'description' ? 'Aucune description' : '');
+                        showMessage(data.message, 'success');
+                    } else {
+                        cell.textContent = originalValue;
+                        showMessage(data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    row.classList.remove('saving');
+                    cell.textContent = originalValue;
+                    showMessage('Erreur de communication avec le serveur', 'danger');
+                    console.error('Error:', error);
+                });
+            }
+            
+            function startEditing(cell) {
+                if (currentEditingCell && currentEditingCell !== cell) {
+                    stopEditing(currentEditingCell, false);
+                }
+                
+                currentEditingCell = cell;
+                originalValue = cell.textContent;
+                
+                let editValue = originalValue;
+                if (cell.dataset.field === 'description' && originalValue === 'Aucune description') {
+                    editValue = '';
+                }
+                
+                cell.classList.add('editing');
+                
+                let input;
+                if (cell.dataset.field === 'description') {
+                    input = document.createElement('textarea');
+                    input.className = 'editable-textarea';
+                    input.rows = 2;
+                } else {
+                    input = document.createElement('input');
+                    input.className = 'editable-input';
+                    input.type = 'text';
+                }
+                
+                input.value = editValue;
+                cell.textContent = '';
+                cell.appendChild(input);
+                
+                input.focus();
+                if (input.type === 'text') {
+                    input.select();
+                }
+                
+                input.addEventListener('blur', function() {
+                    stopEditing(cell, true);
+                });
+                
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        stopEditing(cell, true);
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        stopEditing(cell, false);
+                    }
+                });
+            }
+            
+            function stopEditing(cell, save) {
+                if (!cell || !cell.classList.contains('editing')) return;
+                
+                const input = cell.querySelector('input, textarea');
+                const newValue = input ? input.value.trim() : '';
+                
+                cell.classList.remove('editing');
+                
+                if (save && newValue !== originalValue.replace('Aucune description', '')) {
+                    const field = cell.dataset.field;
+                    const roleId = cell.closest('tr').dataset.id;
+                    
+                    if (field === 'libelle' && !newValue) {
+                        showMessage('Le libellé ne peut pas être vide', 'danger');
+                        cell.textContent = originalValue;
+                    } else {
+                        saveField(cell, field, newValue, roleId);
+                    }
+                } else {
+                    cell.textContent = originalValue;
+                }
+                
+                currentEditingCell = null;
+            }
+            
+            document.querySelectorAll('.editable-field').forEach(cell => {
+                cell.addEventListener('click', function() {
+                    if (!this.classList.contains('editing')) {
+                        startEditing(this);
+                    }
+                });
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (currentEditingCell && !currentEditingCell.contains(e.target)) {
+                    stopEditing(currentEditingCell, false);
+                }
+            });
+        });
+    </script>
+{% endblock %}
             </tr>
         {% endfor %}
         </tbody>

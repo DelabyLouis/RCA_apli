@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/personne')]
@@ -96,5 +97,75 @@ final class PersonneController extends AbstractController
         }
 
         return $this->redirectToRoute('app_personne_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id_personne}/update-field', name: 'app_personne_update_field', methods: ['POST'])]
+    public function updateField(Request $request, int $id_personne, PersonneRepository $personneRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $personne = $personneRepository->findOneBy(['id_personne' => $id_personne]);
+        
+        if (!$personne) {
+            return new JsonResponse(['success' => false, 'message' => 'Personne non trouvée'], 404);
+        }
+
+        $field = $request->request->get('field');
+        $value = $request->request->get('value');
+
+        try {
+            switch ($field) {
+                case 'nom':
+                    if (empty(trim($value))) {
+                        return new JsonResponse(['success' => false, 'message' => 'Le nom ne peut pas être vide'], 400);
+                    }
+                    $personne->setNom(trim($value));
+                    break;
+                case 'prenom':
+                    if (empty(trim($value))) {
+                        return new JsonResponse(['success' => false, 'message' => 'Le prénom ne peut pas être vide'], 400);
+                    }
+                    $personne->setPrenom(trim($value));
+                    break;
+                case 'civilite':
+                    $personne->setCivilite($value ? trim($value) : null);
+                    break;
+                case 'numero_voie':
+                    $personne->setNumeroVoie($value ? trim($value) : null);
+                    break;
+                case 'rue':
+                    $personne->setRue($value ? trim($value) : null);
+                    break;
+                case 'complement_adresse':
+                    $personne->setComplementAdresse($value ? trim($value) : null);
+                    break;
+                case 'ville':
+                    $personne->setVille($value ? trim($value) : null);
+                    break;
+                case 'code_postal':
+                    $personne->setCodePostal($value ? (int)$value : null);
+                    break;
+                case 'pays':
+                    $personne->setPays($value ? trim($value) : 'France');
+                    break;
+                case 'telephone':
+                    $personne->setTelephone($value ? (int)$value : null);
+                    break;
+                case 'email':
+                    $personne->setEmail($value ? trim($value) : null);
+                    break;
+                default:
+                    return new JsonResponse(['success' => false, 'message' => 'Champ non autorisé'], 400);
+            }
+
+            $entityManager->flush();
+            
+            return new JsonResponse([
+                'success' => true, 
+                'message' => 'Modification enregistrée',
+                'value' => $value
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
+        }
     }
 }

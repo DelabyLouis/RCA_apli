@@ -2,29 +2,288 @@
 
 {% block title %}TypeTransaction{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .editable-field {
+            cursor: pointer;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: all 0.2s;
+            min-height: 20px;
+            display: inline-block;
+            min-width: 200px;
+        }
+        
+        .editable-field:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+        }
+        
+        .editable-field.editing {
+            background-color: #fff;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .editable-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: inherit;
+            font-family: inherit;
+            min-width: 200px;
+        }
+        
+        .editable-textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: inherit;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 60px;
+            min-width: 300px;
+        }
+        
+        .saving {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .alert {
+            margin: 15px 0;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .edit-hint {
+            font-size: 0.8em;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        .table td {
+            vertical-align: middle;
+        }
+        
+        .readonly-field {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            padding: 8px;
+            border-radius: 4px;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <h1>TypeTransaction</h1>
+    
+    <div id="message-container"></div>
 
-    <table class="table">
+    <table class="table" data-id="{{ type_transaction.idType }}">
         <tbody>
             <tr>
-                <th>Id_type</th>
-                <td>{{ type_transaction.idType }}</td>
+                <th width="150">Id_type</th>
+                <td>
+                    <span class="readonly-field">{{ type_transaction.idType }}</span>
+                </td>
             </tr>
             <tr>
                 <th>Libelle</th>
-                <td>{{ type_transaction.libelle }}</td>
+                <td>
+                    <span class="editable-field" data-field="libelle">{{ type_transaction.libelle }}</span>
+                </td>
             </tr>
             <tr>
                 <th>Description</th>
-                <td>{{ type_transaction.description }}</td>
+                <td>
+                    <span class="editable-field" data-field="description">{{ type_transaction.description ?? 'Aucune description' }}</span>
+                </td>
             </tr>
         </tbody>
     </table>
 
-    <a href="{{ path('app_type_transaction_index') }}">back to list</a>
+    <div class="mt-3">
+        <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary">back to list</a>
+        <a href="{{ path('app_type_transaction_edit', {'id_type': type_transaction.idType}) }}" class="btn btn-primary">edit</a>
+        {{ include('type_transaction/_delete_form.html.twig') }}
+    </div>
+{% endblock %}
 
-    <a href="{{ path('app_type_transaction_edit', {'id_type': type_transaction.idType}) }}">edit</a>
-
-    {{ include('type_transaction/_delete_form.html.twig') }}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentEditingField = null;
+            let originalValue = '';
+            
+            // Fonction pour afficher les messages
+            function showMessage(message, type) {
+                const container = document.getElementById('message-container');
+                
+                // Supprimer les anciens messages
+                container.innerHTML = '';
+                
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type}`;
+                alert.textContent = message;
+                container.appendChild(alert);
+                
+                // Supprimer le message après 4 secondes
+                setTimeout(() => {
+                    alert.remove();
+                }, 4000);
+            }
+            
+            // Fonction pour sauvegarder la modification
+            function saveField(field, value, typeId) {
+                const table = document.querySelector('.table');
+                table.classList.add('saving');
+                
+                fetch(`/typetransaction/${typeId}/update-field`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    table.classList.remove('saving');
+                    
+                    if (data.success) {
+                        currentEditingField.textContent = value || (field === 'description' ? 'Aucune description' : '');
+                        showMessage(data.message, 'success');
+                    } else {
+                        // Restaurer la valeur originale en cas d'erreur
+                        currentEditingField.textContent = originalValue;
+                        showMessage(data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    table.classList.remove('saving');
+                    currentEditingField.textContent = originalValue;
+                    showMessage('Erreur de communication avec le serveur', 'danger');
+                    console.error('Error:', error);
+                });
+            }
+            
+            // Fonction pour entrer en mode édition
+            function startEditing(field) {
+                if (currentEditingField && currentEditingField !== field) {
+                    stopEditing(false); // Annuler l'édition précédente
+                }
+                
+                currentEditingField = field;
+                originalValue = field.textContent;
+                
+                // Nettoyer la valeur pour l'édition
+                let editValue = originalValue;
+                if (field.dataset.field === 'description' && originalValue === 'Aucune description') {
+                    editValue = '';
+                }
+                
+                field.classList.add('editing');
+                
+                let input;
+                if (field.dataset.field === 'description') {
+                    input = document.createElement('textarea');
+                    input.className = 'editable-textarea';
+                    input.rows = 3;
+                } else {
+                    input = document.createElement('input');
+                    input.className = 'editable-input';
+                    input.type = 'text';
+                }
+                
+                input.value = editValue;
+                field.textContent = '';
+                field.appendChild(input);
+                
+                input.focus();
+                if (input.type === 'text') {
+                    input.select();
+                }
+                
+                // Gérer les événements
+                input.addEventListener('blur', function() {
+                    stopEditing(true);
+                });
+                
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        stopEditing(true);
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        stopEditing(false);
+                    }
+                });
+            }
+            
+            // Fonction pour sortir du mode édition
+            function stopEditing(save) {
+                if (!currentEditingField || !currentEditingField.classList.contains('editing')) return;
+                
+                const input = currentEditingField.querySelector('input, textarea');
+                const newValue = input ? input.value.trim() : '';
+                
+                currentEditingField.classList.remove('editing');
+                
+                if (save && newValue !== originalValue.replace('Aucune description', '')) {
+                    const fieldName = currentEditingField.dataset.field;
+                    const typeId = document.querySelector('.table').dataset.id;
+                    
+                    // Validation côté client
+                    if (fieldName === 'libelle' && !newValue) {
+                        showMessage('Le libellé ne peut pas être vide', 'danger');
+                        currentEditingField.textContent = originalValue;
+                    } else {
+                        saveField(fieldName, newValue, typeId);
+                    }
+                } else {
+                    // Restaurer la valeur originale
+                    currentEditingField.textContent = originalValue;
+                }
+                
+                currentEditingField = null;
+            }
+            
+            // Ajouter les événements de clic sur les champs éditables
+            document.querySelectorAll('.editable-field').forEach(field => {
+                field.addEventListener('click', function() {
+                    if (!this.classList.contains('editing')) {
+                        startEditing(this);
+                    }
+                });
+            });
+            
+            // Annuler l'édition si on clique ailleurs
+            document.addEventListener('click', function(e) {
+                if (currentEditingField && 
+                    !currentEditingField.contains(e.target) && 
+                    !e.target.classList.contains('editable-field')) {
+                    stopEditing(false);
+                }
+            });
+        });
+    </script>
 {% endblock %}

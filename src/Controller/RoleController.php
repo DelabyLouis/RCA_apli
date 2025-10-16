@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/role')]
@@ -95,5 +96,45 @@ final class RoleController extends AbstractController
         }
 
         return $this->redirectToRoute('app_role_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id_role}/update-field', name: 'app_role_update_field', methods: ['POST'])]
+    public function updateField(Request $request, int $id_role, RoleRepository $roleRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $role = $roleRepository->findOneBy(['id_role' => $id_role]);
+        
+        if (!$role) {
+            return new JsonResponse(['success' => false, 'message' => 'Rôle non trouvé'], 404);
+        }
+
+        $field = $request->request->get('field');
+        $value = $request->request->get('value');
+
+        try {
+            switch ($field) {
+                case 'libelle':
+                    if (empty(trim($value))) {
+                        return new JsonResponse(['success' => false, 'message' => 'Le libellé ne peut pas être vide'], 400);
+                    }
+                    $role->setLibelle(trim($value));
+                    break;
+                case 'description':
+                    $role->setDescription($value ? trim($value) : null);
+                    break;
+                default:
+                    return new JsonResponse(['success' => false, 'message' => 'Champ non autorisé'], 400);
+            }
+
+            $entityManager->flush();
+            
+            return new JsonResponse([
+                'success' => true, 
+                'message' => 'Modification enregistrée',
+                'value' => $value
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
+        }
     }
 }

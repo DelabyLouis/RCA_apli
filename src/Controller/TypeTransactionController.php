@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/typetransaction')]
@@ -94,5 +95,45 @@ final class TypeTransactionController extends AbstractController
         }
 
         return $this->redirectToRoute('app_type_transaction_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id_type}/update-field', name: 'app_type_transaction_update_field', methods: ['POST'])]
+    public function updateField(Request $request, int $id_type, TypeTransactionRepository $typeTransactionRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $typeTransaction = $typeTransactionRepository->findOneBy(['id_type' => $id_type]);
+        
+        if (!$typeTransaction) {
+            return new JsonResponse(['success' => false, 'message' => 'Type de transaction non trouvé'], 404);
+        }
+
+        $field = $request->request->get('field');
+        $value = $request->request->get('value');
+
+        try {
+            switch ($field) {
+                case 'libelle':
+                    if (empty(trim($value))) {
+                        return new JsonResponse(['success' => false, 'message' => 'Le libellé ne peut pas être vide'], 400);
+                    }
+                    $typeTransaction->setLibelle(trim($value));
+                    break;
+                case 'description':
+                    $typeTransaction->setDescription($value ? trim($value) : null);
+                    break;
+                default:
+                    return new JsonResponse(['success' => false, 'message' => 'Champ non autorisé'], 400);
+            }
+
+            $entityManager->flush();
+            
+            return new JsonResponse([
+                'success' => true, 
+                'message' => 'Modification enregistrée',
+                'value' => $value
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
+        }
     }
 }
