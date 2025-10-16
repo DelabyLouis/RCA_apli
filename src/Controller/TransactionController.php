@@ -45,9 +45,14 @@ final class TransactionController extends AbstractController
     }
 
     #[Route('/new', name: 'app_transaction_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, TransactionRepository $transactionRepository): Response
     {
         $transaction = new Transaction();
+        
+        // Pré-remplir le numéro d'ordre avec le suivant disponible
+        $lastNumeroOrdre = $transactionRepository->getLastNumeroOrdre();
+        $transaction->setNumeroOrdre($lastNumeroOrdre + 1);
+        
         $form = $this->createForm(TransactionType::class, $transaction);
         $form->handleRequest($request);
 

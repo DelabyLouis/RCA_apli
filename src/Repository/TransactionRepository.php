@@ -16,6 +16,19 @@ class TransactionRepository extends ServiceEntityRepository
         parent::__construct($registry, Transaction::class);
     }
 
+    /**
+     * Récupère le dernier numéro d'ordre utilisé
+     */
+    public function getLastNumeroOrdre(): ?int
+    {
+        $result = $this->createQueryBuilder('t')
+            ->select('MAX(t.numero_ordre)')
+            ->getQuery()
+            ->getSingleScalarResult();
+        
+        return $result ? (int) $result : 0;
+    }
+
     //    /**
     //     * @return Transaction[] Returns an array of Transaction objects
     //     */
