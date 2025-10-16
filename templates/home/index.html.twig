@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - RCA Application{% endblock %}
+
+{% block body %}
+<div>
+    <h1>Bienvenue dans l'application RCA</h1>
+    
+    <h2>Gestion des entités</h2>
+    <p>Utilisez la navigation ci-dessus pour consulter et gérer les différentes entités de l'application :</p>
+    
+    <ul>
+        <li><strong>Entreprises</strong> - Gestion des entreprises</li>
+        <li><strong>Exercices</strong> - Gestion des exercices comptables</li>
+        <li><strong>Personnes</strong> - Gestion des personnes</li>
+        <li><strong>Rôles</strong> - Gestion des rôles</li>
+        <li><strong>Transactions</strong> - Gestion des transactions</li>
+        <li><strong>Types de Transaction</strong> - Gestion des types de transaction</li>
+        <li><strong>Utilisateurs</strong> - Gestion des utilisateurs</li>
+    </ul>
+    
+    <h3>Raccourcis rapides</h3>
+    <p>
+        <a href="{{ path('app_entreprise_index') }}">Voir toutes les entreprises</a> |
+        <a href="{{ path('app_transaction_index') }}">Voir toutes les transactions</a> |
+        <a href="{{ path('app_personne_index') }}">Voir toutes les personnes</a>
+    </p>
+</div>
+{% endblock %}

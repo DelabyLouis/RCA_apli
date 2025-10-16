@@ -114,21 +114,22 @@ class AppFixtures extends Fixture
         $userAdmin->setUsername('admin');
         $userAdmin->setPassword($this->passwordHasher->hashPassword($userAdmin, 'admin123'));
         $userAdmin->setPersonne($personne3);
-        $userAdmin->setRole($roleAdmin);
+        $userAdmin->addRole($roleAdmin);
         $manager->persist($userAdmin);
 
         $user1 = new User();
         $user1->setUsername('jean.dupont');
         $user1->setPassword($this->passwordHasher->hashPassword($user1, 'password123'));
         $user1->setPersonne($personne1);
-        $user1->setRole($roleComptable);
+        $user1->addRole($roleComptable);
+        $user1->addRole($roleUser); // Exemple : ajout de plusieurs rôles
         $manager->persist($user1);
 
         $user2 = new User();
         $user2->setUsername('marie.martin');
         $user2->setPassword($this->passwordHasher->hashPassword($user2, 'password456'));
         $user2->setPersonne($personne2);
-        $user2->setRole($roleUser);
+        $user2->addRole($roleUser);
         $manager->persist($user2);
 
         // Création des exercices

@@ -23,9 +23,13 @@ class UserType extends AbstractType
                     return $personne->getPrenom() . ' ' . $personne->getNom();
                 },
             ])
-            ->add('role', EntityType::class, [
+            ->add('userRoles', EntityType::class, [
                 'class' => Role::class,
                 'choice_label' => 'libelle',
+                'multiple' => true,
+                'expanded' => true, // affiche des checkboxes
+                'by_reference' => false,
+                'label' => 'Rôles',
             ])
         ;
     }

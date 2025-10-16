@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -30,9 +32,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(name: 'id_personne', referencedColumnName: 'id_personne', nullable: false)]
     private ?Personne $personne = null;
 
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    #[ORM\JoinColumn(name: 'id_role', referencedColumnName: 'id_role', nullable: false)]
-    private ?Role $role = null;
+    /**
+     * @var Collection<int, Role>
+     */
+    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'users')]
+    #[ORM\JoinTable(
+        name: 'user_role',
+        joinColumns: [
+            new ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id_user')
+        ],
+        inverseJoinColumns: [
+            new ORM\JoinColumn(name: 'role_id', referencedColumnName: 'id_role')
+        ]
+    )]
+    private Collection $roles;
+
+    public function __construct()
+    {
+        $this->roles = new ArrayCollection();
+    }
 
     public function getIdUser(): ?int
     {
@@ -66,10 +84,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        // Utiliser la relation avec l'entité Role
+        // Utiliser la collection de rôles
         $roles = ['ROLE_USER']; // rôle par défaut
-        if ($this->role) {
-            $roles[] = 'ROLE_' . strtoupper($this->role->getLibelle());
+        foreach ($this->roles as $role) {
+            $roles[] = 'ROLE_' . strtoupper($role->getLibelle());
         }
 
         return array_unique($roles);
@@ -119,15 +137,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRole(): ?Role
+    public function getUserRoles(): Collection
     {
-        return $this->role;
+        return $this->roles;
     }
 
-    public function setRole(?Role $role): static
+    public function addRole(Role $role): static
     {
-        $this->role = $role;
+        if (!$this->roles->contains($role)) {
+            $this->roles->add($role);
+        }
 
         return $this;
+    }
+
+    public function removeRole(Role $role): static
+    {
+        $this->roles->removeElement($role);
+
+        return $this;
+    }
+
+    public function hasRole(Role $role): bool
+    {
+        return $this->roles->contains($role);
     }
 }

@@ -12,6 +12,18 @@
         {% endblock %}
     </head>
     <body>
+        <nav>
+            <ul>
+                <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                <li><a href="{{ path('app_entreprise_index') }}">Entreprises</a></li>
+                <li><a href="{{ path('app_exercice_index') }}">Exercices</a></li>
+                <li><a href="{{ path('app_personne_index') }}">Personnes</a></li>
+                <li><a href="{{ path('app_role_index') }}">Rôles</a></li>
+                <li><a href="{{ path('app_transaction_index') }}">Transactions</a></li>
+                <li><a href="{{ path('app_type_transaction_index') }}">Types de Transaction</a></li>
+                <li><a href="{{ path('app_user_index') }}">Utilisateurs</a></li>
+            </ul>
+        </nav>
         {% block body %}{% endblock %}
     </body>
 </html>
