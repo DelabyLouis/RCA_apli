@@ -63,7 +63,7 @@
     
     <div id="message-container"></div>
 
-    <table class="table">
+    <table class="table" data-turbo="false">
         <thead>
             <tr>
                 <th>Id_personne</th>
@@ -137,11 +137,19 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // Attendre que tout soit complètement chargé
+        window.addEventListener('load', function() {
+            console.log('Window load - JavaScript chargé');
+            
             let currentEditingCell = null;
             let originalValue = '';
             
-            function showMessage(message, type) {
+            // Petit délai pour s'assurer que Turbo a fini
+            setTimeout(function() {
+                const editableFields = document.querySelectorAll('.editable-field');
+                console.log('Nombre de champs éditables trouvés:', editableFields.length);
+                
+                function showMessage(message, type) {
                 const container = document.getElementById('message-container');
                 const alert = document.createElement('div');
                 alert.className = `alert alert-${type}`;
@@ -185,6 +193,7 @@
             }
             
             function startEditing(cell) {
+                console.log('startEditing appelé pour:', cell);
                 if (currentEditingCell && currentEditingCell !== cell) {
                     stopEditing(currentEditingCell, false);
                 }
@@ -246,7 +255,9 @@
             }
             
             document.querySelectorAll('.editable-field').forEach(cell => {
+                console.log('Attachement événement click à:', cell);
                 cell.addEventListener('click', function() {
+                    console.log('Click détecté sur:', this);
                     if (!this.classList.contains('editing')) {
                         startEditing(this);
                     }
@@ -258,6 +269,7 @@
                     stopEditing(currentEditingCell, false);
                 }
             });
+            }, 100); // Délai de 100ms
         });
     </script>
 {% endblock %}

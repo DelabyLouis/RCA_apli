@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
+use App\Repository\PersonneRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,10 +17,11 @@ use Symfony\Component\Routing\Attribute\Route;
 final class UserController extends AbstractController
 {
     #[Route(name: 'app_user_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository): Response
+    public function index(UserRepository $userRepository, PersonneRepository $personneRepository): Response
     {
         return $this->render('user/index.html.twig', [
             'users' => $userRepository->findAll(),
+            'personnes' => $personneRepository->findAll(),
         ]);
     }
 
@@ -99,7 +101,7 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id_user}/update-field', name: 'app_user_update_field', methods: ['POST'])]
-    public function updateField(Request $request, int $id_user, UserRepository $userRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function updateField(Request $request, int $id_user, UserRepository $userRepository, PersonneRepository $personneRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         $user = $userRepository->findOneBy(['id_user' => $id_user]);
         
@@ -124,6 +126,17 @@ final class UserController extends AbstractController
                     }
                     
                     $user->setUsername(trim($value));
+                    break;
+                case 'personne':
+                    if (empty($value)) {
+                        $user->setPersonne(null);
+                    } else {
+                        $personne = $personneRepository->findOneBy(['id_personne' => intval($value)]);
+                        if (!$personne) {
+                            return new JsonResponse(['success' => false, 'message' => 'Personne non trouvée'], 400);
+                        }
+                        $user->setPersonne($personne);
+                    }
                     break;
                 default:
                     return new JsonResponse(['success' => false, 'message' => 'Champ non autorisé'], 400);

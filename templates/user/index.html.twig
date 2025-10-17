@@ -68,7 +68,7 @@
     
     <div id="message-container"></div>
 
-    <table class="table">
+    <table class="table" data-turbo="false">
         <thead>
             <tr>
                 <th>Id_user</th>
@@ -84,7 +84,7 @@
             <tr data-id="{{ user.idUser }}">
                 <td>{{ user.idUser }}</td>
                 <td class="editable-field" data-field="username">{{ user.username }}</td>
-                <td>
+                <td class="editable-field" data-field="personne" data-current-value="{{ user.personne ? user.personne.idPersonne : '' }}">
                     {% if user.personne %}
                         {{ user.personne.prenom }} {{ user.personne.nom }}
                     {% else %}
@@ -123,6 +123,18 @@
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Données des personnes pour les listes déroulantes
+            const personnes = [
+                {% for personne in personnes %}
+                {
+                    id: {{ personne.idPersonne }},
+                    nom: "{{ personne.nom|e('js') }}",
+                    prenom: "{{ personne.prenom|e('js') }}",
+                    fullName: "{{ personne.prenom|e('js') }} {{ personne.nom|e('js') }}"
+                }{{ not loop.last ? ',' : '' }}
+                {% endfor %}
+            ];
+            
             let currentEditingCell = null;
             let originalValue = '';
             
@@ -154,16 +166,27 @@
                     row.classList.remove('saving');
                     
                     if (data.success) {
-                        cell.textContent = value || '';
+                        if (field === 'personne') {
+                            // Mettre à jour l'affichage et la valeur courante
+                            cell.dataset.currentValue = value;
+                            if (value) {
+                                const personne = personnes.find(p => p.id == value);
+                                cell.textContent = personne ? personne.fullName : 'Aucune personne';
+                            } else {
+                                cell.innerHTML = '<span class="text-muted">Aucune personne</span>';
+                            }
+                        } else {
+                            cell.textContent = value || '';
+                        }
                         showMessage(data.message, 'success');
                     } else {
-                        cell.textContent = originalValue;
+                        restoreOriginalContent(cell, field);
                         showMessage(data.message, 'danger');
                     }
                 })
                 .catch(error => {
                     row.classList.remove('saving');
-                    cell.textContent = originalValue;
+                    restoreOriginalContent(cell, field);
                     showMessage('Erreur de communication avec le serveur', 'danger');
                     console.error('Error:', error);
                 });
@@ -179,16 +202,48 @@
                 
                 cell.classList.add('editing');
                 
-                const input = document.createElement('input');
-                input.className = 'editable-input';
-                input.type = 'text';
-                input.value = originalValue;
+                const field = cell.dataset.field;
+                let input;
+                
+                if (field === 'personne') {
+                    // Créer un select pour les personnes
+                    input = document.createElement('select');
+                    input.className = 'editable-input';
+                    
+                    // Option vide
+                    const emptyOption = document.createElement('option');
+                    emptyOption.value = '';
+                    emptyOption.textContent = 'Aucune personne';
+                    input.appendChild(emptyOption);
+                    
+                    // Options des personnes
+                    personnes.forEach(personne => {
+                        const option = document.createElement('option');
+                        option.value = personne.id;
+                        option.textContent = personne.fullName;
+                        input.appendChild(option);
+                    });
+                    
+                    // Sélectionner la valeur actuelle
+                    const currentValue = cell.dataset.currentValue;
+                    if (currentValue) {
+                        input.value = currentValue;
+                    }
+                } else {
+                    // Input text normal pour les autres champs
+                    input = document.createElement('input');
+                    input.className = 'editable-input';
+                    input.type = 'text';
+                    input.value = originalValue;
+                }
                 
                 cell.textContent = '';
                 cell.appendChild(input);
                 
                 input.focus();
-                input.select();
+                if (input.tagName.toLowerCase() === 'input') {
+                    input.select();
+                }
                 
                 input.addEventListener('blur', function() {
                     stopEditing(cell, true);
@@ -208,26 +263,40 @@
             function stopEditing(cell, save) {
                 if (!cell || !cell.classList.contains('editing')) return;
                 
-                const input = cell.querySelector('input');
+                const input = cell.querySelector('input, select');
                 const newValue = input ? input.value.trim() : '';
+                const field = cell.dataset.field;
                 
                 cell.classList.remove('editing');
                 
-                if (save && newValue !== originalValue) {
-                    const field = cell.dataset.field;
+                if (save && newValue !== (field === 'personne' ? cell.dataset.currentValue : originalValue)) {
                     const userId = cell.closest('tr').dataset.id;
                     
                     if (field === 'username' && !newValue) {
                         showMessage('Le nom d\'utilisateur ne peut pas être vide', 'danger');
-                        cell.textContent = originalValue;
+                        restoreOriginalContent(cell, field);
                     } else {
                         saveField(cell, field, newValue, userId);
                     }
                 } else {
-                    cell.textContent = originalValue;
+                    restoreOriginalContent(cell, field);
                 }
                 
                 currentEditingCell = null;
+            }
+            
+            function restoreOriginalContent(cell, field) {
+                if (field === 'personne') {
+                    const currentValue = cell.dataset.currentValue;
+                    if (currentValue) {
+                        const personne = personnes.find(p => p.id == currentValue);
+                        cell.textContent = personne ? personne.fullName : 'Aucune personne';
+                    } else {
+                        cell.innerHTML = '<span class="text-muted">Aucune personne</span>';
+                    }
+                } else {
+                    cell.textContent = originalValue;
+                }
             }
             
             document.querySelectorAll('.editable-field').forEach(cell => {

@@ -74,7 +74,7 @@
     
     <div id="message-container"></div>
 
-    <table class="table">
+    <table class="table" data-turbo="false">
         <thead>
             <tr>
                 <th>Id_role</th>
@@ -245,11 +245,4 @@
             });
         });
     </script>
-{% endblock %}
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_role_new') }}">Create new</a>
 {% endblock %}
