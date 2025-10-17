@@ -170,8 +170,7 @@
                     table.classList.remove('saving');
                     
                     if (data.success) {
-                        currentEditingField.textContent = value || (field === 'description' ? 'Aucune description' : '');
-                        showMessage(data.message, 'success');
+                        cell.textContent = value || (field === 'description' ? 'Aucune description' : '');
                     } else {
                         // Restaurer la valeur originale en cas d'erreur
                         currentEditingField.textContent = originalValue;

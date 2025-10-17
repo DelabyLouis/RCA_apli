@@ -233,13 +233,7 @@ final class TransactionController extends AbstractController
 
             $entityManager->flush();
             
-            return new JsonResponse([
-                'success' => true, 
-                'message' => 'Modification enregistrée',
-                'value' => $value
-            ]);
-            
-        } catch (\Exception $e) {
+            return new JsonResponse(['success' => true]);        } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la modification : ' . $e->getMessage()], 500);
         }
     }

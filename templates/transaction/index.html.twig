@@ -144,20 +144,8 @@
                         <span class="text-muted">-</span>
                     {% endif %}
                 </td>
-                <td class="editable-field montant-cell" data-field="montant" data-type="debit" data-current-value="{{ transaction.montant }}">
-                    {% if transaction.montant > 0 %}
-                        <span class="montant-debit">{{ transaction.montant|number_format(2, ',', ' ') }} €</span>
-                    {% else %}
-                        <span class="montant-null">-</span>
-                    {% endif %}
-                </td>
-                <td class="editable-field montant-cell" data-field="montant" data-type="credit" data-current-value="{{ transaction.montant }}">
-                    {% if transaction.montant < 0 %}
-                        <span class="montant-credit">{{ (transaction.montant * -1)|number_format(2, ',', ' ') }} €</span>
-                    {% else %}
-                        <span class="montant-null">-</span>
-                    {% endif %}
-                </td>
+                <td class="editable-field montant-cell" data-field="montant" data-type="debit" data-current-value="{{ transaction.montant }}">{% if transaction.montant > 0 %}<span class="montant-debit">{{ transaction.montant|number_format(2, ',', ' ') }} €</span>{% else %}<span class="montant-null">-</span>{% endif %}</td>
+                <td class="editable-field montant-cell" data-field="montant" data-type="credit" data-current-value="{{ transaction.montant }}">{% if transaction.montant < 0 %}<span class="montant-credit">{{ (transaction.montant * -1)|number_format(2, ',', ' ') }} €</span>{% else %}<span class="montant-null">-</span>{% endif %}</td>
                 <td>
                     <span class="montant-solde {% if solde > 0 %}solde-positif{% elseif solde < 0 %}solde-negatif{% else %}solde-nul{% endif %}">
                         {{ solde|number_format(2, ',', ' ') }} €
@@ -182,427 +170,232 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
+        console.log('SCRIPT CHARGÉ - Début');
         document.addEventListener('DOMContentLoaded', function() {
-            // Données pour les listes déroulantes
-            const personnes = [
-                {% for personne in personnes %}
-                {
-                    id: {{ personne.idPersonne }},
-                    nom: "{{ personne.nom|e('js') }}",
-                    prenom: "{{ personne.prenom|e('js') }}",
-                    fullName: "{{ personne.prenom|e('js') }} {{ personne.nom|e('js') }}"
-                }{{ not loop.last ? ',' : '' }}
-                {% endfor %}
-            ];
+            console.log('DOM LOADED - Transaction page');
             
-            const entreprises = [
-                {% for entreprise in entreprises %}
-                {
-                    id: {{ entreprise.idEntreprise }},
-                    nom: "{{ entreprise.nomEntreprise|e('js') }}"
-                }{{ not loop.last ? ',' : '' }}
-                {% endfor %}
-            ];
+            // Test de base
+            const editableFields = document.querySelectorAll('.editable-field');
+            console.log('Nombre de champs éditables trouvés:', editableFields.length);
             
+            const montantCells = document.querySelectorAll('.montant-cell');
+            console.log('Nombre de cellules montant trouvées:', montantCells.length);
             let currentEditingCell = null;
             let originalValue = '';
             
-            // Marquer les cellules montant non-éditables
-            document.querySelectorAll('.montant-cell').forEach(cell => {
-                const currentValue = parseFloat(cell.dataset.currentValue) || 0;
-                const type = cell.dataset.type;
+            // Test de base : clic simple sur toutes les cellules éditables
+            document.querySelectorAll('.editable-field').forEach((cell, index) => {
+                console.log(`Cell ${index}:`, cell, 'field:', cell.dataset.field, 'classes:', cell.className);
                 
-                if ((type === 'debit' && currentValue < 0) || (type === 'credit' && currentValue >= 0)) {
-                    cell.classList.add('non-editable');
-                }
-            });
-            
-            function showMessage(message, type) {
-                const container = document.getElementById('message-container');
-                const alert = document.createElement('div');
-                alert.className = `alert alert-${type}`;
-                alert.textContent = message;
-                container.appendChild(alert);
-                
-                setTimeout(() => {
-                    alert.remove();
-                }, 3000);
-            }
-            
-            function saveField(cell, field, value, transactionId) {
-                const row = cell.closest('tr');
-                row.classList.add('saving');
-                
-                fetch(`/transaction/${transactionId}/update-field`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    row.classList.remove('saving');
-                    
-                    if (data.success) {
-                        updateCellDisplay(cell, field, value);
-                        showMessage(data.message, 'success');
-                        
-                        // Recharger la page pour recalculer les soldes
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
-                    } else {
-                        restoreOriginalContent(cell, field);
-                        showMessage(data.message, 'danger');
-                    }
-                })
-                .catch(error => {
-                    row.classList.remove('saving');
-                    restoreOriginalContent(cell, field);
-                    showMessage('Erreur de communication avec le serveur', 'danger');
-                    console.error('Error:', error);
-                });
-            }
-            
-            function updateCellDisplay(cell, field, value) {
-                switch(field) {
-                    case 'montant':
-                        const type = cell.dataset.type;
-                        const numValue = parseFloat(value);
-                        
-                        if (type === 'debit') {
-                            if (numValue > 0) {
-                                cell.innerHTML = `<span class="montant-debit">${numValue.toLocaleString('fr-FR', {minimumFractionDigits: 2})} €</span>`;
-                                cell.classList.remove('non-editable');
-                            } else {
-                                cell.innerHTML = '<span class="montant-null">-</span>';
-                                cell.classList.add('non-editable');
-                            }
-                            // Mettre à jour la cellule crédit correspondante
-                            const creditCell = cell.parentNode.querySelector('[data-type="credit"]');
-                            if (creditCell) {
-                                if (numValue > 0) {
-                                    creditCell.innerHTML = '<span class="montant-null">-</span>';
-                                    creditCell.classList.add('non-editable');
-                                } else {
-                                    creditCell.classList.remove('non-editable');
-                                }
-                                creditCell.dataset.currentValue = value;
-                            }
-                        } else if (type === 'credit') {
-                            if (numValue < 0) {
-                                const positiveValue = Math.abs(numValue);
-                                cell.innerHTML = `<span class="montant-credit">${positiveValue.toLocaleString('fr-FR', {minimumFractionDigits: 2})} €</span>`;
-                                cell.classList.remove('non-editable');
-                            } else {
-                                cell.innerHTML = '<span class="montant-null">-</span>';
-                                cell.classList.add('non-editable');
-                            }
-                            // Mettre à jour la cellule débit correspondante
-                            const debitCell = cell.parentNode.querySelector('[data-type="debit"]');
-                            if (debitCell) {
-                                if (numValue < 0) {
-                                    debitCell.innerHTML = '<span class="montant-null">-</span>';
-                                    debitCell.classList.add('non-editable');
-                                } else {
-                                    debitCell.classList.remove('non-editable');
-                                }
-                                debitCell.dataset.currentValue = value;
-                            }
-                        }
-                        cell.dataset.currentValue = value;
-                        break;
-                        
-                    case 'tiers':
-                        // La gestion du tiers sera complexe, pour l'instant on recharge
-                        break;
-                        
-                    default:
-                        cell.textContent = value;
-                }
-            }
-            
-            function startEditing(cell) {
-                if (currentEditingCell && currentEditingCell !== cell) {
-                    stopEditing(currentEditingCell, false);
-                }
-                
-                currentEditingCell = cell;
-                originalValue = cell.textContent;
-                
-                cell.classList.add('editing');
-                
-                const field = cell.dataset.field;
-                let input;
-                
-                if (field === 'montant') {
-                    // Éditeur spécial pour les montants avec bouton débit/crédit
-                    const currentValue = parseFloat(cell.dataset.currentValue) || 0;
-                    const isDebit = cell.dataset.type === 'debit';
-                    const isCredit = cell.dataset.type === 'credit';
-                    
-                    const container = document.createElement('div');
-                    container.className = 'montant-editor';
-                    
-                    input = document.createElement('input');
-                    input.className = 'montant-input';
-                    input.type = 'number';
-                    input.step = '0.01';
-                    input.min = '0';
-                    
-                    if ((isDebit && currentValue > 0) || (isCredit && currentValue < 0)) {
-                        input.value = Math.abs(currentValue);
-                    } else {
-                        input.value = '';
-                    }
-                    
-                    const toggleBtn = document.createElement('button');
-                    toggleBtn.className = 'montant-toggle';
-                    toggleBtn.type = 'button';
-                    
-                    // Variable pour stocker le type actuel
-                    let currentType = isDebit ? 'debit' : 'credit';
-                    toggleBtn.textContent = currentType === 'debit' ? 'D' : 'C';
-                    
-                    // Fonction pour mettre à jour l'affichage du bouton
-                    const updateToggleButton = () => {
-                        toggleBtn.textContent = currentType === 'debit' ? 'D' : 'C';
-                        toggleBtn.style.backgroundColor = currentType === 'debit' ? '#28a745' : '#dc3545';
-                    };
-                    
-                    updateToggleButton();
-                    
-                    toggleBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        currentType = currentType === 'debit' ? 'credit' : 'debit';
-                        updateToggleButton();
-                        console.log('Toggle clicked, new type:', currentType);
-                    });
-                    
-                    container.appendChild(input);
-                    container.appendChild(toggleBtn);
-                    
-                    cell.textContent = '';
-                    cell.appendChild(container);
-                    
-                    // Gestion de la validation
-                    const validateMontant = () => {
-                        const value = parseFloat(input.value) || 0;
-                        if (value <= 0) {
-                            showMessage('Le montant doit être supérieur à zéro', 'danger');
-                            return false;
-                        }
-                        const finalValue = currentType === 'debit' ? value : -value;
-                        console.log('Validating montant:', value, 'type:', currentType, 'final:', finalValue);
-                        return finalValue;
-                    };
-                    
-                    input.addEventListener('blur', function() {
-                        const finalValue = validateMontant();
-                        if (finalValue !== false) {
-                            stopEditing(cell, true, finalValue);
-                        } else {
-                            stopEditing(cell, false);
-                        }
-                    });
-                    
-                    input.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            const finalValue = validateMontant();
-                            if (finalValue !== false) {
-                                stopEditing(cell, true, finalValue);
-                            }
-                        } else if (e.key === 'Escape') {
-                            e.preventDefault();
-                            stopEditing(cell, false);
-                        }
-                    });
-                    
-                } else if (field === 'tiers') {
-                    // Select pour choisir entre personne et entreprise
-                    input = document.createElement('select');
-                    input.className = 'editable-input';
-                    
-                    // Option vide
-                    const emptyOption = document.createElement('option');
-                    emptyOption.value = '';
-                    emptyOption.textContent = 'Aucun tiers';
-                    input.appendChild(emptyOption);
-                    
-                    // Groupe personnes
-                    const personnesGroup = document.createElement('optgroup');
-                    personnesGroup.label = 'Personnes';
-                    personnes.forEach(personne => {
-                        const option = document.createElement('option');
-                        option.value = `personne_${personne.id}`;
-                        option.textContent = personne.fullName;
-                        personnesGroup.appendChild(option);
-                    });
-                    input.appendChild(personnesGroup);
-                    
-                    // Groupe entreprises
-                    const entreprisesGroup = document.createElement('optgroup');
-                    entreprisesGroup.label = 'Entreprises';
-                    entreprises.forEach(entreprise => {
-                        const option = document.createElement('option');
-                        option.value = `entreprise_${entreprise.id}`;
-                        option.textContent = entreprise.nom;
-                        entreprisesGroup.appendChild(option);
-                    });
-                    input.appendChild(entreprisesGroup);
-                    
-                    // Sélectionner la valeur actuelle
-                    if (cell.dataset.currentPersonne) {
-                        input.value = `personne_${cell.dataset.currentPersonne}`;
-                    } else if (cell.dataset.currentEntreprise) {
-                        input.value = `entreprise_${cell.dataset.currentEntreprise}`;
-                    }
-                    
-                    cell.textContent = '';
-                    cell.appendChild(input);
-                    
-                } else {
-                    // Input normal pour les autres champs
-                    input = document.createElement('input');
-                    input.className = 'editable-input';
-                    
-                    if (field === 'date_transaction') {
-                        input.type = 'date';
-                        input.value = originalValue;
-                    } else if (field === 'numero_ordre') {
-                        input.type = 'number';
-                        input.min = '1';
-                        input.value = originalValue;
-                    } else {
-                        input.type = 'text';
-                        input.value = originalValue;
-                    }
-                    
-                    cell.textContent = '';
-                    cell.appendChild(input);
-                }
-                
-                if (input && !input.classList.contains('montant-input')) {
-                    input.focus();
-                    if (input.tagName.toLowerCase() === 'input' && input.type === 'text') {
-                        input.select();
-                    }
-                    
-                    input.addEventListener('blur', function() {
-                        stopEditing(cell, true);
-                    });
-                    
-                    input.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            stopEditing(cell, true);
-                        } else if (e.key === 'Escape') {
-                            e.preventDefault();
-                            stopEditing(cell, false);
-                        }
-                    });
-                }
-                
-                if (field === 'montant') {
-                    input.focus();
-                }
-            }
-            
-            function stopEditing(cell, save, customValue = null) {
-                if (!cell || !cell.classList.contains('editing')) return;
-                
-                const field = cell.dataset.field;
-                let newValue;
-                
-                if (customValue !== null) {
-                    newValue = customValue;
-                } else {
-                    const input = cell.querySelector('input, select');
-                    if (field === 'tiers') {
-                        newValue = input ? input.value : '';
-                    } else {
-                        newValue = input ? input.value.trim() : '';
-                    }
-                }
-                
-                cell.classList.remove('editing');
-                
-                if (save && shouldSave(field, newValue, cell)) {
-                    const transactionId = cell.closest('tr').dataset.id;
-                    
-                    if (field === 'tiers') {
-                        // Gérer le tiers spécialement
-                        if (newValue.startsWith('personne_')) {
-                            saveField(cell, 'personne', newValue.replace('personne_', ''), transactionId);
-                        } else if (newValue.startsWith('entreprise_')) {
-                            saveField(cell, 'entreprise', newValue.replace('entreprise_', ''), transactionId);
-                        } else {
-                            // Vider le tiers
-                            saveField(cell, 'personne', '', transactionId);
-                        }
-                    } else {
-                        saveField(cell, field, newValue, transactionId);
-                    }
-                } else {
-                    restoreOriginalContent(cell, field);
-                }
-                
-                currentEditingCell = null;
-            }
-            
-            function shouldSave(field, newValue, cell) {
-                if (field === 'montant') {
-                    return newValue !== cell.dataset.currentValue;
-                } else if (field === 'tiers') {
-                    const currentPersonne = cell.dataset.currentPersonne;
-                    const currentEntreprise = cell.dataset.currentEntreprise;
-                    
-                    if (newValue.startsWith('personne_')) {
-                        return newValue.replace('personne_', '') !== currentPersonne;
-                    } else if (newValue.startsWith('entreprise_')) {
-                        return newValue.replace('entreprise_', '') !== currentEntreprise;
-                    } else {
-                        return currentPersonne || currentEntreprise;
-                    }
-                } else {
-                    return newValue !== originalValue;
-                }
-            }
-            
-            function restoreOriginalContent(cell, field) {
-                if (field === 'montant') {
+                // Marquer les cellules montant non-éditables au chargement
+                if (cell.dataset.field === 'montant') {
                     const currentValue = parseFloat(cell.dataset.currentValue) || 0;
                     const type = cell.dataset.type;
                     
-                    if (type === 'debit' && currentValue > 0) {
-                        cell.innerHTML = `<span class="montant-debit">${currentValue.toLocaleString('fr-FR', {minimumFractionDigits: 2})} €</span>`;
-                    } else if (type === 'credit' && currentValue < 0) {
-                        const positiveValue = Math.abs(currentValue);
-                        cell.innerHTML = `<span class="montant-credit">${positiveValue.toLocaleString('fr-FR', {minimumFractionDigits: 2})} €</span>`;
-                    } else {
-                        cell.innerHTML = '<span class="montant-null">-</span>';
+                    // Une cellule montant est non-éditable si elle contient "-" ou si la valeur est du mauvais signe
+                    if ((type === 'debit' && currentValue < 0) || (type === 'credit' && currentValue >= 0)) {
+                        cell.classList.add('non-editable');
+                        console.log('Cellule marquée non-éditable:', type, 'valeur:', currentValue);
                     }
-                } else {
-                    cell.textContent = originalValue;
                 }
-            }
-            
-            document.querySelectorAll('.editable-field').forEach(cell => {
-                cell.addEventListener('click', function() {
-                    if (!this.classList.contains('editing') && !this.classList.contains('non-editable')) {
-                        startEditing(this);
+                
+                cell.addEventListener('click', function(e) {
+                    console.log('CLICK DÉTECTÉ sur:', this.dataset.field, 'contenu:', this.textContent.trim());
+                    
+                    if (this.classList.contains('non-editable')) {
+                        console.log('Cellule non-éditable, clic ignoré');
+                        return;
+                    }
+                    
+                    if (this.dataset.field === 'montant') {
+                        console.log('Montant cliqué, type:', this.dataset.type, 'valeur actuelle:', this.dataset.currentValue);
+                        startMontantEdit(this);
+                    } else {
+                        console.log('Autre champ cliqué:', this.dataset.field);
+                        // Pour l'instant, juste un test
+                        alert('Clic détecté sur: ' + this.dataset.field);
                     }
                 });
             });
             
-            document.addEventListener('click', function(e) {
-                if (currentEditingCell && !currentEditingCell.contains(e.target)) {
-                    stopEditing(currentEditingCell, false);
+            function startMontantEdit(cell) {
+                console.log('startMontantEdit appelé pour:', cell);
+                
+                const currentValue = parseFloat(cell.dataset.currentValue) || 0;
+                
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.step = '0.01';
+                input.style.width = '100px';
+                
+                // Afficher la valeur avec son signe (positif ou négatif)
+                input.value = currentValue || '';
+                
+                const button = document.createElement('button');
+                button.style.marginLeft = '5px';
+                button.style.color = 'white';
+                button.style.border = 'none';
+                button.style.padding = '4px 12px';
+                button.style.cursor = 'pointer';
+                button.style.borderRadius = '3px';
+                
+                const updateButton = () => {
+                    const value = parseFloat(input.value) || 0;
+                    if (value >= 0) {
+                        button.textContent = 'DÉBIT';
+                        button.style.backgroundColor = '#28a745';
+                    } else {
+                        button.textContent = 'CRÉDIT';
+                        button.style.backgroundColor = '#dc3545';
+                    }
+                };
+                
+                updateButton();
+                
+                button.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const currentVal = parseFloat(input.value) || 0;
+                    const newVal = -currentVal; // Inverser le signe
+                    
+                    input.value = newVal;
+                    updateButton();
+                    
+                    console.log('Toggle cliqué:', currentVal, '->', newVal);
+                    
+                    // Sauvegarder automatiquement après le toggle
+                    if (newVal !== 0) {
+                        console.log('Sauvegarde automatique du montant après toggle:', newVal);
+                        saveMontant(cell, newVal);
+                    }
+                };
+                
+                // Mettre à jour le bouton quand on tape dans l'input
+                input.oninput = function() {
+                    updateButton();
+                };
+                
+                cell.innerHTML = '';
+                cell.appendChild(input);
+                cell.appendChild(button);
+                
+                input.focus();
+                input.select();
+                
+                input.onblur = function() {
+                    const value = parseFloat(input.value) || 0;
+                    if (value !== 0) {
+                        console.log('Sauvegarde du montant:', value);
+                        saveMontant(cell, value);
+                    } else {
+                        restoreCell(cell);
+                    }
+                };
+                
+                input.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        input.blur();
+                    } else if (e.key === 'Escape') {
+                        restoreCell(cell);
+                    }
+                };
+            }
+            
+            function saveMontant(cell, value) {
+                const transactionId = cell.closest('tr').dataset.id;
+                console.log('Envoi AJAX:', transactionId, 'montant:', value);
+                
+                fetch(`/transaction/${transactionId}/update-field`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `field=montant&value=${value}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Réponse AJAX:', data);
+                    if (data.success) {
+                        // Petite pause pour debug
+                        setTimeout(() => {
+                            updateMontantCells(cell.closest('tr'), value);
+                        }, 100);
+                    } else {
+                        alert('Erreur: ' + data.message);
+                        restoreCell(cell);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur AJAX:', error);
+                    alert('Erreur de communication');
+                    restoreCell(cell);
+                });
+            }
+            
+            function updateMontantCells(row, value) {
+                console.log('updateMontantCells appelée avec row:', row, 'value:', value);
+                console.log('Structure de la ligne:', row.outerHTML);
+                
+                const debitCell = row.querySelector('.montant-cell[data-type="debit"]');
+                const creditCell = row.querySelector('.montant-cell[data-type="credit"]');
+                const numValue = parseFloat(value);
+                
+                console.log('Cellules trouvées avec sélecteur amélioré:');
+                console.log('- Débit:', debitCell);
+                console.log('- Crédit:', creditCell);
+                console.log('Valeur numérique:', numValue);
+                
+                if (!debitCell || !creditCell) {
+                    console.error('Cellules débit/crédit non trouvées !');
+                    console.log('Toutes les cellules de la ligne:', row.querySelectorAll('td'));
+                    return;
                 }
-            });
+                
+                // TEST SIMPLE : changer juste le texte
+                console.log('Test simple de changement de contenu...');
+                
+                // Mettre à jour les data-current-value
+                debitCell.dataset.currentValue = value;
+                creditCell.dataset.currentValue = value;
+                
+                if (numValue > 0) {
+                    // Montant positif = débit
+                    console.log('Montant positif -> débit');
+                    debitCell.innerHTML = `<span class="montant-debit">${numValue.toFixed(2)} €</span>`;
+                    creditCell.innerHTML = '<span class="montant-null">-</span>';
+                    
+                    debitCell.classList.remove('non-editable');
+                    creditCell.classList.add('non-editable');
+                } else if (numValue < 0) {
+                    // Montant négatif = crédit
+                    console.log('Montant négatif -> crédit');
+                    const positiveValue = Math.abs(numValue);
+                    creditCell.innerHTML = `<span class="montant-credit">${positiveValue.toFixed(2)} €</span>`;
+                    debitCell.innerHTML = '<span class="montant-null">-</span>';
+                    
+                    creditCell.classList.remove('non-editable');
+                    debitCell.classList.add('non-editable');
+                } else {
+                    // Montant zéro (ne devrait pas arriver)
+                    console.log('Montant zéro');
+                    debitCell.innerHTML = '<span class="montant-null">-</span>';
+                    creditCell.innerHTML = '<span class="montant-null">-</span>';
+                    
+                    debitCell.classList.add('non-editable');
+                    creditCell.classList.add('non-editable');
+                }
+                
+                console.log('APRÈS MISE À JOUR:');
+                console.log('- Débit:', debitCell.innerHTML);
+                console.log('- Crédit:', creditCell.innerHTML);
+                console.log('- Classes débit:', debitCell.className);
+                console.log('- Classes crédit:', creditCell.className);
+            }
+            
+            function restoreCell(cell) {
+                console.log('Restauration de la cellule');
+                const currentValue = parseFloat(cell.dataset.currentValue) || 0;
+                updateMontantCells(cell.closest('tr'), currentValue);
+            }
         });
     </script>
 {% endblock %}

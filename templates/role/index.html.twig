@@ -141,7 +141,6 @@
                     
                     if (data.success) {
                         cell.textContent = value || (field === 'description' ? 'Aucune description' : '');
-                        showMessage(data.message, 'success');
                     } else {
                         cell.textContent = originalValue;
                         showMessage(data.message, 'danger');

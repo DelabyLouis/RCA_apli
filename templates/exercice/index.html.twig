@@ -140,7 +140,6 @@
                     
                     if (data.success) {
                         cell.textContent = value || '';
-                        showMessage(data.message, 'success');
                     } else {
                         cell.textContent = originalValue;
                         showMessage(data.message, 'danger');
