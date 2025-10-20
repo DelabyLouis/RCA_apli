@@ -76,7 +76,6 @@
                 <th>Personne</th>
                 <th>Roles</th>
                 <th>Password</th>
-                <th>actions</th>
             </tr>
         </thead>
         <tbody>
@@ -103,14 +102,10 @@
                 <td>
                     <span class="password-mask">••••••••</span>
                 </td>
-                <td>
-                    <a href="{{ path('app_user_show', {'id_user': user.idUser}) }}">show</a>
-                    <a href="{{ path('app_user_edit', {'id_user': user.idUser}) }}">edit</a>
-                </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="6">no records found</td>
+                <td colspan="5">no records found</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -299,10 +294,18 @@
             }
             
             document.querySelectorAll('.editable-field').forEach(cell => {
-                cell.addEventListener('click', function() {
-                    if (!this.classList.contains('editing')) {
-                        startEditing(this);
+                cell.addEventListener('click', function(e) {
+                    // Si on clique sur un input/select à l'intérieur, ne pas traiter le clic de la cellule
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+                        return;
                     }
+                    
+                    // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
+                    if (this.classList.contains('editing')) {
+                        return;
+                    }
+                    
+                    startEditing(this);
                 });
             });
             

@@ -180,7 +180,9 @@ final class TransactionController extends AbstractController
                     if (!is_numeric($value) || floatval($value) == 0) {
                         return new JsonResponse(['success' => false, 'message' => 'Le montant doit être un nombre différent de zéro'], 400);
                     }
-                    $transaction->setMontant(strval(floatval($value)));
+                    // Formater le montant à 2 décimales pour la base de données
+                    $montantFormate = number_format(floatval($value), 2, '.', '');
+                    $transaction->setMontant($montantFormate);
                     break;
                     
                 case 'personne':

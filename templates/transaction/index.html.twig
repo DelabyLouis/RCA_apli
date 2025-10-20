@@ -119,7 +119,6 @@
                 <th>Débit</th>
                 <th>Crédit</th>
                 <th>Solde</th>
-                <th>actions</th>
             </tr>
         </thead>
         <tbody>
@@ -151,14 +150,10 @@
                         {{ solde|number_format(2, ',', ' ') }} €
                     </span>
                 </td>
-                <td>
-                    <a href="{{ path('app_transaction_show', {'id_transaction': transaction.idTransaction}) }}">show</a>
-                    <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}">edit</a>
-                </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="9">no records found</td>
+                <td colspan="8">no records found</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -236,11 +231,19 @@
                 
                 const input = document.createElement('input');
                 input.type = 'number';
-                input.step = '0.01';
-                input.style.width = '100px';
+                input.step = 'any';  // Permet n'importe quel nombre de décimales
+                input.min = '-999999999.99';
+                input.max = '999999999.99';
+                input.style.width = '120px';
                 
-                // Afficher la valeur avec son signe (positif ou négatif)
-                input.value = currentValue || '';
+                // Afficher la valeur avec son signe (formatage intelligent)
+                let formattedValue = '0';
+                if (currentValue) {
+                    const numValue = parseFloat(currentValue);
+                    // Afficher sans décimales inutiles
+                    formattedValue = numValue % 1 === 0 ? numValue.toString() : numValue.toString();
+                }
+                input.value = formattedValue;
                 
                 const button = document.createElement('button');
                 button.style.marginLeft = '5px';
@@ -252,6 +255,8 @@
                 
                 const updateButton = () => {
                     const value = parseFloat(input.value) || 0;
+                    // Ne pas formater pendant la saisie, juste mettre à jour le bouton
+                    
                     if (value >= 0) {
                         button.textContent = 'DÉBIT';
                         button.style.backgroundColor = '#28a745';
@@ -270,7 +275,15 @@
                     const currentVal = parseFloat(input.value) || 0;
                     const newVal = -currentVal; // Inverser le signe
                     
-                    input.value = newVal;
+                    // Garder le formatage de l'utilisateur si possible
+                    const inputStr = input.value.trim();
+                    if (inputStr.includes('.')) {
+                        // Si l'utilisateur a mis un point, respecter son formatage
+                        input.value = newVal.toString();
+                    } else {
+                        // Si pas de point, afficher comme entier si c'est un entier
+                        input.value = newVal % 1 === 0 ? newVal.toString() : newVal.toFixed(2);
+                    }
                     updateButton();
                     
                     console.log('Toggle cliqué:', currentVal, '->', newVal);
@@ -286,6 +299,8 @@
                 input.oninput = function() {
                     updateButton();
                 };
+                
+                // Pas de formatage automatique sur blur pour laisser l'utilisateur saisir librement
                 
                 cell.innerHTML = '';
                 cell.appendChild(input);
@@ -326,9 +341,12 @@
                 .then(data => {
                     console.log('Réponse AJAX:', data);
                     if (data.success) {
-                        // Petite pause pour debug
+                        // Mettre à jour les cellules de montant
+                        updateMontantCells(cell.closest('tr'), value);
+                        
+                        // Recalculer tous les soldes
                         setTimeout(() => {
-                            updateMontantCells(cell.closest('tr'), value);
+                            recalculateAllSoldes();
                         }, 100);
                     } else {
                         alert('Erreur: ' + data.message);
@@ -408,6 +426,47 @@
                 updateMontantCells(cell.closest('tr'), currentValue);
             }
             
+            // Fonction pour recalculer tous les soldes après modification d'un montant
+            function recalculateAllSoldes() {
+                console.log('Recalcul de tous les soldes...');
+                
+                const rows = document.querySelectorAll('tbody tr');
+                let solde = 0;
+                
+                rows.forEach((row, index) => {
+                    // Récupérer le montant de cette transaction
+                    const debitCell = row.querySelector('.montant-cell[data-type="debit"]');
+                    if (debitCell) {
+                        const montant = parseFloat(debitCell.dataset.currentValue) || 0;
+                        solde += montant;
+                        
+                        // Mettre à jour l'affichage du solde
+                        const soldeCell = row.querySelector('.montant-solde');
+                        if (soldeCell) {
+                            // Formater le solde comme dans Twig (style français)
+                            const soldeAbs = Math.abs(solde);
+                            const soldeFormate = soldeAbs.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+                            
+                            soldeCell.textContent = `${soldeFormate} €`;
+                            
+                            // Mettre à jour les classes CSS selon le signe
+                            soldeCell.classList.remove('solde-positif', 'solde-negatif', 'solde-nul');
+                            if (solde > 0) {
+                                soldeCell.classList.add('solde-positif');
+                            } else if (solde < 0) {
+                                soldeCell.classList.add('solde-negatif');
+                            } else {
+                                soldeCell.classList.add('solde-nul');
+                            }
+                            
+                            console.log(`Ligne ${index + 1}: montant=${montant}, solde cumulé=${solde}`);
+                        }
+                    }
+                });
+                
+                console.log('Recalcul terminé, solde final:', solde);
+            }
+            
             // Variables pour l'édition standard des champs
             let currentEditingField = null;
             let originalFieldValue = '';
@@ -431,6 +490,8 @@
                 } else if (cell.dataset.field === 'numero_ordre') {
                     input = document.createElement('input');
                     input.type = 'number';
+                    input.step = '1';
+                    input.min = '0';
                     input.value = originalFieldValue;
                 } else if (cell.dataset.field === 'personne' || cell.dataset.field === 'entreprise') {
                     // Pour les relations, on utilise un select

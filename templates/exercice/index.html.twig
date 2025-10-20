@@ -70,13 +70,11 @@
 
     <table class="table" data-turbo="false">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Libellé</th>
-                <th>Date début</th>
+                        <tr>
+                <th>Id exercice</th>
+                <th>Libelle</th>
+                <th>Date debut</th>
                 <th>Date fin</th>
-                <th>Nb transactions</th>
-                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -89,15 +87,10 @@
                 <td>
                     <span class="badge bg-secondary">{{ exercice.transactions|length }}</span>
                 </td>
-                <td>
-                    <a href="{{ path('app_exercice_transactions', {'id_exercice': exercice.idExercice}) }}" class="btn btn-sm btn-success">Voir transactions</a>
-                    <a href="{{ path('app_exercice_show', {'id_exercice': exercice.idExercice}) }}" class="btn btn-sm btn-info">Détails</a>
-                    <a href="{{ path('app_exercice_edit', {'id_exercice': exercice.idExercice}) }}" class="btn btn-sm btn-warning">Modifier</a>
-                </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="6">Aucun exercice trouvé</td>
+                <td colspan="5">Aucun exercice trouvé</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -196,6 +189,11 @@
                         stopEditing(cell, false);
                     }
                 });
+                
+                // Empêcher la propagation du clic sur l'input pour éviter de relancer l'édition
+                input.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
             }
             
             function stopEditing(cell, save) {
@@ -223,11 +221,20 @@
                 currentEditingCell = null;
             }
             
+            // Ajouter les événements de clic sur les cellules éditables
             document.querySelectorAll('.editable-field').forEach(cell => {
-                cell.addEventListener('click', function() {
-                    if (!this.classList.contains('editing')) {
-                        startEditing(this);
+                cell.addEventListener('click', function(e) {
+                    // Si on clique sur un input/textarea à l'intérieur, ne pas traiter le clic de la cellule
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                        return;
                     }
+                    
+                    // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
+                    if (this.classList.contains('editing')) {
+                        return;
+                    }
+                    
+                    startEditing(this);
                 });
             });
             

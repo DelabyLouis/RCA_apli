@@ -77,10 +77,9 @@
     <table class="table" data-turbo="false">
         <thead>
             <tr>
-                <th>Id_type</th>
+                <th>Id type</th>
                 <th>Libelle</th>
                 <th>Description</th>
-                <th>actions</th>
             </tr>
         </thead>
         <tbody>
@@ -89,14 +88,10 @@
                 <td>{{ type_transaction.idType }}</td>
                 <td class="editable-field" data-field="libelle">{{ type_transaction.libelle }}</td>
                 <td class="editable-field" data-field="description">{{ type_transaction.description ?? 'Aucune description' }}</td>
-                <td>
-                    <a href="{{ path('app_type_transaction_show', {'id_type': type_transaction.idType}) }}">show</a>
-                    <a href="{{ path('app_type_transaction_edit', {'id_type': type_transaction.idType}) }}">edit</a>
-                </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+                <td colspan="3">no records found</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -209,6 +204,11 @@
                         stopEditing(cell, false);
                     }
                 });
+                
+                // Empêcher la propagation du clic sur l'input pour éviter de relancer l'édition
+                input.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
             }
             
             // Fonction pour sortir du mode édition
@@ -241,10 +241,18 @@
             
             // Ajouter les événements de clic sur les cellules éditables
             document.querySelectorAll('.editable-field').forEach(cell => {
-                cell.addEventListener('click', function() {
-                    if (!this.classList.contains('editing')) {
-                        startEditing(this);
+                cell.addEventListener('click', function(e) {
+                    // Si on clique sur un input/textarea à l'intérieur, ne pas traiter le clic de la cellule
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                        return;
                     }
+                    
+                    // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
+                    if (this.classList.contains('editing')) {
+                        return;
+                    }
+                    
+                    startEditing(this);
                 });
             });
             
