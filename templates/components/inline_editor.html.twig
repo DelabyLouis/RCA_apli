@@ -1,0 +1,274 @@
+<script>
+/**
+ * Gestionnaire d'édition en ligne universel
+ * Configuration simple et robuste pour toutes les entités
+ */
+class InlineEditor {
+    constructor(config) {
+        this.entityName = config.entityName; // 'transaction', 'user', etc.
+        this.entityIdField = config.entityIdField; // 'idTransaction', 'idUser', etc.
+        this.updateUrl = config.updateUrl; // '/transaction/{id}/update-field'
+        this.deleteUrl = config.deleteUrl; // '/transaction/{id}/delete-ajax'
+        this.specialFields = config.specialFields || {}; // champs avec logique spéciale
+        
+        this.currentEditingCell = null;
+        this.originalValue = '';
+        
+        this.init();
+    }
+    
+    init() {
+        // UN SEUL gestionnaire d'événements pour tout
+        document.addEventListener('click', (e) => this.handleClick(e));
+        document.addEventListener('keydown', (e) => this.handleKeydown(e));
+    }
+    
+    handleClick(e) {
+        // 1. Gestion des boutons de suppression
+        const deleteBtn = e.target.closest('.delete-btn');
+        if (deleteBtn) {
+            e.stopPropagation();
+            this.handleDelete(deleteBtn);
+            return;
+        }
+        
+        // 2. Arrêt d'édition si clic en dehors
+        if (this.currentEditingCell && !this.currentEditingCell.contains(e.target)) {
+            this.stopEditing(false);
+            return;
+        }
+        
+        // 3. Démarrage d'édition sur cellule éditable
+        const cell = e.target.closest('.editable-field');
+        if (cell && !cell.classList.contains('editing') && 
+            e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {
+            this.startEditing(cell);
+        }
+    }
+    
+    handleKeydown(e) {
+        if (!this.currentEditingCell) return;
+        
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            this.stopEditing(true);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            this.stopEditing(false);
+        }
+    }
+    
+    startEditing(cell) {
+        if (this.currentEditingCell) {
+            this.stopEditing(false);
+        }
+        
+        this.currentEditingCell = cell;
+        this.originalValue = cell.textContent.trim();
+        
+        const field = cell.dataset.field;
+        let input;
+        
+        // Créer l'input approprié selon le champ
+        if (this.specialFields[field]) {
+            input = this.createSpecialInput(field, cell);
+        } else {
+            input = this.createDefaultInput(field);
+        }
+        
+        // Valeur initiale
+        let editValue = this.originalValue;
+        if (field === 'description' && editValue === 'Aucune description') {
+            editValue = '';
+        }
+        input.value = editValue;
+        
+        // Remplacer le contenu
+        cell.classList.add('editing');
+        cell.innerHTML = '';
+        cell.appendChild(input);
+        
+        input.focus();
+        if (input.select) input.select();
+    }
+    
+    createDefaultInput(field) {
+        if (field === 'description') {
+            const textarea = document.createElement('textarea');
+            textarea.className = 'editable-textarea';
+            textarea.rows = 2;
+            return textarea;
+        } else if (field.includes('date')) {
+            const input = document.createElement('input');
+            input.type = 'date';
+            input.className = 'editable-input';
+            return input;
+        } else if (field.includes('numero') || field === 'ordre') {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '1';
+            input.className = 'editable-input';
+            return input;
+        } else {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'editable-input';
+            return input;
+        }
+    }
+    
+    createSpecialInput(field, cell) {
+        // Pour les champs spéciaux définis dans la configuration
+        const config = this.specialFields[field];
+        if (config.type === 'select') {
+            const select = document.createElement('select');
+            select.className = 'editable-select form-control form-control-sm';
+            
+            config.options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option.value;
+                optionElement.textContent = option.text;
+                select.appendChild(optionElement);
+            });
+            
+            return select;
+        }
+        
+        return this.createDefaultInput(field);
+    }
+    
+    stopEditing(save) {
+        if (!this.currentEditingCell) return;
+        
+        const cell = this.currentEditingCell;
+        const input = cell.querySelector('input, textarea, select');
+        const newValue = input ? input.value.trim() : '';
+        
+        cell.classList.remove('editing');
+        
+        if (save && newValue !== this.originalValue) {
+            this.saveField(cell, newValue);
+        } else {
+            // Restaurer la valeur originale
+            this.restoreOriginalValue(cell);
+        }
+        
+        this.currentEditingCell = null;
+        this.originalValue = '';
+    }
+    
+    saveField(cell, value) {
+        const field = cell.dataset.field;
+        const row = cell.closest('tr');
+        const entityId = row.dataset.id;
+        
+        console.log(`Sauvegarde ${this.entityName}:`, { entityId, field, value });
+        
+        row.classList.add('saving');
+        
+        const url = this.updateUrl.replace('{id}', entityId);
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            row.classList.remove('saving');
+            
+            if (data.success) {
+                this.updateCellDisplay(cell, field, value);
+                this.showMessage('Modification enregistrée', 'success');
+            } else {
+                this.restoreOriginalValue(cell);
+                this.showMessage('Erreur: ' + (data.message || 'Erreur inconnue'), 'danger');
+            }
+        })
+        .catch(error => {
+            row.classList.remove('saving');
+            this.restoreOriginalValue(cell);
+            this.showMessage('Erreur de communication', 'danger');
+            console.error('Erreur:', error);
+        });
+    }
+    
+    updateCellDisplay(cell, field, value) {
+        if (field === 'description') {
+            cell.textContent = value || 'Aucune description';
+        } else {
+            cell.textContent = value;
+        }
+    }
+    
+    restoreOriginalValue(cell) {
+        const field = cell.dataset.field;
+        if (field === 'description' && !this.originalValue) {
+            cell.textContent = 'Aucune description';
+        } else {
+            cell.textContent = this.originalValue;
+        }
+    }
+    
+    handleDelete(button) {
+        const id = button.getAttribute('data-id');
+        const row = button.closest('tr');
+        const entityName = this.entityName;
+        
+        if (confirm(`Êtes-vous sûr de vouloir supprimer ce(tte) ${entityName} ?`)) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
+            
+            const url = this.deleteUrl.replace('{id}', id);
+            
+            fetch(url, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    row.classList.add('row-deleting');
+                    setTimeout(() => row.remove(), 300);
+                    this.showMessage(`${entityName} supprimé(e) avec succès`, 'success');
+                } else {
+                    this.restoreDeleteButton(button);
+                    this.showMessage('Erreur lors de la suppression : ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                this.restoreDeleteButton(button);
+                this.showMessage('Erreur lors de la suppression', 'danger');
+                console.error('Erreur:', error);
+            });
+        }
+    }
+    
+    restoreDeleteButton(button) {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
+    }
+    
+    showMessage(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const alert = document.createElement('div');
+        alert.className = `alert ${alertClass} alert-custom`;
+        alert.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span>${message}</span>
+                <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            if (alert.parentElement) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+}
+</script>

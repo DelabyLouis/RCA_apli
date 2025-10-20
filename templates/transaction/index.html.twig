@@ -1,639 +1,217 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Transaction index{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .editable-field {
-            cursor: pointer;
-            padding: 5px;
-            border: 1px solid transparent;
-            border-radius: 3px;
-            transition: all 0.2s;
-        }
-        
-        .editable-field:hover {
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-        }
-        
-        .editable-field.editing {
-            background-color: #fff;
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-        
-        /* Cellules montant non-éditables */
-        .montant-cell .montant-null {
-            color: #6c757d;
-        }
-        
-        .montant-cell.non-editable {
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        
-        .montant-cell.non-editable:hover {
-            background-color: transparent;
-            border-color: transparent;
-        }
-        
-        .editable-input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: inherit;
-            font-family: inherit;
-        }
-        
-        .montant-editor {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            width: 100%;
-        }
-        
-        .montant-input {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: inherit;
-            font-family: inherit;
-        }
-        
-        .montant-toggle {
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            padding: 2px 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        .montant-toggle:hover {
-            background: #0056b3;
-        }
-        
-        .saving {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        .alert {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-    </style>
-{% endblock %}
+{% block title %}Transactions{% endblock %}
 
 {% block body %}
-    <h1>Transaction index</h1>
+    {{ include('components/inline_edit_styles.html.twig') }}
     
-    <div id="message-container"></div>
+    <div class="container-fluid">
+        <h1 class="mb-4">Gestion des Transactions</h1>
+        
+        <div class="row mb-3">
+            <div class="col">
+                <a href="{{ path('app_transaction_new') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Nouvelle Transaction
+                </a>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Libellé</th>
+                        <th>N° Ordre</th>
+                        <th>Date</th>
+                        <th>Tiers</th>
+                        <th>Débit</th>
+                        <th>Crédit</th>
+                        <th>Solde</th>
+                        <th>Exercice</th>
+                        <th>Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in transactions_avec_solde %}
+                    {% set transaction = item.transaction %}
+                    {% set solde = item.solde %}
+                    <tr data-id="{{ transaction.idTransaction }}">
+                        <td>{{ transaction.idTransaction }}</td>
+                        <td class="editable-field" data-field="libelle">{{ transaction.libelle }}</td>
+                        <td class="editable-field" data-field="numero_ordre">{{ transaction.numeroOrdre }}</td>
+                        <td class="editable-field" data-field="date_transaction">{{ transaction.dateTransaction ? transaction.dateTransaction|date('Y-m-d') : '' }}</td>
+                        <td class="editable-field" data-field="tiers" data-current-personne="{{ transaction.personne ? transaction.personne.idPersonne : '' }}" data-current-entreprise="{{ transaction.entreprise ? transaction.entreprise.idEntreprise : '' }}">
+                            {% if transaction.personne %}
+                                <span class="badge bg-info">
+                                    <i class="fas fa-user"></i> {{ transaction.personne.prenom }} {{ transaction.personne.nom }}
+                                </span>
+                            {% elseif transaction.entreprise %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-building"></i> {{ transaction.entreprise.nomEntreprise }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="montant-cell editable-field text-end" 
+                            data-field="montant" 
+                            data-type="debit" 
+                            data-current-value="{{ transaction.montant }}">
+                            {% if transaction.montant >= 0 %}
+                                <span class="fw-bold" style="color: #198754;">{{ transaction.montant|number_format(2, ',', ' ') }} €</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="montant-cell editable-field text-end" 
+                            data-field="montant" 
+                            data-type="credit" 
+                            data-current-value="{{ transaction.montant }}">
+                            {% if transaction.montant < 0 %}
+                                <span class="fw-bold" style="color: #dc3545;">{{ (transaction.montant * -1)|number_format(2, ',', ' ') }} €</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="solde-cell text-end">
+                            {% if solde >= 0 %}
+                                <span class="text-success fw-bold">{{ solde|number_format(2, ',', ' ') }} €</span>
+                            {% else %}
+                                <span class="text-danger fw-bold">{{ solde|number_format(2, ',', ' ') }} €</span>
+                            {% endif %}
+                        </td>
+                        <td class="editable-field" data-field="exercice">{{ transaction.exercice ? transaction.exercice.libelle : '' }}</td>
+                        <td class="editable-field" data-field="type_transaction">{{ transaction.typeTransaction ? transaction.typeTransaction.libelle : '' }}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="{{ transaction.idTransaction }}" title="Supprimer">
+                                <i class="fas fa-trash me-1"></i> Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="11" class="text-center">Aucune transaction trouvée</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-    <table class="table transaction-table" data-turbo="false">
-        <thead>
-            <tr>
-                <th>Id_transaction</th>
-                <th>Libelle</th>
-                <th>Numero_ordre</th>
-                <th>Date_transaction</th>
-                <th>Tiers</th>
-                <th>Débit</th>
-                <th>Crédit</th>
-                <th>Solde</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for item in transactions_avec_solde %}
-            {% set transaction = item.transaction %}
-            {% set solde = item.solde %}
-            <tr data-id="{{ transaction.idTransaction }}">
-                <td>{{ transaction.idTransaction }}</td>
-                <td class="editable-field" data-field="libelle">{{ transaction.libelle }}</td>
-                <td class="editable-field" data-field="numero_ordre">{{ transaction.numeroOrdre }}</td>
-                <td class="editable-field" data-field="date_transaction">{{ transaction.dateTransaction ? transaction.dateTransaction|date('Y-m-d') : '' }}</td>
-                <td class="editable-field" data-field="tiers" data-current-personne="{{ transaction.personne ? transaction.personne.idPersonne : '' }}" data-current-entreprise="{{ transaction.entreprise ? transaction.entreprise.idEntreprise : '' }}">
-                    {% if transaction.personne %}
-                        <span class="badge bg-info">
-                            <i class="fas fa-user"></i> {{ transaction.personne.prenom }} {{ transaction.personne.nom }}
-                        </span>
-                    {% elseif transaction.entreprise %}
-                        <span class="badge bg-warning">
-                            <i class="fas fa-building"></i> {{ transaction.entreprise.nomEntreprise }}
-                        </span>
-                    {% else %}
-                        <span class="text-muted">-</span>
-                    {% endif %}
-                </td>
-                <td class="editable-field montant-cell" data-field="montant" data-type="debit" data-current-value="{{ transaction.montant }}">{% if transaction.montant > 0 %}<span class="montant-debit">{{ transaction.montant|number_format(2, ',', ' ') }} €</span>{% else %}<span class="montant-null">-</span>{% endif %}</td>
-                <td class="editable-field montant-cell" data-field="montant" data-type="credit" data-current-value="{{ transaction.montant }}">{% if transaction.montant < 0 %}<span class="montant-credit">{{ (transaction.montant * -1)|number_format(2, ',', ' ') }} €</span>{% else %}<span class="montant-null">-</span>{% endif %}</td>
-                <td>
-                    <span class="montant-solde {% if solde > 0 %}solde-positif{% elseif solde < 0 %}solde-negatif{% else %}solde-nul{% endif %}">
-                        {{ solde|number_format(2, ',', ' ') }} €
-                    </span>
-                </td>
-                <td>
-                    <button class="btn btn-danger btn-sm delete-btn" data-id="{{ transaction.idTransaction }}" title="Supprimer">
-                        <i class="fas fa-trash me-1"></i> Supprimer
-                    </button>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="9">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_transaction_new') }}">Create new</a>
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
+    {{ include('components/inline_editor.html.twig') }}
+    {{ include('components/montant_editor.html.twig') }}
+    
     <script>
-        console.log('SCRIPT CHARGÉ - Début');
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM LOADED - Transaction page');
+            // Données pour les champs spéciaux
+            const personnes = [
+                {% for personne in personnes %}
+                {
+                    id: {{ personne.idPersonne }},
+                    nom: "{{ personne.nom|e('js') }}",
+                    prenom: "{{ personne.prenom|e('js') }}",
+                    fullName: "{{ personne.prenom|e('js') }} {{ personne.nom|e('js') }}"
+                }{{ not loop.last ? ',' : '' }}
+                {% endfor %}
+            ];
             
-            // Test de base
-            const editableFields = document.querySelectorAll('.editable-field');
-            console.log('Nombre de champs éditables trouvés:', editableFields.length);
+            const entreprises = [
+                {% for entreprise in entreprises %}
+                {
+                    id: {{ entreprise.idEntreprise }},
+                    nom: "{{ entreprise.nomEntreprise|e('js') }}"
+                }{{ not loop.last ? ',' : '' }}
+                {% endfor %}
+            ];
             
-            const montantCells = document.querySelectorAll('.montant-cell');
-            console.log('Nombre de cellules montant trouvées:', montantCells.length);
-            let currentEditingCell = null;
-            let originalValue = '';
+            const exercices = [
+                {% for exercice in exercices %}
+                {
+                    id: {{ exercice.idExercice }},
+                    libelle: "{{ exercice.libelle|e('js') }}"
+                }{{ not loop.last ? ',' : '' }}
+                {% endfor %}
+            ];
             
-            // Test de base : clic simple sur toutes les cellules éditables
-            document.querySelectorAll('.editable-field').forEach((cell, index) => {
-                console.log(`Cell ${index}:`, cell, 'field:', cell.dataset.field, 'classes:', cell.className);
-                
-                // Marquer les cellules montant non-éditables au chargement
-                if (cell.dataset.field === 'montant') {
-                    const currentValue = parseFloat(cell.dataset.currentValue) || 0;
-                    const type = cell.dataset.type;
-                    
-                    // Une cellule montant est non-éditable si elle contient "-" ou si la valeur est du mauvais signe
-                    if ((type === 'debit' && currentValue < 0) || (type === 'credit' && currentValue >= 0)) {
-                        cell.classList.add('non-editable');
-                        console.log('Cellule marquée non-éditable:', type, 'valeur:', currentValue);
-                    }
-                }
-                
-                cell.addEventListener('click', function(e) {
-                    console.log('CLICK DÉTECTÉ sur:', this.dataset.field, 'contenu:', this.textContent.trim());
-                    
-                    // Si on clique sur un input/button à l'intérieur, ne pas traiter le clic de la cellule
-                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT') {
-                        console.log('Clic sur un élément d\'input, ignoré');
-                        return;
-                    }
-                    
-                    // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
-                    if (this.classList.contains('editing')) {
-                        console.log('Cellule déjà en cours d\'édition, clic ignoré');
-                        return;
-                    }
-                    
-                    if (this.classList.contains('non-editable')) {
-                        console.log('Cellule non-éditable, clic ignoré');
-                        return;
-                    }
-                    
-                    if (this.dataset.field === 'montant') {
-                        console.log('Montant cliqué, type:', this.dataset.type, 'valeur actuelle:', this.dataset.currentValue);
-                        startMontantEdit(this);
-                    } else {
-                        console.log('Autre champ cliqué:', this.dataset.field);
-                        startEditing(this);
-                    }
-                });
-            });
+            const typesTransaction = [
+                {% for type in types_transaction %}
+                {
+                    id: {{ type.idType }},
+                    libelle: "{{ type.libelle|e('js') }}"
+                }{{ not loop.last ? ',' : '' }}
+                {% endfor %}
+            ];
             
-            function startMontantEdit(cell) {
-                console.log('startMontantEdit appelé pour:', cell);
-                
-                const currentValue = parseFloat(cell.dataset.currentValue) || 0;
-                
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.step = 'any';  // Permet n'importe quel nombre de décimales
-                input.min = '-999999999.99';
-                input.max = '999999999.99';
-                input.style.width = '120px';
-                
-                // Afficher la valeur avec son signe (formatage intelligent)
-                let formattedValue = '0';
-                if (currentValue) {
-                    const numValue = parseFloat(currentValue);
-                    // Afficher sans décimales inutiles
-                    formattedValue = numValue % 1 === 0 ? numValue.toString() : numValue.toString();
-                }
-                input.value = formattedValue;
-                
-                const button = document.createElement('button');
-                button.style.marginLeft = '5px';
-                button.style.color = 'white';
-                button.style.border = 'none';
-                button.style.padding = '4px 12px';
-                button.style.cursor = 'pointer';
-                button.style.borderRadius = '3px';
-                
-                const updateButton = () => {
-                    const value = parseFloat(input.value) || 0;
-                    // Ne pas formater pendant la saisie, juste mettre à jour le bouton
-                    
-                    if (value >= 0) {
-                        button.textContent = 'DÉBIT';
-                        button.style.backgroundColor = '#28a745';
-                    } else {
-                        button.textContent = 'CRÉDIT';
-                        button.style.backgroundColor = '#dc3545';
-                    }
-                };
-                
-                updateButton();
-                
-                button.onclick = function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const currentVal = parseFloat(input.value) || 0;
-                    const newVal = -currentVal; // Inverser le signe
-                    
-                    // Garder le formatage de l'utilisateur si possible
-                    const inputStr = input.value.trim();
-                    if (inputStr.includes('.')) {
-                        // Si l'utilisateur a mis un point, respecter son formatage
-                        input.value = newVal.toString();
-                    } else {
-                        // Si pas de point, afficher comme entier si c'est un entier
-                        input.value = newVal % 1 === 0 ? newVal.toString() : newVal.toFixed(2);
-                    }
-                    updateButton();
-                    
-                    console.log('Toggle cliqué:', currentVal, '->', newVal);
-                    
-                    // Sauvegarder automatiquement après le toggle
-                    if (newVal !== 0) {
-                        console.log('Sauvegarde automatique du montant après toggle:', newVal);
-                        saveMontant(cell, newVal);
-                    }
-                };
-                
-                // Mettre à jour le bouton quand on tape dans l'input
-                input.oninput = function() {
-                    updateButton();
-                };
-                
-                // Pas de formatage automatique sur blur pour laisser l'utilisateur saisir librement
-                
-                cell.innerHTML = '';
-                cell.appendChild(input);
-                cell.appendChild(button);
-                
-                input.focus();
-                input.select();
-                
-                input.onblur = function() {
-                    const value = parseFloat(input.value) || 0;
-                    if (value !== 0) {
-                        console.log('Sauvegarde du montant:', value);
-                        saveMontant(cell, value);
-                    } else {
-                        restoreCell(cell);
-                    }
-                };
-                
-                input.onkeydown = function(e) {
-                    if (e.key === 'Enter') {
-                        input.blur();
-                    } else if (e.key === 'Escape') {
-                        restoreCell(cell);
-                    }
-                };
-            }
-            
-            function saveMontant(cell, value) {
-                const transactionId = cell.closest('tr').dataset.id;
-                console.log('Envoi AJAX:', transactionId, 'montant:', value);
-                
-                fetch(`/transaction/${transactionId}/update-field`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `field=montant&value=${value}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Réponse AJAX:', data);
-                    if (data.success) {
-                        // Mettre à jour les cellules de montant
-                        updateMontantCells(cell.closest('tr'), value);
-                        
-                        // Recalculer tous les soldes
-                        setTimeout(() => {
-                            recalculateAllSoldes();
-                        }, 100);
-                    } else {
-                        alert('Erreur: ' + data.message);
-                        restoreCell(cell);
-                    }
-                })
-                .catch(error => {
-                    console.error('Erreur AJAX:', error);
-                    alert('Erreur de communication');
-                    restoreCell(cell);
-                });
-            }
-            
-            function updateMontantCells(row, value) {
-                console.log('updateMontantCells appelée avec row:', row, 'value:', value);
-                console.log('Structure de la ligne:', row.outerHTML);
-                
-                const debitCell = row.querySelector('.montant-cell[data-type="debit"]');
-                const creditCell = row.querySelector('.montant-cell[data-type="credit"]');
-                const numValue = parseFloat(value);
-                
-                console.log('Cellules trouvées avec sélecteur amélioré:');
-                console.log('- Débit:', debitCell);
-                console.log('- Crédit:', creditCell);
-                console.log('Valeur numérique:', numValue);
-                
-                if (!debitCell || !creditCell) {
-                    console.error('Cellules débit/crédit non trouvées !');
-                    console.log('Toutes les cellules de la ligne:', row.querySelectorAll('td'));
-                    return;
-                }
-                
-                // TEST SIMPLE : changer juste le texte
-                console.log('Test simple de changement de contenu...');
-                
-                // Mettre à jour les data-current-value
-                debitCell.dataset.currentValue = value;
-                creditCell.dataset.currentValue = value;
-                
-                if (numValue > 0) {
-                    // Montant positif = débit
-                    console.log('Montant positif -> débit');
-                    debitCell.innerHTML = `<span class="montant-debit">${numValue.toFixed(2)} €</span>`;
-                    creditCell.innerHTML = '<span class="montant-null">-</span>';
-                    
-                    debitCell.classList.remove('non-editable');
-                    creditCell.classList.add('non-editable');
-                } else if (numValue < 0) {
-                    // Montant négatif = crédit
-                    console.log('Montant négatif -> crédit');
-                    const positiveValue = Math.abs(numValue);
-                    creditCell.innerHTML = `<span class="montant-credit">${positiveValue.toFixed(2)} €</span>`;
-                    debitCell.innerHTML = '<span class="montant-null">-</span>';
-                    
-                    creditCell.classList.remove('non-editable');
-                    debitCell.classList.add('non-editable');
-                } else {
-                    // Montant zéro (ne devrait pas arriver)
-                    console.log('Montant zéro');
-                    debitCell.innerHTML = '<span class="montant-null">-</span>';
-                    creditCell.innerHTML = '<span class="montant-null">-</span>';
-                    
-                    debitCell.classList.add('non-editable');
-                    creditCell.classList.add('non-editable');
-                }
-                
-                console.log('APRÈS MISE À JOUR:');
-                console.log('- Débit:', debitCell.innerHTML);
-                console.log('- Crédit:', creditCell.innerHTML);
-                console.log('- Classes débit:', debitCell.className);
-                console.log('- Classes crédit:', creditCell.className);
-            }
-            
-            function restoreCell(cell) {
-                console.log('Restauration de la cellule');
-                const currentValue = parseFloat(cell.dataset.currentValue) || 0;
-                updateMontantCells(cell.closest('tr'), currentValue);
-            }
-            
-            // Fonction pour recalculer tous les soldes après modification d'un montant
-            function recalculateAllSoldes() {
-                console.log('Recalcul de tous les soldes...');
-                
-                const rows = document.querySelectorAll('tbody tr');
-                let solde = 0;
-                
-                rows.forEach((row, index) => {
-                    // Récupérer le montant de cette transaction
-                    const debitCell = row.querySelector('.montant-cell[data-type="debit"]');
-                    if (debitCell) {
-                        const montant = parseFloat(debitCell.dataset.currentValue) || 0;
-                        solde += montant;
-                        
-                        // Mettre à jour l'affichage du solde
-                        const soldeCell = row.querySelector('.montant-solde');
-                        if (soldeCell) {
-                            // Formater le solde comme dans Twig (style français)
-                            const soldeAbs = Math.abs(solde);
-                            const soldeFormate = soldeAbs.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-                            
-                            soldeCell.textContent = `${soldeFormate} €`;
-                            
-                            // Mettre à jour les classes CSS selon le signe
-                            soldeCell.classList.remove('solde-positif', 'solde-negatif', 'solde-nul');
-                            if (solde > 0) {
-                                soldeCell.classList.add('solde-positif');
-                            } else if (solde < 0) {
-                                soldeCell.classList.add('solde-negatif');
-                            } else {
-                                soldeCell.classList.add('solde-nul');
-                            }
-                            
-                            console.log(`Ligne ${index + 1}: montant=${montant}, solde cumulé=${solde}`);
-                        }
-                    }
-                });
-                
-                console.log('Recalcul terminé, solde final:', solde);
-            }
-            
-            // Variables pour l'édition standard des champs
-            let currentEditingField = null;
-            let originalFieldValue = '';
-            
-            // Fonction pour l'édition standard des champs (non-montant)
-            function startEditing(cell) {
-                if (currentEditingField && currentEditingField !== cell) {
-                    stopEditing(currentEditingField, false);
-                }
-                
-                currentEditingField = cell;
-                originalFieldValue = cell.textContent.trim();
-                
-                cell.classList.add('editing');
-                
-                let input;
-                if (cell.dataset.field === 'date') {
-                    input = document.createElement('input');
-                    input.type = 'date';
-                    input.value = originalFieldValue;
-                } else if (cell.dataset.field === 'numero_ordre') {
-                    input = document.createElement('input');
-                    input.type = 'number';
-                    input.step = '1';
-                    input.min = '0';
-                    input.value = originalFieldValue;
-                } else if (cell.dataset.field === 'personne' || cell.dataset.field === 'entreprise') {
-                    // Pour les relations, on utilise un select
-                    input = document.createElement('select');
-                    // On ajoutera les options selon le type de relation
-                } else {
-                    input = document.createElement('input');
-                    input.type = 'text';
-                    input.value = originalFieldValue;
-                }
-                
-                input.className = 'editable-input';
-                cell.textContent = '';
-                cell.appendChild(input);
-                
-                input.focus();
-                if (input.type !== 'select-one') {
-                    input.select();
-                }
-                
-                input.addEventListener('blur', function() {
-                    stopEditing(cell, true);
-                });
-                
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        stopEditing(cell, true);
-                    } else if (e.key === 'Escape') {
-                        stopEditing(cell, false);
-                    }
-                });
-                
-                // Empêcher la propagation du clic sur l'input pour éviter de relancer l'édition
-                input.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
-            
-            function stopEditing(cell, save) {
-                if (!cell || !cell.querySelector('.editable-input')) return;
-                
-                const input = cell.querySelector('.editable-input');
-                const value = input.value.trim();
-                
-                cell.classList.remove('editing');
-                
-                if (save && value !== originalFieldValue) {
-                    // Sauvegarder la modification
-                    saveField(cell, cell.dataset.field, value);
-                } else {
-                    // Restaurer la valeur originale
-                    cell.textContent = originalFieldValue;
-                }
-                
-                currentEditingField = null;
-                originalFieldValue = '';
-            }
-            
-            function saveField(cell, field, value) {
-                const row = cell.closest('tr');
-                const transactionId = row.dataset.id;
-                
-                row.classList.add('saving');
-                
-                fetch(`/transaction/${transactionId}/update-field`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+            // Configuration de l'éditeur pour les transactions avec gestion avancée des montants
+            const editor = new MontantEditor({
+                entityName: 'transaction',
+                entityIdField: 'idTransaction',
+                updateUrl: '/transaction/{id}/update-field',
+                deleteUrl: '/transaction/{id}/delete-ajax',
+                specialFields: {
+                    tiers: {
+                        type: 'select',
+                        options: [
+                            { value: '', text: 'Aucun tiers' },
+                            ...personnes.map(p => ({ 
+                                value: `personne_${p.id}`, 
+                                text: `👤 ${p.fullName}` 
+                            })),
+                            ...entreprises.map(e => ({ 
+                                value: `entreprise_${e.id}`, 
+                                text: `🏢 ${e.nom}` 
+                            }))
+                        ]
                     },
-                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    row.classList.remove('saving');
-                    
-                    if (data.success) {
-                        cell.textContent = value || '';
-                    } else {
-                        cell.textContent = originalFieldValue;
-                        alert('Erreur: ' + (data.message || 'Erreur inconnue'));
+                    exercice: {
+                        type: 'select',
+                        options: [
+                            { value: '', text: 'Sélectionner un exercice' },
+                            ...exercices.map(ex => ({ 
+                                value: ex.id, 
+                                text: ex.libelle 
+                            }))
+                        ]
+                    },
+                    type_transaction: {
+                        type: 'select',
+                        options: [
+                            { value: '', text: 'Sélectionner un type' },
+                            ...typesTransaction.map(type => ({ 
+                                value: type.id, 
+                                text: type.libelle 
+                            }))
+                        ]
                     }
-                })
-                .catch(error => {
-                    row.classList.remove('saving');
-                    cell.textContent = originalFieldValue;
-                    alert('Erreur de communication');
-                });
-            }
-        });
-
-        // Gestion de la suppression
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.stopPropagation();
-                
-                const id = this.getAttribute('data-id');
-                const row = this.closest('tr');
-                
-                if (confirm('Êtes-vous sûr de vouloir supprimer cette transaction ?')) {
-                    // Désactiver le bouton pendant la suppression
-                    this.disabled = true;
-                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
+                },
+                soldeCalculationCallback: function() {
+                    // Recalculer tous les soldes après modification d'un montant
+                    const rows = document.querySelectorAll('tbody tr[data-id]');
+                    let cumulativeSolde = 0;
                     
-                    fetch(`/transaction/${id}/delete-ajax`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
+                    rows.forEach(row => {
+                        const debitCell = row.querySelector('[data-type="debit"]');
+                        if (debitCell) {
+                            const montant = parseFloat(debitCell.dataset.currentValue) || 0;
+                            cumulativeSolde += montant;
+                            
+                            const soldeCell = row.querySelector('.solde-cell');
+                            if (soldeCell) {
+                                const colorClass = cumulativeSolde >= 0 ? 'text-success' : 'text-danger';
+                                const formattedSolde = new Intl.NumberFormat('fr-FR', {
+                                    style: 'currency',
+                                    currency: 'EUR'
+                                }).format(cumulativeSolde);
+                                soldeCell.innerHTML = `<span class="${colorClass} fw-bold">${formattedSolde}</span>`;
+                            }
                         }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Supprimer la ligne du tableau avec animation
-                            row.style.transition = 'opacity 0.3s';
-                            row.style.opacity = '0';
-                            setTimeout(() => {
-                                row.remove();
-                                // Recalculer les soldes après suppression
-                                recalculateAllSoldes();
-                            }, 300);
-                        } else {
-                            alert('Erreur lors de la suppression : ' + data.message);
-                            // Restaurer le bouton
-                            this.disabled = false;
-                            this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erreur:', error);
-                        alert('Erreur lors de la suppression');
-                        // Restaurer le bouton
-                        this.disabled = false;
-                        this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
                     });
                 }
             });
+            
+            console.log('Transaction MontantEditor initialisé avec gestion débit/crédit');
         });
     </script>
 {% endblock %}

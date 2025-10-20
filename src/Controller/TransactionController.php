@@ -229,6 +229,35 @@ final class TransactionController extends AbstractController
                     $transaction->setTypeTransaction($typeTransaction);
                     break;
                     
+                case 'tiers':
+                    // Gestion du champ tiers combiné (personne ou entreprise)
+                    if (empty($value)) {
+                        // Aucun tiers sélectionné
+                        $transaction->setPersonne(null);
+                        $transaction->setEntreprise(null);
+                    } elseif (strpos($value, 'personne_') === 0) {
+                        // Tiers de type personne
+                        $personneId = intval(substr($value, 9)); // Enlever "personne_"
+                        $personne = $personneRepository->findOneBy(['id_personne' => $personneId]);
+                        if (!$personne) {
+                            return new JsonResponse(['success' => false, 'message' => 'Personne non trouvée'], 400);
+                        }
+                        $transaction->setPersonne($personne);
+                        $transaction->setEntreprise(null); // Une transaction ne peut avoir qu'un seul tiers
+                    } elseif (strpos($value, 'entreprise_') === 0) {
+                        // Tiers de type entreprise
+                        $entrepriseId = intval(substr($value, 11)); // Enlever "entreprise_"
+                        $entreprise = $entrepriseRepository->findOneBy(['id_entreprise' => $entrepriseId]);
+                        if (!$entreprise) {
+                            return new JsonResponse(['success' => false, 'message' => 'Entreprise non trouvée'], 400);
+                        }
+                        $transaction->setEntreprise($entreprise);
+                        $transaction->setPersonne(null); // Une transaction ne peut avoir qu'un seul tiers
+                    } else {
+                        return new JsonResponse(['success' => false, 'message' => 'Format de tiers invalide'], 400);
+                    }
+                    break;
+                    
                 default:
                     return new JsonResponse(['success' => false, 'message' => 'Champ non autorisé'], 400);
             }

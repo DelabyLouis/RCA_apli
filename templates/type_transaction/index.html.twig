@@ -1,319 +1,70 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}TypeTransaction index{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .editable-field {
-            cursor: pointer;
-            padding: 5px;
-            border: 1px solid transparent;
-            border-radius: 3px;
-            transition: all 0.2s;
-        }
-        
-        .editable-field:hover {
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-        }
-        
-        .editable-field.editing {
-            background-color: #fff;
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-        
-        .editable-input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: inherit;
-            font-family: inherit;
-        }
-        
-        .editable-textarea {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: inherit;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 20px;
-        }
-        
-        .saving {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        .alert {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-    </style>
-{% endblock %}
+{% block title %}Types de Transaction{% endblock %}
 
 {% block body %}
-    <h1>TypeTransaction index</h1>
+    {{ include('components/inline_edit_styles.html.twig') }}
     
-    <div id="message-container"></div>
+    <div class="container-fluid">
+        <h1 class="mb-4">Gestion des Types de Transaction</h1>
+        
+        <div class="row mb-3">
+            <div class="col">
+                <a href="{{ path('app_type_transaction_new') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Nouveau Type
+                </a>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Libellé</th>
+                        <th>Description</th>
+                        <th>Nb Transactions</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for type_transaction in type_transactions %}
+                    <tr data-id="{{ type_transaction.idType }}">
+                        <td>{{ type_transaction.idType }}</td>
+                        <td class="editable-field" data-field="libelle">{{ type_transaction.libelle }}</td>
+                        <td class="editable-field" data-field="description">{{ type_transaction.description ?: 'Aucune description' }}</td>
+                        <td>
+                            <span class="badge bg-info">{{ type_transaction.transactions|length }}</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="{{ type_transaction.idType }}" title="Supprimer">
+                                <i class="fas fa-trash me-1"></i> Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Aucun type de transaction trouvé</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-    <table class="table" data-turbo="false">
-        <thead>
-            <tr>
-                <th>Id type</th>
-                <th>Libelle</th>
-                <th>Description</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for type_transaction in type_transactions %}
-            <tr data-id="{{ type_transaction.idType }}">
-                <td>{{ type_transaction.idType }}</td>
-                <td class="editable-field" data-field="libelle">{{ type_transaction.libelle }}</td>
-                <td class="editable-field" data-field="description">{{ type_transaction.description ?? 'Aucune description' }}</td>
-                <td>
-                    <button class="btn btn-danger btn-sm delete-btn" data-id="{{ type_transaction.idType }}" title="Supprimer">
-                        <i class="fas fa-trash me-1"></i> Supprimer
-                    </button>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="3">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_type_transaction_new') }}">Create new</a>
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
+    {{ include('components/inline_editor.html.twig') }}
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            let currentEditingCell = null;
-            let originalValue = '';
-            
-            // Fonction pour afficher les messages
-            function showMessage(message, type) {
-                const container = document.getElementById('message-container');
-                const alert = document.createElement('div');
-                alert.className = `alert alert-${type}`;
-                alert.textContent = message;
-                container.appendChild(alert);
-                
-                // Supprimer le message après 3 secondes
-                setTimeout(() => {
-                    alert.remove();
-                }, 3000);
-            }
-            
-            // Fonction pour sauvegarder la modification
-            function saveField(cell, field, value, typeId) {
-                const row = cell.closest('tr');
-                row.classList.add('saving');
-                
-                fetch(`/typetransaction/${typeId}/update-field`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    row.classList.remove('saving');
-                    
-                    if (data.success) {
-                        cell.textContent = value || (field === 'description' ? 'Aucune description' : '');
-                    } else {
-                        // Restaurer la valeur originale en cas d'erreur
-                        cell.textContent = originalValue;
-                        showMessage(data.message, 'danger');
-                    }
-                })
-                .catch(error => {
-                    row.classList.remove('saving');
-                    cell.textContent = originalValue;
-                    showMessage('Erreur de communication avec le serveur', 'danger');
-                    console.error('Error:', error);
-                });
-            }
-            
-            // Fonction pour entrer en mode édition
-            function startEditing(cell) {
-                if (currentEditingCell && currentEditingCell !== cell) {
-                    stopEditing(currentEditingCell, false); // Annuler l'édition précédente
-                }
-                
-                currentEditingCell = cell;
-                originalValue = cell.textContent;
-                
-                // Nettoyer la valeur pour l'édition
-                let editValue = originalValue;
-                if (cell.dataset.field === 'description' && originalValue === 'Aucune description') {
-                    editValue = '';
-                }
-                
-                cell.classList.add('editing');
-                
-                let input;
-                if (cell.dataset.field === 'description') {
-                    input = document.createElement('textarea');
-                    input.className = 'editable-textarea';
-                    input.rows = 2;
-                } else {
-                    input = document.createElement('input');
-                    input.className = 'editable-input';
-                    input.type = 'text';
-                }
-                
-                input.value = editValue;
-                cell.textContent = '';
-                cell.appendChild(input);
-                
-                input.focus();
-                if (input.type === 'text') {
-                    input.select();
-                }
-                
-                // Gérer les événements
-                input.addEventListener('blur', function() {
-                    stopEditing(cell, true);
-                });
-                
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        stopEditing(cell, true);
-                    } else if (e.key === 'Escape') {
-                        e.preventDefault();
-                        stopEditing(cell, false);
-                    }
-                });
-                
-                // Empêcher la propagation du clic sur l'input pour éviter de relancer l'édition
-                input.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
-            
-            // Fonction pour sortir du mode édition
-            function stopEditing(cell, save) {
-                if (!cell || !cell.classList.contains('editing')) return;
-                
-                const input = cell.querySelector('input, textarea');
-                const newValue = input ? input.value.trim() : '';
-                
-                cell.classList.remove('editing');
-                
-                if (save && newValue !== originalValue.replace('Aucune description', '')) {
-                    const field = cell.dataset.field;
-                    const typeId = cell.closest('tr').dataset.id;
-                    
-                    // Validation côté client
-                    if (field === 'libelle' && !newValue) {
-                        showMessage('Le libellé ne peut pas être vide', 'danger');
-                        cell.textContent = originalValue;
-                    } else {
-                        saveField(cell, field, newValue, typeId);
-                    }
-                } else {
-                    // Restaurer la valeur originale
-                    cell.textContent = originalValue;
-                }
-                
-                currentEditingCell = null;
-            }
-            
-            // Ajouter les événements de clic sur les cellules éditables
-            document.querySelectorAll('.editable-field').forEach(cell => {
-                cell.addEventListener('click', function(e) {
-                    // Si on clique sur un input/textarea à l'intérieur, ne pas traiter le clic de la cellule
-                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-                        return;
-                    }
-                    
-                    // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
-                    if (this.classList.contains('editing')) {
-                        return;
-                    }
-                    
-                    startEditing(this);
-                });
+            // Configuration de l'éditeur pour les types de transaction
+            const editor = new InlineEditor({
+                entityName: 'type de transaction',
+                entityIdField: 'idType',
+                updateUrl: '/typetransaction/{id}/update-field',
+                deleteUrl: '/typetransaction/{id}/delete-ajax'
             });
             
-            // Annuler l'édition si on clique ailleurs
-            document.addEventListener('click', function(e) {
-                if (currentEditingCell && !currentEditingCell.contains(e.target)) {
-                    stopEditing(currentEditingCell, false);
-                }
-            });
-
-            // Gestion de la suppression
-            document.querySelectorAll('.delete-btn').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    
-                    const id = this.getAttribute('data-id');
-                    const row = this.closest('tr');
-                    
-                    if (confirm('Êtes-vous sûr de vouloir supprimer ce type de transaction ?')) {
-                        // Désactiver le bouton pendant la suppression
-                        this.disabled = true;
-                        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
-                        
-                        fetch(`/typetransaction/${id}/delete-ajax`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Supprimer la ligne du tableau avec animation
-                                row.style.transition = 'opacity 0.3s';
-                                row.style.opacity = '0';
-                                setTimeout(() => {
-                                    row.remove();
-                                }, 300);
-                            } else {
-                                alert('Erreur lors de la suppression : ' + data.message);
-                                // Restaurer le bouton
-                                this.disabled = false;
-                                this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erreur:', error);
-                            alert('Erreur lors de la suppression');
-                            // Restaurer le bouton
-                            this.disabled = false;
-                            this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
-                        });
-                    }
-                });
-            });
+            console.log('TypeTransaction InlineEditor initialisé');
         });
     </script>
 {% endblock %}

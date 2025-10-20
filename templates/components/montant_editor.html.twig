@@ -1,0 +1,263 @@
+<script>
+/**
+ * Extension de InlineEditor pour la gestion avancée des montants débit/crédit
+ */
+class MontantEditor extends InlineEditor {
+    constructor(config) {
+        super(config);
+        this.soldeCalculationCallback = config.soldeCalculationCallback;
+    }
+    
+    handleClick(e) {
+        // Gestion spéciale pour les cellules de montant
+        const montantCell = e.target.closest('.montant-cell');
+        if (montantCell) {
+            e.stopPropagation();
+            
+            // Vérifier si la cellule contient "-" (pas éditable)
+            if (montantCell.textContent.trim() === '-') {
+                return; // Ne rien faire si c'est juste un "-"
+            }
+            
+            // Vérifier si on peut éditer cette cellule
+            const currentValue = parseFloat(montantCell.dataset.currentValue) || 0;
+            const type = montantCell.dataset.type; // 'debit' ou 'credit'
+            
+            // Ne permettre l'édition que si :
+            // - C'est un débit et la valeur est positive 
+            // - C'est un crédit et la valeur est négative
+            const canEdit = (type === 'debit' && currentValue >= 0) || 
+                           (type === 'credit' && currentValue < 0);
+            
+            if (canEdit) {
+                this.handleMontantClick(montantCell);
+            }
+            return;
+        }
+        
+        // Déléguer au parent pour les autres cas
+        super.handleClick(e);
+    }
+    
+    handleMontantClick(cell) {
+        if (this.currentEditingCell) {
+            this.stopEditing(false);
+        }
+        
+        this.currentEditingCell = cell;
+        const currentValue = parseFloat(cell.dataset.currentValue) || 0;
+        const type = cell.dataset.type; // 'debit' ou 'credit'
+        
+        // Si la cellule contient "-", c'est une nouvelle saisie
+        if (cell.textContent.trim() === '-') {
+            this.createMontantEditor(cell, 0, type);
+        } else {
+            // Éditer le montant existant
+            const displayValue = Math.abs(currentValue);
+            this.createMontantEditor(cell, displayValue, type);
+        }
+    }
+    
+    createMontantEditor(cell, value, type) {
+        this.originalValue = cell.textContent.trim();
+        
+        const container = document.createElement('div');
+        container.className = 'montant-editor';
+        container.style.cssText = `
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            padding: 4px;
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            min-width: 200px;
+        `;
+        
+        // Input pour le montant
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.step = '0.01';
+        input.min = '0';
+        input.value = value > 0 ? value.toString() : '';
+        input.placeholder = '0.00';
+        input.style.cssText = `
+            flex: 1;
+            border: 1px solid #ced4da; 
+            outline: none; 
+            text-align: right;
+            padding: 4px 8px;
+            border-radius: 4px;
+        `;
+        
+        // Bouton pour changer débit/crédit
+        const switchBtn = document.createElement('button');
+        switchBtn.type = 'button';
+        switchBtn.className = `btn btn-sm ${type === 'debit' ? 'btn-success' : 'btn-danger'}`;
+        switchBtn.innerHTML = type === 'debit' ? 'DÉB' : 'CRÉ';
+        switchBtn.style.cssText = 'font-size: 11px; padding: 4px 8px; min-width: 45px;';
+        switchBtn.title = `Changer en ${type === 'debit' ? 'crédit' : 'débit'}`;
+        
+        container.appendChild(input);
+        container.appendChild(switchBtn);
+        
+        // Événements
+        let currentType = type;
+        
+        switchBtn.addEventListener('click', () => {
+            currentType = currentType === 'debit' ? 'credit' : 'debit';
+            switchBtn.className = `btn btn-sm ${currentType === 'debit' ? 'btn-success' : 'btn-danger'}`;
+            switchBtn.innerHTML = currentType === 'debit' ? 'DÉB' : 'CRÉ';
+            switchBtn.title = `Changer en ${currentType === 'debit' ? 'crédit' : 'débit'}`;
+        });
+
+        const finishEditing = (save) => {
+            if (save && input.value && parseFloat(input.value) > 0) {
+                const montant = parseFloat(input.value);
+                const finalValue = currentType === 'debit' ? montant : -montant;
+                this.saveMontant(cell, finalValue);
+            } else {
+                this.restoreOriginalValue(cell);
+                this.currentEditingCell = null;
+            }
+        };
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                finishEditing(true);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                finishEditing(false);
+            }
+        });
+        
+        // Sauvegarder automatiquement si on perd le focus
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (!container.contains(document.activeElement)) {
+                    finishEditing(true);
+                }
+            }, 100);
+        });
+
+        // Remplacer le contenu de la cellule
+        cell.classList.add('editing');
+        cell.innerHTML = '';
+        cell.appendChild(container);
+        
+        input.focus();
+        if (value > 0) input.select();
+    }
+    
+    saveMontant(cell, finalValue) {
+        const row = cell.closest('tr');
+        const entityId = row.dataset.id;
+        
+        console.log(`Sauvegarde montant ${this.entityName}:`, { entityId, montant: finalValue });
+        
+        row.classList.add('saving');
+        
+        const url = this.updateUrl.replace('{id}', entityId);
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `field=montant&value=${encodeURIComponent(finalValue)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            row.classList.remove('saving');
+            
+            if (data.success) {
+                this.updateMontantDisplay(row, finalValue);
+                this.showMessage('Montant modifié avec succès', 'success');
+                
+                // Recalculer les soldes si callback fourni
+                if (this.soldeCalculationCallback) {
+                    setTimeout(() => this.soldeCalculationCallback(), 100);
+                }
+            } else {
+                this.restoreOriginalValue(cell);
+                this.showMessage('Erreur: ' + (data.message || 'Erreur inconnue'), 'danger');
+            }
+            
+            this.currentEditingCell = null;
+        })
+        .catch(error => {
+            row.classList.remove('saving');
+            this.restoreOriginalValue(cell);
+            this.showMessage('Erreur de communication', 'danger');
+            console.error('Erreur:', error);
+            this.currentEditingCell = null;
+        });
+    }
+    
+    updateMontantDisplay(row, montant) {
+        const debitCell = row.querySelector('.montant-cell[data-type="debit"]');
+        const creditCell = row.querySelector('.montant-cell[data-type="credit"]');
+        
+        // Mettre à jour les données
+        debitCell.dataset.currentValue = montant;
+        creditCell.dataset.currentValue = montant;
+        
+        // Formatter et afficher
+        const formattedValue = Math.abs(montant).toLocaleString('fr-FR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + ' €';
+        
+        if (montant >= 0) {
+            // Montant positif = débit (vert foncé)
+            debitCell.innerHTML = `<span class="fw-bold" style="color: #198754;">${formattedValue}</span>`;
+            creditCell.innerHTML = '<span class="text-muted">-</span>';
+        } else {
+            // Montant négatif = crédit (rouge)
+            debitCell.innerHTML = '<span class="text-muted">-</span>';
+            creditCell.innerHTML = `<span class="fw-bold" style="color: #dc3545;">${formattedValue}</span>`;
+        }
+        
+        debitCell.classList.remove('editing');
+        creditCell.classList.remove('editing');
+    }
+    
+    restoreOriginalValue(cell) {
+        cell.classList.remove('editing');
+        cell.innerHTML = this.originalValue;
+    }
+}
+
+/**
+ * Fonction utilitaire pour recalculer tous les soldes d'un tableau de transactions
+ */
+function recalculateAllSoldes() {
+    const rows = document.querySelectorAll('tbody tr[data-id]');
+    let solde = 0;
+    
+    rows.forEach(row => {
+        const montantCell = row.querySelector('.montant-cell[data-current-value]');
+        if (montantCell) {
+            const montant = parseFloat(montantCell.dataset.currentValue) || 0;
+            solde += montant;
+            
+            const soldeCell = row.querySelector('.solde-cell');
+            if (soldeCell) {
+                const formattedSolde = solde.toLocaleString('fr-FR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }) + ' €';
+                
+                if (solde >= 0) {
+                    soldeCell.innerHTML = `<span class="text-success fw-bold">${formattedSolde}</span>`;
+                } else {
+                    soldeCell.innerHTML = `<span class="text-danger fw-bold">${formattedSolde}</span>`;
+                }
+            }
+        }
+    });
+    
+    console.log('Soldes recalculés, solde final:', solde);
+}
+</script>

@@ -1,0 +1,190 @@
+<style>
+    /* Styles spéciaux pour les montants débit/crédit */
+.montant-cell {
+    position: relative;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.montant-cell:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Seules les cellules avec des montants affichés sont réellement cliquables */
+.montant-cell:has(.fw-bold) {
+    cursor: pointer;
+}
+
+.montant-cell:has(.text-muted) {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.montant-cell:has(.text-muted):hover {
+    background-color: transparent;
+}
+
+.montant-cell.editing {
+    background-color: rgba(255, 193, 7, 0.1);
+    border: 2px solid #ffc107;
+}
+
+.montant-editor {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    min-width: 180px;
+    padding: 4px;
+    background: white;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+}
+
+.montant-editor input {
+    flex: 1;
+    min-width: 80px;
+    padding: 4px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-align: right;
+}
+
+.montant-editor input:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.montant-editor .btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    white-space: nowrap;
+    min-width: 45px;
+}
+
+.montant-editor .btn:hover {
+    transform: scale(1.05);
+}
+
+/* Animation pour le changement de type débit/crédit */
+.montant-type-changing {
+    animation: typeChange 0.3s ease-in-out;
+}
+
+@keyframes typeChange {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); background-color: rgba(255, 193, 7, 0.3); }
+    100% { transform: scale(1); }
+}
+
+/* Couleurs pour les soldes */
+.solde-positif {
+    color: #198754 !important;
+    font-weight: bold;
+}
+
+.solde-negatif {
+    color: #dc3545 !important;
+    font-weight: bold;
+}
+
+/* Indicateur de recalcul en cours */
+.solde-recalculating {
+    opacity: 0.6;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+    .editable-field {
+        cursor: pointer;
+        position: relative;
+        padding: 4px 8px;
+        min-height: 20px;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        transition: background-color 0.2s;
+    }
+    
+    .editable-field:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+    
+    .editable-field.editing {
+        background-color: #fff;
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .editable-field .editable-input,
+    .editable-field .editable-textarea {
+        width: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: inherit;
+        font-family: inherit;
+        padding: 0;
+        margin: 0;
+        resize: vertical;
+        min-height: 20px;
+    }
+    
+    .editable-field .editable-select {
+        width: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: inherit;
+        font-family: inherit;
+        padding: 0;
+        margin: 0;
+    }
+    
+    /* Animation de sauvegarde */
+    tr.saving {
+        opacity: 0.7;
+        background-color: #fff3cd;
+    }
+    
+    /* Messages de feedback */
+    .alert-custom {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+        min-width: 300px;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* Styles pour les boutons de suppression */
+    .delete-btn {
+        transition: all 0.2s ease;
+    }
+    
+    .delete-btn:hover {
+        transform: scale(1.05);
+    }
+    
+    .delete-btn:disabled {
+        transform: none;
+        opacity: 0.7;
+    }
+    
+    /* Animation de suppression de ligne */
+    .row-deleting {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+</style>

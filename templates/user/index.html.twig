@@ -31,6 +31,18 @@
             background: transparent;
             font-size: inherit;
             font-family: inherit;
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* Masquer les rectangles blancs indésirables */
+        .editable-field input,
+        .editable-field textarea,
+        .editable-field select {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
         }
         
         .saving {
@@ -299,20 +311,21 @@
                 }
             }
             
-            document.querySelectorAll('.editable-field').forEach(cell => {
-                cell.addEventListener('click', function(e) {
-                    // Si on clique sur un input/select à l'intérieur, ne pas traiter le clic de la cellule
-                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
-                        return;
-                    }
-                    
-                    // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
-                    if (this.classList.contains('editing')) {
-                        return;
-                    }
-                    
-                    startEditing(this);
-                });
+            // Délégation d'événements pour les cellules éditables - plus robuste  
+            document.addEventListener('click', function(e) {
+                const cell = e.target.closest('.editable-field');
+                if (!cell) return;
+                // Si on clique sur un input/select à l'intérieur, ne pas traiter le clic de la cellule
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+                    return;
+                }
+                
+                // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
+                if (cell.classList.contains('editing')) {
+                    return;
+                }
+                
+                startEditing(cell);
             });
             
             document.addEventListener('click', function(e) {
@@ -321,18 +334,20 @@
                 }
             });
 
-            // Gestion de la suppression
-            document.querySelectorAll('.delete-btn').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    
-                    const id = this.getAttribute('data-id');
-                    const row = this.closest('tr');
-                    
-                    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-                        // Désactiver le bouton pendant la suppression
-                        this.disabled = true;
-                        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
+            // Délégation d'événements pour les boutons de suppression
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.delete-btn')) return;
+                
+                const button = e.target.closest('.delete-btn');
+                e.stopPropagation();
+                
+                const id = button.getAttribute('data-id');
+                const row = button.closest('tr');
+                
+                if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                    // Désactiver le bouton pendant la suppression
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
                         
                         fetch(`/user/${id}/delete-ajax`, {
                             method: 'DELETE',
@@ -352,19 +367,18 @@
                             } else {
                                 alert('Erreur lors de la suppression : ' + data.message);
                                 // Restaurer le bouton
-                                this.disabled = false;
-                                this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
+                                button.disabled = false;
+                                button.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
                             }
                         })
                         .catch(error => {
                             console.error('Erreur:', error);
                             alert('Erreur lors de la suppression');
                             // Restaurer le bouton
-                            this.disabled = false;
-                            this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
-                        });
-                    }
-                });
+                            button.disabled = false;
+                            button.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
+                    });
+                }
             });
         });
     </script>
