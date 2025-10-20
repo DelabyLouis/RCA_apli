@@ -202,6 +202,18 @@
                 cell.addEventListener('click', function(e) {
                     console.log('CLICK DÉTECTÉ sur:', this.dataset.field, 'contenu:', this.textContent.trim());
                     
+                    // Si on clique sur un input/button à l'intérieur, ne pas traiter le clic de la cellule
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT') {
+                        console.log('Clic sur un élément d\'input, ignoré');
+                        return;
+                    }
+                    
+                    // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
+                    if (this.classList.contains('editing')) {
+                        console.log('Cellule déjà en cours d\'édition, clic ignoré');
+                        return;
+                    }
+                    
                     if (this.classList.contains('non-editable')) {
                         console.log('Cellule non-éditable, clic ignoré');
                         return;
@@ -212,8 +224,7 @@
                         startMontantEdit(this);
                     } else {
                         console.log('Autre champ cliqué:', this.dataset.field);
-                        // Pour l'instant, juste un test
-                        alert('Clic détecté sur: ' + this.dataset.field);
+                        startEditing(this);
                     }
                 });
             });
@@ -395,6 +406,118 @@
                 console.log('Restauration de la cellule');
                 const currentValue = parseFloat(cell.dataset.currentValue) || 0;
                 updateMontantCells(cell.closest('tr'), currentValue);
+            }
+            
+            // Variables pour l'édition standard des champs
+            let currentEditingField = null;
+            let originalFieldValue = '';
+            
+            // Fonction pour l'édition standard des champs (non-montant)
+            function startEditing(cell) {
+                if (currentEditingField && currentEditingField !== cell) {
+                    stopEditing(currentEditingField, false);
+                }
+                
+                currentEditingField = cell;
+                originalFieldValue = cell.textContent.trim();
+                
+                cell.classList.add('editing');
+                
+                let input;
+                if (cell.dataset.field === 'date') {
+                    input = document.createElement('input');
+                    input.type = 'date';
+                    input.value = originalFieldValue;
+                } else if (cell.dataset.field === 'numero_ordre') {
+                    input = document.createElement('input');
+                    input.type = 'number';
+                    input.value = originalFieldValue;
+                } else if (cell.dataset.field === 'personne' || cell.dataset.field === 'entreprise') {
+                    // Pour les relations, on utilise un select
+                    input = document.createElement('select');
+                    // On ajoutera les options selon le type de relation
+                } else {
+                    input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = originalFieldValue;
+                }
+                
+                input.className = 'editable-input';
+                cell.textContent = '';
+                cell.appendChild(input);
+                
+                input.focus();
+                if (input.type !== 'select-one') {
+                    input.select();
+                }
+                
+                input.addEventListener('blur', function() {
+                    stopEditing(cell, true);
+                });
+                
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        stopEditing(cell, true);
+                    } else if (e.key === 'Escape') {
+                        stopEditing(cell, false);
+                    }
+                });
+                
+                // Empêcher la propagation du clic sur l'input pour éviter de relancer l'édition
+                input.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+            
+            function stopEditing(cell, save) {
+                if (!cell || !cell.querySelector('.editable-input')) return;
+                
+                const input = cell.querySelector('.editable-input');
+                const value = input.value.trim();
+                
+                cell.classList.remove('editing');
+                
+                if (save && value !== originalFieldValue) {
+                    // Sauvegarder la modification
+                    saveField(cell, cell.dataset.field, value);
+                } else {
+                    // Restaurer la valeur originale
+                    cell.textContent = originalFieldValue;
+                }
+                
+                currentEditingField = null;
+                originalFieldValue = '';
+            }
+            
+            function saveField(cell, field, value) {
+                const row = cell.closest('tr');
+                const transactionId = row.dataset.id;
+                
+                row.classList.add('saving');
+                
+                fetch(`/transaction/${transactionId}/update-field`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    row.classList.remove('saving');
+                    
+                    if (data.success) {
+                        cell.textContent = value || '';
+                    } else {
+                        cell.textContent = originalFieldValue;
+                        alert('Erreur: ' + (data.message || 'Erreur inconnue'));
+                    }
+                })
+                .catch(error => {
+                    row.classList.remove('saving');
+                    cell.textContent = originalFieldValue;
+                    alert('Erreur de communication');
+                });
             }
         });
     </script>
