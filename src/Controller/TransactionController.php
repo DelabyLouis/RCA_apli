@@ -235,8 +235,29 @@ final class TransactionController extends AbstractController
 
             $entityManager->flush();
             
-            return new JsonResponse(['success' => true]);        } catch (\Exception $e) {
+            return new JsonResponse(['success' => true]);
+        } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la modification : ' . $e->getMessage()], 500);
+        }
+    }
+
+    #[Route('/{id_transaction}/delete-ajax', name: 'app_transaction_delete_ajax', methods: ['DELETE'])]
+    public function deleteAjax(int $id_transaction, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $transaction = $transactionRepository->findOneBy(['id_transaction' => $id_transaction]);
+        
+        if (!$transaction) {
+            return new JsonResponse(['success' => false, 'message' => 'Transaction non trouvée'], 404);
+        }
+
+        try {
+            $entityManager->remove($transaction);
+            $entityManager->flush();
+            
+            return new JsonResponse(['success' => true, 'message' => 'Transaction supprimée avec succès']);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
         }
     }
 }

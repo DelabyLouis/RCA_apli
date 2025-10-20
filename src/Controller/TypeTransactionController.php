@@ -132,4 +132,24 @@ final class TypeTransactionController extends AbstractController
             return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
         }
     }
+
+    #[Route('/{id_type}/delete-ajax', name: 'app_type_transaction_delete_ajax', methods: ['DELETE'])]
+    public function deleteAjax(int $id_type, TypeTransactionRepository $typeTransactionRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $typeTransaction = $typeTransactionRepository->findOneBy(['id_type' => $id_type]);
+        
+        if (!$typeTransaction) {
+            return new JsonResponse(['success' => false, 'message' => 'Type de transaction non trouvé'], 404);
+        }
+
+        try {
+            $entityManager->remove($typeTransaction);
+            $entityManager->flush();
+            
+            return new JsonResponse(['success' => true, 'message' => 'Type de transaction supprimé avec succès']);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
+        }
+    }
 }

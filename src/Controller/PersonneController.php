@@ -158,8 +158,29 @@ final class PersonneController extends AbstractController
 
             $entityManager->flush();
             
-            return new JsonResponse(['success' => true]);        } catch (\Exception $e) {
+            return new JsonResponse(['success' => true]);
+        } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
+        }
+    }
+
+    #[Route('/{id_personne}/delete-ajax', name: 'app_personne_delete_ajax', methods: ['DELETE'])]
+    public function deleteAjax(int $id_personne, PersonneRepository $personneRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $personne = $personneRepository->findOneBy(['id_personne' => $id_personne]);
+        
+        if (!$personne) {
+            return new JsonResponse(['success' => false, 'message' => 'Personne non trouvée'], 404);
+        }
+
+        try {
+            $entityManager->remove($personne);
+            $entityManager->flush();
+            
+            return new JsonResponse(['success' => true, 'message' => 'Personne supprimée avec succès']);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
         }
     }
 }

@@ -205,8 +205,29 @@ final class ExerciceController extends AbstractController
 
             $entityManager->flush();
             
-            return new JsonResponse(['success' => true]);        } catch (\Exception $e) {
+            return new JsonResponse(['success' => true]);
+        } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
+        }
+    }
+
+    #[Route('/{id_exercice}/delete-ajax', name: 'app_exercice_delete_ajax', methods: ['DELETE'])]
+    public function deleteAjax(int $id_exercice, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $exercice = $exerciceRepository->findOneBy(['id_exercice' => $id_exercice]);
+        
+        if (!$exercice) {
+            return new JsonResponse(['success' => false, 'message' => 'Exercice non trouvé'], 404);
+        }
+
+        try {
+            $entityManager->remove($exercice);
+            $entityManager->flush();
+            
+            return new JsonResponse(['success' => true, 'message' => 'Exercice supprimé avec succès']);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
         }
     }
 }

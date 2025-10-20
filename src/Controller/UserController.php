@@ -144,8 +144,29 @@ final class UserController extends AbstractController
 
             $entityManager->flush();
             
-            return new JsonResponse(['success' => true]);        } catch (\Exception $e) {
+            return new JsonResponse(['success' => true]);
+        } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
+        }
+    }
+
+    #[Route('/{id_user}/delete-ajax', name: 'app_user_delete_ajax', methods: ['DELETE'])]
+    public function deleteAjax(int $id_user, UserRepository $userRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $userRepository->findOneBy(['id_user' => $id_user]);
+        
+        if (!$user) {
+            return new JsonResponse(['success' => false, 'message' => 'Utilisateur non trouvé'], 404);
+        }
+
+        try {
+            $entityManager->remove($user);
+            $entityManager->flush();
+            
+            return new JsonResponse(['success' => true, 'message' => 'Utilisateur supprimé avec succès']);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
         }
     }
 }

@@ -76,6 +76,7 @@
                 <th>Personne</th>
                 <th>Roles</th>
                 <th>Password</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -102,10 +103,15 @@
                 <td>
                     <span class="password-mask">••••••••</span>
                 </td>
+                <td>
+                    <button class="btn btn-danger btn-sm delete-btn" data-id="{{ user.idUser }}" title="Supprimer">
+                        <i class="fas fa-trash me-1"></i> Supprimer
+                    </button>
+                </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="5">no records found</td>
+                <td colspan="6">no records found</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -313,6 +319,52 @@
                 if (currentEditingCell && !currentEditingCell.contains(e.target)) {
                     stopEditing(currentEditingCell, false);
                 }
+            });
+
+            // Gestion de la suppression
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    const id = this.getAttribute('data-id');
+                    const row = this.closest('tr');
+                    
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                        // Désactiver le bouton pendant la suppression
+                        this.disabled = true;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
+                        
+                        fetch(`/user/${id}/delete-ajax`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Supprimer la ligne du tableau avec animation
+                                row.style.transition = 'opacity 0.3s';
+                                row.style.opacity = '0';
+                                setTimeout(() => {
+                                    row.remove();
+                                }, 300);
+                            } else {
+                                alert('Erreur lors de la suppression : ' + data.message);
+                                // Restaurer le bouton
+                                this.disabled = false;
+                                this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            alert('Erreur lors de la suppression');
+                            // Restaurer le bouton
+                            this.disabled = false;
+                            this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
+                        });
+                    }
+                });
             });
         });
     </script>

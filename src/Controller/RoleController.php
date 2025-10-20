@@ -127,8 +127,29 @@ final class RoleController extends AbstractController
 
             $entityManager->flush();
             
-            return new JsonResponse(['success' => true]);        } catch (\Exception $e) {
+            return new JsonResponse(['success' => true]);
+        } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
+        }
+    }
+
+    #[Route('/{id_role}/delete-ajax', name: 'app_role_delete_ajax', methods: ['DELETE'])]
+    public function deleteAjax(int $id_role, RoleRepository $roleRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $role = $roleRepository->findOneBy(['id_role' => $id_role]);
+        
+        if (!$role) {
+            return new JsonResponse(['success' => false, 'message' => 'Rôle non trouvé'], 404);
+        }
+
+        try {
+            $entityManager->remove($role);
+            $entityManager->flush();
+            
+            return new JsonResponse(['success' => true, 'message' => 'Rôle supprimé avec succès']);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
         }
     }
 }

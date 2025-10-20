@@ -80,6 +80,7 @@
                 <th>Id type</th>
                 <th>Libelle</th>
                 <th>Description</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -88,6 +89,11 @@
                 <td>{{ type_transaction.idType }}</td>
                 <td class="editable-field" data-field="libelle">{{ type_transaction.libelle }}</td>
                 <td class="editable-field" data-field="description">{{ type_transaction.description ?? 'Aucune description' }}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm delete-btn" data-id="{{ type_transaction.idType }}" title="Supprimer">
+                        <i class="fas fa-trash me-1"></i> Supprimer
+                    </button>
+                </td>
             </tr>
         {% else %}
             <tr>
@@ -261,6 +267,52 @@
                 if (currentEditingCell && !currentEditingCell.contains(e.target)) {
                     stopEditing(currentEditingCell, false);
                 }
+            });
+
+            // Gestion de la suppression
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    const id = this.getAttribute('data-id');
+                    const row = this.closest('tr');
+                    
+                    if (confirm('Êtes-vous sûr de vouloir supprimer ce type de transaction ?')) {
+                        // Désactiver le bouton pendant la suppression
+                        this.disabled = true;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
+                        
+                        fetch(`/typetransaction/${id}/delete-ajax`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Supprimer la ligne du tableau avec animation
+                                row.style.transition = 'opacity 0.3s';
+                                row.style.opacity = '0';
+                                setTimeout(() => {
+                                    row.remove();
+                                }, 300);
+                            } else {
+                                alert('Erreur lors de la suppression : ' + data.message);
+                                // Restaurer le bouton
+                                this.disabled = false;
+                                this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            alert('Erreur lors de la suppression');
+                            // Restaurer le bouton
+                            this.disabled = false;
+                            this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
+                        });
+                    }
+                });
             });
         });
     </script>
