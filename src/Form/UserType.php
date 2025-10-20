@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Entity\Personne;
 use App\Entity\Role;
 use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -16,6 +17,15 @@ class UserType extends AbstractType
         $builder
             ->add('username')
             ->add('password')
+            ->add('personne', EntityType::class, [
+                'class' => Personne::class,
+                'choice_label' => function(Personne $personne) {
+                    return $personne->getPrenom() . ' ' . $personne->getNom();
+                },
+                'placeholder' => 'Sélectionner une personne',
+                'required' => true,
+                'label' => 'Personne associée',
+            ])
             ->add('userRoles', EntityType::class, [
                 'class' => Role::class,
                 'choice_label' => 'libelle',
@@ -23,6 +33,7 @@ class UserType extends AbstractType
                 'expanded' => true, // affiche des checkboxes
                 'by_reference' => false,
                 'label' => 'Rôles',
+                'required' => false,
             ])
         ;
     }

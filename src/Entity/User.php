@@ -142,6 +142,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->roles;
     }
 
+    public function setUserRoles(Collection $userRoles): static
+    {
+        $this->roles = $userRoles;
+
+        return $this;
+    }
+
     public function addRole(Role $role): static
     {
         if (!$this->roles->contains($role)) {

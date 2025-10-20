@@ -85,7 +85,11 @@
                 <td class="editable-field" data-field="date_debut">{{ exercice.dateDebut ? exercice.dateDebut|date('Y-m-d') : '' }}</td>
                 <td class="editable-field" data-field="date_fin">{{ exercice.dateFin ? exercice.dateFin|date('Y-m-d') : '' }}</td>
                 <td>
-                    <span class="badge bg-secondary">{{ exercice.transactions|length }}</span>
+                    <a href="{{ path('app_exercice_transactions', {'id_exercice': exercice.idExercice}) }}" 
+                       class="badge bg-secondary text-decoration-none" 
+                       title="Voir les {{ exercice.transactions|length }} transactions de cet exercice">
+                        {{ exercice.transactions|length }} transactions
+                    </a>
                 </td>
             </tr>
         {% else %}
