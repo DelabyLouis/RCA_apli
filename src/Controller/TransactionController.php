@@ -66,6 +66,15 @@ final class TransactionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Vérifier si l'exercice assigné est clôturé
+            if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+                $this->addFlash('error', 'Impossible de créer une transaction pour un exercice clôturé. Vous devez d\'abord déclôturer l\'exercice.');
+                return $this->render('transaction/new.html.twig', [
+                    'transaction' => $transaction,
+                    'form' => $form,
+                ]);
+            }
+
             $entityManager->persist($transaction);
             $entityManager->flush();
 
@@ -101,6 +110,12 @@ final class TransactionController extends AbstractController
             throw $this->createNotFoundException('Transaction non trouvée');
         }
 
+        // Vérifier si l'exercice de la transaction est clôturé
+        if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+            $this->addFlash('error', 'Impossible de modifier une transaction d\'un exercice clôturé. Vous devez d\'abord déclôturer l\'exercice.');
+            return $this->redirectToRoute('app_transaction_index');
+        }
+
         $form = $this->createForm(TransactionType::class, $transaction);
         $form->handleRequest($request);
 
@@ -124,6 +139,13 @@ final class TransactionController extends AbstractController
         if (!$transaction) {
             throw $this->createNotFoundException('Transaction non trouvée');
         }
+
+        // Vérifier si l'exercice de la transaction est clôturé
+        if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+            $this->addFlash('error', 'Impossible de supprimer une transaction d\'un exercice clôturé. Vous devez d\'abord déclôturer l\'exercice.');
+            return $this->redirectToRoute('app_transaction_index');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$transaction->getIdTransaction(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($transaction);
             $entityManager->flush();
@@ -139,6 +161,11 @@ final class TransactionController extends AbstractController
         
         if (!$transaction) {
             return new JsonResponse(['success' => false, 'message' => 'Transaction non trouvée'], 404);
+        }
+
+        // Vérifier si l'exercice de la transaction est clôturé
+        if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+            return new JsonResponse(['success' => false, 'message' => 'Impossible de modifier une transaction d\'un exercice clôturé'], 403);
         }
 
         $field = $request->request->get('field');
@@ -277,6 +304,11 @@ final class TransactionController extends AbstractController
         
         if (!$transaction) {
             return new JsonResponse(['success' => false, 'message' => 'Transaction non trouvée'], 404);
+        }
+
+        // Vérifier si l'exercice de la transaction est clôturé
+        if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+            return new JsonResponse(['success' => false, 'message' => 'Impossible de supprimer une transaction d\'un exercice clôturé'], 403);
         }
 
         try {

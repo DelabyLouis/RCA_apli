@@ -23,6 +23,7 @@ entity "Exercice" as Exercice {
   libelle : VARCHAR(100) NOT NULL
   date_debut : DATE NOT NULL
   date_fin : DATE NULL
+  clos : BOOLEAN NOT NULL DEFAULT FALSE
 }
 
 ' Tables principales
@@ -87,6 +88,16 @@ entity "Transaction" as Transaction {
   //id_entreprise// : INT <<FK>> NULL (XOR)
 }
 
+entity "HistoriqueCloture" as HistoriqueCloture {
+  **id_historique** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  --
+  date_action : DATETIME NOT NULL
+  type_action : VARCHAR(50) NOT NULL
+  commentaire : TEXT NULL
+  //id_exercice// : INT <<FK>> NOT NULL
+  //id_user// : INT <<FK>> NULL
+}
+
 ' Relations
 User ||--|| Personne : "1,1" "1,1"
 User }o--|| Role : "0,n" "1,1"
@@ -99,6 +110,10 @@ Transaction }o--|| TypeTransaction : "0,n" "1,1"
 Transaction }o--o| Personne : "0,n" "0,1"
 Transaction }o--o| Entreprise : "0,n" "0,1"
 
+HistoriqueCloture }o--|| Exercice : "0,n" "1,1"
+HistoriqueCloture }o--o| User : "0,n" "0,1"
+
 note right of Transaction : XOR: soit Personne\nsoit Entreprise
+note right of HistoriqueCloture : Historique des clôtures\net déclôtures d'exercices
 
 @enduml

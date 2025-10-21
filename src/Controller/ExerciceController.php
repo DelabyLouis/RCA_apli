@@ -94,6 +94,12 @@ final class ExerciceController extends AbstractController
         if (!$exercice) {
             throw $this->createNotFoundException('Exercice non trouvé');
         }
+
+        // Vérifier si l'exercice est clôturé
+        if ($exercice->isClos()) {
+            $this->addFlash('error', 'Impossible de modifier un exercice clôturé. Vous devez d\'abord le déclôturer.');
+            return $this->redirectToRoute('app_exercice_index');
+        }
         
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->handleRequest($request);
@@ -118,6 +124,13 @@ final class ExerciceController extends AbstractController
         if (!$exercice) {
             throw $this->createNotFoundException('Exercice non trouvé');
         }
+
+        // Vérifier si l'exercice est clôturé
+        if ($exercice->isClos()) {
+            $this->addFlash('error', 'Impossible de supprimer un exercice clôturé. Vous devez d\'abord le déclôturer.');
+            return $this->redirectToRoute('app_exercice_index');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$exercice->getIdExercice(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($exercice);
             $entityManager->flush();
@@ -166,6 +179,11 @@ final class ExerciceController extends AbstractController
         
         if (!$exercice) {
             return new JsonResponse(['success' => false, 'message' => 'Exercice non trouvé'], 404);
+        }
+
+        // Vérifier si l'exercice est clôturé
+        if ($exercice->isClos()) {
+            return new JsonResponse(['success' => false, 'message' => 'Impossible de modifier un exercice clôturé'], 403);
         }
 
         $field = $request->request->get('field');

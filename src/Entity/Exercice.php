@@ -25,15 +25,25 @@ class Exercice
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $date_fin = null;
 
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private ?bool $clos = false;
+
     /**
      * @var Collection<int, Transaction>
      */
     #[ORM\OneToMany(targetEntity: Transaction::class, mappedBy: 'exercice')]
     private Collection $transactions;
 
+    /**
+     * @var Collection<int, HistoriqueCloture>
+     */
+    #[ORM\OneToMany(targetEntity: HistoriqueCloture::class, mappedBy: 'exercice', cascade: ['persist', 'remove'])]
+    private Collection $historiquesCloture;
+
     public function __construct()
     {
         $this->transactions = new ArrayCollection();
+        $this->historiquesCloture = new ArrayCollection();
     }
 
     public function getIdExercice(): ?int
@@ -105,6 +115,74 @@ class Exercice
         }
 
         return $this;
+    }
+
+    public function isClos(): ?bool
+    {
+        return $this->clos;
+    }
+
+    public function setClos(bool $clos): static
+    {
+        $this->clos = $clos;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HistoriqueCloture>
+     */
+    public function getHistoriquesCloture(): Collection
+    {
+        return $this->historiquesCloture;
+    }
+
+    public function addHistoriqueCloture(HistoriqueCloture $historiqueCloture): static
+    {
+        if (!$this->historiquesCloture->contains($historiqueCloture)) {
+            $this->historiquesCloture->add($historiqueCloture);
+            $historiqueCloture->setExercice($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHistoriqueCloture(HistoriqueCloture $historiqueCloture): static
+    {
+        if ($this->historiquesCloture->removeElement($historiqueCloture)) {
+            // set the owning side to null (unless already changed)
+            if ($historiqueCloture->getExercice() === $this) {
+                $historiqueCloture->setExercice(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Retourne true si l'exercice peut être modifié (pas clos)
+     */
+    public function isModifiable(): bool
+    {
+        return !$this->clos;
+    }
+
+    /**
+     * Retourne la dernière action de clôture/déclôture
+     */
+    public function getDerniereActionCloture(): ?HistoriqueCloture
+    {
+        if ($this->historiquesCloture->isEmpty()) {
+            return null;
+        }
+
+        // Trier par date décroissante et retourner le premier
+        $historiques = $this->historiquesCloture->toArray();
+        usort($historiques, function($a, $b) {
+            return $b->getDateAction() <=> $a->getDateAction();
+        });
+
+        return $historiques[0] ?? null;
     }
 
     public function __toString(): string

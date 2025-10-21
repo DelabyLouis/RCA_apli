@@ -1,318 +1,340 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Exercices et Transactions{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .editable-field {
-            cursor: pointer;
-            padding: 5px;
-            border: 1px solid transparent;
-            border-radius: 3px;
-            transition: all 0.2s;
-        }
-        
-        .editable-field:hover {
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-        }
-        
-        .editable-field.editing {
-            background-color: #fff;
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-        
-        .editable-input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: inherit;
-            font-family: inherit;
-            padding: 0;
-            margin: 0;
-        }
-        
-        /* Masquer les rectangles blancs indésirables */
-        .editable-field input,
-        .editable-field textarea,
-        .editable-field select {
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-            background: transparent !important;
-        }
-        
-        .saving {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        .alert {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-    </style>
-{% endblock %}
+{% block title %}Gestion des exercices{% endblock %}
 
 {% block body %}
-    <h1>Gestion des Exercices et Transactions</h1>
-    
-    <div id="message-container"></div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-calendar-alt me-2"></i>Gestion des exercices</h1>
+                <a href="{{ path('app_exercice_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Nouvel exercice
+                </a>
+            </div>
 
-    <div class="mb-3">
-        <a href="{{ path('app_exercice_all_transactions') }}" class="btn btn-info">Voir toutes les transactions</a>
-        <a href="{{ path('app_exercice_new') }}" class="btn btn-primary">Créer un nouvel exercice</a>
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Libellé</th>
+                                    <th>Début</th>
+                                    <th>Fin</th>
+                                    <th>Statut</th>
+                                    <th>Clôture</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exercice in exercices %}
+                                    <tr class="{% if exercice.clos %}table-secondary{% endif %}">
+                                        <td>{{ exercice.idExercice }}</td>
+                                        <td>
+                                            {% if not exercice.clos %}
+                                                <span class="editable-field" 
+                                                      data-field="libelle" 
+                                                      data-id="{{ exercice.idExercice }}" 
+                                                      data-url="{{ path('app_exercice_update_field', {id_exercice: exercice.idExercice}) }}">
+                                                    {{ exercice.libelle }}
+                                                </span>
+                                            {% else %}
+                                                {{ exercice.libelle }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if not exercice.clos %}
+                                                <span class="editable-field" 
+                                                      data-field="dateDebut" 
+                                                      data-id="{{ exercice.idExercice }}" 
+                                                      data-url="{{ path('app_exercice_update_field', {id_exercice: exercice.idExercice}) }}">
+                                                    {{ exercice.dateDebut ? exercice.dateDebut|date('d/m/Y') : '' }}
+                                                </span>
+                                            {% else %}
+                                                {{ exercice.dateDebut ? exercice.dateDebut|date('d/m/Y') : '' }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if not exercice.clos %}
+                                                <span class="editable-field" 
+                                                      data-field="dateFin" 
+                                                      data-id="{{ exercice.idExercice }}" 
+                                                      data-url="{{ path('app_exercice_update_field', {id_exercice: exercice.idExercice}) }}">
+                                                    {{ exercice.dateFin ? exercice.dateFin|date('d/m/Y') : '' }}
+                                                </span>
+                                            {% else %}
+                                                {{ exercice.dateFin ? exercice.dateFin|date('d/m/Y') : '' }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if exercice.clos %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-lock me-1"></i>CLÔTURÉ
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-unlock me-1"></i>OUVERT
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if not exercice.clos %}
+                                                <button type="button" 
+                                                        class="btn btn-warning" 
+                                                        title="Clôturer cet exercice"
+                                                        onclick="cloturerExercice({{ exercice.idExercice }}, '{{ exercice.libelle }}')">
+                                                    <i class="fas fa-lock me-1"></i>Clôturer
+                                                </button>
+                                            {% else %}
+                                                <button type="button" 
+                                                        class="btn btn-success" 
+                                                        title="Déclôturer cet exercice"
+                                                        onclick="decloturerExercice({{ exercice.idExercice }}, '{{ exercice.libelle }}')">
+                                                    <i class="fas fa-unlock me-1"></i>Déclôturer
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if not exercice.clos %}
+                                                <button type="button" 
+                                                        class="btn btn-outline-danger btn-sm" 
+                                                        title="Supprimer l'exercice"
+                                                        onclick="if(confirm('Êtes-vous sûr de vouloir supprimer cet exercice ?')) { 
+                                                            var form = document.createElement('form');
+                                                            form.method = 'POST';
+                                                            form.action = '{{ path('app_exercice_delete', {id_exercice: exercice.idExercice}) }}';
+                                                            var token = document.createElement('input');
+                                                            token.type = 'hidden';
+                                                            token.name = '_token';
+                                                            token.value = '{{ csrf_token('delete' ~ exercice.idExercice) }}';
+                                                            form.appendChild(token);
+                                                            document.body.appendChild(form);
+                                                            form.submit();
+                                                        }">
+                                                    <i class="fas fa-trash me-1"></i>Supprimer
+                                                </button>
+                                            {% else %}
+                                                <span class="btn btn-outline-secondary btn-sm disabled" title="Suppression interdite">
+                                                    <i class="fas fa-trash me-1"></i>Supprimer
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">
+                                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                                            <br>Aucun exercice trouvé
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <table class="table" data-turbo="false">
-        <thead>
-                        <tr>
-                <th>Id exercice</th>
-                <th>Libelle</th>
-                <th>Date debut</th>
-                <th>Date fin</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for exercice in exercices %}
-            <tr data-id="{{ exercice.idExercice }}">
-                <td>{{ exercice.idExercice }}</td>
-                <td class="editable-field" data-field="libelle">{{ exercice.libelle }}</td>
-                <td class="editable-field" data-field="date_debut">{{ exercice.dateDebut ? exercice.dateDebut|date('Y-m-d') : '' }}</td>
-                <td class="editable-field" data-field="date_fin">{{ exercice.dateFin ? exercice.dateFin|date('Y-m-d') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_exercice_transactions', {'id_exercice': exercice.idExercice}) }}" 
-                       class="badge bg-secondary text-decoration-none" 
-                       title="Voir les {{ exercice.transactions|length }} transactions de cet exercice">
-                        {{ exercice.transactions|length }} transactions
-                    </a>
-                    <button class="btn btn-danger btn-sm delete-btn ms-2" data-id="{{ exercice.idExercice }}" title="Supprimer">
-                        <i class="fas fa-trash me-1"></i> Supprimer
-                    </button>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">Aucun exercice trouvé</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% endblock %}
+<script>
+// Fonctions pour clôturer et déclôturer directement
+function cloturerExercice(exerciceId, exerciceNom) {
+    if (!confirm(`Voulez-vous vraiment clôturer l'exercice "${exerciceNom}" ?`)) {
+        return;
+    }
 
-{% block javascripts %}
-    {{ parent() }}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let currentEditingCell = null;
-            let originalValue = '';
-            
-            function showMessage(message, type) {
-                const container = document.getElementById('message-container');
-                const alert = document.createElement('div');
-                alert.className = `alert alert-${type}`;
-                alert.textContent = message;
-                container.appendChild(alert);
-                
-                setTimeout(() => {
-                    alert.remove();
-                }, 3000);
+    fetch('/historique-cloture/cloturer/' + exerciceId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            commentaire: ''
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erreur : ' + (data.message || 'Impossible de clôturer l\'exercice'));
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur de communication avec le serveur');
+    });
+}
+
+function decloturerExercice(exerciceId, exerciceNom) {
+    if (!confirm(`Voulez-vous vraiment déclôturer l'exercice "${exerciceNom}" ?`)) {
+        return;
+    }
+
+    fetch('/historique-cloture/decloturer/' + exerciceId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            commentaire: ''
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erreur : ' + (data.message || 'Impossible de déclôturer l\'exercice'));
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur de communication avec le serveur');
+    });
+}
+
+// Gestion de l'édition inline
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.editable-field').forEach(function(element) {
+        element.addEventListener('click', function() {
+            if (this.querySelector('input') || this.querySelector('select')) {
+                return;
             }
             
-            function saveField(cell, field, value, exerciceId) {
-                const row = cell.closest('tr');
-                row.classList.add('saving');
+            const field = this.dataset.field;
+            const currentValue = this.textContent.trim();
+            const url = this.dataset.url;
+            const exerciceId = this.dataset.id;
+            
+            if (field === 'dateDebut' || field === 'dateFin') {
+                let isoValue = '';
+                if (currentValue && currentValue !== '') {
+                    const parts = currentValue.split('/');
+                    if (parts.length === 3) {
+                        isoValue = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+                    }
+                }
                 
-                fetch(`/exercice/${exerciceId}/update-field`, {
+                this.innerHTML = '<input type="date" class="form-control form-control-sm" value="' + isoValue + '" style="min-width: 150px;">';
+            } else {
+                this.innerHTML = '<input type="text" class="form-control form-control-sm" value="' + currentValue + '" style="min-width: 150px;">';
+            }
+            
+            const input = this.querySelector('input');
+            input.focus();
+            
+            const saveValue = () => {
+                const newValue = input.value;
+                
+                fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
+                    body: 'field=' + field + '&value=' + encodeURIComponent(newValue)
                 })
                 .then(response => response.json())
                 .then(data => {
-                    row.classList.remove('saving');
-                    
                     if (data.success) {
-                        cell.textContent = value || '';
+                        if (field === 'dateDebut' || field === 'dateFin') {
+                            if (newValue) {
+                                const date = new Date(newValue);
+                                const formattedDate = date.toLocaleDateString('fr-FR');
+                                element.textContent = formattedDate;
+                            } else {
+                                element.textContent = '';
+                            }
+                        } else {
+                            element.textContent = newValue;
+                        }
                     } else {
-                        cell.textContent = originalValue;
-                        showMessage(data.message, 'danger');
+                        alert('Erreur lors de la sauvegarde : ' + data.message);
+                        element.textContent = currentValue;
                     }
                 })
                 .catch(error => {
-                    row.classList.remove('saving');
-                    cell.textContent = originalValue;
-                    showMessage('Erreur de communication avec le serveur', 'danger');
-                    console.error('Error:', error);
+                    alert('Erreur de connexion');
+                    element.textContent = currentValue;
                 });
-            }
+            };
             
-            function startEditing(cell) {
-                if (currentEditingCell && currentEditingCell !== cell) {
-                    stopEditing(currentEditingCell, false);
+            input.addEventListener('blur', saveValue);
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    saveValue();
                 }
-                
-                currentEditingCell = cell;
-                originalValue = cell.textContent;
-                
-                cell.classList.add('editing');
-                
-                const input = document.createElement('input');
-                input.className = 'editable-input';
-                
-                // Gérer les champs date
-                if (cell.dataset.field.includes('date')) {
-                    input.type = 'date';
-                    input.value = originalValue;
-                } else {
-                    input.type = 'text';
-                    input.value = originalValue;
-                }
-                
-                cell.textContent = '';
-                cell.appendChild(input);
-                
-                input.focus();
-                if (input.type === 'text') {
-                    input.select();
-                }
-                
-                input.addEventListener('blur', function() {
-                    stopEditing(cell, true);
-                });
-                
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        stopEditing(cell, true);
-                    } else if (e.key === 'Escape') {
-                        e.preventDefault();
-                        stopEditing(cell, false);
-                    }
-                });
-                
-                // Empêcher la propagation du clic sur l'input pour éviter de relancer l'édition
-                input.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
-            
-            function stopEditing(cell, save) {
-                if (!cell || !cell.classList.contains('editing')) return;
-                
-                const input = cell.querySelector('input');
-                const newValue = input ? input.value.trim() : '';
-                
-                cell.classList.remove('editing');
-                
-                if (save && newValue !== originalValue) {
-                    const field = cell.dataset.field;
-                    const exerciceId = cell.closest('tr').dataset.id;
-                    
-                    if (field === 'libelle' && !newValue) {
-                        showMessage('Le libellé ne peut pas être vide', 'danger');
-                        cell.textContent = originalValue;
-                    } else {
-                        saveField(cell, field, newValue, exerciceId);
-                    }
-                } else {
-                    cell.textContent = originalValue;
-                }
-                
-                currentEditingCell = null;
-            }
-            
-            // Délégation d'événements pour les cellules éditables - plus robuste
-            document.addEventListener('click', function(e) {
-                const cell = e.target.closest('.editable-field');
-                if (!cell) return;
-                
-                // Si on clique sur un input/textarea à l'intérieur, ne pas traiter le clic de la cellule
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-                    return;
-                }
-                
-                // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
-                if (cell.classList.contains('editing')) {
-                    return;
-                }
-                
-                startEditing(cell);
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (currentEditingCell && !currentEditingCell.contains(e.target)) {
-                    stopEditing(currentEditingCell, false);
+                if (e.key === 'Escape') {
+                    element.textContent = currentValue;
                 }
             });
-
-            // Délégation d'événements pour les boutons de suppression
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.delete-btn')) return;
-                
-                const button = e.target.closest('.delete-btn');
-                e.stopPropagation();
-                
-                const id = button.getAttribute('data-id');
-                const row = button.closest('tr');
-                
-                if (confirm('Êtes-vous sûr de vouloir supprimer cet exercice ?')) {
-                    // Désactiver le bouton pendant la suppression
-                    button.disabled = true;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
-                        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
-                        
-                        fetch(`/exercice/${id}/delete-ajax`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Supprimer la ligne du tableau avec animation
-                                row.style.transition = 'opacity 0.3s';
-                                row.style.opacity = '0';
-                                setTimeout(() => {
-                                    row.remove();
-                                }, 300);
-                            } else {
-                                alert('Erreur lors de la suppression : ' + data.message);
-                                // Restaurer le bouton
-                                button.disabled = false;
-                                button.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erreur:', error);
-                            alert('Erreur lors de la suppression');
-                            // Restaurer le bouton
-                            button.disabled = false;
-                            button.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
-                        });
-                    }
-            });
-            }, 100); // Délai pour s'assurer que tous les éléments sont prêts
         });
-    </script>
+    });
+});
+</script>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -19px;
+    top: 30px;
+    height: calc(100% + 10px);
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 5px;
+}
+
+.timeline-content {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid #dee2e6;
+}
+
+.editable-field:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 2px 4px;
+}
+
+.table-secondary {
+    --bs-table-bg: #f8f9fa;
+}
+</style>
 {% endblock %}
