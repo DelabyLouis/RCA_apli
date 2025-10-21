@@ -6,8 +6,11 @@ use App\Repository\TransactionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
+#[ORM\UniqueConstraint(name: "unique_numero_ordre_exercice", columns: ["numero_ordre", "id_exercice"])]
+#[UniqueEntity(fields: ['libelle'], message: 'Ce libellé existe déjà pour une autre transaction')]
 #[Assert\Callback(callback: 'validatePersonneOrEntreprise')]
 class Transaction
 {
@@ -17,15 +20,32 @@ class Transaction
     private ?int $id_transaction = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Assert\NotBlank(message: 'Le libellé ne peut pas être vide')]
+    #[Assert\Length(
+        min: 3,
+        max: 255,
+        minMessage: 'Le libellé doit contenir au moins {{ limit }} caractères',
+        maxMessage: 'Le libellé ne peut pas dépasser {{ limit }} caractères'
+    )]
     private ?string $libelle = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'Le numéro d\'ordre est obligatoire')]
+    #[Assert\Positive(message: 'Le numéro d\'ordre doit être positif')]
     private ?int $numero_ordre = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotNull(message: 'La date est obligatoire')]
+    #[Assert\Type(\DateTime::class)]
     private ?\DateTime $date_transaction = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2)]
+    #[Assert\NotBlank(message: 'Le montant ne peut pas être vide')]
+    #[Assert\NotEqualTo(value: 0, message: 'Le montant ne peut pas être égal à zéro')]
+    #[Assert\Regex(
+        pattern: '/^-?\d{1,13}(\.\d{1,2})?$/',
+        message: 'Le montant doit être un nombre valide avec au maximum 2 décimales'
+    )]
     private ?string $montant = null;
 
     #[ORM\ManyToOne(inversedBy: 'transactions')]

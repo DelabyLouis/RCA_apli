@@ -33,7 +33,7 @@
                         <table class="table table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>ID</th>
+                                    <th>N°</th>
                                     <th>Libellé</th>
                                     <th>Début</th>
                                     <th>Fin</th>
@@ -45,7 +45,7 @@
                             <tbody>
                                 {% for exercice in exercices %}
                                     <tr class="{% if exercice.clos %}table-secondary{% endif %}">
-                                        <td>{{ exercice.idExercice }}</td>
+                                        <td><strong>{{ exercice.numeroOrdre }}</strong></td>
                                         <td>
                                             {% if not exercice.clos %}
                                                 <span class="editable-field" 

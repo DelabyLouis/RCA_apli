@@ -16,6 +16,19 @@ class ExerciceRepository extends ServiceEntityRepository
         parent::__construct($registry, Exercice::class);
     }
 
+    /**
+     * Récupère le dernier numéro d'ordre utilisé pour les exercices
+     */
+    public function getLastNumeroOrdre(): ?int
+    {
+        $result = $this->createQueryBuilder('e')
+            ->select('MAX(e.numero_ordre)')
+            ->getQuery()
+            ->getSingleScalarResult();
+        
+        return $result ? (int) $result : 0;
+    }
+
     //    /**
     //     * @return Exercice[] Returns an array of Exercice objects
     //     */

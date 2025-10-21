@@ -7,8 +7,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: ExerciceRepository::class)]
+#[UniqueEntity(fields: ['libelle'], message: 'Ce libellé d\'exercice existe déjà')]
 class Exercice
 {
     #[ORM\Id]
@@ -17,12 +20,27 @@ class Exercice
     private ?int $id_exercice = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: 'Le libellé de l\'exercice ne peut pas être vide')]
+    #[Assert\Length(
+        min: 3,
+        max: 100,
+        minMessage: 'Le libellé doit contenir au moins {{ limit }} caractères',
+        maxMessage: 'Le libellé ne peut pas dépasser {{ limit }} caractères'
+    )]
     private ?string $libelle = null;
 
+    #[ORM\Column(type: Types::INTEGER)]
+    #[Assert\NotNull(message: 'Le numéro d\'ordre est obligatoire')]
+    #[Assert\Positive(message: 'Le numéro d\'ordre doit être positif')]
+    private ?int $numero_ordre = null;
+
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotNull(message: 'La date de début est obligatoire')]
+    #[Assert\Type(\DateTime::class)]
     private ?\DateTime $date_debut = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Assert\Type(\DateTime::class)]
     private ?\DateTime $date_fin = null;
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
@@ -183,6 +201,18 @@ class Exercice
         });
 
         return $historiques[0] ?? null;
+    }
+
+    public function getNumeroOrdre(): ?int
+    {
+        return $this->numero_ordre;
+    }
+
+    public function setNumeroOrdre(int $numero_ordre): static
+    {
+        $this->numero_ordre = $numero_ordre;
+
+        return $this;
     }
 
     public function __toString(): string

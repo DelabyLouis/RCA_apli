@@ -1,0 +1,218 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle transaction{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-plus-circle me-2"></i>Nouvelle transaction</h1>
+                <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                </a>
+            </div>
+
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            {% if form.vars.errors|length > 0 %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>
+                    <ul class="mb-0 mt-2">
+                        {% for error in form.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endif %}
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.libelle, 'Libellé', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control' ~ (form.libelle.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.libelle.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.libelle.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.libelle) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.exercice, 'Exercice', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.exercice, {'attr': {'class': 'form-select' ~ (form.exercice.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.exercice.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.exercice.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.exercice) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.type_transaction, 'Type de transaction', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.type_transaction, {'attr': {'class': 'form-select' ~ (form.type_transaction.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.type_transaction.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.type_transaction.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.type_transaction) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.montant, 'Montant', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.montant, {'attr': {'class': 'form-control' ~ (form.montant.vars.errors|length > 0 ? ' is-invalid' : ''), 'step': '0.01'}}) }}
+                                {% if form.montant.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.montant.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.montant) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.date_transaction, 'Date', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control' ~ (form.date_transaction.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.date_transaction.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.date_transaction.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.date_transaction) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.tiers, 'Tiers (Personne ou Entreprise)', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.tiers, {'attr': {'class': 'form-select' ~ (form.tiers.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.tiers.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.tiers.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.tiers) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i>Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Créer la transaction
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validation Bootstrap
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+        
+        // Validation en temps réel pour le libellé
+        const libelleInput = document.querySelector('[name*="[libelle]"]');
+        if (libelleInput) {
+            libelleInput.addEventListener('blur', function() {
+                validateLibelle(this);
+            });
+        }
+        
+        // Validation en temps réel pour le montant
+        const montantInput = document.querySelector('[name*="[montant]"]');
+        if (montantInput) {
+            montantInput.addEventListener('blur', function() {
+                validateMontant(this);
+            });
+        }
+    }, false);
+    
+    function validateLibelle(input) {
+        const value = input.value.trim();
+        const feedback = input.parentNode.querySelector('.invalid-feedback');
+        
+        if (value.length < 3) {
+            input.classList.add('is-invalid');
+            if (feedback) feedback.textContent = 'Le libellé doit contenir au moins 3 caractères';
+        } else if (value.length > 255) {
+            input.classList.add('is-invalid');
+            if (feedback) feedback.textContent = 'Le libellé ne peut pas dépasser 255 caractères';
+        } else {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        }
+    }
+    
+    function validateMontant(input) {
+        const value = parseFloat(input.value);
+        const feedback = input.parentNode.querySelector('.invalid-feedback');
+        
+        if (isNaN(value) || value === 0) {
+            input.classList.add('is-invalid');
+            if (feedback) feedback.textContent = 'Le montant ne peut pas être égal à zéro';
+        } else {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        }
+    }
+})();
+</script>
+{% endblock %}

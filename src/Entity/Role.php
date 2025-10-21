@@ -6,8 +6,11 @@ use App\Repository\RoleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: RoleRepository::class)]
+#[UniqueEntity(fields: ['libelle'], message: 'Ce rôle existe déjà')]
 class Role
 {
     #[ORM\Id]
@@ -16,6 +19,13 @@ class Role
     private ?int $id_role = null;
 
     #[ORM\Column(length: 50, unique: true)]
+    #[Assert\NotBlank(message: 'Le libellé du rôle ne peut pas être vide')]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'Le libellé doit contenir au moins {{ limit }} caractères',
+        maxMessage: 'Le libellé ne peut pas dépasser {{ limit }} caractères'
+    )]
     private ?string $libelle = null;
 
     #[ORM\Column(length: 255, nullable: true)]

@@ -6,8 +6,11 @@ use App\Repository\EntrepriseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: EntrepriseRepository::class)]
+#[UniqueEntity(fields: ['siret'], message: 'Ce numéro SIRET existe déjà')]
 class Entreprise
 {
     #[ORM\Id]
@@ -16,9 +19,24 @@ class Entreprise
     private ?int $id_entreprise = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le nom de l\'entreprise ne peut pas être vide')]
+    #[Assert\Length(
+        min: 2,
+        max: 255,
+        minMessage: 'Le nom de l\'entreprise doit contenir au moins {{ limit }} caractères',
+        maxMessage: 'Le nom de l\'entreprise ne peut pas dépasser {{ limit }} caractères'
+    )]
     private ?string $nom_entreprise = null;
 
     #[ORM\Column(length: 14, nullable: true, unique: true)]
+    #[Assert\Length(
+        exactly: 14,
+        exactMessage: 'Le SIRET doit contenir exactement {{ limit }} caractères'
+    )]
+    #[Assert\Regex(
+        pattern: '/^\d{14}$/',
+        message: 'Le SIRET doit contenir uniquement des chiffres'
+    )]
     private ?string $siret = null;
 
     #[ORM\Column(length: 9, nullable: true)]

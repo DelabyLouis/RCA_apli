@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Transaction;
+use App\Entity\Personne;
+use App\Entity\Entreprise;
 use App\Form\TransactionType;
+use App\Form\TransactionNewType;
 use App\Repository\TransactionRepository;
 use App\Repository\PersonneRepository;
 use App\Repository\EntrepriseRepository;
@@ -76,14 +79,35 @@ final class TransactionController extends AbstractController
     {
         $transaction = new Transaction();
         
-        // Pré-remplir le numéro d'ordre avec le suivant disponible
-        $lastNumeroOrdre = $transactionRepository->getLastNumeroOrdre();
-        $transaction->setNumeroOrdre($lastNumeroOrdre + 1);
+        // Pré-remplir le numéro d'ordre avec le suivant disponible pour l'exercice par défaut
+        // Le numéro d'ordre sera automatiquement calculé lors de la soumission
         
-        $form = $this->createForm(TransactionType::class, $transaction);
+        $form = $this->createForm(TransactionNewType::class, $transaction);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Traiter le champ tiers combiné
+            $tiersValue = $form->get('tiers')->getData();
+            if ($tiersValue) {
+                if (strpos($tiersValue, 'personne_') === 0) {
+                    // C'est une personne
+                    $personneId = str_replace('personne_', '', $tiersValue);
+                    $personne = $entityManager->getRepository(Personne::class)->find($personneId);
+                    if ($personne) {
+                        $transaction->setPersonne($personne);
+                        $transaction->setEntreprise(null);
+                    }
+                } elseif (strpos($tiersValue, 'entreprise_') === 0) {
+                    // C'est une entreprise
+                    $entrepriseId = str_replace('entreprise_', '', $tiersValue);
+                    $entreprise = $entityManager->getRepository(Entreprise::class)->find($entrepriseId);
+                    if ($entreprise) {
+                        $transaction->setEntreprise($entreprise);
+                        $transaction->setPersonne(null);
+                    }
+                }
+            }
+
             // Vérifier si l'exercice assigné est clôturé
             if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
                 $this->addFlash('error', 'Impossible de créer une transaction pour un exercice clôturé. Vous devez d\'abord déclôturer l\'exercice.');
@@ -91,6 +115,12 @@ final class TransactionController extends AbstractController
                     'transaction' => $transaction,
                     'form' => $form,
                 ]);
+            }
+
+            // Calculer automatiquement le numéro d'ordre en fonction de l'exercice choisi
+            if ($transaction->getExercice()) {
+                $lastNumeroOrdre = $transactionRepository->getLastNumeroOrdreByExercice($transaction->getExercice()->getIdExercice());
+                $transaction->setNumeroOrdre($lastNumeroOrdre + 1);
             }
 
             $entityManager->persist($transaction);

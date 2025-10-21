@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la transaction{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-edit me-2"></i>Modifier la transaction</h1>
+                <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                </a>
+            </div>
+
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.libelle, 'Libellé', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.libelle) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.exercice, 'Exercice', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.exercice, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.exercice) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.type_transaction, 'Type de transaction', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.type_transaction, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.type_transaction) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.montant, 'Montant', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.montant, {'attr': {'class': 'form-control', 'step': '0.01'}}) }}
+                                {{ form_errors(form.montant) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.date_transaction, 'Date', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.date_transaction) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.numero_ordre, 'Numéro d\'ordre', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.numero_ordre, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.numero_ordre) }}
+                                <div class="form-text">Modifiez le numéro d'ordre si nécessaire.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.personne, 'Personne', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.personne, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.personne) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.entreprise, 'Entreprise', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.entreprise, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.entreprise) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i>Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Sauvegarder
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validation Bootstrap
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}

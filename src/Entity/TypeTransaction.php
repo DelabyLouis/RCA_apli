@@ -7,8 +7,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: TypeTransactionRepository::class)]
+#[UniqueEntity(fields: ['libelle'], message: 'Ce type de transaction existe déjà')]
 class TypeTransaction
 {
     #[ORM\Id]
@@ -17,6 +20,13 @@ class TypeTransaction
     private ?int $id_type = null;
 
     #[ORM\Column(length: 100, unique: true)]
+    #[Assert\NotBlank(message: 'Le libellé du type de transaction ne peut pas être vide')]
+    #[Assert\Length(
+        min: 3,
+        max: 100,
+        minMessage: 'Le libellé doit contenir au moins {{ limit }} caractères',
+        maxMessage: 'Le libellé ne peut pas dépasser {{ limit }} caractères'
+    )]
     private ?string $libelle = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

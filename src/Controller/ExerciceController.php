@@ -33,6 +33,10 @@ final class ExerciceController extends AbstractController
         // Calculer les dates par défaut basées sur le dernier exercice
         $this->setDefaultDates($exercice, $exerciceRepository);
         
+        // Définir le numéro d'ordre pour le nouvel exercice
+        $lastNumeroOrdre = $exerciceRepository->getLastNumeroOrdre();
+        $exercice->setNumeroOrdre($lastNumeroOrdre + 1);
+        
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->handleRequest($request);
 
