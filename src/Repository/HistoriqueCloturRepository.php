@@ -49,6 +49,22 @@ class HistoriqueCloturRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    /**
+     * Récupère l'historique récent des clôtures/déclôtures (toutes exercices confondus)
+     * 
+     * @param int $limit
+     * @return HistoriqueCloture[]
+     */
+    public function findRecentHistorique(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('h')
+            ->join('h.exercice', 'e')
+            ->orderBy('h.date_action', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return HistoriqueCloture[] Returns an array of HistoriqueCloture objects
     //     */

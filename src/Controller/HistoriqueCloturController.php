@@ -189,4 +189,30 @@ class HistoriqueCloturController extends AbstractController
             'historiques' => $historiques,
         ]);
     }
+
+    #[Route('/historique-recent', name: 'app_historique_cloture_recent', methods: ['GET'])]
+    public function getHistoriqueRecent(
+        HistoriqueCloturRepository $historiqueCloturRepository
+    ): JsonResponse {
+        // Récupérer les 10 dernières actions de clôture/déclôture
+        $historiques = $historiqueCloturRepository->findRecentHistorique(10);
+
+        $data = [];
+        foreach ($historiques as $historique) {
+            $data[] = [
+                'id' => $historique->getIdHistorique(),
+                'date_action' => $historique->getDateAction()->format('Y-m-d H:i:s'),
+                'type_action' => $historique->getTypeAction(),
+                'commentaire' => $historique->getCommentaire(),
+                'user' => $historique->getUser() ? $historique->getUser()->getUsername() : null,
+                'exercice_id' => $historique->getExercice()->getIdExercice(),
+                'exercice_libelle' => $historique->getExercice()->getLibelle()
+            ];
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'historiques' => $data
+        ]);
+    }
 }

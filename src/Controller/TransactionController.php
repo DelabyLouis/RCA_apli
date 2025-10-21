@@ -20,15 +20,32 @@ use Symfony\Component\Routing\Attribute\Route;
 final class TransactionController extends AbstractController
 {
     #[Route(name: 'app_transaction_index', methods: ['GET'])]
-    public function index(TransactionRepository $transactionRepository, PersonneRepository $personneRepository, EntrepriseRepository $entrepriseRepository, ExerciceRepository $exerciceRepository, TypeTransactionRepository $typeTransactionRepository): Response
+    public function index(Request $request, TransactionRepository $transactionRepository, PersonneRepository $personneRepository, EntrepriseRepository $entrepriseRepository, ExerciceRepository $exerciceRepository, TypeTransactionRepository $typeTransactionRepository): Response
     {
+        $exerciceId = $request->query->get('exercice_id');
+        $exerciceFilter = null;
+        
+        // Si un exercice est spécifié, le récupérer pour le filtre
+        if ($exerciceId) {
+            $exerciceFilter = $exerciceRepository->findOneBy(['id_exercice' => $exerciceId]);
+        }
+        
         // Récupérer les transactions triées par numéro d'ordre avec leurs relations pour éviter les requêtes N+1
-        $transactions = $transactionRepository->createQueryBuilder('t')
+        $queryBuilder = $transactionRepository->createQueryBuilder('t')
             ->leftJoin('t.personne', 'p')
             ->leftJoin('t.entreprise', 'e')
+            ->leftJoin('t.exercice', 'ex')
             ->addSelect('p')
             ->addSelect('e')
-            ->orderBy('t.numero_ordre', 'ASC')
+            ->addSelect('ex');
+        
+        // Appliquer le filtre par exercice si spécifié
+        if ($exerciceFilter) {
+            $queryBuilder->where('t.exercice = :exercice')
+                        ->setParameter('exercice', $exerciceFilter);
+        }
+        
+        $transactions = $queryBuilder->orderBy('t.numero_ordre', 'ASC')
             ->getQuery()
             ->getResult();
         
@@ -50,6 +67,7 @@ final class TransactionController extends AbstractController
             'entreprises' => $entrepriseRepository->findAll(),
             'exercices' => $exerciceRepository->findAll(),
             'types_transaction' => $typeTransactionRepository->findAll(),
+            'exercice_filter' => $exerciceFilter,
         ]);
     }
 

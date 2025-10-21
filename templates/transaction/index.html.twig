@@ -8,6 +8,16 @@
     <div class="container-fluid">
         <h1 class="mb-4">Gestion des Transactions</h1>
         
+        {% if exercice_filter %}
+            <div class="alert alert-info">
+                <i class="fas fa-filter me-2"></i>Transactions filtrées pour l'exercice : 
+                <strong>{{ exercice_filter.libelle }}</strong>
+                <a href="{{ path('app_transaction_index') }}" class="btn btn-outline-secondary btn-sm ms-3">
+                    <i class="fas fa-times me-1"></i>Voir toutes les transactions
+                </a>
+            </div>
+        {% endif %}
+        
         <div class="row mb-3">
             <div class="col">
                 <a href="{{ path('app_transaction_new') }}" class="btn btn-success">
