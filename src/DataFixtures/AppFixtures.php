@@ -135,12 +135,14 @@ class AppFixtures extends Fixture
         // Création des exercices
         $exercice2024 = new Exercice();
         $exercice2024->setLibelle('Exercice 2024');
+        $exercice2024->setNumeroOrdre(1);
         $exercice2024->setDateDebut(new \DateTime('2024-01-01'));
         $exercice2024->setDateFin(new \DateTime('2024-12-31'));
         $manager->persist($exercice2024);
 
         $exercice2023 = new Exercice();
         $exercice2023->setLibelle('Exercice 2023');
+        $exercice2023->setNumeroOrdre(2);
         $exercice2023->setDateDebut(new \DateTime('2023-01-01'));
         $exercice2023->setDateFin(new \DateTime('2023-12-31'));
         $manager->persist($exercice2023);

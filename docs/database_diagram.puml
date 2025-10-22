@@ -21,6 +21,7 @@ entity "Exercice" as Exercice {
   **id_exercice** : INT <<PK>> NOT NULL AUTO_INCREMENT
   --
   libelle : VARCHAR(100) NOT NULL
+  numero_ordre : INT NOT NULL
   date_debut : DATE NOT NULL
   date_fin : DATE NULL
   clos : BOOLEAN NOT NULL DEFAULT FALSE
@@ -64,8 +65,14 @@ entity "User" as User {
   --
   username : VARCHAR(50) NOT NULL UNIQUE
   password : VARCHAR(255) NOT NULL
-  //id_personne// : INT <<FK>> NOT NULL
+  //id_personne// : INT <<FK>> NOT NULL UNIQUE
+}
+
+entity "UserRole" as UserRole {
+  //id_user// : INT <<FK>> NOT NULL
   //id_role// : INT <<FK>> NOT NULL
+  --
+  PRIMARY KEY (id_user, id_role)
 }
 
 entity "PersonneEntreprise" as PersonneEntreprise {
@@ -86,6 +93,8 @@ entity "Transaction" as Transaction {
   //id_type// : INT <<FK>> NOT NULL
   //id_personne// : INT <<FK>> NULL (XOR)
   //id_entreprise// : INT <<FK>> NULL (XOR)
+  --
+  UNIQUE (numero_ordre, id_exercice)
 }
 
 entity "HistoriqueCloture" as HistoriqueCloture {
@@ -99,8 +108,8 @@ entity "HistoriqueCloture" as HistoriqueCloture {
 }
 
 ' Relations
-User ||--|| Personne : "1,1" "1,1"
-User }o--|| Role : "0,n" "1,1"
+User ||--|| Personne : "1,1" "1,0"
+User }o--o{ Role : "0,n" "0,n" (UserRole)
 
 PersonneEntreprise }o--|| Personne : "0,n" "1,1"
 PersonneEntreprise }o--|| Entreprise : "0,n" "1,1"
@@ -109,6 +118,11 @@ Transaction }o--|| Exercice : "0,n" "1,1"
 Transaction }o--|| TypeTransaction : "0,n" "1,1"
 Transaction }o--o| Personne : "0,n" "0,1"
 Transaction }o--o| Entreprise : "0,n" "0,1"
+
+HistoriqueCloture }o--|| Exercice : "0,n" "1,1"
+HistoriqueCloture }o--o| User : "0,n" "0,1"
+
+@enduml
 
 HistoriqueCloture }o--|| Exercice : "0,n" "1,1"
 HistoriqueCloture }o--o| User : "0,n" "0,1"

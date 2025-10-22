@@ -72,11 +72,8 @@ class Personne
     #[ORM\InverseJoinColumn(name: 'id_entreprise', referencedColumnName: 'id_entreprise')]
     private Collection $entreprise;
 
-    /**
-     * @var Collection<int, User>
-     */
-    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'personne')]
-    private Collection $users;
+    #[ORM\OneToOne(targetEntity: User::class, mappedBy: 'personne')]
+    private ?User $user = null;
 
     /**
      * @var Collection<int, Transaction>
@@ -87,7 +84,6 @@ class Personne
     public function __construct()
     {
         $this->entreprise = new ArrayCollection();
-        $this->users = new ArrayCollection();
         $this->transactions = new ArrayCollection();
     }
 
@@ -252,32 +248,14 @@ class Personne
         return $this;
     }
 
-    /**
-     * @return Collection<int, User>
-     */
-    public function getUsers(): Collection
+    public function getUser(): ?User
     {
-        return $this->users;
+        return $this->user;
     }
 
-    public function addUser(User $user): static
+    public function setUser(?User $user): static
     {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->setPersonne($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUser(User $user): static
-    {
-        if ($this->users->removeElement($user)) {
-            // set the owning side to null (unless already changed)
-            if ($user->getPersonne() === $this) {
-                $user->setPersonne(null);
-            }
-        }
+        $this->user = $user;
 
         return $this;
     }
