@@ -5,10 +5,11 @@
 {% block body %}
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow-sm mt-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm mt-4">
                 <div class="card-header text-center bg-success text-white">
-                    <h4><i class="fas fa-user-plus me-2"></i>Inscription</h4>
+                    <h3><i class="fas fa-user-plus me-2"></i>Inscription</h3>
+                    <p class="mb-0">Créez votre compte pour accéder à l'application</p>
                 </div>
                 <div class="card-body">
                     {% for message in app.flashes('error') %}
@@ -32,140 +33,173 @@
 
                     {{ form_start(registrationForm, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
                     
-                    <div class="mb-3">
-                        {{ form_label(registrationForm.username, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(registrationForm.username, {'attr': {'class': 'form-control' ~ (registrationForm.username.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                        {% if registrationForm.username.vars.errors|length > 0 %}
-                            <div class="invalid-feedback">
-                                {% for error in registrationForm.username.vars.errors %}
-                                    {{ error.message }}
-                                {% endfor %}
+                    <!-- ========== INFORMATIONS DE CONNEXION ========== -->
+                    <div class="border rounded p-3 mb-4 bg-light">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-key me-2"></i>Informations de connexion
+                        </h5>
+                        
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.username, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(registrationForm.username, {'attr': {'class': 'form-control' ~ (registrationForm.username.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                            {% if registrationForm.username.vars.errors|length > 0 %}
+                                <div class="invalid-feedback">
+                                    {% for error in registrationForm.username.vars.errors %}
+                                        {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.plainPassword.first, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'form-control' ~ (registrationForm.plainPassword.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if registrationForm.plainPassword.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in registrationForm.plainPassword.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-3">
-                        {{ form_label(registrationForm.plainPassword.first, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'form-control' ~ (registrationForm.plainPassword.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                        {% if registrationForm.plainPassword.vars.errors|length > 0 %}
-                            <div class="invalid-feedback">
-                                {% for error in registrationForm.plainPassword.vars.errors %}
-                                    {{ error.message }}
-                                {% endfor %}
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.plainPassword.second, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'form-control' ~ (registrationForm.plainPassword.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
                             </div>
-                        {% endif %}
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        {{ form_label(registrationForm.plainPassword.second, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'form-control' ~ (registrationForm.plainPassword.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                    </div>
-
-                    <div class="mb-3 form-check">
-                        {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input' ~ (registrationForm.agreeTerms.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                        {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                        {% if registrationForm.agreeTerms.vars.errors|length > 0 %}
-                            <div class="invalid-feedback">
-                                {% for error in registrationForm.agreeTerms.vars.errors %}
-                                    {{ error.message }}
-                                {% endfor %}
+                    <!-- ========== INFORMATIONS PERSONNELLES ========== -->
+                    <div class="border rounded p-3 mb-4 bg-light">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-user me-2"></i>Informations personnelles
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                {{ form_label(registrationForm.civilite, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.civilite, {'attr': {'class': 'form-select'}}) }}
                             </div>
-                        {% endif %}
+                            <div class="col-md-4 mb-3">
+                                {{ form_label(registrationForm.nom, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-control' ~ (registrationForm.nom.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if registrationForm.nom.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in registrationForm.nom.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form_label(registrationForm.prenom, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-control' ~ (registrationForm.prenom.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if registrationForm.prenom.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in registrationForm.prenom.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control' ~ (registrationForm.email.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if registrationForm.email.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in registrationForm.email.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form_label(registrationForm.telephone, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.telephone, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-user-plus me-1"></i>S'inscrire
+                    <!-- ========== ADRESSE ========== -->
+                    <div class="border rounded p-3 mb-4 bg-light">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>Adresse
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                {{ form_label(registrationForm.numero_voie, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.numero_voie, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            <div class="col-md-9 mb-3">
+                                {{ form_label(registrationForm.rue, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.rue, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.complement_adresse, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.complement_adresse, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                {{ form_label(registrationForm.code_postal, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.code_postal, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.ville, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.ville, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                {{ form_label(registrationForm.pays, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.pays, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========== CONDITIONS ========== -->
+                    <div class="border rounded p-3 mb-4 bg-warning bg-opacity-10">
+                        <div class="form-check">
+                            {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input' ~ (registrationForm.agreeTerms.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                            {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'form-check-label fw-bold'}}) }}
+                            {% if registrationForm.agreeTerms.vars.errors|length > 0 %}
+                                <div class="invalid-feedback">
+                                    {% for error in registrationForm.agreeTerms.vars.errors %}
+                                        {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Les champs marqués d'un astérisque (*) sont obligatoires.
+                        </small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Créer mon compte
                         </button>
                     </div>
 
                     {{ form_end(registrationForm) }}
 
-                    <hr>
-                    <div class="text-center">
-                        <p class="mb-0">Déjà un compte ?</p>
-                        <a href="{{ path('app_login') }}" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-sign-in-alt me-1"></i>Se connecter
-                        </a>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">
+                            Vous avez déjà un compte ? 
+                            <a href="{{ path('app_login') }}" class="text-decoration-none">
+                                <i class="fas fa-sign-in-alt me-1"></i>Se connecter
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-// Validation Bootstrap
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-        var validation = Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-        
-        // Validation en temps réel
-        const usernameInput = document.querySelector('#registration_form_username');
-        const passwordInput = document.querySelector('#registration_form_plainPassword_first');
-        const confirmPasswordInput = document.querySelector('#registration_form_plainPassword_second');
-        
-        if (usernameInput) {
-            usernameInput.addEventListener('blur', validateUsername);
-        }
-        
-        if (passwordInput) {
-            passwordInput.addEventListener('blur', validatePassword);
-        }
-        
-        if (confirmPasswordInput) {
-            confirmPasswordInput.addEventListener('blur', validatePasswordConfirmation);
-        }
-    }, false);
-    
-    function validateUsername() {
-        const input = document.querySelector('#registration_form_username');
-        const value = input.value.trim();
-        
-        if (value.length < 3) {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-        } else {
-            input.classList.remove('is-invalid');
-            input.classList.add('is-valid');
-        }
-    }
-    
-    function validatePassword() {
-        const input = document.querySelector('#registration_form_plainPassword_first');
-        const value = input.value;
-        
-        if (value.length < 6) {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-        } else {
-            input.classList.remove('is-invalid');
-            input.classList.add('is-valid');
-        }
-    }
-    
-    function validatePasswordConfirmation() {
-        const passwordInput = document.querySelector('#registration_form_plainPassword_first');
-        const confirmInput = document.querySelector('#registration_form_plainPassword_second');
-        
-        if (passwordInput.value !== confirmInput.value) {
-            confirmInput.classList.add('is-invalid');
-            confirmInput.classList.remove('is-valid');
-        } else {
-            confirmInput.classList.remove('is-invalid');
-            confirmInput.classList.add('is-valid');
-        }
-    }
-})();
-</script>
 {% endblock %}

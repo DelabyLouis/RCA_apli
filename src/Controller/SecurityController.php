@@ -58,11 +58,23 @@ class SecurityController extends AbstractController
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
-            // Créer automatiquement une personne correspondante
+            // Créer automatiquement une personne correspondante avec les données du formulaire
             $personne = new Personne();
-            // Utiliser des valeurs par défaut basées sur le username
-            $personne->setNom('Nom');
-            $personne->setPrenom($user->getUsername());
+            
+            // Récupérer les données du formulaire pour la personne
+            $personne->setNom($form->get('nom')->getData() ?: 'Nom');
+            $personne->setPrenom($form->get('prenom')->getData() ?: $user->getUsername());
+            $personne->setCivilite($form->get('civilite')->getData());
+            $personne->setEmail($form->get('email')->getData());
+            $personne->setTelephone($form->get('telephone')->getData() ? (int)$form->get('telephone')->getData() : null);
+            
+            // Adresse
+            $personne->setNumeroVoie($form->get('numero_voie')->getData());
+            $personne->setRue($form->get('rue')->getData());
+            $personne->setComplementAdresse($form->get('complement_adresse')->getData());
+            $personne->setVille($form->get('ville')->getData());
+            $personne->setCodePostal($form->get('code_postal')->getData());
+            $personne->setPays($form->get('pays')->getData() ?: 'France');
             
             // Associer la personne au user (grâce au cascade persist, la personne sera automatiquement persistée)
             $user->setPersonne($personne);
