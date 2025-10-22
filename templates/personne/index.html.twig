@@ -75,6 +75,40 @@
     
     <div id="message-container"></div>
 
+        {% include 'components/entity_filter_detailed.html.twig' with {
+        'filters': [
+            {
+                'field': 'nom',
+                'label': 'Nom',
+                'type': 'text',
+                'placeholder': 'Rechercher par nom...',
+                'width': 3
+            },
+            {
+                'field': 'prenom',
+                'label': 'Prénom',
+                'type': 'text',
+                'placeholder': 'Rechercher par prénom...',
+                'width': 3
+            },
+            {
+                'field': 'email',
+                'label': 'Email',
+                'type': 'text',
+                'placeholder': 'Rechercher par email...',
+                'width': 3
+            },
+            {
+                'field': 'ville',
+                'label': 'Ville',
+                'type': 'text',
+                'placeholder': 'Rechercher par ville...',
+                'width': 3
+            }
+        ],
+        'tableSelector': '.table tbody'
+    } %}
+
     <table class="table" data-turbo="false">
         <thead>
                         <tr>

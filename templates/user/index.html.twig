@@ -78,6 +78,11 @@
 {% block body %}
     <h1>User index</h1>
     
+    {% include 'components/entity_filter.html.twig' with {
+        'placeholder': 'Rechercher par nom d\'utilisateur, nom, prénom, rôle...',
+        'tableSelector': '.table tbody'
+    } %}
+    
     <div id="message-container"></div>
 
     <table class="table" data-turbo="false">

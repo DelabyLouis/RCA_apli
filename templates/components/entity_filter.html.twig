@@ -1,0 +1,420 @@
+{# Composant de filtrage détaillé pour les listes d'entités #}
+{% set filter_id = filter_id|default('entity-filter') %}
+{% set placeholder = placeholder|default('Rechercher...') %}
+
+<div class="mb-3">
+    {% if filters is defined and filters is not empty %}
+        {# Filtres détaillés par colonne #}
+        <div class="card">
+            <div class="card-header py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Filtres
+                    </h6>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary me-2" type="button" id="toggleFilters">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" type="button" id="clearAllFilters">
+                            <i class="fas fa-times me-1"></i>Effacer tout
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body py-2" id="filtersContainer">
+                <div class="row g-2">
+                    {% for filter in filters %}
+                        <div class="col-md-{{ filter.width|default(3) }}">
+                            <label class="form-label small mb-1" for="filter_{{ filter.field }}">
+                                {{ filter.label }}
+                            </label>
+                            {% if filter.type == 'select' %}
+                                <select class="form-select form-select-sm entity-filter-field" 
+                                        id="filter_{{ filter.field }}" 
+                                        data-field="{{ filter.field }}">
+                                    <option value="">Tous</option>
+                                    {% for option in filter.options %}
+                                        <option value="{{ option.value }}">{{ option.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% elseif filter.type == 'number' %}
+                                <div class="input-group input-group-sm">
+                                    <input type="number" 
+                                           class="form-control entity-filter-field" 
+                                           id="filter_{{ filter.field }}_min"
+                                           data-field="{{ filter.field }}"
+                                           data-operator="min"
+                                           placeholder="Min">
+                                    <span class="input-group-text">-</span>
+                                    <input type="number" 
+                                           class="form-control entity-filter-field" 
+                                           id="filter_{{ filter.field }}_max"
+                                           data-field="{{ filter.field }}"
+                                           data-operator="max"
+                                           placeholder="Max">
+                                </div>
+                            {% elseif filter.type == 'date' %}
+                                <div class="input-group input-group-sm">
+                                    <input type="date" 
+                                           class="form-control entity-filter-field" 
+                                           id="filter_{{ filter.field }}_from"
+                                           data-field="{{ filter.field }}"
+                                           data-operator="from">
+                                    <span class="input-group-text">-</span>
+                                    <input type="date" 
+                                           class="form-control entity-filter-field" 
+                                           id="filter_{{ filter.field }}_to"
+                                           data-field="{{ filter.field }}"
+                                           data-operator="to">
+                                </div>
+                            {% else %}
+                                <input type="text" 
+                                       class="form-control form-control-sm entity-filter-field" 
+                                       id="filter_{{ filter.field }}"
+                                       data-field="{{ filter.field }}"
+                                       placeholder="{{ filter.placeholder|default('Rechercher...') }}">
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        {# Filtre simple par défaut #}
+        <div class="row align-items-end">
+            <div class="col-md-6">
+                <label for="{{ filter_id }}" class="form-label">
+                    <i class="fas fa-search me-1"></i>Filtrer la liste
+                </label>
+                <input type="text" 
+                       id="{{ filter_id }}" 
+                       class="form-control" 
+                       placeholder="{{ placeholder }}"
+                       autocomplete="off">
+            </div>
+            <div class="col-md-3">
+                <button type="button" id="{{ filter_id }}-clear" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>Effacer
+                </button>
+            </div>
+            <div class="col-md-3">
+                <div id="{{ filter_id }}-stats" class="text-muted small">
+                    <!-- Statistiques de filtrage -->
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <small class="text-muted mt-1 d-block">
+        <span id="filter-stats"></span>
+        <span class="ms-2">
+            <kbd>Ctrl+F</kbd> pour rechercher, <kbd>Échap</kbd> pour effacer
+        </span>
+    </small>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables pour filtrage simple
+    const filterInput = document.getElementById('{{ filter_id }}');
+    const clearButton = document.getElementById('{{ filter_id }}-clear');
+    const statsDiv = document.getElementById('{{ filter_id }}-stats');
+    
+    // Variables pour filtrage détaillé
+    const detailedFilters = document.querySelectorAll('.entity-filter-field');
+    const toggleFiltersBtn = document.getElementById('toggleFilters');
+    const clearAllFiltersBtn = document.getElementById('clearAllFilters');
+    const filtersContainer = document.getElementById('filtersContainer');
+    
+    const table = document.querySelector('{{ tableSelector|default("table") }}');
+    
+    if (!table) return;
+    
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const totalRows = rows.length;
+    
+    // Stockage des filtres actifs
+    let activeFilters = {};
+    
+    function updateStats(visibleCount) {
+        const statsElement = document.getElementById('filter-stats') || statsDiv;
+        if (statsElement) {
+            if (visibleCount === totalRows) {
+                statsElement.innerHTML = `<i class="fas fa-list me-1"></i>${totalRows} élément(s)`;
+            } else {
+                statsElement.innerHTML = `<i class="fas fa-filter me-1"></i>${visibleCount}/${totalRows} élément(s)`;
+            }
+        }
+    }
+    
+    function normalizeText(text) {
+        return text.toLowerCase()
+                  .normalize('NFD')
+                  .replace(/[\u0300-\u036f]/g, '')
+                  .trim();
+    }
+    
+    function matchesFilter(cellText, filterValue, operator = null) {
+        const normalizedCell = normalizeText(cellText);
+        const normalizedFilter = normalizeText(filterValue);
+        
+        if (operator === 'min') {
+            const num = parseFloat(cellText.replace(/[^\d.-]/g, ''));
+            return !isNaN(num) && num >= parseFloat(filterValue);
+        } else if (operator === 'max') {
+            const num = parseFloat(cellText.replace(/[^\d.-]/g, ''));
+            return !isNaN(num) && num <= parseFloat(filterValue);
+        } else if (operator === 'from') {
+            const cellDate = new Date(cellText);
+            const filterDate = new Date(filterValue);
+            return cellDate >= filterDate;
+        } else if (operator === 'to') {
+            const cellDate = new Date(cellText);
+            const filterDate = new Date(filterValue);
+            return cellDate <= filterDate;
+        }
+        
+        return normalizedCell.includes(normalizedFilter);
+    }
+    
+    function filterTable() {
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            // Ignorer les lignes spéciales
+            if (row.classList.contains('table-secondary') || row.querySelector('.fst-italic')) {
+                return;
+            }
+            
+            let isVisible = true;
+            
+            // Filtrage simple
+            if (filterInput && filterInput.value.trim()) {
+                const filterValue = filterInput.value.trim();
+                const text = row.textContent;
+                isVisible = matchesFilter(text, filterValue);
+            }
+            
+            // Filtrage détaillé
+            if (Object.keys(activeFilters).length > 0) {
+                const cells = row.querySelectorAll('td');
+                
+                for (const [field, filterData] of Object.entries(activeFilters)) {
+                    const fieldIndex = getFieldIndex(field);
+                    if (fieldIndex >= 0 && cells[fieldIndex]) {
+                        const cellText = cells[fieldIndex].textContent.trim();
+                        
+                        if (Array.isArray(filterData)) {
+                            // Filtres numériques ou de date avec min/max
+                            const hasMatch = filterData.some(filter => 
+                                matchesFilter(cellText, filter.value, filter.operator)
+                            );
+                            if (!hasMatch) {
+                                isVisible = false;
+                                break;
+                            }
+                        } else {
+                            // Filtre simple
+                            if (!matchesFilter(cellText, filterData)) {
+                                isVisible = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            row.style.display = isVisible ? '' : 'none';
+            if (isVisible) visibleCount++;
+        });
+        
+        updateStats(visibleCount);
+        highlightTerms();
+    }
+    
+    function getFieldIndex(fieldName) {
+        // Mapper les noms de champs aux index de colonnes
+        const headers = table.querySelectorAll('thead th');
+        const fieldMapping = {
+            'libelle': 1,
+            'tiers': 2,
+            'montant': 3,
+            'nom': 1,
+            'prenom': 2,
+            'email': 3,
+            'ville': 4,
+            'username': 1,
+            'siret': 2,
+            'siren': 3,
+            'description': 2,
+            'statut': 3,
+            'annee': 2
+        };
+        
+        return fieldMapping[fieldName] || -1;
+    }
+    
+    function highlightTerms() {
+        removeHighlights();
+        
+        const searchTerms = [];
+        
+        // Collecter les termes du filtre simple
+        if (filterInput && filterInput.value.trim()) {
+            searchTerms.push(filterInput.value.trim());
+        }
+        
+        // Collecter les termes des filtres détaillés
+        Object.values(activeFilters).forEach(filterData => {
+            if (Array.isArray(filterData)) {
+                filterData.forEach(filter => {
+                    if (filter.value && ['min', 'max', 'from', 'to'].includes(filter.operator)) {
+                        searchTerms.push(filter.value);
+                    }
+                });
+            } else if (filterData) {
+                searchTerms.push(filterData);
+            }
+        });
+        
+        if (searchTerms.length === 0) return;
+        
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                searchTerms.forEach(term => {
+                    highlightInElement(row, term);
+                });
+            }
+        });
+    }
+    
+    function highlightInElement(element, term) {
+        const walker = document.createTreeWalker(
+            element,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+        
+        const textNodes = [];
+        let node;
+        
+        while (node = walker.nextNode()) {
+            if (node.parentElement.tagName !== 'MARK') {
+                textNodes.push(node);
+            }
+        }
+        
+        textNodes.forEach(textNode => {
+            const text = textNode.textContent;
+            const normalizedText = normalizeText(text);
+            const normalizedTerm = normalizeText(term);
+            
+            if (normalizedText.includes(normalizedTerm)) {
+                const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                const highlightedText = text.replace(regex, '<mark>$1</mark>');
+                
+                if (highlightedText !== text) {
+                    const wrapper = document.createElement('span');
+                    wrapper.innerHTML = highlightedText;
+                    textNode.parentNode.replaceChild(wrapper, textNode);
+                }
+            }
+        });
+    }
+    
+    function removeHighlights() {
+        table.querySelectorAll('mark').forEach(mark => {
+            const parent = mark.parentNode;
+            parent.replaceChild(document.createTextNode(mark.textContent), mark);
+            parent.normalize();
+        });
+    }
+                const textNodes = [];
+                let node;
+                while (node = walker.nextNode()) {
+                    if (node.nodeValue.toLowerCase().includes(term)) {
+                        textNodes.push(node);
+                    }
+                }
+                
+                textNodes.forEach(textNode => {
+                    const parent = textNode.parentNode;
+                    if (parent.tagName !== 'MARK') {
+                        const regex = new RegExp(`(${term})`, 'gi');
+                        const highlightedText = textNode.nodeValue.replace(regex, '<mark class="bg-warning">$1</mark>');
+                        
+                        const temp = document.createElement('div');
+                        temp.innerHTML = highlightedText;
+                        
+                        while (temp.firstChild) {
+                            parent.insertBefore(temp.firstChild, textNode);
+                        }
+                        parent.removeChild(textNode);
+                    }
+                });
+            }
+        });
+    }
+    
+    function removeHighlights() {
+        const highlights = table.querySelectorAll('mark.bg-warning');
+        highlights.forEach(mark => {
+            const parent = mark.parentNode;
+            parent.replaceChild(document.createTextNode(mark.textContent), mark);
+            parent.normalize();
+        });
+    }
+    
+    // Event listeners
+    filterInput.addEventListener('input', filterTable);
+    filterInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            filterTable();
+        }
+    });
+    
+    clearButton.addEventListener('click', function() {
+        filterInput.value = '';
+        filterTable();
+        filterInput.focus();
+    });
+    
+    // Initialisation
+    updateStats(totalRows);
+    
+    // Focus automatique sur le champ de recherche si Ctrl+F
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            filterInput.focus();
+        }
+    });
+});
+</script>
+
+<style>
+#{{ filter_id }} {
+    transition: all 0.3s ease;
+}
+
+#{{ filter_id }}:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+mark.bg-warning {
+    background-color: #fff3cd !important;
+    padding: 0.1em 0.2em;
+    border-radius: 0.25rem;
+}
+
+.table tbody tr {
+    transition: opacity 0.2s ease;
+}
+
+.table tbody tr[style*="display: none"] {
+    opacity: 0;
+}
+</style>

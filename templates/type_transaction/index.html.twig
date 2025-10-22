@@ -16,6 +16,11 @@
             </div>
         </div>
         
+        {{ include('components/entity_filter.html.twig', {
+            'filter_id': 'type-transaction-filter',
+            'placeholder': 'Rechercher par libellé, description...'
+        }) }}
+        
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead class="table-dark">

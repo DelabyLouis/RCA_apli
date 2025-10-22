@@ -86,6 +86,11 @@
 {% block body %}
     <h1>Role index</h1>
     
+    {% include 'components/entity_filter.html.twig' with {
+        'placeholder': 'Rechercher par libellé, description...',
+        'tableSelector': '.table tbody'
+    } %}
+    
     <div id="message-container"></div>
 
     <table class="table" data-turbo="false">

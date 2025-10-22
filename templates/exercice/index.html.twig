@@ -29,6 +29,40 @@
 
             <div class="card shadow-sm">
                 <div class="card-body">
+                    {{ include('components/entity_filter_detailed.html.twig', {
+                        'filters': [
+                            {
+                                'field': 'libelle',
+                                'label': 'Libellé',
+                                'type': 'text',
+                                'placeholder': 'Rechercher par libellé...',
+                                'width': 4
+                            },
+                            {
+                                'field': 'annee',
+                                'label': 'Année',
+                                'type': 'number',
+                                'width': 2
+                            },
+                            {
+                                'field': 'statut',
+                                'label': 'Statut',
+                                'type': 'select',
+                                'width': 3,
+                                'options': [
+                                    { 'value': 'ouvert', 'label': 'Ouvert' },
+                                    { 'value': 'clos', 'label': 'Clôturé' }
+                                ]
+                            },
+                            {
+                                'field': 'date_creation',
+                                'label': 'Date de création',
+                                'type': 'date',
+                                'width': 3
+                            }
+                        ]
+                    }) }}
+                    
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead class="table-dark">

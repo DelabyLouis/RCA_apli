@@ -26,6 +26,39 @@
             </div>
         </div>
         
+        {{ include('components/entity_filter_detailed.html.twig', {
+            'filters': [
+                {
+                    'field': 'libelle',
+                    'label': 'Libellé',
+                    'type': 'text',
+                    'placeholder': 'Rechercher par libellé...',
+                    'width': 3
+                },
+                {
+                    'field': 'tiers',
+                    'label': 'Tiers',
+                    'type': 'text',
+                    'placeholder': 'Rechercher par tiers...',
+                    'width': 3
+                },
+                {
+                    'field': 'montant',
+                    'label': 'Montant',
+                    'type': 'number_with_type',
+                    'width': 3,
+                    'debit_column': 5,
+                    'credit_column': 6
+                },
+                {
+                    'field': 'date_creation',
+                    'label': 'Date de création',
+                    'type': 'date',
+                    'width': 3
+                }
+            ]
+        }) }}
+        
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead class="table-dark">
