@@ -52,20 +52,31 @@ final class TransactionController extends AbstractController
             ->getQuery()
             ->getResult();
         
-        // Calculer le solde cumulé pour chaque transaction
-        $solde = 0;
-        $transactionsAvecSolde = [];
+        // Calculer le solde de l'exercice précédent si on filtre par exercice
+        $soldePrecedent = 0;
+        if ($exerciceFilter) {
+            $exercicePrecedent = $exerciceRepository->findPreviousExercice($exerciceFilter);
+            if ($exercicePrecedent) {
+                $soldePrecedent = $transactionRepository->calculateSoldeByExercice($exercicePrecedent->getIdExercice());
+            }
+        }
+        
+        // Calculer le montant cumulé pour chaque transaction
+        $montantCumule = $soldePrecedent;
+        $transactionsAvecMontant = [];
         
         foreach ($transactions as $transaction) {
-            $solde += $transaction->getMontant();
-            $transactionsAvecSolde[] = [
+            $montantCumule += $transaction->getMontant();
+            $transactionsAvecMontant[] = [
                 'transaction' => $transaction,
-                'solde' => $solde
+                'montant_cumule' => $montantCumule
             ];
         }
         
         return $this->render('transaction/index.html.twig', [
-            'transactions_avec_solde' => $transactionsAvecSolde,
+            'transactions_avec_montant' => $transactionsAvecMontant,
+            'solde_precedent' => $soldePrecedent,
+            'exercice_precedent_existe' => $exerciceFilter && $soldePrecedent != 0,
             'personnes' => $personneRepository->findAll(),
             'entreprises' => $entrepriseRepository->findAll(),
             'exercices' => $exerciceRepository->findAll(),

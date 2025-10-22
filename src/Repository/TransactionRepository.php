@@ -45,6 +45,21 @@ class TransactionRepository extends ServiceEntityRepository
         return $result ? (int) $result : 0;
     }
 
+    /**
+     * Calcule le solde total d'un exercice
+     */
+    public function calculateSoldeByExercice(int $exerciceId): float
+    {
+        $result = $this->createQueryBuilder('t')
+            ->select('SUM(t.montant)')
+            ->where('t.exercice = :exerciceId')
+            ->setParameter('exerciceId', $exerciceId)
+            ->getQuery()
+            ->getSingleScalarResult();
+        
+        return $result ? (float) $result : 0.0;
+    }
+
     //    /**
     //     * @return Transaction[] Returns an array of Transaction objects
     //     */

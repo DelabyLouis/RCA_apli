@@ -29,6 +29,20 @@ class ExerciceRepository extends ServiceEntityRepository
         return $result ? (int) $result : 0;
     }
 
+    /**
+     * Trouve l'exercice précédent basé sur le numéro d'ordre
+     */
+    public function findPreviousExercice(Exercice $exercice): ?Exercice
+    {
+        return $this->createQueryBuilder('e')
+            ->where('e.numero_ordre < :numero_ordre')
+            ->setParameter('numero_ordre', $exercice->getNumeroOrdre())
+            ->orderBy('e.numero_ordre', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    /**
     //     * @return Exercice[] Returns an array of Exercice objects
     //     */

@@ -37,16 +37,31 @@
                         <th>Tiers</th>
                         <th>Débit</th>
                         <th>Crédit</th>
-                        <th>Solde</th>
+                        <th>Montant</th>
                         <th>Exercice</th>
                         <th>Type</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                {% for item in transactions_avec_solde %}
+                {% if exercice_precedent_existe %}
+                    <tr class="table-secondary">
+                        <td colspan="7" class="text-muted fst-italic">
+                            <i class="fas fa-level-up-alt me-2"></i>Solde de l'exercice précédent
+                        </td>
+                        <td class="text-end">
+                            {% if solde_precedent >= 0 %}
+                                <span class="text-success fw-bold">{{ solde_precedent|number_format(2, ',', ' ') }} €</span>
+                            {% else %}
+                                <span class="text-danger fw-bold">{{ solde_precedent|number_format(2, ',', ' ') }} €</span>
+                            {% endif %}
+                        </td>
+                        <td colspan="3"></td>
+                    </tr>
+                {% endif %}
+                {% for item in transactions_avec_montant %}
                     {% set transaction = item.transaction %}
-                    {% set solde = item.solde %}
+                    {% set montant_cumule = item.montant_cumule %}
                     <tr data-id="{{ transaction.idTransaction }}">
                         <td>{{ transaction.idTransaction }}</td>
                         <td class="editable-field" data-field="libelle">{{ transaction.libelle }}</td>
@@ -86,10 +101,10 @@
                             {% endif %}
                         </td>
                         <td class="solde-cell text-end">
-                            {% if solde >= 0 %}
-                                <span class="text-success fw-bold">{{ solde|number_format(2, ',', ' ') }} €</span>
+                            {% if montant_cumule >= 0 %}
+                                <span class="text-success fw-bold">{{ montant_cumule|number_format(2, ',', ' ') }} €</span>
                             {% else %}
-                                <span class="text-danger fw-bold">{{ solde|number_format(2, ',', ' ') }} €</span>
+                                <span class="text-danger fw-bold">{{ montant_cumule|number_format(2, ',', ' ') }} €</span>
                             {% endif %}
                         </td>
                         <td class="editable-field" data-field="exercice">{{ transaction.exercice ? transaction.exercice.libelle : '' }}</td>
