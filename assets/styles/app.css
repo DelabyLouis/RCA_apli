@@ -1446,3 +1446,95 @@ button.btn-secondary:hover {
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.5) !important;
     color: white !important;
 }
+
+/* Bouton Transactions jaune dans le tableau des exercices - forcer la couleur */
+.table .btn-warning,
+table .btn-warning,
+.table tbody .btn-warning,
+table tbody .btn-warning,
+.btn-transactions-exercice {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    color: #212529 !important;
+    font-weight: 600 !important;
+}
+
+.table .btn-warning:hover,
+table .btn-warning:hover,
+.table tbody .btn-warning:hover,
+table tbody .btn-warning:hover,
+.btn-transactions-exercice:hover {
+    background-color: #e0a800 !important;
+    border-color: #e0a800 !important;
+    color: #212529 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.4) !important;
+}
+
+/* Règle ultra-spécifique pour le bouton Transactions des exercices */
+button.btn-transactions-exercice,
+.btn.btn-transactions-exercice {
+    background: #ffc107 !important;
+    border: 1px solid #ffc107 !important;
+    color: #212529 !important;
+}
+
+/* Centrage des colonnes du tableau des exercices SEULEMENT */
+.table.table-exercices th,
+.table.table-exercices td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Règles générales pour tous les autres tableaux - rétablir l'alignement normal */
+.table th,
+.table td {
+    vertical-align: middle;
+}
+
+/* Alignement spécifique pour le tableau des transactions */
+.table.table-striped th,
+.table.table-striped td {
+    text-align: left;
+}
+
+/* Montants à droite dans les tableaux de transactions */
+.table.table-striped .text-end,
+.table.table-striped .montant-cell {
+    text-align: right !important;
+}
+
+/* En-têtes spécifiques pour les colonnes de montant */
+.table.table-striped thead th:nth-child(6),  /* Débit */
+.table.table-striped thead th:nth-child(7),  /* Crédit */
+.table.table-striped thead th:nth-child(8) { /* Montant */
+    text-align: right;
+}
+
+/* Centrage pour certaines colonnes spécifiques dans transactions */
+.table.table-striped thead th:nth-child(1),  /* ID */
+.table.table-striped thead th:nth-child(3),  /* N° Ordre */
+.table.table-striped thead th:nth-child(4),  /* Date */
+.table.table-striped thead th:nth-child(11) { /* Actions */
+    text-align: center;
+}
+
+.table.table-striped tbody td:nth-child(1),  /* ID */
+.table.table-striped tbody td:nth-child(3),  /* N° Ordre */
+.table.table-striped tbody td:nth-child(4),  /* Date */
+.table.table-striped tbody td:nth-child(11) { /* Actions */
+    text-align: center;
+}
+
+/* Amélioration de l'alignement des éléments éditables dans les exercices seulement */
+.table.table-exercices .editable-field {
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Style pour les boutons de statut des exercices */
+.btn-statut-exercice {
+    min-width: 140px;
+    display: inline-block;
+}

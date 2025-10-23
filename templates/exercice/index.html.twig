@@ -64,22 +64,22 @@
                     }) }}
                     
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover table-exercices">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>N°</th>
-                                    <th>Libellé</th>
-                                    <th>Début</th>
-                                    <th>Fin</th>
+                                    <th class="text-center">N°</th>
+                                    <th class="text-center">Libellé</th>
+                                    <th class="text-center">Début</th>
+                                    <th class="text-center">Fin</th>
                                     <th class="text-center">Statut</th>
-                                    <th>Actions</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for exercice in exercices %}
                                     <tr class="{% if exercice.clos %}table-secondary{% endif %}">
-                                        <td><strong>{{ exercice.numeroOrdre }}</strong></td>
-                                        <td>
+                                        <td class="text-center"><strong>{{ exercice.numeroOrdre }}</strong></td>
+                                        <td class="text-center">
                                             {% if not exercice.clos %}
                                                 <span class="editable-field" 
                                                       data-field="libelle" 
@@ -91,7 +91,7 @@
                                                 {{ exercice.libelle }}
                                             {% endif %}
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             {% if not exercice.clos %}
                                                 <span class="editable-field" 
                                                       data-field="dateDebut" 
@@ -103,7 +103,7 @@
                                                 {{ exercice.dateDebut ? exercice.dateDebut|date('d/m/Y') : '' }}
                                             {% endif %}
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             {% if not exercice.clos %}
                                                 <span class="editable-field" 
                                                       data-field="dateFin" 
@@ -132,33 +132,9 @@
                                                 </button>
                                             {% endif %}
                                         </td>
-                                        <td>
-                                            {% if not exercice.clos %}
-                                                <button type="button" 
-                                                        class="btn btn-outline-danger btn-sm" 
-                                                        title="Supprimer l'exercice"
-                                                        onclick="if(confirm('Êtes-vous sûr de vouloir supprimer cet exercice ?')) { 
-                                                            var form = document.createElement('form');
-                                                            form.method = 'POST';
-                                                            form.action = '{{ path('app_exercice_delete', {id_exercice: exercice.idExercice}) }}';
-                                                            var token = document.createElement('input');
-                                                            token.type = 'hidden';
-                                                            token.name = '_token';
-                                                            token.value = '{{ csrf_token('delete' ~ exercice.idExercice) }}';
-                                                            form.appendChild(token);
-                                                            document.body.appendChild(form);
-                                                            form.submit();
-                                                        }">
-                                                    <i class="fas fa-trash me-1"></i>Supprimer
-                                                </button>
-                                            {% else %}
-                                                <span class="btn btn-outline-secondary btn-sm disabled" title="Suppression interdite">
-                                                    <i class="fas fa-trash me-1"></i>Supprimer
-                                                </span>
-                                            {% endif %}
-                                            
+                                        <td class="text-center">
                                             <button type="button" 
-                                                    class="btn btn-info btn-sm ms-1" 
+                                                    class="btn btn-warning btn-sm btn-transactions-exercice" 
                                                     title="Voir les transactions de cet exercice"
                                                     onclick="window.location.href='{{ path('app_transaction_index') }}?exercice_id={{ exercice.idExercice }}'">
                                                 <i class="fas fa-list me-1"></i>Transactions
