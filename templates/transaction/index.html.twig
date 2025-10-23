@@ -143,9 +143,17 @@
                         <td class="editable-field" data-field="exercice">{{ transaction.exercice ? transaction.exercice.libelle : '' }}</td>
                         <td class="editable-field" data-field="type_transaction">{{ transaction.typeTransaction ? transaction.typeTransaction.libelle : '' }}</td>
                         <td>
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="{{ transaction.idTransaction }}" title="Supprimer">
-                                <i class="fas fa-trash me-1"></i> Supprimer
-                            </button>
+                            <div class="btn-group" role="group">
+                                <a href="{{ path('app_transaction_show', {'id_transaction': transaction.idTransaction}) }}" class="btn btn-info btn-sm" title="Voir les détails">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}" class="btn btn-warning btn-sm" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-danger btn-sm delete-btn" data-id="{{ transaction.idTransaction }}" title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 {% else %}

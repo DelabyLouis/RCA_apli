@@ -83,9 +83,15 @@
     <h1>Transactions de l'exercice "{{ exercice.libelle }}"</h1>
 
     <div class="mb-3">
-        <a href="{{ path('app_exercice_index') }}" class="btn btn-secondary">← Retour aux exercices</a>
-        <a href="{{ path('app_transaction_index') }}" class="btn btn-info">Voir toutes les transactions</a>
-        <a href="{{ path('app_transaction_new') }}" class="btn btn-primary">Créer nouvelle transaction</a>
+        <a href="{{ path('app_exercice_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Retour aux exercices
+        </a>
+        <a href="{{ path('app_transaction_index') }}" class="btn btn-info">
+            <i class="fas fa-list me-1"></i>Voir toutes les transactions
+        </a>
+        <a href="{{ path('app_transaction_new') }}" class="btn btn-success">
+            <i class="fas fa-plus me-1"></i>Créer nouvelle transaction
+        </a>
     </div>
 
     <div class="card mb-3">

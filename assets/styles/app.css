@@ -1,6 +1,807 @@
-body {
-    background-color: skyblue;
+/* ==============================================
+   THEME NOIR ET BLANC - COULEURS PRINCIPALES
+   ============================================== */
+
+:root {
+    --primary-color: #ffffff;
+    --secondary-color: #000000;
+    --accent-color: #cccccc;
+    --light-gray: #333333;
+    --medium-gray: #2a2a2a;
+    --dark-gray: #666666;
+    --border-color: #444444;
+    --text-muted: #999999;
 }
+
+/* Corps principal */
+body {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navigation */
+.navbar {
+    background-color: var(--secondary-color) !important;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.navbar-brand,
+.navbar-nav .nav-link {
+    color: var(--primary-color) !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--accent-color) !important;
+}
+
+/* Boutons */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--secondary-color);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.btn-secondary {
+    background-color: var(--dark-gray);
+    border-color: var(--dark-gray);
+    color: var(--primary-color);
+}
+
+.btn-outline-secondary {
+    color: var(--primary-color);
+    border-color: var(--border-color);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--border-color);
+    color: var(--primary-color);
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: var(--primary-color);
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: var(--primary-color);
+}
+
+/* Tables */
+.table {
+    color: var(--primary-color) !important;
+    background-color: var(--secondary-color) !important;
+}
+
+.table-dark {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+}
+
+.table-secondary {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(even) > td {
+    background-color: var(--secondary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--border-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.table th,
+.table td {
+    border-color: var(--border-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.table tbody tr {
+    color: var(--primary-color) !important;
+}
+
+.table tbody tr td {
+    color: var(--primary-color) !important;
+}
+
+/* Force un fond différent pour toutes les lignes de table */
+.table tbody tr {
+    background-color: var(--light-gray);
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: var(--medium-gray);
+}
+
+/* Cards */
+.card {
+    border: 1px solid var(--border-color);
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.card-header {
+    background-color: var(--light-gray);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--primary-color);
+}
+
+.card-body {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+/* Corrections pour tous les éléments avec fond blanc */
+.bg-white {
+    background-color: var(--secondary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Corrections pour les formulaires */
+.form-control {
+    border: 1px solid var(--border-color) !important;
+    color: var(--primary-color) !important;
+    background-color: var(--light-gray) !important;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.form-label {
+    color: var(--primary-color) !important;
+}
+
+.form-select {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.form-select:focus {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.form-check-input {
+    background-color: var(--light-gray) !important;
+    border-color: var(--border-color) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.form-check-label {
+    color: var(--primary-color) !important;
+}
+
+/* Corrections pour les input groups */
+.input-group-text {
+    background-color: var(--light-gray) !important;
+    border-color: var(--border-color) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Corrections pour tous les éléments avec fond blanc par défaut */
+input,
+textarea,
+select,
+option {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Corrections pour les dropdowns */
+.dropdown-menu {
+    border: 1px solid var(--border-color) !important;
+    background-color: var(--secondary-color) !important;
+}
+
+.dropdown-item {
+    color: var(--primary-color) !important;
+    background-color: transparent !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Corrections pour les modals */
+.modal-content {
+    background-color: var(--secondary-color) !important;
+    color: var(--primary-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color) !important;
+    background-color: var(--light-gray) !important;
+}
+
+.modal-body {
+    background-color: var(--secondary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color) !important;
+    background-color: var(--light-gray) !important;
+}
+
+/* Badges */
+.badge {
+    color: var(--secondary-color);
+}
+
+.badge.bg-primary {
+    background-color: var(--primary-color) !important;
+    color: var(--secondary-color) !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--dark-gray) !important;
+    color: var(--primary-color) !important;
+}
+
+.badge.bg-success {
+    background-color: #28a745 !important;
+    color: var(--primary-color) !important;
+}
+
+.badge.bg-info {
+    background-color: #17a2b8 !important;
+    color: var(--primary-color) !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: var(--secondary-color) !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+    color: var(--primary-color) !important;
+}
+
+/* Alerts */
+.alert {
+    border: 1px solid var(--border-color);
+    color: var(--primary-color);
+}
+
+.alert-success {
+    background-color: #1e4620;
+    border-color: #28a745;
+    color: #90ee90;
+}
+
+.alert-danger {
+    background-color: #4a1a1a;
+    border-color: #dc3545;
+    color: #ffb3b3;
+}
+
+.alert-info {
+    background-color: #0c3544;
+    border-color: #17a2b8;
+    color: #b3e5fc;
+}
+
+.alert-warning {
+    background-color: #4a3c00;
+    border-color: #ffc107;
+    color: #fff3cd;
+}
+
+/* ==============================================
+   STYLES EXISTANTS MODIFIÉS
+   ============================================== */
+
+/* Conteneur principal */
+.container-fluid,
+.container {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+/* Titres */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Links */
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+    border: 1px solid var(--border-color);
+    background-color: var(--secondary-color);
+}
+
+.dropdown-item {
+    color: var(--primary-color);
+}
+
+.dropdown-item:hover {
+    background-color: var(--light-gray);
+    color: var(--primary-color);
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+    background-color: var(--light-gray);
+}
+
+.breadcrumb-item a {
+    color: var(--accent-color);
+}
+
+/* Icons */
+.fas, .far, .fab {
+    color: inherit;
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: var(--primary-color);
+    border-color: var(--border-color);
+    background-color: var(--secondary-color);
+}
+
+.pagination .page-link:hover {
+    background-color: var(--light-gray);
+    color: var(--primary-color);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+/* Text utilities */
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.text-secondary {
+    color: var(--text-muted) !important;
+}
+
+.text-success {
+    color: #90ee90 !important;
+}
+
+.text-danger {
+    color: #ffb3b3 !important;
+}
+
+.text-warning {
+    color: #fff3cd !important;
+}
+
+.text-info {
+    color: #b3e5fc !important;
+}
+
+.text-dark {
+    color: var(--primary-color) !important;
+}
+
+.text-light {
+    color: var(--text-muted) !important;
+}
+
+/* Bootstrap background utilities override */
+.bg-light {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+}
+
+.bg-dark {
+    background-color: var(--secondary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.bg-secondary {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Corrections pour tous les contenus des pages */
+.container,
+.container-fluid,
+.row,
+.col,
+div,
+p,
+span,
+small,
+strong,
+em,
+li,
+ul,
+ol {
+    color: var(--primary-color);
+}
+
+/* Corrections spécifiques pour les cartes */
+.card,
+.card-body,
+.card-header,
+.card-footer {
+    color: var(--primary-color) !important;
+}
+
+.card * {
+    color: var(--primary-color);
+}
+
+/* Corrections pour les titres */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-color) !important;
+}
+
+/* Corrections pour tous les liens */
+a:not(.btn):not(.badge) {
+    color: var(--accent-color) !important;
+}
+
+a:not(.btn):not(.badge):hover {
+    color: var(--primary-color) !important;
+}
+
+/* Force la couleur pour tous les éléments de liste */
+.list-group-item,
+.dropdown-item {
+    color: var(--primary-color) !important;
+}
+
+/* Force la couleur pour les icônes */
+i.fas, i.far, i.fab {
+    color: inherit !important;
+}
+
+/* Corrections pour les badges spécifiques */
+.badge.bg-success {
+    background-color: #28a745 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000000 !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+    color: #ffffff !important;
+}
+
+/* Navigation corrections */
+.nav-link {
+    color: var(--primary-color) !important;
+}
+
+.nav-link:hover {
+    color: var(--accent-color) !important;
+}
+
+/* Correction globale pour tous les éléments dans les conteneurs principaux */
+main,
+.main-content,
+section,
+article {
+    color: var(--primary-color);
+}
+
+main *:not(.btn):not(.badge):not(.alert),
+.main-content *:not(.btn):not(.badge):not(.alert),
+section *:not(.btn):not(.badge):not(.alert),
+article *:not(.btn):not(.badge):not(.alert) {
+    color: var(--primary-color);
+}
+
+/* S'assurer que les formulaires sont lisibles */
+.form-group,
+.form-group *,
+.mb-3,
+.mb-3 * {
+    color: var(--primary-color);
+}
+
+/* Règle globale pour éliminer tous les fonds blancs */
+*[style*="background-color: white"],
+*[style*="background-color: #fff"],
+*[style*="background-color: #ffffff"],
+*[style*="background: white"],
+*[style*="background: #fff"],
+*[style*="background: #ffffff"] {
+    background-color: var(--secondary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Correction pour les éléments Bootstrap avec fond blanc */
+.bg-white,
+.table-light,
+.list-group-item-light,
+.alert-light {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Correction pour les bordures et outline */
+*:focus {
+    outline-color: var(--primary-color) !important;
+}
+
+/* Correction pour les éléments éditable qui pourraient avoir des fonds blancs */
+.editable-field input,
+.editable-field textarea {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Correction spécifique pour les filtres détaillés */
+.dropdown-toggle-btn {
+    background: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.dropdown-toggle-btn:hover {
+    background-color: var(--border-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.dropdown-options {
+    background: var(--secondary-color) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.dropdown-options .form-check-label {
+    color: var(--primary-color) !important;
+}
+
+/* Correction pour les colonnes vides dans les messages "no records found" */
+td[colspan] {
+    color: var(--primary-color) !important;
+}
+
+/* Correction pour tous les contenus de cellules */
+td, th {
+    color: var(--primary-color) !important;
+}
+
+/* Correction pour les éléments inline */
+.fst-italic,
+.fw-bold,
+.fw-normal {
+    color: inherit !important;
+}
+
+/* Input groups */
+.input-group-text {
+    background-color: var(--light-gray);
+    border-color: var(--border-color);
+    color: var(--primary-color);
+}
+
+/* Modal */
+.modal-content {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: 1px solid var(--border-color);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+}
+
+/* Close button */
+.btn-close {
+    filter: invert(1);
+}
+
+/* Navbar toggler */
+.navbar-toggler {
+    border-color: var(--border-color);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Editable fields */
+.editable-field {
+    cursor: pointer;
+    padding: 5px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    transition: all 0.2s;
+    color: var(--primary-color) !important;
+}
+
+.editable-field:hover {
+    background-color: var(--light-gray) !important;
+    border-color: var(--border-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.editable-field.editing {
+    background-color: var(--light-gray) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+    color: var(--primary-color) !important;
+}
+
+.editable-input {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+    border: none !important;
+}
+
+/* Styles spécifiques pour les transactions */
+.montant-cell {
+    color: var(--primary-color) !important;
+}
+
+.solde-cell {
+    color: var(--primary-color) !important;
+}
+
+/* Force tous les spans dans les tables à être blancs */
+.table span {
+    color: inherit !important;
+}
+
+.table .fw-bold {
+    color: inherit !important;
+}
+
+/* Correction pour les badges dans les tables */
+.table .badge {
+    color: var(--secondary-color) !important;
+}
+
+.table .badge.bg-info {
+    background-color: #17a2b8 !important;
+    color: var(--primary-color) !important;
+}
+
+.table .badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: var(--secondary-color) !important;
+}
+
+/* Mark highlighting */
+mark {
+    background-color: #4a3c00;
+    color: #fff3cd;
+    padding: 0;
+    border-radius: 2px;
+}
+
+/* List groups */
+.list-group-item {
+    background-color: var(--secondary-color);
+    border-color: var(--border-color);
+    color: var(--primary-color);
+}
+
+.list-group-item:hover {
+    background-color: var(--light-gray);
+}
+
+/* Progress bars */
+.progress {
+    background-color: var(--light-gray);
+}
+
+.progress-bar {
+    background-color: var(--primary-color);
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    color: var(--primary-color);
+    border-color: var(--border-color);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+    border-color: var(--border-color);
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: var(--border-color);
+    background-color: var(--light-gray);
+}
+
+/* Tooltips */
+.tooltip .tooltip-inner {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+/* Popovers */
+.popover {
+    background-color: var(--secondary-color);
+    border-color: var(--border-color);
+}
+
+.popover-header {
+    background-color: var(--light-gray);
+    border-bottom-color: var(--border-color);
+}
+
+.popover-body {
+    color: var(--primary-color);
+}
+
+/* ==============================================
+   STYLES EXISTANTS (Listes déroulantes)
+   ============================================== */
 
 /* Styles pour les listes déroulantes avec cases à cocher */
 .form-check-list-dropdown {
@@ -117,28 +918,28 @@ body {
     min-width: 100px;
 }
 
-/* Styles pour la colonne solde */
+/* Styles pour la colonne solde avec thème sombre */
 .montant-solde {
     font-weight: bold;
     font-size: 0.95em;
 }
 
 .solde-positif {
-    color: #198754;
-    background-color: #d1e7dd;
+    color: #90ee90;
+    background-color: #1e4620;
     padding: 2px 6px;
     border-radius: 3px;
 }
 
 .solde-negatif {
-    color: #dc3545;
-    background-color: #f8d7da;
+    color: #ffb3b3;
+    background-color: #4a1a1a;
     padding: 2px 6px;
     border-radius: 3px;
 }
 
 .solde-nul {
-    color: #6c757d;
+    color: var(--text-muted);
     font-style: italic;
 }
 
@@ -150,4 +951,484 @@ body {
 
 .badge i {
     margin-right: 4px;
+}
+
+/* ==============================================
+   STYLES POUR LES FILTRES DÉTAILLÉS
+   ============================================== */
+
+.entity-filter-field {
+    transition: all 0.2s ease;
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.entity-filter-field:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.form-label.small {
+    font-weight: 600;
+    color: var(--primary-color) !important;
+}
+
+/* Correction pour les dropdown-toggle-btn */
+.dropdown-toggle-btn {
+    background: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.dropdown-toggle-btn:hover {
+    background-color: var(--border-color) !important;
+}
+
+.dropdown-options {
+    background: var(--secondary-color) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.dropdown-options .form-check-label {
+    color: var(--primary-color) !important;
+}
+
+
+/* CORRECTION FINALE - Assurer la lisibilité de TOUS les éléments de tableau */
+table tr,
+table td,
+table th,
+.table tr,
+.table td,
+.table th,
+.table tbody tr,
+.table tbody td,
+.table tbody th {
+}
+
+/* Forcer les couleurs alternées pour tous les tableaux */
+.table-striped tbody tr:nth-of-type(odd) {
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+}
+
+/* Éliminer tous les fonds blancs possibles */
+.bg-white,
+.table-light,
+.list-group-item-light,
+.alert-light,
+[class*="bg-light"],
+[style*="background-color: white"],
+[style*="background-color: #fff"],
+[style*="background-color: #ffffff"],
+[style*="background: white"],
+[style*="background: #fff"],
+[style*="background: #ffffff"] {
+}
+
+/* Assurer que les éléments de formulaire dans les tableaux restent lisibles */
+table .form-control,
+table .form-select,
+table .btn,
+.table .form-control,
+.table .form-select,
+.table .btn {
+}
+
+/* Correction spécifique pour les liens dans les tableaux */
+table a,
+.table a {
+}
+
+table a:hover,
+.table a:hover {
+}
+/* CORRECTION FINALE - Assurer la lisibilité de TOUS les éléments de tableau */
+table tr,
+table td,
+table th,
+.table tr,
+.table td,
+.table th,
+.table tbody tr,
+.table tbody td,
+.table tbody th {
+    background-color: inherit !important;
+    color: var(--primary-color) !important;
+}
+
+/* Forcer les couleurs alternées pour tous les tableaux */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #333333 !important;
+    color: var(--primary-color) !important;
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #2a2a2a !important;
+    color: var(--primary-color) !important;
+}
+
+/* Éliminer tous les fonds blancs possibles */
+.bg-white,
+.table-light,
+.list-group-item-light,
+.alert-light,
+[class*="bg-light"],
+[style*="background-color: white"],
+[style*="background-color: #fff"],
+[style*="background-color: #ffffff"],
+[style*="background: white"],
+[style*="background: #fff"],
+[style*="background: #ffffff"] {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Assurer que les éléments de formulaire dans les tableaux restent lisibles */
+table .form-control,
+table .form-select,
+table .btn,
+.table .form-control,
+.table .form-select,
+.table .btn {
+    background-color: var(--light-gray) !important;
+    color: var(--primary-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Correction spécifique pour les liens dans les tableaux */
+table a,
+.table a {
+    color: var(--primary-color) !important;
+}
+
+table a:hover,
+.table a:hover {
+    color: var(--text-muted) !important;
+}
+
+/* ================================ */
+/* SYSTÈME DE COULEURS POUR BOUTONS */
+/* ================================ */
+
+/* Variables de couleurs sémantiques */
+:root {
+    --btn-danger: #dc3545;      /* Rouge pour supprimer */
+    --btn-danger-hover: #c82333;
+    --btn-success: #28a745;     /* Vert pour créer/ajouter */
+    --btn-success-hover: #218838;
+    --btn-warning: #ffc107;     /* Jaune pour modifier */
+    --btn-warning-hover: #e0a800;
+    --btn-info: #17a2b8;        /* Bleu clair pour voir/détails */
+    --btn-info-hover: #138496;
+    --btn-secondary: #6c757d;   /* Gris pour actions neutres */
+    --btn-secondary-hover: #5a6268;
+    --btn-primary: #007bff;     /* Bleu principal */
+    --btn-primary-hover: #0056b3;
+}
+
+/* Boutons de suppression - Rouge */
+.btn-danger,
+a.btn-danger,
+button.btn-danger,
+input[type="submit"].btn-danger {
+    background-color: var(--btn-danger) !important;
+    border-color: var(--btn-danger) !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover,
+a.btn-danger:hover,
+button.btn-danger:hover {
+    background-color: var(--btn-danger-hover) !important;
+    border-color: var(--btn-danger-hover) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Boutons de création/ajout - Vert */
+.btn-success,
+a.btn-success,
+button.btn-success,
+input[type="submit"].btn-success {
+    background-color: var(--btn-success) !important;
+    border-color: var(--btn-success) !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover,
+a.btn-success:hover,
+button.btn-success:hover {
+    background-color: var(--btn-success-hover) !important;
+    border-color: var(--btn-success-hover) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Boutons de modification - Jaune/Orange */
+.btn-warning,
+a.btn-warning,
+button.btn-warning,
+input[type="submit"].btn-warning {
+    background-color: var(--btn-warning) !important;
+    border-color: var(--btn-warning) !important;
+    color: #212529 !important; /* Texte sombre sur jaune */
+    transition: all 0.3s ease;
+}
+
+.btn-warning:hover,
+a.btn-warning:hover,
+button.btn-warning:hover {
+    background-color: var(--btn-warning-hover) !important;
+    border-color: var(--btn-warning-hover) !important;
+    color: #212529 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+/* Boutons d'information/voir - Bleu clair */
+.btn-info,
+a.btn-info,
+button.btn-info,
+input[type="submit"].btn-info {
+    background-color: var(--btn-info) !important;
+    border-color: var(--btn-info) !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.btn-info:hover,
+a.btn-info:hover,
+button.btn-info:hover {
+    background-color: var(--btn-info-hover) !important;
+    border-color: var(--btn-info-hover) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+}
+
+/* Boutons primaires - Bleu principal */
+.btn-primary,
+a.btn-primary,
+button.btn-primary,
+input[type="submit"].btn-primary {
+    background-color: var(--btn-primary) !important;
+    border-color: var(--btn-primary) !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover,
+a.btn-primary:hover,
+button.btn-primary:hover {
+    background-color: var(--btn-primary-hover) !important;
+    border-color: var(--btn-primary-hover) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Boutons secondaires - Gris */
+.btn-secondary,
+a.btn-secondary,
+button.btn-secondary,
+input[type="submit"].btn-secondary {
+    background-color: var(--btn-secondary) !important;
+    border-color: var(--btn-secondary) !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover,
+a.btn-secondary:hover,
+button.btn-secondary:hover {
+    background-color: var(--btn-secondary-hover) !important;
+    border-color: var(--btn-secondary-hover) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Styles spéciaux pour les petits boutons */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+}
+
+/* Boutons avec icônes - Style amélioré */
+.btn i {
+    margin-right: 0.5rem;
+}
+
+.btn-sm i {
+    margin-right: 0.25rem;
+}
+
+/* Groupes de boutons */
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-radius: 0.375rem 0 0 0.375rem;
+}
+
+.btn-group .btn:last-child {
+    border-radius: 0 0.375rem 0.375rem 0;
+}
+
+/* Boutons dans les tableaux - espacement */
+.table .btn {
+    margin: 0.125rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Classes utilitaires pour les actions courantes */
+.btn-delete {
+    background-color: var(--btn-danger) !important;
+    border-color: var(--btn-danger) !important;
+    color: white !important;
+}
+
+.btn-edit {
+    background-color: var(--btn-warning) !important;
+    border-color: var(--btn-warning) !important;
+    color: #212529 !important;
+}
+
+.btn-view {
+    background-color: var(--btn-info) !important;
+    border-color: var(--btn-info) !important;
+    color: white !important;
+}
+
+.btn-create {
+    background-color: var(--btn-success) !important;
+    border-color: var(--btn-success) !important;
+    color: white !important;
+}
+
+/* Espacement amélioré pour les groupes de boutons */
+.btn-group .btn {
+    margin: 0;
+}
+
+.btn-group .btn + .btn {
+    margin-left: -1px;
+}
+
+/* Animation pour les boutons au survol */
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Amélioration des boutons de navigation */
+.btn-secondary {
+    background-color: var(--btn-secondary) !important;
+    border-color: var(--btn-secondary) !important;
+}
+
+.btn-secondary:hover {
+    background-color: var(--btn-secondary-hover) !important;
+    border-color: var(--btn-secondary-hover) !important;
+}
+
+/* Styles pour les boutons outline */
+.btn-outline-secondary {
+    color: var(--btn-secondary) !important;
+    border-color: var(--btn-secondary) !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--btn-secondary) !important;
+    border-color: var(--btn-secondary) !important;
+    color: white !important;
+}
+
+.btn-outline-primary {
+    color: var(--btn-primary) !important;
+    border-color: var(--btn-primary) !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--btn-primary) !important;
+    border-color: var(--btn-primary) !important;
+    color: white !important;
+}
+
+/* Amélioration des boutons disabled */
+.btn.disabled,
+.btn:disabled {
+    opacity: 0.6;
+    transform: none !important;
+    cursor: not-allowed;
+}
+
+/* Style spécial pour les boutons d'action dans les cartes */
+.card .btn-group {
+    margin: 0.25rem 0;
+}
+
+/* Boutons avec badges/compteurs */
+.btn .badge {
+    margin-left: 0.5rem;
+}
+
+/* Styles spéciaux pour les boutons de statut/clôture des exercices */
+.btn-statut-exercice {
+    min-width: 180px;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-statut-exercice:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Exercice ouvert - bouton vert pour clôturer */
+.btn-statut-ouvert {
+    background: linear-gradient(45deg, #28a745, #218838) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-statut-ouvert:hover {
+    background: linear-gradient(45deg, #218838, #1e7e34) !important;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.5) !important;
+    color: white !important;
+}
+
+/* Exercice clôturé - bouton rouge pour déclôturer */
+.btn-statut-clos {
+    background: linear-gradient(45deg, #dc3545, #c82333) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.btn-statut-clos:hover {
+    background: linear-gradient(45deg, #c82333, #a71e2a) !important;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.5) !important;
+    color: white !important;
 }
