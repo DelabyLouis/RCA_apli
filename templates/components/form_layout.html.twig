@@ -1,0 +1,39 @@
+{# Composant pour la disposition uniforme des formulaires #}
+{# Paramètres attendus:
+   - form: L'objet formulaire Symfony
+   - form_id: ID unique du formulaire
+   - submit_label: Texte du bouton de soumission (ex: "Créer", "Modifier")
+   - cancel_url: URL de retour/annulation
+   - form_fields: Block contenant les champs du formulaire
+#}
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-lg-6">
+                {{ form_start(form, {'attr': {'novalidate': false, 'id': form_id}}) }}
+                
+                {% block form_fields %}
+                    {# Les champs du formulaire seront insérés ici #}
+                {% endblock %}
+                
+                {{ form_end(form) }}
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">
+                    <h6 class="text-muted mb-0">Actions</h6>
+                    <a href="{{ cancel_url }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </a>
+                    <button type="submit" class="btn btn-success btn-lg py-3" style="margin: 0 3rem;" form="{{ form_id }}">
+                        <i class="fas fa-save me-2"></i>{{ submit_label|default('Enregistrer') }}
+                    </button>
+                    {% block additional_buttons %}
+                        {# Boutons supplémentaires peuvent être ajoutés ici #}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
