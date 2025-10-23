@@ -32,6 +32,13 @@ class TypeTransaction
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(length: 20, nullable: false, options: ['default' => 'both'])]
+    #[Assert\Choice(
+        choices: ['debit', 'credit', 'both'],
+        message: 'Le type de montant autorisé doit être "debit", "credit" ou "both"'
+    )]
+    private string $type_montant_autorise = 'both';
+
     /**
      * @var Collection<int, Transaction>
      */
@@ -68,6 +75,18 @@ class TypeTransaction
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getTypeMontantAutorise(): string
+    {
+        return $this->type_montant_autorise;
+    }
+
+    public function setTypeMontantAutorise(string $type_montant_autorise): static
+    {
+        $this->type_montant_autorise = $type_montant_autorise;
 
         return $this;
     }

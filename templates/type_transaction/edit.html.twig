@@ -6,31 +6,83 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-edit me-2"></i>Modifier {{ type_transaction.libelle }}</h1>
+                <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                </a>
+            </div>
+
             <div class="card shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">
-                        <i class="fas fa-edit me-2"></i>Modifier {{ type_transaction.libelle }}
-                    </h5>
-                </div>
                 <div class="card-body">
-                    {{ form_start(form, {'attr': {'class': 'row g-3'}}) }}
-                    {{ form_rest(form) }}
-                    
-                    <div class="col-12">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-warning">
-                                <i class="fas fa-save me-1"></i>Mettre à jour
-                            </button>
-                            <a href="{{ path('app_type_transaction_show', {'id_type': type_transaction.idType}) }}" class="btn btn-info">
-                                <i class="fas fa-eye me-1"></i>Voir
-                            </a>
-                            <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary">
-                                <i class="fas fa-times me-1"></i>Annuler
-                            </a>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            {{ form_start(form, {'attr': {'novalidate': false, 'id': 'type_transaction_edit_form'}}) }}
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.libelle, 'Libellé', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control' ~ (form.libelle.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.libelle.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.libelle.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.libelle) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : ''), 'rows': 3}}) }}
+                                {% if form.description.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.description.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.description) }}
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form_label(form.type_montant_autorise, null, {'label_attr': {'class': 'form-label fw-bold mb-3'}}) }}
+                                <div class="mt-3">
+                                    {% for child in form.type_montant_autorise %}
+                                        <div class="form-check mb-3 p-3 border rounded bg-light">
+                                            {{ form_widget(child, {'attr': {'class': 'form-check-input me-3'}}) }}
+                                            {{ form_label(child, null, {'label_attr': {'class': 'form-check-label fw-semibold'}}) }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% if form.type_montant_autorise.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.type_montant_autorise.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.type_montant_autorise) }}
+                            </div>
+                            
+                            {{ form_end(form) }}
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">
+                                <h6 class="text-muted mb-0">Actions</h6>
+                                <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-times me-2"></i>Annuler
+                                </a>
+                                <a href="{{ path('app_type_transaction_show', {'id_type': type_transaction.idType}) }}" class="btn btn-info btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-eye me-2"></i>Voir le détail
+                                </a>
+                                <button type="submit" class="btn btn-warning btn-lg py-3" style="margin: 0 3rem;" form="type_transaction_edit_form">
+                                    <i class="fas fa-save me-2"></i>Mettre à jour
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    
-                    {{ form_end(form) }}
                 </div>
             </div>
         </div>
