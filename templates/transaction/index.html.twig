@@ -34,7 +34,7 @@
             <div class="card-body">
                 <div class="row">
                     <!-- Filtre Libellé -->
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-2 mb-3">
                         <label for="filter-libelle" class="form-label">Libellé</label>
                         <input type="text" class="form-control" id="filter-libelle" placeholder="Rechercher par libellé...">
                     </div>
@@ -91,25 +91,29 @@
                         </div>
                     </div>
                     
-                    <!-- Filtre Montant -->
+                    <!-- Filtre Débit/Crédit -->
                     <div class="col-md-3 mb-3">
-                        <label for="filter-montant" class="form-label">Montant</label>
+                        <label for="filter-type-montant" class="form-label"><i class="fas fa-exchange-alt me-1"></i>Type de montant</label>
                         <div class="input-group">
-                            <select class="form-select" id="filter-montant-type" style="max-width: 100px;">
-                                <option value="">=</option>
-                                <option value="gt">></option>
-                                <option value="lt"><</option>
-                                <option value="gte">>=</option>
-                                <option value="lte"><=</option>
+                            <select class="form-select" id="filter-type-montant" style="max-width: 160px;">
+                                <option value="">Tous</option>
+                                <option value="debit">🟢 Débit uniquement</option>
+                                <option value="credit">🔴 Crédit uniquement</option>
                             </select>
-                            <input type="number" class="form-control" id="filter-montant" placeholder="0.00" step="0.01">
+                            <input type="number" class="form-control" id="filter-montant-min" placeholder="Min" step="0.01" style="max-width: 100px;">
+                            <input type="number" class="form-control" id="filter-montant-max" placeholder="Max" step="0.01" style="max-width: 100px;">
                         </div>
+                        <small class="text-muted">Filtre combiné : type + montant min/max</small>
                     </div>
                     
                     <!-- Filtre Date -->
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label for="filter-date" class="form-label">Date de transaction</label>
-                        <input type="date" class="form-control" id="filter-date">
+                        <div class="input-group">
+                            <input type="date" class="form-control" id="filter-date-min" placeholder="Date min">
+                            <input type="date" class="form-control" id="filter-date-max" placeholder="Date max">
+                        </div>
+                        <small class="text-muted">Période : date min/max</small>
                     </div>
                 </div>
                 
@@ -396,9 +400,11 @@
             // Fonction de filtrage
             function applyFilters() {
                 const libelleFilter = document.getElementById('filter-libelle').value.toLowerCase();
-                const montantFilter = parseFloat(document.getElementById('filter-montant').value);
-                const montantType = document.getElementById('filter-montant-type').value;
-                const dateFilter = document.getElementById('filter-date').value;
+                const typeMontantFilter = document.getElementById('filter-type-montant').value;
+                const montantMinFilter = parseFloat(document.getElementById('filter-montant-min').value) || null;
+                const montantMaxFilter = parseFloat(document.getElementById('filter-montant-max').value) || null;
+                const dateMinFilter = document.getElementById('filter-date-min').value;
+                const dateMaxFilter = document.getElementById('filter-date-max').value;
                 
                 const rows = document.querySelectorAll('tbody tr[data-id]');
                 
@@ -439,37 +445,52 @@
                         }
                     }
                     
-                    // Filtre par montant
-                    if (!isNaN(montantFilter)) {
-                        const montantText = row.cells[7].textContent.replace(/[^\d.,-]/g, '').replace(',', '.');
-                        const montant = parseFloat(montantText);
+                    // Filtre par type de montant (débit/crédit) et montant min/max
+                    if (typeMontantFilter || montantMinFilter !== null || montantMaxFilter !== null) {
+                        const montantCell = row.cells[7];
+                        const badge = montantCell.querySelector('.badge');
                         
-                        if (!isNaN(montant)) {
-                            switch (montantType) {
-                                case 'gt':
-                                    if (montant <= montantFilter) showRow = false;
-                                    break;
-                                case 'lt':
-                                    if (montant >= montantFilter) showRow = false;
-                                    break;
-                                case 'gte':
-                                    if (montant < montantFilter) showRow = false;
-                                    break;
-                                case 'lte':
-                                    if (montant > montantFilter) showRow = false;
-                                    break;
-                                default:
-                                    if (Math.abs(montant - montantFilter) > 0.01) showRow = false;
-                                    break;
+                        if (badge) {
+                            const isDebit = badge.classList.contains('bg-success');
+                            const isCredit = badge.classList.contains('bg-danger');
+                            
+                            // Filtre par type (débit/crédit)
+                            if (typeMontantFilter === 'debit' && !isDebit) {
+                                showRow = false;
+                            } else if (typeMontantFilter === 'credit' && !isCredit) {
+                                showRow = false;
+                            }
+                            
+                            // Filtre par montant min/max
+                            const montantText = badge.textContent.trim().replace(/[^\d.,]/g, '').replace(',', '.');
+                            const montantValue = parseFloat(montantText);
+                            
+                            if (!isNaN(montantValue)) {
+                                if (montantMinFilter !== null && montantValue < montantMinFilter) {
+                                    showRow = false;
+                                }
+                                if (montantMaxFilter !== null && montantValue > montantMaxFilter) {
+                                    showRow = false;
+                                }
                             }
                         }
                     }
                     
-                    // Filtre par date
-                    if (dateFilter) {
+                    // Filtre par période de dates
+                    if (dateMinFilter || dateMaxFilter) {
                         const dateText = row.cells[3].textContent.trim();
-                        if (!dateText.includes(dateFilter)) {
-                            showRow = false;
+                        // Convertir la date affichée (format français) en format ISO pour la comparaison
+                        const dateParts = dateText.split('/');
+                        if (dateParts.length === 3) {
+                            const dateISO = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+                            
+                            if (dateMinFilter && dateISO < dateMinFilter) {
+                                showRow = false;
+                            }
+                            if (dateMaxFilter && dateISO > dateMaxFilter) {
+                                showRow = false;
+                            }
+                        }
                         }
                     }
                     
@@ -495,9 +516,11 @@
             // Bouton pour effacer tous les filtres
             document.getElementById('clear-filters').addEventListener('click', function() {
                 document.getElementById('filter-libelle').value = '';
-                document.getElementById('filter-montant').value = '';
-                document.getElementById('filter-montant-type').value = '';
-                document.getElementById('filter-date').value = '';
+                document.getElementById('filter-type-montant').value = '';
+                document.getElementById('filter-montant-min').value = '';
+                document.getElementById('filter-montant-max').value = '';
+                document.getElementById('filter-date-min').value = '';
+                document.getElementById('filter-date-max').value = '';
                 
                 document.querySelectorAll('.tiers-checkbox').forEach(checkbox => {
                     checkbox.checked = false;
@@ -519,6 +542,17 @@
                     applyFilters();
                 }
             });
+            
+            // Appliquer les filtres en temps réel pour le type de montant
+            document.getElementById('filter-type-montant').addEventListener('change', applyFilters);
+            
+            // Appliquer les filtres en temps réel pour les montants min/max
+            document.getElementById('filter-montant-min').addEventListener('input', applyFilters);
+            document.getElementById('filter-montant-max').addEventListener('input', applyFilters);
+            
+            // Appliquer les filtres en temps réel pour les dates min/max
+            document.getElementById('filter-date-min').addEventListener('change', applyFilters);
+            document.getElementById('filter-date-max').addEventListener('change', applyFilters);
         });
     </script>
 {% endblock %}
