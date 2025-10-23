@@ -1,0 +1,105 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ entreprise.nomEntreprise }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-building me-2"></i>{{ entreprise.nomEntreprise }}
+                        </h5>
+                        <div class="btn-group">
+                            <a href="{{ path('app_entreprise_edit', {'id_entreprise': entreprise.idEntreprise}) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>Modifier
+                            </a>
+                            <a href="{{ path('app_entreprise_index') }}" class="btn btn-light btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <th class="text-muted" style="width: 40%;">Nom de l'entreprise :</th>
+                                        <td><strong>{{ entreprise.nomEntreprise }}</strong></td>
+                                    </tr>
+                                    {% if entreprise.siret %}
+                                    <tr>
+                                        <th class="text-muted">SIRET :</th>
+                                        <td>{{ entreprise.siret }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if entreprise.siren %}
+                                    <tr>
+                                        <th class="text-muted">SIREN :</th>
+                                        <td>{{ entreprise.siren }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-muted border-bottom pb-2 mb-3">
+                                <i class="fas fa-map-marker-alt me-2"></i>Adresse
+                            </h6>
+                            {% if entreprise.numeroVoie or entreprise.rue or entreprise.ville %}
+                                <address class="mb-0">
+                                    {% if entreprise.numeroVoie %}{{ entreprise.numeroVoie }} {% endif %}{{ entreprise.rue }}<br>
+                                    {% if entreprise.complementAdresse %}{{ entreprise.complementAdresse }}<br>{% endif %}
+                                    {% if entreprise.codePostal %}{{ entreprise.codePostal }} {% endif %}{{ entreprise.ville }}<br>
+                                    {% if entreprise.pays %}{{ entreprise.pays }}{% endif %}
+                                </address>
+                            {% else %}
+                                <p class="text-muted fst-italic">Aucune adresse renseignée</p>
+                            {% endif %}
+                            
+                            {% if entreprise.telephone or entreprise.email %}
+                            <h6 class="text-muted border-bottom pb-2 mb-3 mt-4">
+                                <i class="fas fa-address-book me-2"></i>Contact
+                            </h6>
+                            {% if entreprise.telephone %}
+                                <p class="mb-1">
+                                    <i class="fas fa-phone me-2 text-muted"></i>{{ entreprise.telephone }}
+                                </p>
+                            {% endif %}
+                            {% if entreprise.email %}
+                                <p class="mb-1">
+                                    <i class="fas fa-envelope me-2 text-muted"></i>
+                                    <a href="mailto:{{ entreprise.email }}">{{ entreprise.email }}</a>
+                                </p>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="d-flex gap-2">
+                        <a href="{{ path('app_entreprise_edit', {'id_entreprise': entreprise.idEntreprise}) }}" class="btn btn-warning">
+                            <i class="fas fa-edit me-1"></i>Modifier
+                        </a>
+                        <form method="post" action="{{ path('app_entreprise_delete', {'id_entreprise': entreprise.idEntreprise}) }}" 
+                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette entreprise ?')" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entreprise.idEntreprise) }}">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i>Supprimer
+                            </button>
+                        </form>
+                        <a href="{{ path('app_entreprise_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
