@@ -24,7 +24,7 @@ class PersonneRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->leftJoin('p.entreprise', 'e')
-            ->leftJoin('p.users', 'u')
+            ->leftJoin('p.user', 'u')
             ->leftJoin('p.transactions', 't')
             ->addSelect('e')
             ->addSelect('u')

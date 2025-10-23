@@ -48,7 +48,9 @@ final class TransactionController extends AbstractController
                         ->setParameter('exercice', $exerciceFilter);
         }
         
-        $transactions = $queryBuilder->orderBy('t.numero_ordre', 'ASC')
+        $transactions = $queryBuilder
+            ->orderBy('ex.numero_ordre', 'ASC')
+            ->addOrderBy('t.numero_ordre', 'ASC')
             ->getQuery()
             ->getResult();
         

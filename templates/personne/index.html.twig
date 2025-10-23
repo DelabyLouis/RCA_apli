@@ -111,13 +111,22 @@
 
     <table class="table" data-turbo="false">
         <thead>
-                        <tr>
+            <tr>
                 <th>Id</th>
-                <th>Civilite</th>
                 <th>Nom</th>
-                <th>Prenom</th>
-                <th>Adresse</th>
-                <th>Contact</th>
+                <th>Prénom</th>
+                <th>Civilité</th>
+                <th>N° Voie</th>
+                <th>Rue</th>
+                <th>Complément</th>
+                <th>Ville</th>
+                <th>Code Postal</th>
+                <th>Pays</th>
+                <th>Téléphone</th>
+                <th>Email</th>
+                <th>Entreprises</th>
+                <th>Compte utilisateur</th>
+                <th>Transactions</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -146,7 +155,7 @@
                     {% endif %}
                 </td>
                 <td>
-                    {% if personne.users|length > 0 %}
+                    {% if personne.user %}
                         <span class="badge bg-success">Oui</span>
                     {% else %}
                         <span class="badge bg-secondary">Non</span>
@@ -163,7 +172,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="13">no records found</td>
+                <td colspan="16">no records found</td>
             </tr>
         {% endfor %}
         </tbody>
