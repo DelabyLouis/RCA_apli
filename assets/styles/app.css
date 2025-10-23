@@ -17,7 +17,7 @@
 body {
     background-color: var(--secondary-color);
     color: var(--primary-color);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Navigation */
@@ -345,7 +345,12 @@ option {
 }
 
 /* Titres */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: var(--primary-color);
     font-weight: 600;
 }
@@ -386,7 +391,9 @@ a:hover {
 }
 
 /* Icons */
-.fas, .far, .fab {
+.fas,
+.far,
+.fab {
     color: inherit;
 }
 
@@ -491,7 +498,12 @@ ol {
 }
 
 /* Corrections pour les titres */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: var(--primary-color) !important;
 }
 
@@ -511,7 +523,9 @@ a:not(.btn):not(.badge):hover {
 }
 
 /* Force la couleur pour les icônes */
-i.fas, i.far, i.fab {
+i.fas,
+i.far,
+i.fab {
     color: inherit !important;
 }
 
@@ -624,7 +638,8 @@ td[colspan] {
 }
 
 /* Correction pour tous les contenus de cellules */
-td, th {
+td,
+th {
     color: var(--primary-color) !important;
 }
 
@@ -997,7 +1012,6 @@ mark {
     color: var(--primary-color) !important;
 }
 
-
 /* CORRECTION FINALE - Assurer la lisibilité de TOUS les éléments de tableau */
 table tr,
 table td,
@@ -1118,17 +1132,17 @@ table a:hover,
 
 /* Variables de couleurs sémantiques */
 :root {
-    --btn-danger: #dc3545;      /* Rouge pour supprimer */
+    --btn-danger: #dc3545; /* Rouge pour supprimer */
     --btn-danger-hover: #c82333;
-    --btn-success: #28a745;     /* Vert pour créer/ajouter */
+    --btn-success: #28a745; /* Vert pour créer/ajouter */
     --btn-success-hover: #218838;
-    --btn-warning: #ffc107;     /* Jaune pour modifier */
+    --btn-warning: #ffc107; /* Jaune pour modifier */
     --btn-warning-hover: #e0a800;
-    --btn-info: #17a2b8;        /* Bleu clair pour voir/détails */
+    --btn-info: #17a2b8; /* Bleu clair pour voir/détails */
     --btn-info-hover: #138496;
-    --btn-secondary: #6c757d;   /* Gris pour actions neutres */
+    --btn-secondary: #6c757d; /* Gris pour actions neutres */
     --btn-secondary-hover: #5a6268;
-    --btn-primary: #007bff;     /* Bleu principal */
+    --btn-primary: #007bff; /* Bleu principal */
     --btn-primary-hover: #0056b3;
 }
 
@@ -1402,7 +1416,7 @@ button.btn-secondary:hover {
 
 .btn-statut-exercice:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Exercice ouvert - bouton vert pour clôturer */
