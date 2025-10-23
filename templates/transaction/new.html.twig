@@ -273,8 +273,7 @@
                 console.log('Tiers sélectionné:', tiersValue);
                 console.log('Montant final:', montantValue);
                 
-                // VALIDATION DÉSACTIVÉE TEMPORAIREMENT
-                /*
+                // VALIDATION RÉACTIVÉE
                 if (!tiersValue || tiersValue === '') {
                     alert('Vous devez sélectionner une personne ou une entreprise.');
                     event.preventDefault();
@@ -286,9 +285,8 @@
                     event.preventDefault();
                     return false;
                 }
-                */
                 
-                console.log('Formulaire soumis sans validation - DEBUG MODE');
+                console.log('Formulaire validé et soumis');
                 return true;
             });
         }

@@ -120,6 +120,23 @@ final class TransactionController extends AbstractController
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Validation supplémentaire côté serveur
+            if (!$transaction->getPersonne() && !$transaction->getEntreprise()) {
+                $this->addFlash('error', 'Vous devez sélectionner une personne ou une entreprise.');
+                return $this->render('transaction/new.html.twig', [
+                    'transaction' => $transaction,
+                    'form' => $form,
+                ]);
+            }
+            
+            if (!$transaction->getMontant() || $transaction->getMontant() == 0) {
+                $this->addFlash('error', 'Le montant ne peut pas être égal à zéro.');
+                return $this->render('transaction/new.html.twig', [
+                    'transaction' => $transaction,
+                    'form' => $form,
+                ]);
+            }
+            
             // Calculer automatiquement le numéro d'ordre en fonction de l'exercice choisi
             if ($transaction->getExercice()) {
                 $lastNumeroOrdre = $transactionRepository->getLastNumeroOrdreByExercice($transaction->getExercice()->getIdExercice());

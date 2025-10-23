@@ -68,7 +68,7 @@ class TransactionNewType extends AbstractType
             ])
             ->add('tiers', ChoiceType::class, [
                 'choices' => $choices,
-                'required' => false,
+                'required' => true,
                 'placeholder' => 'Choisir un tiers (personne ou entreprise)',
                 'label' => 'Tiers (Personne ou Entreprise)',
                 'mapped' => false, // Ce champ ne sera pas mappé directement sur l'entité
