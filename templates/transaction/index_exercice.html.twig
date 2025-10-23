@@ -241,9 +241,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initialisation édition inline pour transactions (page principale)');
+            console.log('Initialisation édition inline pour transactions - Exercice {{ exercice_filter.libelle }}');
             
-            // Gestion de l'édition inline simple
+            // Gestion de l'édition inline simple (basée sur la page exercices qui fonctionne)
             document.querySelectorAll('.editable-field').forEach(function(element) {
                 element.addEventListener('click', function() {
                     if (this.querySelector('input') || this.querySelector('select')) {
@@ -259,13 +259,16 @@
                     if (field === 'date_transaction') {
                         let isoValue = '';
                         if (currentValue && currentValue !== '') {
-                            const parts = currentValue.split('/');
+                            const parts = currentValue.split('-');
                             if (parts.length === 3) {
-                                isoValue = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+                                isoValue = parts[0] + '-' + parts[1] + '-' + parts[2];
                             }
                         }
                         
                         this.innerHTML = '<input type="date" class="form-control form-control-sm" value="' + isoValue + '" style="min-width: 150px;">';
+                    } else if (field === 'tiers') {
+                        // Pour simplifier, on met juste un champ texte pour l'instant
+                        this.innerHTML = '<input type="text" class="form-control form-control-sm" value="' + currentValue + '" style="min-width: 200px;">';
                     } else {
                         this.innerHTML = '<input type="text" class="form-control form-control-sm" value="' + currentValue + '" style="min-width: 150px;">';
                     }
@@ -286,8 +289,8 @@
                                 formData.append('field', field);
                                 formData.append('value', newValue);
                                 
-                                // URL sans exercice_id pour la page principale
-                                const url = '/transaction/' + transactionId + '/update-field';
+                                // URL avec exercice_id
+                                const url = '/transaction/' + transactionId + '/update-field?exercice_id={{ exercice_filter.idExercice }}';
                                 
                                 fetch(url, {
                                     method: 'POST',
@@ -341,7 +344,7 @@
                     const transactionId = this.dataset.id;
                     const row = this.closest('tr');
                     
-                    const url = '/transaction/' + transactionId + '/delete-ajax';
+                    const url = '/transaction/' + transactionId + '/delete-ajax?exercice_id={{ exercice_filter.idExercice }}';
                     
                     fetch(url, {
                         method: 'DELETE',
@@ -356,7 +359,7 @@
                             // Réafficher "Aucune transaction" si plus de lignes
                             const tbody = document.querySelector('tbody');
                             if (tbody.children.length === 0) {
-                                location.reload(); // Recharger pour afficher le message "aucune transaction"
+                                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted"><em>Aucune transaction trouvée</em></td></tr>';
                             }
                         } else {
                             alert('Erreur: ' + (data.error || 'Impossible de supprimer'));
@@ -368,6 +371,208 @@
                     });
                 });
             });
+            
+            // Gestion des filtres avec cases à cocher pour les tiers
+            let selectedTiers = [];
+            
+            // Fonction pour mettre à jour le texte du bouton dropdown
+            function updateTiersButtonText() {
+                const button = document.getElementById('selected-tiers-text');
+                if (selectedTiers.length === 0) {
+                    button.textContent = 'Sélectionner des tiers...';
+                } else if (selectedTiers.length === 1) {
+                    const checkbox = document.querySelector(`input[value="${selectedTiers[0]}"]`);
+                    const label = checkbox ? checkbox.nextElementSibling.textContent.trim() : 'Tiers sélectionné';
+                    button.textContent = label;
+                } else {
+                    button.textContent = `${selectedTiers.length} tiers sélectionnés`;
+                }
+            }
+            
+            // Gestion des cases à cocher
+            document.querySelectorAll('.tiers-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        if (!selectedTiers.includes(this.value)) {
+                            selectedTiers.push(this.value);
+                        }
+                    } else {
+                        selectedTiers = selectedTiers.filter(value => value !== this.value);
+                    }
+                    updateTiersButtonText();
+                });
+            });
+            
+            // Bouton pour tout décocher
+            document.getElementById('clear-tiers-selection').addEventListener('click', function() {
+                document.querySelectorAll('.tiers-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                selectedTiers = [];
+                updateTiersButtonText();
+            });
+            
+            // Empêcher la fermeture du dropdown quand on clique à l'intérieur
+            document.querySelector('.dropdown-menu').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Fonction de filtrage
+            function applyFilters() {
+                const libelleFilter = document.getElementById('filter-libelle').value.toLowerCase();
+                const typeMontantFilter = document.getElementById('filter-type-montant').value;
+                const montantMinFilter = parseFloat(document.getElementById('filter-montant-min').value) || null;
+                const montantMaxFilter = parseFloat(document.getElementById('filter-montant-max').value) || null;
+                const dateMinFilter = document.getElementById('filter-date-min').value;
+                const dateMaxFilter = document.getElementById('filter-date-max').value;
+                
+                const rows = document.querySelectorAll('tbody tr[data-id]');
+                
+                rows.forEach(row => {
+                    let showRow = true;
+                    
+                    // Filtre par libellé
+                    if (libelleFilter) {
+                        const libelle = row.cells[1].textContent.toLowerCase();
+                        if (!libelle.includes(libelleFilter)) {
+                            showRow = false;
+                        }
+                    }
+                    
+                    // Filtre par tiers
+                    if (selectedTiers.length > 0) {
+                        const tiersCell = row.cells[4].textContent.trim();
+                        let tierMatch = false;
+                        
+                        selectedTiers.forEach(selectedTier => {
+                            if (selectedTier.startsWith('personne_')) {
+                                const personneId = selectedTier.replace('personne_', '');
+                                const personne = personnes.find(p => p.id == personneId);
+                                if (personne && tiersCell.includes(personne.fullName)) {
+                                    tierMatch = true;
+                                }
+                            } else if (selectedTier.startsWith('entreprise_')) {
+                                const entrepriseId = selectedTier.replace('entreprise_', '');
+                                const entreprise = entreprises.find(e => e.id == entrepriseId);
+                                if (entreprise && tiersCell.includes(entreprise.nom)) {
+                                    tierMatch = true;
+                                }
+                            }
+                        });
+                        
+                        if (!tierMatch) {
+                            showRow = false;
+                        }
+                    }
+                    
+                    // Filtre par type de montant (débit/crédit) et montant min/max
+                    if (typeMontantFilter || montantMinFilter !== null || montantMaxFilter !== null) {
+                        const montantCell = row.cells[7];
+                        const badge = montantCell.querySelector('.badge');
+                        
+                        if (badge) {
+                            const isDebit = badge.classList.contains('bg-success');
+                            const isCredit = badge.classList.contains('bg-danger');
+                            
+                            // Filtre par type (débit/crédit)
+                            if (typeMontantFilter === 'debit' && !isDebit) {
+                                showRow = false;
+                            } else if (typeMontantFilter === 'credit' && !isCredit) {
+                                showRow = false;
+                            }
+                            
+                            // Filtre par montant min/max
+                            const montantText = badge.textContent.trim().replace(/[^\d.,]/g, '').replace(',', '.');
+                            const montantValue = parseFloat(montantText);
+                            
+                            if (!isNaN(montantValue)) {
+                                if (montantMinFilter !== null && montantValue < montantMinFilter) {
+                                    showRow = false;
+                                }
+                                if (montantMaxFilter !== null && montantValue > montantMaxFilter) {
+                                    showRow = false;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Filtre par période de dates
+                    if (dateMinFilter || dateMaxFilter) {
+                        const dateText = row.cells[3].textContent.trim();
+                        // Convertir la date affichée (format français) en format ISO pour la comparaison
+                        const dateParts = dateText.split('/');
+                        if (dateParts.length === 3) {
+                            const dateISO = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+                            
+                            if (dateMinFilter && dateISO < dateMinFilter) {
+                                showRow = false;
+                            }
+                            if (dateMaxFilter && dateISO > dateMaxFilter) {
+                                showRow = false;
+                            }
+                        }
+                        }
+                    }
+                    
+                    row.style.display = showRow ? '' : 'none';
+                });
+                
+                // Compter les résultats visibles
+                const visibleRows = document.querySelectorAll('tbody tr[data-id]:not([style*="display: none"])').length;
+                console.log(`Filtrage appliqué: ${visibleRows} transactions affichées`);
+            }
+            
+            // Event listeners pour les boutons de filtre
+            document.getElementById('apply-filters').addEventListener('click', applyFilters);
+            document.getElementById('apply-tiers-filter').addEventListener('click', function() {
+                // Fermer le dropdown
+                const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('filter-tiers-dropdown'));
+                if (dropdown) {
+                    dropdown.hide();
+                }
+                applyFilters();
+            });
+            
+            // Bouton pour effacer tous les filtres
+            document.getElementById('clear-filters').addEventListener('click', function() {
+                document.getElementById('filter-libelle').value = '';
+                document.getElementById('filter-type-montant').value = '';
+                document.getElementById('filter-montant-min').value = '';
+                document.getElementById('filter-montant-max').value = '';
+                document.getElementById('filter-date-min').value = '';
+                document.getElementById('filter-date-max').value = '';
+                
+                document.querySelectorAll('.tiers-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                selectedTiers = [];
+                updateTiersButtonText();
+                
+                // Afficher toutes les lignes
+                document.querySelectorAll('tbody tr[data-id]').forEach(row => {
+                    row.style.display = '';
+                });
+                
+                console.log('Tous les filtres ont été effacés');
+            });
+            
+            // Appliquer les filtres en temps réel pour le libellé
+            document.getElementById('filter-libelle').addEventListener('input', function() {
+                if (this.value.length === 0 || this.value.length >= 2) {
+                    applyFilters();
+                }
+            });
+            
+            // Appliquer les filtres en temps réel pour le type de montant
+            document.getElementById('filter-type-montant').addEventListener('change', applyFilters);
+            
+            // Appliquer les filtres en temps réel pour les montants min/max
+            document.getElementById('filter-montant-min').addEventListener('input', applyFilters);
+            document.getElementById('filter-montant-max').addEventListener('input', applyFilters);
+            
+            // Appliquer les filtres en temps réel pour les dates min/max
+            document.getElementById('filter-date-min').addEventListener('change', applyFilters);
+            document.getElementById('filter-date-max').addEventListener('change', applyFilters);
         });
     </script>
 {% endblock %}

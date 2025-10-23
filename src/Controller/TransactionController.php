@@ -75,6 +75,14 @@ final class TransactionController extends AbstractController
             ];
         }
         
+        // Si on filtre par exercice, utiliser le template simple
+        if ($exerciceFilter) {
+            return $this->render('transaction/index_exercice_simple.html.twig', [
+                'transactions' => $transactions,
+                'exercice_filter' => $exerciceFilter,
+            ]);
+        }
+        
         return $this->render('transaction/index.html.twig', [
             'transactions_avec_montant' => $transactionsAvecMontant,
             'solde_precedent' => $soldePrecedent,
