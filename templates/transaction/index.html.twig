@@ -118,7 +118,7 @@
                             data-type="debit" 
                             data-current-value="{{ transaction.montant }}">
                             {% if transaction.montant >= 0 %}
-                                <span class="fw-bold" style="color: #198754;">{{ transaction.montant|number_format(2, ',', ' ') }} €</span>
+                                <span class="badge bg-success fs-6 fw-bold">{{ transaction.montant|number_format(2, ',', ' ') }} €</span>
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
@@ -128,16 +128,18 @@
                             data-type="credit" 
                             data-current-value="{{ transaction.montant }}">
                             {% if transaction.montant < 0 %}
-                                <span class="fw-bold" style="color: #dc3545;">{{ (transaction.montant * -1)|number_format(2, ',', ' ') }} €</span>
+                                <span class="badge bg-danger fs-6 fw-bold">{{ (transaction.montant * -1)|number_format(2, ',', ' ') }} €</span>
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
                         </td>
-                        <td class="solde-cell text-end">
+                        <td class="solde-cell text-end" {% if montant_cumule < 0 %}style="border: 3px solid #dc3545 !important; background-color: rgba(220, 53, 69, 0.1) !important;"{% endif %}>
                             {% if montant_cumule >= 0 %}
                                 <span class="text-success fw-bold">{{ montant_cumule|number_format(2, ',', ' ') }} €</span>
                             {% else %}
-                                <span class="text-danger fw-bold">{{ montant_cumule|number_format(2, ',', ' ') }} €</span>
+                                <span class="fw-bold" style="color: #dc3545 !important;">
+                                    <i class="fas fa-exclamation-triangle me-1" style="color: #dc3545 !important;"></i>{{ montant_cumule|number_format(2, ',', ' ') }} €
+                                </span>
                             {% endif %}
                         </td>
                         <td class="editable-field" data-field="exercice">{{ transaction.exercice ? transaction.exercice.libelle : '' }}</td>
