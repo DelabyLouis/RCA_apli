@@ -29,49 +29,60 @@
 
             <div class="card shadow-sm">
                 <div class="card-body">
-                    {{ include('components/entity_filter_detailed.html.twig', {
-                        'filters': [
-                            {
-                                'field': 'libelle',
-                                'label': 'Libellé',
-                                'type': 'text',
-                                'placeholder': 'Rechercher par libellé...',
-                                'width': 4
-                            },
-                            {
-                                'field': 'annee',
-                                'label': 'Année',
-                                'type': 'number',
-                                'width': 2
-                            },
-                            {
-                                'field': 'statut',
-                                'label': 'Statut',
-                                'type': 'select',
-                                'width': 3,
-                                'options': [
-                                    { 'value': 'ouvert', 'label': 'Ouvert' },
-                                    { 'value': 'clos', 'label': 'Clôturé' }
-                                ]
-                            },
-                            {
-                                'field': 'date_creation',
-                                'label': 'Date de création',
-                                'type': 'date',
-                                'width': 3
-                            }
-                        ]
-                    }) }}
-                    
-                    <!-- Boutons d'action pour les filtres -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="reset-filters-btn">
-                                <i class="fas fa-times me-1"></i>Réinitialiser tous les filtres
-                            </button>
+                    <!-- Filtres personnalisés -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtres</h5>
                         </div>
-                        <div id="filter-results-info" class="text-muted small">
-                            <!-- Informations sur le filtrage automatiquement mises à jour par le composant -->
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Filtre Libellé -->
+                                <div class="col-md-3 mb-3">
+                                    <label for="filter-libelle" class="form-label">Libellé</label>
+                                    <input type="text" class="form-control" id="filter-libelle" placeholder="Rechercher par libellé...">
+                                </div>
+                                
+                                <!-- Filtre Statut -->
+                                <div class="col-md-3 mb-3">
+                                    <label for="filter-statut" class="form-label">Statut</label>
+                                    <select class="form-select" id="filter-statut">
+                                        <option value="">Tous les statuts</option>
+                                        <option value="ouvert">Ouvert</option>
+                                        <option value="clos">Clôturé</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Filtre Date de début -->
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Date de début</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="date" class="form-control" id="filter-date-debut-min" placeholder="Date min">
+                                        <span class="input-group-text">-</span>
+                                        <input type="date" class="form-control" id="filter-date-debut-max" placeholder="Date max">
+                                    </div>
+                                </div>
+                                
+                                <!-- Filtre Date de fin -->
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Date de fin</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="date" class="form-control" id="filter-date-fin-min" placeholder="Date min">
+                                        <span class="input-group-text">-</span>
+                                        <input type="date" class="form-control" id="filter-date-fin-max" placeholder="Date max">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <button type="button" class="btn btn-primary me-2" id="apply-filters">
+                                        <i class="fas fa-search me-1"></i>Filtrer
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" id="clear-filters">
+                                        <i class="fas fa-times me-1"></i>Effacer les filtres
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -403,120 +414,217 @@ function afficherHistoriqueRecent(historiques) {
 // Charger l'historique au chargement de la page
 window.addEventListener('load', chargerHistoriqueRecent);
 
-// Gestion du bouton de réinitialisation des filtres
+// Gestion du filtrage personnalisé pour les exercices
 document.addEventListener('DOMContentLoaded', function() {
-    // Attendre que le composant de filtrage soit initialisé
-    setTimeout(() => {
-        // Fonction pour réinitialiser tous les filtres
-        function resetAllFilters() {
-            // Réinitialiser tous les champs de filtre
-            const filterFields = document.querySelectorAll('.entity-filter-field');
-            filterFields.forEach(field => {
-                if (field.type === 'checkbox' || field.type === 'radio') {
-                    field.checked = false;
-                } else {
-                    field.value = '';
-                }
-                
-                // Déclencher l'événement change pour que le composant réagisse
-                const event = new Event('change', { bubbles: true });
-                field.dispatchEvent(event);
-            });
-            
-            // Réinitialiser aussi le filtre simple s'il existe
-            const simpleFilter = document.querySelector('input[id*="filter"]');
-            if (simpleFilter && !simpleFilter.classList.contains('entity-filter-field')) {
-                simpleFilter.value = '';
-                const event = new Event('input', { bubbles: true });
-                simpleFilter.dispatchEvent(event);
-            }
-            
-            // Réafficher toutes les lignes
-            const allRows = document.querySelectorAll('tbody tr');
-            allRows.forEach(row => {
-                row.style.display = '';
-            });
-        }
+    // Fonction de filtrage
+    function applyFilters() {
+        const libelleFilter = document.getElementById('filter-libelle').value.toLowerCase();
+        const statutFilter = document.getElementById('filter-statut').value;
+        const dateDebutMinFilter = document.getElementById('filter-date-debut-min').value;
+        const dateDebutMaxFilter = document.getElementById('filter-date-debut-max').value;
+        const dateFinMinFilter = document.getElementById('filter-date-fin-min').value;
+        const dateFinMaxFilter = document.getElementById('filter-date-fin-max').value;
         
-        // Événement pour le bouton de réinitialisation
-        const resetBtn = document.getElementById('reset-filters-btn');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function() {
-                resetAllFilters();
-                
-                // Feedback visuel
-                const btn = this;
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-check me-1"></i>Filtres réinitialisés';
-                btn.classList.add('btn-success');
-                btn.classList.remove('btn-outline-secondary');
-                
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.classList.add('btn-outline-secondary');
-                    btn.classList.remove('btn-success');
-                }, 1500);
-            });
-        }
+        const rows = document.querySelectorAll('tbody tr[class]');
+        let visibleCount = 0;
         
-        // Fonction pour mettre à jour les informations de résultat
-        function updateFilterResultsInfo() {
-            const allRows = document.querySelectorAll('tbody tr');
-            const visibleRows = Array.from(allRows).filter(row => {
-                const style = window.getComputedStyle(row);
-                return style.display !== 'none';
-            });
-            const totalRows = allRows.length;
-            const infoElement = document.getElementById('filter-results-info');
+        rows.forEach(row => {
+            let showRow = true;
+            const cells = row.cells;
             
-            if (infoElement) {
-                if (visibleRows.length === totalRows) {
-                    infoElement.innerHTML = `<i class="fas fa-list me-1"></i>Tous les ${totalRows} exercices affichés`;
-                } else {
-                    infoElement.innerHTML = `<i class="fas fa-filter me-1"></i>${visibleRows.length} sur ${totalRows} exercices affichés`;
+            // Filtre par libellé (colonne 1)
+            if (libelleFilter && cells[1]) {
+                const libelle = cells[1].textContent.toLowerCase();
+                if (!libelle.includes(libelleFilter)) {
+                    showRow = false;
                 }
             }
-        }
-        
-        // Observer les changements dans le tableau pour mettre à jour les stats
-        const tbody = document.querySelector('tbody');
-        if (tbody) {
-            const observer = new MutationObserver(function(mutations) {
-                let shouldUpdate = false;
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                        shouldUpdate = true;
+            
+            // Filtre par statut (colonne 4)
+            if (statutFilter && cells[4]) {
+                const statut = cells[4].textContent.trim().toLowerCase();
+                const isOuvert = statut.includes('ouvert') || statut.includes('actif');
+                const isClos = statut.includes('clôturé') || statut.includes('fermé') || statut.includes('clos');
+                
+                if (statutFilter === 'ouvert' && !isOuvert) {
+                    showRow = false;
+                } else if (statutFilter === 'clos' && !isClos) {
+                    showRow = false;
+                }
+            }
+            
+            // Filtre par plage de date de début (colonne 2)
+            if ((dateDebutMinFilter || dateDebutMaxFilter) && cells[2]) {
+                const dateDebut = cells[2].textContent.trim();
+                if (dateDebut && dateDebut !== '-') {
+                    // Convertir la date de la cellule (format DD/MM/YYYY vers YYYY-MM-DD)
+                    let cellDate;
+                    if (dateDebut.includes('/')) {
+                        const parts = dateDebut.split('/');
+                        cellDate = new Date(parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0'));
+                    } else {
+                        cellDate = new Date(dateDebut);
                     }
-                });
-                if (shouldUpdate) {
-                    setTimeout(updateFilterResultsInfo, 50);
+                    
+                    // Vérifier la date minimum
+                    if (dateDebutMinFilter) {
+                        const filterMinDate = new Date(dateDebutMinFilter);
+                        if (cellDate < filterMinDate) {
+                            showRow = false;
+                        }
+                    }
+                    
+                    // Vérifier la date maximum
+                    if (dateDebutMaxFilter) {
+                        const filterMaxDate = new Date(dateDebutMaxFilter);
+                        if (cellDate > filterMaxDate) {
+                            showRow = false;
+                        }
+                    }
                 }
-            });
+            }
             
-            // Observer tous les tr du tbody
-            const rows = tbody.querySelectorAll('tr');
-            rows.forEach(row => {
-                observer.observe(row, { attributes: true, attributeFilter: ['style'] });
-            });
+            // Filtre par plage de date de fin (colonne 3)
+            if ((dateFinMinFilter || dateFinMaxFilter) && cells[3]) {
+                const dateFin = cells[3].textContent.trim();
+                if (dateFin && dateFin !== '-') {
+                    // Convertir la date de la cellule (format DD/MM/YYYY vers YYYY-MM-DD)
+                    let cellDate;
+                    if (dateFin.includes('/')) {
+                        const parts = dateFin.split('/');
+                        cellDate = new Date(parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0'));
+                    } else {
+                        cellDate = new Date(dateFin);
+                    }
+                    
+                    // Vérifier la date minimum
+                    if (dateFinMinFilter) {
+                        const filterMinDate = new Date(dateFinMinFilter);
+                        if (cellDate < filterMinDate) {
+                            showRow = false;
+                        }
+                    }
+                    
+                    // Vérifier la date maximum
+                    if (dateFinMaxFilter) {
+                        const filterMaxDate = new Date(dateFinMaxFilter);
+                        if (cellDate > filterMaxDate) {
+                            showRow = false;
+                        }
+                    }
+                }
+            }
+            
+            row.style.display = showRow ? '' : 'none';
+            if (showRow) visibleCount++;
+        });
+        
+        // Mettre à jour le compteur
+        updateFilterInfo(visibleCount, rows.length);
+        
+        console.log(`Filtrage appliqué: ${visibleCount} exercices affichés sur ${rows.length}`);
+    }
+    
+    // Fonction pour effacer tous les filtres
+    function clearAllFilters() {
+        document.getElementById('filter-libelle').value = '';
+        document.getElementById('filter-statut').value = '';
+        document.getElementById('filter-date-debut-min').value = '';
+        document.getElementById('filter-date-debut-max').value = '';
+        document.getElementById('filter-date-fin-min').value = '';
+        document.getElementById('filter-date-fin-max').value = '';
+        
+        // Afficher toutes les lignes
+        const rows = document.querySelectorAll('tbody tr[class]');
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+        
+        updateFilterInfo(rows.length, rows.length);
+        console.log('Tous les filtres ont été effacés');
+    }
+    
+    // Fonction pour mettre à jour les informations de filtrage
+    function updateFilterInfo(visible, total) {
+        // Créer ou mettre à jour l'élément d'information s'il n'existe pas
+        let infoElement = document.getElementById('filter-results-info');
+        if (!infoElement) {
+            infoElement = document.createElement('div');
+            infoElement.id = 'filter-results-info';
+            infoElement.className = 'text-muted small mt-2';
+            document.querySelector('.card-body').appendChild(infoElement);
         }
         
-        // Initialiser l'affichage des informations
-        updateFilterResultsInfo();
+        // Recompter le total réel pour s'assurer de la précision
+        const realTotal = document.querySelectorAll('tbody tr[class]').length;
         
-        // Mettre à jour les stats quand les filtres changent
-        document.addEventListener('input', function(e) {
-            if (e.target.classList.contains('entity-filter-field')) {
-                setTimeout(updateFilterResultsInfo, 100);
-            }
-        });
+        if (visible === realTotal) {
+            infoElement.innerHTML = `<i class="fas fa-list me-1"></i>Tous les ${realTotal} exercices affichés`;
+        } else {
+            infoElement.innerHTML = `<i class="fas fa-filter me-1"></i>${visible} sur ${realTotal} exercices affichés`;
+        }
+    }
+    
+    // Event listeners pour les boutons
+    document.getElementById('apply-filters').addEventListener('click', function() {
+        applyFilters();
         
-        document.addEventListener('change', function(e) {
-            if (e.target.classList.contains('entity-filter-field')) {
-                setTimeout(updateFilterResultsInfo, 100);
-            }
-        });
+        // Feedback visuel
+        const btn = this;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Filtres appliqués';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-primary');
         
-    }, 300); // Délai réduit pour l'initialisation
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.add('btn-primary');
+            btn.classList.remove('btn-success');
+        }, 1500);
+    });
+    
+    document.getElementById('clear-filters').addEventListener('click', function() {
+        clearAllFilters();
+        
+        // Feedback visuel
+        const btn = this;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Filtres effacés';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-secondary');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.add('btn-outline-secondary');
+            btn.classList.remove('btn-success');
+        }, 1500);
+    });
+    
+    // Appliquer les filtres en temps réel pour le libellé
+    document.getElementById('filter-libelle').addEventListener('input', function() {
+        if (this.value.length === 0 || this.value.length >= 2) {
+            applyFilters();
+        }
+    });
+    
+    // Appliquer les filtres automatiquement pour les autres champs
+    document.getElementById('filter-statut').addEventListener('change', applyFilters);
+    document.getElementById('filter-date-debut-min').addEventListener('change', applyFilters);
+    document.getElementById('filter-date-debut-max').addEventListener('change', applyFilters);
+    document.getElementById('filter-date-fin-min').addEventListener('change', applyFilters);
+    document.getElementById('filter-date-fin-max').addEventListener('change', applyFilters);
+    
+    // Permettre l'application des filtres avec la touche Entrée
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && (e.target.id.startsWith('filter-'))) {
+            e.preventDefault();
+            applyFilters();
+        }
+    });
+    
+    // Initialiser l'affichage des informations
+    const totalRows = document.querySelectorAll('tbody tr[class]').length;
+    updateFilterInfo(totalRows, totalRows);
 });
 </script>
 
