@@ -58,8 +58,38 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                {{ form_label(form.montant, 'Montant', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.montant, {'attr': {'class': 'form-control', 'step': '0.01'}}) }}
+                                <label class="form-label fw-bold">Montant et Type</label>
+                                
+                                <!-- Boutons radio pour Débit/Crédit -->
+                                <div class="btn-group w-100 mb-2" role="group">
+                                    <input type="radio" class="btn-check" name="transaction_type_edit" id="debit-edit" value="debit" checked>
+                                    <label class="btn btn-outline-success" for="debit-edit">
+                                        <i class="fas fa-plus-circle me-2"></i>DÉBIT
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="transaction_type_edit" id="credit-edit" value="credit">
+                                    <label class="btn btn-outline-danger" for="credit-edit">
+                                        <i class="fas fa-minus-circle me-2"></i>CRÉDIT
+                                    </label>
+                                </div>
+                                
+                                <!-- Champ pour le montant (toujours positif) -->
+                                <div class="input-group">
+                                    <input type="number" 
+                                           id="montant-display-edit" 
+                                           class="form-control" 
+                                           placeholder="0.00" 
+                                           step="0.01" 
+                                           min="0"
+                                           required>
+                                    <span class="input-group-text">€</span>
+                                </div>
+                                
+                                <!-- Champ caché pour le montant réel (avec signe) -->
+                                <div style="display: none;">
+                                    {{ form_widget(form.montant, {'attr': {'id': 'montant-hidden-edit'}}) }}
+                                </div>
+                                
                                 {{ form_errors(form.montant) }}
                             </div>
                         </div>
@@ -84,17 +114,36 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="mb-3">
-                                {{ form_label(form.personne, 'Personne', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.personne, {'attr': {'class': 'form-select'}}) }}
+                                <label class="form-label fw-bold">Tiers</label>
+                                <select id="tiers-selector" class="form-select">
+                                    <option value="">-- Sélectionner un tiers --</option>
+                                    <optgroup label="Personnes">
+                                        {% for personne in form.personne.vars.choices %}
+                                            <option value="personne-{{ personne.value }}" 
+                                                    {% if form.personne.vars.value == personne.value %}selected{% endif %}>
+                                                👤 {{ personne.label }}
+                                            </option>
+                                        {% endfor %}
+                                    </optgroup>
+                                    <optgroup label="Entreprises">
+                                        {% for entreprise in form.entreprise.vars.choices %}
+                                            <option value="entreprise-{{ entreprise.value }}" 
+                                                    {% if form.entreprise.vars.value == entreprise.value %}selected{% endif %}>
+                                                🏢 {{ entreprise.label }}
+                                            </option>
+                                        {% endfor %}
+                                    </optgroup>
+                                </select>
+                                
+                                <!-- Champs cachés pour maintenir la compatibilité avec le formulaire -->
+                                <div style="display: none;">
+                                    {{ form_widget(form.personne) }}
+                                    {{ form_widget(form.entreprise) }}
+                                </div>
+                                
                                 {{ form_errors(form.personne) }}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                {{ form_label(form.entreprise, 'Entreprise', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.entreprise, {'attr': {'class': 'form-select'}}) }}
                                 {{ form_errors(form.entreprise) }}
                             </div>
                         </div>
@@ -117,6 +166,92 @@
 </div>
 
 <script>
+// Gestion du sélecteur de tiers unifié
+document.addEventListener('DOMContentLoaded', function() {
+    const tiersSelector = document.getElementById('tiers-selector');
+    const personneField = document.querySelector('select[name*="[personne]"]');
+    const entrepriseField = document.querySelector('select[name*="[entreprise]"]');
+    
+    if (tiersSelector && personneField && entrepriseField) {
+        // Fonction pour mettre à jour les champs cachés
+        function updateHiddenFields() {
+            const selectedValue = tiersSelector.value;
+            
+            // Réinitialiser les deux champs
+            personneField.value = '';
+            entrepriseField.value = '';
+            
+            if (selectedValue.startsWith('personne-')) {
+                personneField.value = selectedValue.replace('personne-', '');
+            } else if (selectedValue.startsWith('entreprise-')) {
+                entrepriseField.value = selectedValue.replace('entreprise-', '');
+            }
+        }
+        
+        // Événement de changement sur le sélecteur unifié
+        tiersSelector.addEventListener('change', updateHiddenFields);
+        
+        // Initialisation : définir la valeur du sélecteur unifié basée sur les champs existants
+        function initializeSelector() {
+            if (personneField.value) {
+                tiersSelector.value = 'personne-' + personneField.value;
+            } else if (entrepriseField.value) {
+                tiersSelector.value = 'entreprise-' + entrepriseField.value;
+            }
+        }
+        
+        initializeSelector();
+    }
+    
+    // Gestion du montant avec débit/crédit (edit)
+    const montantDisplayEdit = document.getElementById('montant-display-edit');
+    const montantHiddenEdit = document.getElementById('montant-hidden-edit');
+    const debitRadioEdit = document.getElementById('debit-edit');
+    const creditRadioEdit = document.getElementById('credit-edit');
+    
+    if (montantDisplayEdit && montantHiddenEdit && debitRadioEdit && creditRadioEdit) {
+        // Initialiser les valeurs basées sur le montant existant
+        const currentValue = parseFloat(montantHiddenEdit.value) || 0;
+        if (currentValue >= 0) {
+            debitRadioEdit.checked = true;
+            creditRadioEdit.checked = false;
+            montantDisplayEdit.value = Math.abs(currentValue);
+        } else {
+            debitRadioEdit.checked = false;
+            creditRadioEdit.checked = true;
+            montantDisplayEdit.value = Math.abs(currentValue);
+        }
+        
+        // Fonction pour mettre à jour le montant caché
+        function updateMontantEdit() {
+            const displayValue = parseFloat(montantDisplayEdit.value) || 0;
+            const finalValue = creditRadioEdit.checked ? -Math.abs(displayValue) : Math.abs(displayValue);
+            montantHiddenEdit.value = finalValue;
+            
+            // Mettre à jour le style des boutons
+            if (debitRadioEdit.checked) {
+                debitRadioEdit.nextElementSibling.classList.remove('btn-outline-success');
+                debitRadioEdit.nextElementSibling.classList.add('btn-success');
+                creditRadioEdit.nextElementSibling.classList.remove('btn-danger');
+                creditRadioEdit.nextElementSibling.classList.add('btn-outline-danger');
+            } else {
+                creditRadioEdit.nextElementSibling.classList.remove('btn-outline-danger');
+                creditRadioEdit.nextElementSibling.classList.add('btn-danger');
+                debitRadioEdit.nextElementSibling.classList.remove('btn-success');
+                debitRadioEdit.nextElementSibling.classList.add('btn-outline-success');
+            }
+        }
+        
+        // Événements
+        montantDisplayEdit.addEventListener('input', updateMontantEdit);
+        debitRadioEdit.addEventListener('change', updateMontantEdit);
+        creditRadioEdit.addEventListener('change', updateMontantEdit);
+        
+        // Initialisation
+        updateMontantEdit();
+    }
+});
+
 // Validation Bootstrap
 (function() {
     'use strict';

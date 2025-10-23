@@ -1507,7 +1507,8 @@ button.btn-transactions-exercice,
 /* En-têtes spécifiques pour les colonnes de montant */
 .table.table-striped thead th:nth-child(6),  /* Débit */
 .table.table-striped thead th:nth-child(7),  /* Crédit */
-.table.table-striped thead th:nth-child(8) { /* Montant */
+.table.table-striped thead th:nth-child(8) {
+    /* Montant */
     text-align: right;
 }
 
@@ -1515,14 +1516,16 @@ button.btn-transactions-exercice,
 .table.table-striped thead th:nth-child(1),  /* ID */
 .table.table-striped thead th:nth-child(3),  /* N° Ordre */
 .table.table-striped thead th:nth-child(4),  /* Date */
-.table.table-striped thead th:nth-child(11) { /* Actions */
+.table.table-striped thead th:nth-child(11) {
+    /* Actions */
     text-align: center;
 }
 
 .table.table-striped tbody td:nth-child(1),  /* ID */
 .table.table-striped tbody td:nth-child(3),  /* N° Ordre */
 .table.table-striped tbody td:nth-child(4),  /* Date */
-.table.table-striped tbody td:nth-child(11) { /* Actions */
+.table.table-striped tbody td:nth-child(11) {
+    /* Actions */
     text-align: center;
 }
 
@@ -1537,4 +1540,55 @@ button.btn-transactions-exercice,
 .btn-statut-exercice {
     min-width: 140px;
     display: inline-block;
+}
+
+/* Marges globales pour l'espacement des pages */
+body {
+    padding-bottom: 2rem; /* Marge en bas de toutes les pages */
+}
+
+/* Espacement après la navbar */
+.container-fluid {
+    padding-top: 1rem;
+}
+
+/* Espacement spécifique pour les pages de contenu */
+.container-fluid.mt-4 {
+    margin-top: 1.5rem !important;
+}
+
+/* Amélioration de l'espacement des cartes */
+.card {
+    margin-bottom: 1.5rem;
+}
+
+/* Espacement pour les sections principales */
+.row.mt-4 {
+    margin-top: 2rem !important;
+}
+
+/* Styles pour le sélecteur de tiers unifié */
+#tiers-selector {
+    font-size: 1rem;
+    padding: 0.75rem;
+}
+
+#tiers-selector optgroup {
+    font-weight: bold;
+    color: var(--secondary-color);
+    background-color: var(--light-gray);
+}
+
+#tiers-selector option {
+    padding: 0.5rem;
+    font-weight: normal;
+}
+
+/* Différenciation visuelle pour les types de tiers */
+#tiers-selector option[value^="personne-"] {
+    color: #17a2b8; /* Bleu pour les personnes */
+}
+
+#tiers-selector option[value^="entreprise-"] {
+    color: #fd7e14; /* Orange pour les entreprises */
 }

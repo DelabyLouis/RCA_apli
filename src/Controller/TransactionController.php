@@ -98,38 +98,28 @@ final class TransactionController extends AbstractController
         $form = $this->createForm(TransactionNewType::class, $transaction);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Traiter le champ tiers combiné
-            $tiersValue = $form->get('tiers')->getData();
-            if ($tiersValue) {
-                if (strpos($tiersValue, 'personne_') === 0) {
-                    // C'est une personne
-                    $personneId = str_replace('personne_', '', $tiersValue);
-                    $personne = $entityManager->getRepository(Personne::class)->find($personneId);
-                    if ($personne) {
-                        $transaction->setPersonne($personne);
-                        $transaction->setEntreprise(null);
-                    }
-                } elseif (strpos($tiersValue, 'entreprise_') === 0) {
-                    // C'est une entreprise
-                    $entrepriseId = str_replace('entreprise_', '', $tiersValue);
-                    $entreprise = $entityManager->getRepository(Entreprise::class)->find($entrepriseId);
-                    if ($entreprise) {
-                        $transaction->setEntreprise($entreprise);
-                        $transaction->setPersonne(null);
+        // Debug: vérifier si le formulaire est soumis
+        if ($request->isMethod('POST')) {
+            error_log('POST reçu pour création transaction');
+            error_log('Données POST: ' . json_encode($request->request->all()));
+            error_log('Form submitted: ' . ($form->isSubmitted() ? 'OUI' : 'NON'));
+            error_log('Form valid: ' . ($form->isValid() ? 'OUI' : 'NON'));
+            
+            // Debug du montant spécifiquement
+            $montantFromForm = $transaction->getMontant();
+            error_log('Montant reçu dans l\'entité: ' . var_export($montantFromForm, true));
+            
+            if (!$form->isValid()) {
+                error_log('Erreurs de validation: ' . json_encode($form->getErrors(true, false)));
+                foreach ($form->all() as $child) {
+                    if (!$child->isValid()) {
+                        error_log('Erreur champ ' . $child->getName() . ': ' . json_encode($child->getErrors(true, false)));
                     }
                 }
             }
+        }
 
-            // Vérifier si l'exercice assigné est clôturé
-            if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
-                $this->addFlash('error', 'Impossible de créer une transaction pour un exercice clôturé. Vous devez d\'abord déclôturer l\'exercice.');
-                return $this->render('transaction/new.html.twig', [
-                    'transaction' => $transaction,
-                    'form' => $form,
-                ]);
-            }
-
+        if ($form->isSubmitted() && $form->isValid()) {
             // Calculer automatiquement le numéro d'ordre en fonction de l'exercice choisi
             if ($transaction->getExercice()) {
                 $lastNumeroOrdre = $transactionRepository->getLastNumeroOrdreByExercice($transaction->getExercice()->getIdExercice());
@@ -139,6 +129,7 @@ final class TransactionController extends AbstractController
             $entityManager->persist($transaction);
             $entityManager->flush();
 
+            $this->addFlash('success', 'Transaction créée avec succès !');
             return $this->redirectToRoute('app_transaction_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -181,6 +172,12 @@ final class TransactionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Générer automatiquement le numéro d'ordre si non défini (nouvelle transaction)
+            if ($transaction->getNumeroOrdre() === null && $transaction->getExercice()) {
+                $lastNumeroOrdre = $transactionRepository->getLastNumeroOrdreByExercice($transaction->getExercice()->getIdExercice());
+                $transaction->setNumeroOrdre($lastNumeroOrdre + 1);
+            }
+            
             $entityManager->flush();
 
             return $this->redirectToRoute('app_transaction_index', [], Response::HTTP_SEE_OTHER);

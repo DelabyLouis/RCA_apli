@@ -11,6 +11,8 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -72,6 +74,34 @@ class TransactionNewType extends AbstractType
                 'mapped' => false, // Ce champ ne sera pas mappé directement sur l'entité
             ])
         ;
+        
+        // Écouteur pour traiter le champ tiers lors de la soumission
+        $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) {
+            $transaction = $event->getData();
+            $form = $event->getForm();
+            
+            $tiersValue = $form->get('tiers')->getData();
+            
+            if ($tiersValue) {
+                if (strpos($tiersValue, 'personne_') === 0) {
+                    // C'est une personne
+                    $personneId = str_replace('personne_', '', $tiersValue);
+                    $personne = $this->entityManager->getRepository(Personne::class)->find($personneId);
+                    if ($personne) {
+                        $transaction->setPersonne($personne);
+                        $transaction->setEntreprise(null);
+                    }
+                } elseif (strpos($tiersValue, 'entreprise_') === 0) {
+                    // C'est une entreprise
+                    $entrepriseId = str_replace('entreprise_', '', $tiersValue);
+                    $entreprise = $this->entityManager->getRepository(Entreprise::class)->find($entrepriseId);
+                    if ($entreprise) {
+                        $transaction->setEntreprise($entreprise);
+                        $transaction->setPersonne(null);
+                    }
+                }
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void

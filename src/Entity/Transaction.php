@@ -30,8 +30,6 @@ class Transaction
     private ?string $libelle = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'Le numéro d\'ordre est obligatoire')]
-    #[Assert\Positive(message: 'Le numéro d\'ordre doit être positif')]
     private ?int $numero_ordre = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -40,7 +38,7 @@ class Transaction
     private ?\DateTime $date_transaction = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2)]
-    #[Assert\NotBlank(message: 'Le montant ne peut pas être vide')]
+    #[Assert\NotBlank(message: 'Le montant est obligatoire')]
     #[Assert\NotEqualTo(value: 0, message: 'Le montant ne peut pas être égal à zéro')]
     #[Assert\Regex(
         pattern: '/^-?\d{1,13}(\.\d{1,2})?$/',

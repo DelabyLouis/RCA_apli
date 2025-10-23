@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la transaction{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-eye me-2"></i>Détails de la transaction #{{ transaction.idTransaction }}</h1>
+                <div>
+                    <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                    </a>
+                    <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i>Modifier
+                    </a>
+                </div>
+            </div>
+
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Informations générales
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold mb-1">ID Transaction</label>
+                                        <p class="h6 text-primary mb-0">{{ transaction.idTransaction }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold mb-1">N° d'ordre</label>
+                                        <p class="h6 text-primary mb-0">{{ transaction.numeroOrdre }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold mb-1">Libellé</label>
+                                        <p class="h5 mb-0">{{ transaction.libelle }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold mb-1">Date de transaction</label>
+                                        <p class="h6 mb-0">
+                                            {% if transaction.dateTransaction %}
+                                                {{ transaction.dateTransaction|date('d/m/Y') }}
+                                            {% else %}
+                                                <span class="text-muted">Non définie</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-euro-sign me-2"></i>Montant
+                            </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="h2 mb-3">
+                                {% if transaction.montant >= 0 %}
+                                    <span class="text-success">
+                                        <i class="fas fa-plus-circle me-2"></i>{{ transaction.montant|number_format(2, ',', ' ') }} €
+                                    </span>
+                                    <div class="badge bg-success mt-2">DÉBIT</div>
+                                {% else %}
+                                    <span class="text-danger">
+                                        <i class="fas fa-minus-circle me-2"></i>{{ (transaction.montant * -1)|number_format(2, ',', ' ') }} €
+                                    </span>
+                                    <div class="badge bg-danger mt-2">CRÉDIT</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-address-card me-2"></i>Tiers
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if transaction.personne %}
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-user fa-2x text-info"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="mb-1">{{ transaction.personne.prenom }} {{ transaction.personne.nom }}</h5>
+                                        <p class="mb-1 text-muted">{{ transaction.personne.civilite }}</p>
+                                        {% if transaction.personne.email %}
+                                            <p class="mb-0">
+                                                <i class="fas fa-envelope me-1"></i>{{ transaction.personne.email }}
+                                            </p>
+                                        {% endif %}
+                                        {% if transaction.personne.telephone %}
+                                            <p class="mb-0">
+                                                <i class="fas fa-phone me-1"></i>{{ transaction.personne.telephone }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% elseif transaction.entreprise %}
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-building fa-2x text-warning"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="mb-1">{{ transaction.entreprise.nomEntreprise }}</h5>
+                                        {% if transaction.entreprise.ville %}
+                                            <p class="mb-0 text-muted">
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ transaction.entreprise.ville }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-user-slash fa-2x mb-3"></i>
+                                    <h6>Aucun tiers associé</h6>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tags me-2"></i>Classification
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold mb-1">Exercice</label>
+                                        <div>
+                                            {% if transaction.exercice %}
+                                                <span class="badge bg-primary fs-5 mb-2">{{ transaction.exercice.libelle }}</span>
+                                                <br><span class="h6 text-muted">
+                                                    {{ transaction.exercice.dateDebut|date('d/m/Y') }} - 
+                                                    {{ transaction.exercice.dateFin|date('d/m/Y') }}
+                                                </span>
+                                            {% else %}
+                                                <span class="h6 text-muted">Non défini</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold mb-1">Type de transaction</label>
+                                        <div>
+                                            {% if transaction.typeTransaction %}
+                                                <span class="badge bg-secondary fs-5">{{ transaction.typeTransaction.libelle }}</span>
+                                            {% else %}
+                                                <span class="h6 text-muted">Non défini</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-cogs me-2"></i>Actions disponibles
+                            </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="btn-group" role="group">
+                                <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}" class="btn btn-warning">
+                                    <i class="fas fa-edit me-1"></i>Modifier
+                                </a>
+                                <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-list me-1"></i>Retour à la liste
+                                </a>
+                                {% if transaction.exercice %}
+                                    <a href="{{ path('app_transaction_index') }}?exercice_id={{ transaction.exercice.idExercice }}" class="btn btn-info">
+                                        <i class="fas fa-filter me-1"></i>Autres transactions de cet exercice
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Marge en bas de la page -->
+<div class="mb-5"></div>
+{% endblock %}
