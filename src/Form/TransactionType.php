@@ -29,7 +29,8 @@ class TransactionType extends AbstractType
             ->add('type_transaction', EntityType::class, [
                 'class' => TypeTransaction::class,
                 'choice_label' => 'libelle',
-                'required' => true,
+                'required' => false,
+                'placeholder' => 'Aucun type (optionnel)',
             ])
             ->add('personne', EntityType::class, [
                 'class' => Personne::class,

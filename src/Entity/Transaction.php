@@ -51,7 +51,7 @@ class Transaction
     private ?Exercice $exercice = null;
 
     #[ORM\ManyToOne(inversedBy: 'transactions')]
-    #[ORM\JoinColumn(name: 'id_type', referencedColumnName: 'id_type', nullable: false)]
+    #[ORM\JoinColumn(name: 'id_type', referencedColumnName: 'id_type', nullable: true)]
     private ?TypeTransaction $type_transaction = null;
 
     #[ORM\ManyToOne(inversedBy: 'transactions')]

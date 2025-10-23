@@ -13,20 +13,6 @@
                 </a>
             </div>
 
-            {% for message in app.flashes('success') %}
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-
-            {% for message in app.flashes('error') %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-
             <div class="card shadow-sm">
                 <div class="card-body">
                     {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
@@ -62,13 +48,15 @@
                                 
                                 <!-- Boutons radio pour Débit/Crédit -->
                                 <div class="btn-group w-100 mb-2" role="group">
-                                    <input type="radio" class="btn-check" name="transaction_type_edit" id="debit-edit" value="debit" checked>
-                                    <label class="btn btn-outline-success" for="debit-edit">
+                                    <input type="radio" class="btn-check" name="transaction_type_edit" id="debit-edit" value="debit" 
+                                           {{ (transaction.montant >= 0) ? 'checked' : '' }}>
+                                    <label class="btn {{ (transaction.montant >= 0) ? 'btn-success' : 'btn-outline-success' }}" for="debit-edit">
                                         <i class="fas fa-plus-circle me-2"></i>DÉBIT
                                     </label>
                                     
-                                    <input type="radio" class="btn-check" name="transaction_type_edit" id="credit-edit" value="credit">
-                                    <label class="btn btn-outline-danger" for="credit-edit">
+                                    <input type="radio" class="btn-check" name="transaction_type_edit" id="credit-edit" value="credit"
+                                           {{ (transaction.montant < 0) ? 'checked' : '' }}>
+                                    <label class="btn {{ (transaction.montant < 0) ? 'btn-danger' : 'btn-outline-danger' }}" for="credit-edit">
                                         <i class="fas fa-minus-circle me-2"></i>CRÉDIT
                                     </label>
                                 </div>
@@ -81,6 +69,7 @@
                                            placeholder="0.00" 
                                            step="0.01" 
                                            min="0"
+                                           value="{{ transaction.montant ? (transaction.montant|abs) : '' }}"
                                            required>
                                     <span class="input-group-text">€</span>
                                 </div>
@@ -101,14 +90,6 @@
                                 {{ form_label(form.date_transaction, 'Date', {'label_attr': {'class': 'form-label'}}) }}
                                 {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control'}}) }}
                                 {{ form_errors(form.date_transaction) }}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                {{ form_label(form.numero_ordre, 'Numéro d\'ordre', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.numero_ordre, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.numero_ordre) }}
-                                <div class="form-text">Modifiez le numéro d'ordre si nécessaire.</div>
                             </div>
                         </div>
                     </div>
@@ -210,17 +191,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const creditRadioEdit = document.getElementById('credit-edit');
     
     if (montantDisplayEdit && montantHiddenEdit && debitRadioEdit && creditRadioEdit) {
-        // Initialiser les valeurs basées sur le montant existant
-        const currentValue = parseFloat(montantHiddenEdit.value) || 0;
-        if (currentValue >= 0) {
-            debitRadioEdit.checked = true;
-            creditRadioEdit.checked = false;
-            montantDisplayEdit.value = Math.abs(currentValue);
-        } else {
-            debitRadioEdit.checked = false;
-            creditRadioEdit.checked = true;
-            montantDisplayEdit.value = Math.abs(currentValue);
-        }
+        // Les valeurs sont déjà initialisées par le template Twig
+        // Pas besoin de les réinitialiser ici
         
         // Fonction pour mettre à jour le montant caché
         function updateMontantEdit() {
