@@ -63,6 +63,18 @@
                         ]
                     }) }}
                     
+                    <!-- Boutons d'action pour les filtres -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="reset-filters-btn">
+                                <i class="fas fa-times me-1"></i>Réinitialiser tous les filtres
+                            </button>
+                        </div>
+                        <div id="filter-results-info" class="text-muted small">
+                            <!-- Informations sur le filtrage automatiquement mises à jour par le composant -->
+                        </div>
+                    </div>
+                    
                     <div class="table-responsive">
                         <table class="table table-hover table-exercices">
                             <thead class="table-dark">
@@ -390,6 +402,122 @@ function afficherHistoriqueRecent(historiques) {
 
 // Charger l'historique au chargement de la page
 window.addEventListener('load', chargerHistoriqueRecent);
+
+// Gestion du bouton de réinitialisation des filtres
+document.addEventListener('DOMContentLoaded', function() {
+    // Attendre que le composant de filtrage soit initialisé
+    setTimeout(() => {
+        // Fonction pour réinitialiser tous les filtres
+        function resetAllFilters() {
+            // Réinitialiser tous les champs de filtre
+            const filterFields = document.querySelectorAll('.entity-filter-field');
+            filterFields.forEach(field => {
+                if (field.type === 'checkbox' || field.type === 'radio') {
+                    field.checked = false;
+                } else {
+                    field.value = '';
+                }
+                
+                // Déclencher l'événement change pour que le composant réagisse
+                const event = new Event('change', { bubbles: true });
+                field.dispatchEvent(event);
+            });
+            
+            // Réinitialiser aussi le filtre simple s'il existe
+            const simpleFilter = document.querySelector('input[id*="filter"]');
+            if (simpleFilter && !simpleFilter.classList.contains('entity-filter-field')) {
+                simpleFilter.value = '';
+                const event = new Event('input', { bubbles: true });
+                simpleFilter.dispatchEvent(event);
+            }
+            
+            // Réafficher toutes les lignes
+            const allRows = document.querySelectorAll('tbody tr');
+            allRows.forEach(row => {
+                row.style.display = '';
+            });
+        }
+        
+        // Événement pour le bouton de réinitialisation
+        const resetBtn = document.getElementById('reset-filters-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                resetAllFilters();
+                
+                // Feedback visuel
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Filtres réinitialisés';
+                btn.classList.add('btn-success');
+                btn.classList.remove('btn-outline-secondary');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.add('btn-outline-secondary');
+                    btn.classList.remove('btn-success');
+                }, 1500);
+            });
+        }
+        
+        // Fonction pour mettre à jour les informations de résultat
+        function updateFilterResultsInfo() {
+            const allRows = document.querySelectorAll('tbody tr');
+            const visibleRows = Array.from(allRows).filter(row => {
+                const style = window.getComputedStyle(row);
+                return style.display !== 'none';
+            });
+            const totalRows = allRows.length;
+            const infoElement = document.getElementById('filter-results-info');
+            
+            if (infoElement) {
+                if (visibleRows.length === totalRows) {
+                    infoElement.innerHTML = `<i class="fas fa-list me-1"></i>Tous les ${totalRows} exercices affichés`;
+                } else {
+                    infoElement.innerHTML = `<i class="fas fa-filter me-1"></i>${visibleRows.length} sur ${totalRows} exercices affichés`;
+                }
+            }
+        }
+        
+        // Observer les changements dans le tableau pour mettre à jour les stats
+        const tbody = document.querySelector('tbody');
+        if (tbody) {
+            const observer = new MutationObserver(function(mutations) {
+                let shouldUpdate = false;
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        shouldUpdate = true;
+                    }
+                });
+                if (shouldUpdate) {
+                    setTimeout(updateFilterResultsInfo, 50);
+                }
+            });
+            
+            // Observer tous les tr du tbody
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                observer.observe(row, { attributes: true, attributeFilter: ['style'] });
+            });
+        }
+        
+        // Initialiser l'affichage des informations
+        updateFilterResultsInfo();
+        
+        // Mettre à jour les stats quand les filtres changent
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('entity-filter-field')) {
+                setTimeout(updateFilterResultsInfo, 100);
+            }
+        });
+        
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('entity-filter-field')) {
+                setTimeout(updateFilterResultsInfo, 100);
+            }
+        });
+        
+    }, 300); // Délai réduit pour l'initialisation
+});
 </script>
 
 <style>
