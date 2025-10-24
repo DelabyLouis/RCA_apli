@@ -1,89 +1,88 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier Livret {{ livret.nom }}{% endblock %}
+{% block title %}Modifier - Transaction Livret #{{ transaction.idTransaction }}{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-6">
             <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
                         <i class="fas fa-edit me-2"></i>
-                        Modifier le livret {{ livret.nom }}
-                    </h4>
+                        Modifier la transaction livret #{{ transaction.idTransaction }}
+                    </h5>
                 </div>
                 <div class="card-body">
-                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            {{ form_label(form.nom) }}
-                            {{ form_widget(form.nom) }}
-                            {{ form_errors(form.nom) }}
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="libelle" class="form-label">Libellé *</label>
+                            <input type="text" class="form-control" id="libelle" name="libelle" 
+                                   required value="{{ transaction.libelle }}">
                         </div>
-                        <div class="col-md-6 mb-3">
-                            {{ form_label(form.date_creation) }}
-                            {{ form_widget(form.date_creation) }}
-                            {{ form_errors(form.date_creation) }}
+                        
+                        <div class="mb-3">
+                            <label for="date_transaction" class="form-label">Date de transaction *</label>
+                            <input type="datetime-local" class="form-control" id="date_transaction" name="date_transaction" 
+                                   required value="{{ transaction.dateTransaction|date('Y-m-d\\TH:i') }}">
                         </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            {{ form_label(form.solde_initial) }}
-                            {{ form_widget(form.solde_initial) }}
-                            {{ form_errors(form.solde_initial) }}
-                            <div class="form-text">
-                                <i class="fas fa-exclamation-triangle text-warning"></i>
-                                Attention : modifier le solde initial affectera le calcul du solde actuel
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" 
+                                      rows="3" placeholder="Description optionnelle...">{{ transaction.description ?? '' }}</textarea>
+                        </div>
+                        
+                        <!-- Informations non modifiables -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Informations non modifiables</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>ID :</strong> {{ transaction.idTransaction }}</p>
+                                        <p class="mb-1"><strong>N° Ordre :</strong> {{ transaction.numeroOrdre }}</p>
+                                        <p class="mb-1"><strong>Type de compte :</strong> 
+                                            <span class="badge bg-info">Livret</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Montant :</strong> 
+                                            <span class="badge bg-{{ transaction.montant >= 0 ? 'success' : 'danger' }}">
+                                                {{ transaction.montant|number_format(2, ',', ' ') }} €
+                                            </span>
+                                        </p>
+                                        <p class="mb-1"><strong>Type d'opération :</strong>
+                                            {% if transaction.montant >= 0 %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-arrow-down"></i> Dépôt
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-arrow-up"></i> Retrait
+                                                </span>
+                                            {% endif %}
+                                        </p>
+                                        <p class="mb-0"><strong>Exercice :</strong> {{ transaction.exercice ? transaction.exercice.libelle : 'Non défini' }}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Exercice</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" value="{{ livret.exercice.libelle }}" readonly>
-                                <span class="input-group-text">
-                                    <i class="fas fa-lock text-warning" title="Exercice verrouillé"></i>
-                                </span>
-                            </div>
-                            <div class="form-text">L'exercice ne peut pas être modifié après création</div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note :</strong> Cette modification affectera uniquement la transaction du livret. 
+                            La transaction liée sur le compte courant ne sera pas modifiée.
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        {{ form_label(form.description) }}
-                        {{ form_widget(form.description) }}
-                        {{ form_errors(form.description) }}
-                    </div>
-                    
-                    <!-- Informations actuelles du livret -->
-                    <div class="alert alert-light">
-                        <h6><i class="fas fa-info-circle me-1"></i> Informations actuelles :</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>Solde actuel :</strong> 
-                                <span class="badge bg-{{ livret.soldeActuel >= 0 ? 'success' : 'danger' }}">
-                                    {{ livret.soldeActuel|number_format(2, ',', ' ') }} €
-                                </span>
-                            </div>
-                            <div class="col-md-6">
-                                <strong>Nombre de transactions :</strong> {{ livret.transactionsLivret|length }}
-                            </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ path('app_livret_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save"></i> Enregistrer les modifications
+                            </button>
                         </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ path('app_livret_show', {'id_livret': livret.idLivret}) }}" 
-                           class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Retour
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i>Enregistrer les modifications
-                        </button>
-                    </div>
-                    
-                    {{ form_end(form) }}
+                    </form>
                 </div>
             </div>
         </div>

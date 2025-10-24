@@ -59,14 +59,26 @@ class TransactionRepository extends ServiceEntityRepository
      */
     public function calculateSoldeByExercice(int $exerciceId): float
     {
-        $result = $this->createQueryBuilder('t')
-            ->select('SUM(t.montant)')
+        // Calculer le solde en prenant en compte que les transactions livret 
+        // doivent être inversées pour le point de vue du compte courant
+        $transactions = $this->createQueryBuilder('t')
+            ->select('t.montant, t.type_compte')
             ->where('t.exercice = :exerciceId')
             ->setParameter('exerciceId', $exerciceId)
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getResult();
         
-        return $result ? (float) $result : 0.0;
+        $solde = 0.0;
+        foreach ($transactions as $transaction) {
+            $montant = (float) $transaction['montant'];
+            // Inverser le montant pour les transactions livret
+            if ($transaction['type_compte'] === 'livret') {
+                $montant = -$montant;
+            }
+            $solde += $montant;
+        }
+        
+        return $solde;
     }
 
     //    /**

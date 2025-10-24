@@ -43,6 +43,19 @@ class ExerciceRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    /**
+     * Récupère tous les exercices ouverts (non clôturés) triés par libellé descendant
+     */
+    public function findExercicesOuverts(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->where('e.clos = :clos')
+            ->setParameter('clos', false)
+            ->orderBy('e.libelle', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Exercice[] Returns an array of Exercice objects
     //     */

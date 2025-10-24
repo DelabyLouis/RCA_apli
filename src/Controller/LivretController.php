@@ -3,8 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Transaction;
+use App\Entity\TypeTransaction;
+use App\Entity\Entreprise;
 use App\Repository\TransactionRepository;
 use App\Repository\ExerciceRepository;
+use App\Repository\TypeTransactionRepository;
+use App\Repository\EntrepriseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -97,7 +101,7 @@ class LivretController extends AbstractController
 
         return $this->render('livret/transfert.html.twig', [
             'livret' => (object) $livret_info,
-            'exercices' => $exerciceRepository->findBy([], ['libelle' => 'DESC'])
+            'exercices' => $exerciceRepository->findExercicesOuverts()
         ]);
     }
 
@@ -112,7 +116,20 @@ class LivretController extends AbstractController
         $description = $request->request->get('description');
         $exerciceId = $request->request->get('exercice_id');
 
-        if (!$type || !$montant || !$libelle || !$exerciceId) {
+        // Générer automatiquement le libellé s'il est vide
+        if (empty($libelle) || trim($libelle) === '') {
+            $now = new \DateTime();
+            $day = $now->format('d');
+            $month = $now->format('m');
+            $year = $now->format('y');
+            $hours = $now->format('H');
+            $minutes = $now->format('i');
+            
+            $typeText = $type === 'depot' ? 'DepotLivret' : 'RetraitLivret';
+            $libelle = "{$typeText} {$day}-{$month}-{$year}-{$hours}h{$minutes}";
+        }
+
+        if (!$type || !$montant || !$exerciceId) {
             $this->addFlash('error', 'Tous les champs obligatoires doivent être remplis.');
             return $this->redirectToRoute('app_livret_transfert');
         }
@@ -124,41 +141,34 @@ class LivretController extends AbstractController
             return $this->redirectToRoute('app_livret_transfert');
         }
 
+        // Vérifier que l'exercice n'est pas clôturé
+        if ($exercice->isClos()) {
+            $this->addFlash('error', 'Impossible d\'ajouter une transaction à un exercice clôturé.');
+            return $this->redirectToRoute('app_livret_transfert');
+        }
+
         // Créer les deux transactions liées
         try {
-            // Obtenir les numéros d'ordre en une fois pour éviter les conflits
-            $numeroOrdreCompteCourant = $this->getNextNumeroOrdre($transactionRepository, $exercice, 'compte_courant');
-            $numeroOrdrelivret = $numeroOrdreCompteCourant + 1;
+            // Créer ou récupérer le type de transaction "livret" et l'entreprise "livret"
+            $typeLivret = $this->getOrCreateLivretTypeTransaction($entityManager);
+            $entrepriseLivret = $this->getOrCreateLivretEntreprise($entityManager);
+            
+            // Obtenir le numéro d'ordre
+            $numeroOrdre = $this->getNextNumeroOrdre($transactionRepository, $exercice, 'livret');
 
-            // Transaction compte courant
-            $transactionCompteCourant = new Transaction();
-            $transactionCompteCourant->setLibelle($libelle . ' (Compte courant)')
-                ->setNumeroOrdre($numeroOrdreCompteCourant)
-                ->setDateTransaction(new \DateTime())
-                ->setMontant($type === 'depot' ? '-' . $montant : (string) $montant)
-                ->setTypeCompte('compte_courant')
-                ->setDescription($description)
-                ->setExercice($exercice);
-
-            $entityManager->persist($transactionCompteCourant);
-            $entityManager->flush(); // Pour obtenir l'ID
-
-            // Transaction livret
+            // Créer une seule transaction pour le transfert livret
             $transactionLivret = new Transaction();
-            $transactionLivret->setLibelle($libelle . ' (Livret)')
-                ->setNumeroOrdre($numeroOrdrelivret)
+            $transactionLivret->setLibelle($libelle) // Libellé simple sans suffixe
+                ->setNumeroOrdre($numeroOrdre)
                 ->setDateTransaction(new \DateTime())
                 ->setMontant($type === 'depot' ? (string) $montant : '-' . $montant)
                 ->setTypeCompte('livret')
                 ->setDescription($description)
-                ->setTransactionLieeId($transactionCompteCourant->getIdTransaction())
-                ->setExercice($exercice);
+                ->setExercice($exercice)
+                ->setTypeTransaction($typeLivret)
+                ->setEntreprise($entrepriseLivret);
 
             $entityManager->persist($transactionLivret);
-            $entityManager->flush();
-
-            // Mettre à jour la transaction compte courant avec l'ID de la transaction livret
-            $transactionCompteCourant->setTransactionLieeId($transactionLivret->getIdTransaction());
             $entityManager->flush();
 
             $this->addFlash('success', 'Transfert effectué avec succès.');
@@ -170,7 +180,76 @@ class LivretController extends AbstractController
         }
     }
 
-    #[Route('/{id_transaction}/update-field', name: 'app_livret_update_field', methods: ['POST'])]
+    #[Route('/{id}/show', name: 'app_livret_show', methods: ['GET'])]
+    public function show(int $id, TransactionRepository $transactionRepository): Response
+    {
+        $transaction = $transactionRepository->find($id);
+        
+        if (!$transaction || $transaction->getTypeCompte() !== 'livret') {
+            throw $this->createNotFoundException('Transaction du livret non trouvée');
+        }
+        
+        // Récupérer la transaction liée si elle existe
+        $transactionLiee = null;
+        if ($transaction->getTransactionLieeId()) {
+            $transactionLiee = $transactionRepository->find($transaction->getTransactionLieeId());
+        }
+        
+        return $this->render('livret/show.html.twig', [
+            'transaction' => $transaction,
+            'transaction_liee' => $transactionLiee
+        ]);
+    }
+    
+    #[Route('/{id}/edit', name: 'app_livret_edit', methods: ['GET', 'POST'])]
+    public function edit(
+        int $id, 
+        Request $request, 
+        TransactionRepository $transactionRepository, 
+        EntityManagerInterface $entityManager
+    ): Response {
+        $transaction = $transactionRepository->find($id);
+        
+        if (!$transaction || $transaction->getTypeCompte() !== 'livret') {
+            throw $this->createNotFoundException('Transaction du livret non trouvée');
+        }
+        
+        // Vérifier que l'exercice n'est pas clôturé
+        if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+            $this->addFlash('error', 'Impossible de modifier une transaction d\'un exercice clôturé.');
+            return $this->redirectToRoute('app_livret_index');
+        }
+        
+        if ($request->isMethod('POST')) {
+            // Traitement de la modification
+            $libelle = $request->request->get('libelle');
+            $description = $request->request->get('description');
+            $dateTransaction = $request->request->get('date_transaction');
+            
+            if ($libelle) {
+                $transaction->setLibelle($libelle);
+            }
+            
+            if ($description !== null) {
+                $transaction->setDescription($description);
+            }
+            
+            if ($dateTransaction) {
+                $transaction->setDateTransaction(new \DateTime($dateTransaction));
+            }
+            
+            $entityManager->flush();
+            
+            $this->addFlash('success', 'Transaction du livret modifiée avec succès');
+            return $this->redirectToRoute('app_livret_index');
+        }
+        
+        return $this->render('livret/edit.html.twig', [
+            'transaction' => $transaction
+        ]);
+    }
+
+    #[Route('/{id}/update-field', name: 'app_livret_update_field', methods: ['POST'])]
     public function updateField(
         Request $request, 
         int $id_transaction,
@@ -182,6 +261,11 @@ class LivretController extends AbstractController
 
             if (!$transaction || !$transaction->isLivret()) {
                 return new JsonResponse(['success' => false, 'error' => 'Transaction livret non trouvée'], 404);
+            }
+
+            // Vérifier que l'exercice n'est pas clôturé
+            if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+                return new JsonResponse(['success' => false, 'error' => 'Impossible de modifier une transaction d\'un exercice clôturé'], 403);
             }
 
             $field = $request->request->get('field');
@@ -258,6 +342,41 @@ class LivretController extends AbstractController
         } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }
+    }
+
+    private function getOrCreateLivretTypeTransaction(EntityManagerInterface $entityManager): TypeTransaction
+    {
+        $typeTransactionRepo = $entityManager->getRepository(TypeTransaction::class);
+        $typeTransaction = $typeTransactionRepo->findOneBy(['libelle' => 'Livret']);
+        
+        if (!$typeTransaction) {
+            $typeTransaction = new TypeTransaction();
+            $typeTransaction->setLibelle('Livret');
+            $entityManager->persist($typeTransaction);
+            $entityManager->flush();
+        }
+        
+        return $typeTransaction;
+    }
+    
+    private function getOrCreateLivretEntreprise(EntityManagerInterface $entityManager): Entreprise
+    {
+        $entrepriseRepo = $entityManager->getRepository(Entreprise::class);
+        $entreprise = $entrepriseRepo->findOneBy(['nom_entreprise' => 'Livret']);
+        
+        if (!$entreprise) {
+            $entreprise = new Entreprise();
+            $entreprise->setNomEntreprise('Livret');
+            $entreprise->setRue('Compte épargne interne');
+            $entreprise->setVille('Interne');
+            $entreprise->setCodePostal(00000);
+            $entreprise->setTelephone(null);
+            $entreprise->setEmail('');
+            $entityManager->persist($entreprise);
+            $entityManager->flush();
+        }
+        
+        return $entreprise;
     }
 
     private function getSoldeInitialLivret(): float

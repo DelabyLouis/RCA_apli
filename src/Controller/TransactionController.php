@@ -68,10 +68,17 @@ final class TransactionController extends AbstractController
         $transactionsAvecMontant = [];
         
         foreach ($transactions as $transaction) {
-            $montantCumule += $transaction->getMontant();
+            // Pour les transactions livret, inverser le montant pour le point de vue du compte courant
+            $montantTransaction = $transaction->getMontant();
+            if ($transaction->getTypeCompte() === 'livret') {
+                $montantTransaction = -$montantTransaction; // Inverser le signe
+            }
+            
+            $montantCumule += $montantTransaction;
             $transactionsAvecMontant[] = [
                 'transaction' => $transaction,
-                'montant_cumule' => $montantCumule
+                'montant_cumule' => $montantCumule,
+                'montant_compte_courant' => $montantTransaction // Montant du point de vue du compte courant
             ];
         }
         
@@ -89,7 +96,7 @@ final class TransactionController extends AbstractController
             'exercice_precedent_existe' => $exerciceFilter && $soldePrecedent != 0,
             'personnes' => $personneRepository->findAll(),
             'entreprises' => $entrepriseRepository->findAll(),
-            'exercices' => $exerciceRepository->findAll(),
+            'exercices' => $exerciceRepository->findExercicesOuverts(),
             'types_transaction' => $typeTransactionRepository->findAll(),
             'exercice_filter' => $exerciceFilter,
         ]);
@@ -128,6 +135,15 @@ final class TransactionController extends AbstractController
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Vérifier si l'exercice est clôturé
+            if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+                $this->addFlash('error', 'Impossible de créer une transaction dans un exercice clôturé.');
+                return $this->render('transaction/new.html.twig', [
+                    'transaction' => $transaction,
+                    'form' => $form,
+                ]);
+            }
+            
             // Validation supplémentaire côté serveur
             if (!$transaction->getPersonne() && !$transaction->getEntreprise()) {
                 $this->addFlash('error', 'Vous devez sélectionner une personne ou une entreprise.');
@@ -386,22 +402,36 @@ final class TransactionController extends AbstractController
         $transaction = $transactionRepository->findOneBy(['id_transaction' => $id_transaction]);
         
         if (!$transaction) {
-            return new JsonResponse(['success' => false, 'message' => 'Transaction non trouvée'], 404);
+            return new JsonResponse(['success' => false, 'error' => 'Transaction non trouvée'], 404);
         }
 
         // Vérifier si l'exercice de la transaction est clôturé
         if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
-            return new JsonResponse(['success' => false, 'message' => 'Impossible de supprimer une transaction d\'un exercice clôturé'], 403);
+            return new JsonResponse(['success' => false, 'error' => 'Impossible de supprimer une transaction d\'un exercice clôturé'], 403);
         }
 
         try {
+            // Si c'est une transaction liée à une autre (transfert livret), supprimer aussi la transaction liée
+            if ($transaction->getTransactionLieeId()) {
+                $transactionLiee = $transactionRepository->find($transaction->getTransactionLieeId());
+                if ($transactionLiee) {
+                    $entityManager->remove($transactionLiee);
+                }
+            }
+            
+            // Chercher les transactions qui pointent vers celle-ci
+            $transactionsLiees = $transactionRepository->findBy(['transaction_liee_id' => $transaction->getIdTransaction()]);
+            foreach ($transactionsLiees as $transactionLiee) {
+                $entityManager->remove($transactionLiee);
+            }
+            
             $entityManager->remove($transaction);
             $entityManager->flush();
             
             return new JsonResponse(['success' => true, 'message' => 'Transaction supprimée avec succès']);
             
         } catch (\Exception $e) {
-            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
+            return new JsonResponse(['success' => false, 'error' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
         }
     }
 }

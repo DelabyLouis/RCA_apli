@@ -166,12 +166,13 @@
                 {% for item in transactions_avec_montant %}
                     {% set transaction = item.transaction %}
                     {% set montant_cumule = item.montant_cumule %}
+                    {% set is_exercice_clos = transaction.exercice and transaction.exercice.isClos %}
                     <tr data-id="{{ transaction.idTransaction }}">
                         <td>{{ transaction.idTransaction }}</td>
-                        <td class="editable-field" data-field="libelle">{{ transaction.libelle }}</td>
-                        <td class="editable-field" data-field="numero_ordre">{{ transaction.numeroOrdre }}</td>
-                        <td class="editable-field" data-field="date_transaction">{{ transaction.dateTransaction ? transaction.dateTransaction|date('Y-m-d') : '' }}</td>
-                        <td class="editable-field" data-field="tiers" data-current-personne="{{ transaction.personne ? transaction.personne.idPersonne : '' }}" data-current-entreprise="{{ transaction.entreprise ? transaction.entreprise.idEntreprise : '' }}">
+                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="libelle" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.libelle }}</td>
+                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="numero_ordre" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.numeroOrdre }}</td>
+                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="date_transaction" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.dateTransaction ? transaction.dateTransaction|date('Y-m-d') : '' }}</td>
+                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="tiers" data-current-personne="{{ transaction.personne ? transaction.personne.idPersonne : '' }}" data-current-entreprise="{{ transaction.entreprise ? transaction.entreprise.idEntreprise : '' }}" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>
                             {% if transaction.personne %}
                                 <span class="badge bg-info">
                                     <i class="fas fa-user"></i> {{ transaction.personne.prenom }} {{ transaction.personne.nom }}
@@ -184,22 +185,25 @@
                                 <span class="text-muted">-</span>
                             {% endif %}
                         </td>
-                        <td class="montant-cell editable-field text-end" 
+                        {% set display_montant = item.montant_compte_courant is defined ? item.montant_compte_courant : transaction.montant %}
+                        <td class="montant-cell {% if not is_exercice_clos %}editable-field{% endif %} text-end" 
                             data-field="montant" 
                             data-type="debit" 
-                            data-current-value="{{ transaction.montant }}">
-                            {% if transaction.montant >= 0 %}
-                                <span class="badge bg-success fs-6 fw-bold">{{ transaction.montant|number_format(2, ',', ' ') }} €</span>
+                            data-current-value="{{ transaction.montant }}"
+                            {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>
+                            {% if display_montant >= 0 %}
+                                <span class="badge bg-success fs-6 fw-bold">{{ display_montant|number_format(2, ',', ' ') }} €</span>
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
                         </td>
-                        <td class="montant-cell editable-field text-end" 
+                        <td class="montant-cell {% if not is_exercice_clos %}editable-field{% endif %} text-end" 
                             data-field="montant" 
                             data-type="credit" 
-                            data-current-value="{{ transaction.montant }}">
-                            {% if transaction.montant < 0 %}
-                                <span class="badge bg-danger fs-6 fw-bold">{{ (transaction.montant * -1)|number_format(2, ',', ' ') }} €</span>
+                            data-current-value="{{ transaction.montant }}"
+                            {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>
+                            {% if display_montant < 0 %}
+                                <span class="badge bg-danger fs-6 fw-bold">{{ (display_montant * -1)|number_format(2, ',', ' ') }} €</span>
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
@@ -213,19 +217,28 @@
                                 </span>
                             {% endif %}
                         </td>
-                        <td class="editable-field" data-field="exercice">{{ transaction.exercice ? transaction.exercice.libelle : '' }}</td>
-                        <td class="editable-field" data-field="type_transaction">{{ transaction.typeTransaction ? transaction.typeTransaction.libelle : '' }}</td>
+                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="exercice" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.exercice ? transaction.exercice.libelle : '' }}</td>
+                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="type_transaction" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.typeTransaction ? transaction.typeTransaction.libelle : '' }}</td>
                         <td>
                             <div class="btn-group" role="group">
                                 <a href="{{ path('app_transaction_show', {'id_transaction': transaction.idTransaction}) }}" class="btn btn-info btn-sm" title="Voir les détails">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}" class="btn btn-warning btn-sm" title="Modifier">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn btn-danger btn-sm delete-btn" data-id="{{ transaction.idTransaction }}" title="Supprimer">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                {% if transaction.exercice and transaction.exercice.isClos %}
+                                    <button class="btn btn-warning btn-sm" disabled title="Exercice clôturé - Modification impossible">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" disabled title="Exercice clôturé - Suppression impossible">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                {% else %}
+                                    <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}" class="btn btn-warning btn-sm" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-danger btn-sm delete-btn" data-id="{{ transaction.idTransaction }}" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>
@@ -330,7 +343,7 @@
             });
             
             // Gestion de la suppression
-            document.querySelectorAll('.delete-transaction').forEach(function(button) {
+            document.querySelectorAll('.delete-btn').forEach(function(button) {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
                     

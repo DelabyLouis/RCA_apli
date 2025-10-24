@@ -91,7 +91,7 @@
                         <div class="mb-3">
                             <label for="libelle" class="form-label">Libellé *</label>
                             <input type="text" class="form-control" id="libelle" name="libelle" 
-                                   required value="" placeholder="Libellé automatique...">
+                                   value="" placeholder="Libellé automatique...">
                         </div>
                         </div>
                         
@@ -125,48 +125,88 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Script de transfert livret chargé');
+    
     const typeRadios = document.querySelectorAll('input[name="type"]');
     const montantInput = document.getElementById('montant');
     const libelleInput = document.getElementById('libelle');
     const preview = document.getElementById('transfert-preview');
     const previewContent = document.getElementById('preview-content');
     
-    const soldeActuel = {{ livret.solde_actuel }};
+    // Vérifier que tous les éléments sont trouvés
+    console.log('Elements trouvés:', {
+        typeRadios: typeRadios.length,
+        montantInput: !!montantInput,
+        libelleInput: !!libelleInput,
+        preview: !!preview,
+        previewContent: !!previewContent
+    });
+    
+    const soldeActuel = {{ livret.solde_actuel|default(0) }};
+    console.log('Solde actuel:', soldeActuel);
     
     // Fonction pour générer le libellé par défaut
     function generateDefaultLibelle() {
-        const now = new Date();
-        const day = String(now.getDate()).padStart(2, '0');
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const year = String(now.getFullYear()).slice(-2);
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        
-        const dateFormatted = `${day}-${month}-${year}-${hours}h${minutes}`;
-        
-        const selectedType = document.querySelector('input[name="type"]:checked');
-        if (selectedType) {
-            const typeText = selectedType.value === 'depot' ? 'DepotLivret' : 'RetraitLivret';
-            return `${typeText} ${dateFormatted}`;
+        try {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = String(now.getFullYear()).slice(-2);
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            const dateFormatted = `${day}-${month}-${year}-${hours}h${minutes}`;
+            
+            const selectedType = document.querySelector('input[name="type"]:checked');
+            if (selectedType) {
+                const typeText = selectedType.value === 'depot' ? 'DepotLivret' : 'RetraitLivret';
+                const libelle = `${typeText} ${dateFormatted}`;
+                console.log('Libellé généré:', libelle);
+                return libelle;
+            }
+            console.log('Aucun type sélectionné');
+            return '';
+        } catch (error) {
+            console.error('Erreur lors de la génération du libellé:', error);
+            return 'DepotLivret';
         }
-        return '';
     }
     
     // Mettre à jour le libellé quand le type change
     typeRadios.forEach(radio => {
         radio.addEventListener('change', function() {
+            console.log('Type changé vers:', this.value);
             if (libelleInput.value === '' || libelleInput.value.includes('DepotLivret') || libelleInput.value.includes('RetraitLivret')) {
-                libelleInput.value = generateDefaultLibelle();
+                const newLibelle = generateDefaultLibelle();
+                libelleInput.value = newLibelle;
+                console.log('Nouveau libellé:', newLibelle);
             }
             updatePreview();
         });
     });
     
     // Initialiser le libellé au chargement de la page
-    libelleInput.value = generateDefaultLibelle();
+    console.log('Initialisation du libellé...');
     
-    // Mettre à jour l'aperçu initial
-    updatePreview();
+    // Fonction pour forcer la génération du libellé
+    function forceGenerateLibelle() {
+        const libelle = generateDefaultLibelle();
+        if (libelle && libelleInput) {
+            libelleInput.value = libelle;
+            console.log('Libellé forcé:', libelle);
+            updatePreview();
+            return true;
+        }
+        return false;
+    }
+    
+    // Essayer immédiatement
+    if (!forceGenerateLibelle()) {
+        // Si ça ne marche pas, essayer après un délai
+        setTimeout(forceGenerateLibelle, 100);
+        // Et encore une fois si nécessaire
+        setTimeout(forceGenerateLibelle, 500);
+    }
     
     function updatePreview() {
         const selectedType = document.querySelector('input[name="type"]:checked');
@@ -212,6 +252,55 @@ document.addEventListener('DOMContentLoaded', function() {
     
     montantInput.addEventListener('input', updatePreview);
     libelleInput.addEventListener('input', updatePreview);
+    
+    // Gestionnaire pour la soumission du formulaire
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Soumission du formulaire...');
+            
+            // Vérifier si le libellé est vide et le remplir automatiquement
+            if (!libelleInput.value || libelleInput.value.trim() === '') {
+                console.log('Libellé vide détecté, génération automatique...');
+                const autoLibelle = generateDefaultLibelle();
+                libelleInput.value = autoLibelle;
+                console.log('Libellé automatique défini:', autoLibelle);
+            }
+            
+            // Vérifier les champs obligatoires
+            const selectedType = document.querySelector('input[name="type"]:checked');
+            const montant = parseFloat(montantInput.value) || 0;
+            const exercice = document.getElementById('exercice').value;
+            
+            if (!selectedType) {
+                e.preventDefault();
+                alert('Veuillez sélectionner un type de transfert (Dépôt ou Retrait).');
+                return;
+            }
+            
+            if (!montant || montant <= 0) {
+                e.preventDefault();
+                alert('Veuillez saisir un montant valide.');
+                montantInput.focus();
+                return;
+            }
+            
+            if (!exercice) {
+                e.preventDefault();
+                alert('Veuillez sélectionner un exercice.');
+                return;
+            }
+            
+            if (!libelleInput.value || libelleInput.value.trim() === '') {
+                e.preventDefault();
+                alert('Le libellé est requis.');
+                libelleInput.focus();
+                return;
+            }
+            
+            console.log('Formulaire valide, soumission en cours...');
+        });
+    }
 });
 </script>
 
