@@ -3,27 +3,132 @@
 {% block title %}Accueil - RCA Application{% endblock %}
 
 {% block body %}
-<div>
-    <h1>Bienvenue dans l'application RCA</h1>
+<div class="container-fluid mt-4">
+    <h1 class="mb-4">Bienvenue dans l'application RCA</h1>
     
-    <h2>Gestion des entités</h2>
-    <p>Utilisez la navigation ci-dessus pour consulter et gérer les différentes entités de l'application :</p>
+    <!-- Cartes des soldes -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-wallet fa-3x mb-3"></i>
+                    <h5 class="card-title">Montant Total</h5>
+                    <h2 class="display-5 fw-bold">{{ solde_total|number_format(2, ',', ' ') }} €</h2>
+                    <p class="card-text">Somme de tous les comptes</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-credit-card fa-3x mb-3"></i>
+                    <h5 class="card-title">Compte Courant</h5>
+                    <h2 class="display-5 fw-bold">{{ solde_compte_courant|number_format(2, ',', ' ') }} €</h2>
+                    <p class="card-text">
+                        <a href="{{ path('app_transaction_index') }}" class="text-white text-decoration-underline">
+                            Voir les transactions
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-piggy-bank fa-3x mb-3"></i>
+                    <h5 class="card-title">Livret d'Épargne</h5>
+                    <h2 class="display-5 fw-bold">{{ solde_livret|number_format(2, ',', ' ') }} €</h2>
+                    <p class="card-text">
+                        <a href="{{ path('app_livret_index') }}" class="text-white text-decoration-underline">
+                            Voir le livret
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
     
-    <ul>
-        <li><strong>Entreprises</strong> - Gestion des entreprises</li>
-        <li><strong>Exercices</strong> - Gestion des exercices comptables</li>
-        <li><strong>Personnes</strong> - Gestion des personnes</li>
-        <li><strong>Rôles</strong> - Gestion des rôles</li>
-        <li><strong>Transactions</strong> - Gestion des transactions</li>
-        <li><strong>Types de Transaction</strong> - Gestion des types de transaction</li>
-        <li><strong>Utilisateurs</strong> - Gestion des utilisateurs</li>
-    </ul>
-    
-    <h3>Raccourcis rapides</h3>
-    <p>
-        <a href="{{ path('app_entreprise_index') }}">Voir toutes les entreprises</a> |
-        <a href="{{ path('app_transaction_index') }}">Voir toutes les transactions</a> |
-        <a href="{{ path('app_personne_index') }}">Voir toutes les personnes</a>
-    </p>
+    <!-- Section de gestion -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Gestion des entités</h5>
+                </div>
+                <div class="card-body">
+                    <p>Utilisez la navigation ci-dessus pour consulter et gérer les différentes entités de l'application :</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-building text-primary me-2"></i>
+                                    <a href="{{ path('app_entreprise_index') }}">Entreprises</a>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-calendar-alt text-success me-2"></i>
+                                    <a href="{{ path('app_exercice_index') }}">Exercices</a>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-users text-info me-2"></i>
+                                    <a href="{{ path('app_personne_index') }}">Personnes</a>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-user-tag text-warning me-2"></i>
+                                    <a href="{{ path('app_role_index') }}">Rôles</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-exchange-alt text-primary me-2"></i>
+                                    <a href="{{ path('app_transaction_index') }}">Transactions</a>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-tags text-success me-2"></i>
+                                    <a href="{{ path('app_type_transaction_index') }}">Types de Transaction</a>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-credit-card text-info me-2"></i>
+                                    <a href="{{ path('app_mode_de_paiement_index') }}">Modes de Paiement</a>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-user-cog text-warning me-2"></i>
+                                    <a href="{{ path('app_user_index') }}">Utilisateurs</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Actions rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('app_transaction_new') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Nouvelle transaction
+                        </a>
+                        <a href="{{ path('app_livret_transfert') }}" class="btn btn-success">
+                            <i class="fas fa-exchange-alt me-2"></i>Transfert livret
+                        </a>
+                        <a href="{{ path('app_entreprise_new') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-building me-2"></i>Nouvelle entreprise
+                        </a>
+                        <a href="{{ path('app_personne_new') }}" class="btn btn-outline-info">
+                            <i class="fas fa-user-plus me-2"></i>Nouvelle personne
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

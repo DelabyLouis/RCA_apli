@@ -26,47 +26,24 @@
             </div>
         </div>
         
-        <!-- Informations du livret (équivalent des filtres) -->
+        <!-- Informations du livret -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-piggy-bank me-2"></i>Informations du livret</h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Solde initial</label>
-                        <div class="form-control-plaintext">
-                            <span class="badge bg-info fs-6">{{ livret.solde_initial|number_format(2, ',', ' ') }} €</span>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Solde actuel</label>
-                        <div class="form-control-plaintext">
-                            <span class="badge bg-{{ livret.solde_actuel >= 0 ? 'success' : 'danger' }} fs-6">
-                                {{ livret.solde_actuel|number_format(2, ',', ' ') }} €
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Nombre d'opérations</label>
-                        <div class="form-control-plaintext">
-                            <span class="badge bg-primary fs-6">{{ transactions_avec_solde|length }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Variation totale</label>
-                        <div class="form-control-plaintext">
-                            {% set variation = livret.solde_actuel - livret.solde_initial %}
-                            <span class="badge bg-{{ variation >= 0 ? 'success' : 'danger' }} fs-6">
-                                {% if variation >= 0 %}+{% endif %}{{ variation|number_format(2, ',', ' ') }} €
-                            </span>
-                        </div>
+                <!-- Solde actuel en gros -->
+                <div class="row mb-4">
+                    <div class="col-12 text-center">
+                        <h2 class="mb-2">Solde actuel</h2>
+                        <h1 class="display-4 fw-bold text-{{ livret.solde_actuel >= 0 ? 'success' : 'danger' }}">
+                            {{ livret.solde_actuel|number_format(2, ',', ' ') }} €
+                        </h1>
                     </div>
                 </div>
                 
+                <!-- Filtres -->
+                <hr class="my-4">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="filter-libelle" class="form-label">Libellé</label>
