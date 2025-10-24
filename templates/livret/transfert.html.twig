@@ -1,0 +1,218 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Transfert - Livret d'épargne{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Informations du livret -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-piggy-bank me-2"></i>
+                        Livret d'épargne
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Type :</strong> Livret d'épargne unique</p>
+                            <p><strong>Date création :</strong> {{ livret.date_creation|date('d/m/Y') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Solde initial :</strong> 
+                                <span class="badge bg-info">{{ livret.solde_initial|number_format(2, ',', ' ') }} €</span>
+                            </p>
+                            <p><strong>Solde actuel :</strong> 
+                                <span class="badge bg-{{ livret.solde_actuel >= 0 ? 'success' : 'danger' }}">
+                                    {{ livret.solde_actuel|number_format(2, ',', ' ') }} €
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulaire de transfert -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exchange-alt me-2"></i>
+                        Nouveau transfert
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="exercice" class="form-label">Exercice *</label>
+                                <select class="form-select" id="exercice" name="exercice_id" required>
+                                    {% for exercice in exercices %}
+                                        <option value="{{ exercice.idExercice }}" {% if loop.first %}selected{% endif %}>
+                                            {{ exercice.libelle }} ({{ exercice.dateDebut|date('d/m/Y') }} - {{ exercice.dateFin|date('d/m/Y') }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <!-- Type de transfert avec radio buttons -->
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="type" id="depot" value="depot" required checked>
+                                        <label class="form-check-label" for="depot">
+                                            <i class="fas fa-arrow-down text-success me-1"></i> Dépôt sur le livret
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="type" id="retrait" value="retrait" required>
+                                        <label class="form-check-label" for="retrait">
+                                            <i class="fas fa-arrow-up text-danger me-1"></i> Retrait du livret
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-text">
+                                    <strong>Dépôt :</strong> Transfert du compte courant vers le livret<br>
+                                    <strong>Retrait :</strong> Transfert du livret vers le compte courant
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="montant" class="form-label">Montant *</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="montant" name="montant" 
+                                           step="0.01" min="0.01" required placeholder="0.00">
+                                    <span class="input-group-text">€</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="libelle" class="form-label">Libellé *</label>
+                            <input type="text" class="form-control" id="libelle" name="libelle" 
+                                   required value="" placeholder="Libellé automatique...">
+                        </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" 
+                                      rows="3" placeholder="Description optionnelle du transfert..."></textarea>
+                        </div>
+                        
+                        <!-- Aperçu du transfert -->
+                        <div id="transfert-preview" class="alert alert-info" style="display: none;">
+                            <h6><i class="fas fa-info-circle me-1"></i> Aperçu du transfert :</h6>
+                            <div id="preview-content"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ path('app_livret_index') }}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Retour
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-exchange-alt me-1"></i>Effectuer le transfert
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeRadios = document.querySelectorAll('input[name="type"]');
+    const montantInput = document.getElementById('montant');
+    const libelleInput = document.getElementById('libelle');
+    const preview = document.getElementById('transfert-preview');
+    const previewContent = document.getElementById('preview-content');
+    
+    const soldeActuel = {{ livret.solde_actuel }};
+    
+    // Fonction pour générer le libellé par défaut
+    function generateDefaultLibelle() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = String(now.getFullYear()).slice(-2);
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        const dateFormatted = `${day}-${month}-${year}-${hours}h${minutes}`;
+        
+        const selectedType = document.querySelector('input[name="type"]:checked');
+        if (selectedType) {
+            const typeText = selectedType.value === 'depot' ? 'DepotLivret' : 'RetraitLivret';
+            return `${typeText} ${dateFormatted}`;
+        }
+        return '';
+    }
+    
+    // Mettre à jour le libellé quand le type change
+    typeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (libelleInput.value === '' || libelleInput.value.includes('DepotLivret') || libelleInput.value.includes('RetraitLivret')) {
+                libelleInput.value = generateDefaultLibelle();
+            }
+            updatePreview();
+        });
+    });
+    
+    // Initialiser le libellé au chargement de la page
+    libelleInput.value = generateDefaultLibelle();
+    
+    // Mettre à jour l'aperçu initial
+    updatePreview();
+    
+    function updatePreview() {
+        const selectedType = document.querySelector('input[name="type"]:checked');
+        const type = selectedType ? selectedType.value : '';
+        const montant = parseFloat(montantInput.value) || 0;
+        const libelle = libelleInput.value;
+        
+        if (type && montant > 0) {
+            let nouveauSolde = soldeActuel;
+            let compteCourantEffect = '';
+            let livretEffect = '';
+            
+            if (type === 'depot') {
+                nouveauSolde = soldeActuel + montant;
+                compteCourantEffect = `<span class="text-danger">-${montant.toFixed(2)} €</span> (débit)`;
+                livretEffect = `<span class="text-success">+${montant.toFixed(2)} €</span> (crédit)`;
+            } else {
+                nouveauSolde = soldeActuel - montant;
+                compteCourantEffect = `<span class="text-success">+${montant.toFixed(2)} €</span> (crédit)`;
+                livretEffect = `<span class="text-danger">-${montant.toFixed(2)} €</span> (débit)`;
+            }
+            
+            previewContent.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Compte courant :</strong> ${compteCourantEffect}<br>
+                        <strong>Livret :</strong> ${livretEffect}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Nouveau solde livret :</strong> 
+                        <span class="badge bg-${nouveauSolde >= 0 ? 'success' : 'danger'}">
+                            ${nouveauSolde.toFixed(2)} €
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+    
+    montantInput.addEventListener('input', updatePreview);
+    libelleInput.addEventListener('input', updatePreview);
+});
+</script>
+
+{% endblock %}

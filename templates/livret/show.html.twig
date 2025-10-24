@@ -1,0 +1,163 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Livret {{ livret.nom }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <!-- En-tête du livret -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-piggy-bank me-2"></i>
+                Livret {{ livret.nom }}
+            </h1>
+            <p class="text-muted small mb-0">
+                Exercice : {{ livret.exercice.libelle }} | 
+                Créé le {{ livret.dateCreation|date('d/m/Y') }}
+            </p>
+        </div>
+        <div>
+            <a href="{{ path('app_livret_transfert', {'id_livret': livret.idLivret}) }}" 
+               class="btn btn-warning me-2">
+                <i class="fas fa-exchange-alt"></i> Nouveau transfert
+            </a>
+            <a href="{{ path('app_livret_edit', {'id_livret': livret.idLivret}) }}" 
+               class="btn btn-primary me-2">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+            <a href="{{ path('app_livret_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+
+    <!-- Informations du livret -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Solde initial</h5>
+                    <h3 class="text-info">{{ livret.soldeInitial|number_format(2, ',', ' ') }} €</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Solde actuel</h5>
+                    <h3 class="text-{{ livret.soldeActuel >= 0 ? 'success' : 'danger' }}">
+                        {{ livret.soldeActuel|number_format(2, ',', ' ') }} €
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Nombre d'opérations</h5>
+                    <h3 class="text-primary">{{ transactions_avec_solde|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Variation totale</h5>
+                    {% set variation = livret.soldeActuel - livret.soldeInitial %}
+                    <h3 class="text-{{ variation >= 0 ? 'success' : 'danger' }}">
+                        {% if variation >= 0 %}+{% endif %}{{ variation|number_format(2, ',', ' ') }} €
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if livret.description %}
+        <div class="alert alert-info">
+            <strong>Description :</strong> {{ livret.description }}
+        </div>
+    {% endif %}
+
+    <!-- Historique des transactions -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-history me-2"></i>
+                Historique des transferts
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if transactions_avec_solde|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Libellé</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Montant</th>
+                                <th>Solde après opération</th>
+                                <th>Transaction compte courant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction_data in transactions_avec_solde %}
+                                {% set transaction = transaction_data.transaction %}
+                                {% set solde = transaction_data.solde_cumule %}
+                                <tr>
+                                    <td>{{ transaction.dateTransaction|date('d/m/Y') }}</td>
+                                    <td>{{ transaction.libelle }}</td>
+                                    <td>{{ transaction.description ?? '' }}</td>
+                                    <td>
+                                        {% if transaction.type == 'depot' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-arrow-down"></i> Dépôt
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-arrow-up"></i> Retrait
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ transaction.type == 'depot' ? 'success' : 'danger' }}">
+                                            {{ transaction.montant|number_format(2, ',', ' ') }} €
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-{{ solde >= 0 ? 'success' : 'danger' }}">
+                                            {{ solde|number_format(2, ',', ' ') }} €
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        {% if transaction.transactionCompteCourant %}
+                                            <a href="{{ path('app_transaction_show', {'id_transaction': transaction.transactionCompteCourant.idTransaction}) }}" 
+                                               class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-link"></i> 
+                                                Transaction #{{ transaction.transactionCompteCourant.idTransaction }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Non liée</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Aucune transaction sur ce livret</h5>
+                    <p class="text-muted">Le livret contient uniquement le solde initial.</p>
+                    <a href="{{ path('app_livret_transfert', {'id_livret': livret.idLivret}) }}" 
+                       class="btn btn-warning">
+                        <i class="fas fa-exchange-alt"></i> Effectuer un transfert
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

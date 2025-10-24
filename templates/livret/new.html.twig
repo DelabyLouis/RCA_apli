@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Livret{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-piggy-bank me-2"></i>
+                        Créer un nouveau livret
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.nom) }}
+                            {{ form_widget(form.nom) }}
+                            {{ form_errors(form.nom) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.date_creation) }}
+                            {{ form_widget(form.date_creation) }}
+                            {{ form_errors(form.date_creation) }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.solde_initial) }}
+                            {{ form_widget(form.solde_initial) }}
+                            {{ form_errors(form.solde_initial) }}
+                            <div class="form-text">Montant initial déposé sur le livret</div>
+                        </div>
+                        {% if form.exercice is defined %}
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.exercice) }}
+                                {{ form_widget(form.exercice) }}
+                                {{ form_errors(form.exercice) }}
+                            </div>
+                        {% else %}
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Exercice</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" value="{{ livret.exercice.libelle }}" readonly>
+                                    <span class="input-group-text">
+                                        <i class="fas fa-lock text-warning" title="Exercice verrouillé"></i>
+                                    </span>
+                                </div>
+                                <div class="form-text">L'exercice est verrouillé pour ce livret</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form_label(form.description) }}
+                        {{ form_widget(form.description) }}
+                        {{ form_errors(form.description) }}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_livret_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Retour
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i>Créer le livret
+                        </button>
+                    </div>
+                    
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

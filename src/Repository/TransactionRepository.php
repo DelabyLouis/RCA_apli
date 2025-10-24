@@ -32,6 +32,15 @@ class TransactionRepository extends ServiceEntityRepository
     }
 
     /**
+     * Alias pour getLastNumeroOrdreByExercice
+     */
+    public function getMaxNumeroOrdreForExercice($exercice): int
+    {
+        $exerciceId = is_object($exercice) ? $exercice->getIdExercice() : $exercice;
+        return $this->getLastNumeroOrdreByExercice($exerciceId);
+    }
+
+    /**
      * Récupère le dernier numéro d'ordre utilisé (toutes exercices confondus)
      * @deprecated Utiliser getLastNumeroOrdreByExercice() pour les nouvelles transactions
      */

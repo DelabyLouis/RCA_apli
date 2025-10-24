@@ -46,6 +46,15 @@ class Transaction
     )]
     private ?string $montant = null;
 
+    #[ORM\Column(length: 50, nullable: false, options: ['default' => 'compte_courant'])]
+    private ?string $type_compte = 'compte_courant';
+
+    #[ORM\Column(nullable: true)]
+    private ?int $transaction_liee_id = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
+
     #[ORM\ManyToOne(inversedBy: 'transactions')]
     #[ORM\JoinColumn(name: 'id_exercice', referencedColumnName: 'id_exercice', nullable: false)]
     private ?Exercice $exercice = null;
@@ -61,6 +70,10 @@ class Transaction
     #[ORM\ManyToOne(inversedBy: 'transactions')]
     #[ORM\JoinColumn(name: 'id_entreprise', referencedColumnName: 'id_entreprise', nullable: true)]
     private ?Entreprise $entreprise = null;
+
+    public function __construct()
+    {
+    }
 
     public function getIdTransaction(): ?int
     {
@@ -163,19 +176,81 @@ class Transaction
         return $this;
     }
 
+    public function getTypeCompte(): ?string
+    {
+        return $this->type_compte;
+    }
+
+    public function setTypeCompte(string $type_compte): static
+    {
+        $this->type_compte = $type_compte;
+        return $this;
+    }
+
+    public function getTransactionLieeId(): ?int
+    {
+        return $this->transaction_liee_id;
+    }
+
+    public function setTransactionLieeId(?int $transaction_liee_id): static
+    {
+        $this->transaction_liee_id = $transaction_liee_id;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    /**
+     * Vérifie si cette transaction est du livret
+     */
+    public function isLivret(): bool
+    {
+        return $this->type_compte === 'livret';
+    }
+
+    /**
+     * Vérifie si cette transaction est du compte courant
+     */
+    public function isCompteCourant(): bool
+    {
+        return $this->type_compte === 'compte_courant';
+    }
+
+    /**
+     * Vérifie si cette transaction est liée à une autre (transfert)
+     */
+    public function isTransfert(): bool
+    {
+        return $this->transaction_liee_id !== null;
+    }
+
     /**
      * Validation XOR : soit Personne soit Entreprise, mais pas les deux
+     * Pour les transactions livret, aucune personne/entreprise n'est requise
      */
     public function validatePersonneOrEntreprise(\Symfony\Component\Validator\Context\ExecutionContextInterface $context): void
     {
-        // Si ni personne ni entreprise n'est définie
+        // Les transactions livret n'ont pas besoin de personne/entreprise
+        if ($this->isLivret()) {
+            return;
+        }
+
+        // Pour les transactions compte courant, validation normale
         if ($this->personne === null && $this->entreprise === null) {
             $context->buildViolation('Une transaction doit être liée soit à une personne soit à une entreprise.')
                 ->atPath('personne')
                 ->addViolation();
         }
 
-        // Si les deux sont définies
         if ($this->personne !== null && $this->entreprise !== null) {
             $context->buildViolation('Une transaction ne peut pas être liée à la fois à une personne et à une entreprise.')
                 ->atPath('personne')
