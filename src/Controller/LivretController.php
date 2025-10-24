@@ -113,7 +113,6 @@ class LivretController extends AbstractController
         $type = $request->request->get('type'); // 'depot' ou 'retrait'
         $montant = (float) $request->request->get('montant');
         $libelle = $request->request->get('libelle');
-        $description = $request->request->get('description');
         $exerciceId = $request->request->get('exercice_id');
 
         // Générer automatiquement le libellé s'il est vide
@@ -163,7 +162,6 @@ class LivretController extends AbstractController
                 ->setDateTransaction(new \DateTime())
                 ->setMontant($type === 'depot' ? (string) $montant : '-' . $montant)
                 ->setTypeCompte('livret')
-                ->setDescription($description)
                 ->setExercice($exercice)
                 ->setTypeTransaction($typeLivret)
                 ->setEntreprise($entrepriseLivret);
@@ -223,15 +221,10 @@ class LivretController extends AbstractController
         if ($request->isMethod('POST')) {
             // Traitement de la modification
             $libelle = $request->request->get('libelle');
-            $description = $request->request->get('description');
             $dateTransaction = $request->request->get('date_transaction');
             
             if ($libelle) {
                 $transaction->setLibelle($libelle);
-            }
-            
-            if ($description !== null) {
-                $transaction->setDescription($description);
             }
             
             if ($dateTransaction) {
@@ -274,9 +267,6 @@ class LivretController extends AbstractController
             switch ($field) {
                 case 'libelle':
                     $transaction->setLibelle($value);
-                    break;
-                case 'description':
-                    $transaction->setDescription($value ?: null);
                     break;
                 case 'date_transaction':
                     if ($value) {

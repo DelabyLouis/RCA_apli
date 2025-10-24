@@ -52,9 +52,6 @@ class Transaction
     #[ORM\Column(nullable: true)]
     private ?int $transaction_liee_id = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $description = null;
-
     #[ORM\ManyToOne(inversedBy: 'transactions')]
     #[ORM\JoinColumn(name: 'id_exercice', referencedColumnName: 'id_exercice', nullable: false)]
     private ?Exercice $exercice = null;
@@ -195,17 +192,6 @@ class Transaction
     public function setTransactionLieeId(?int $transaction_liee_id): static
     {
         $this->transaction_liee_id = $transaction_liee_id;
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): static
-    {
-        $this->description = $description;
         return $this;
     }
 

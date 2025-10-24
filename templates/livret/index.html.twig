@@ -112,9 +112,8 @@
                         <th>Libellé</th>
                         <th>N° Ordre</th>
                         <th>Date</th>
-                        <th>Description</th>
-                        <th>Débit</th>
-                        <th>Crédit</th>
+                        <th>Dépôt</th>
+                        <th>Retrait</th>
                         <th>Solde</th>
                         <th>Exercice</th>
                         <th>Transaction liée</th>
@@ -131,9 +130,6 @@
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="libelle" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.libelle }}</td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="numero_ordre" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.numeroOrdre }}</td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="date_transaction" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.dateTransaction ? transaction.dateTransaction|date('Y-m-d') : '' }}</td>
-                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="description" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>
-                            {{ transaction.description ?? '' }}
-                        </td>
                         <td class="montant-cell {% if not is_exercice_clos %}editable-field{% endif %} text-end" 
                             data-field="montant" 
                             data-type="debit" 
