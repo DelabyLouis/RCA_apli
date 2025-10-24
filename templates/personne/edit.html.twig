@@ -1,46 +1,203 @@
-{% extends 'base.html.twig' %}
+{% extends 'base.html.twig' %}{% extends 'base.html.twig' %}
 
-{% block title %}Modifier {{ personne.prenom }} {{ personne.nom }}{% endblock %}
 
-{% block body %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-edit me-2"></i>Modifier {{ personne.prenom }} {{ personne.nom }}
-                        </h5>
+
+{% block title %}Modifier {{ personne.prenom }} {{ personne.nom }}{% endblock %}{% block title %}Modifier {{ personne.prenom }} {{ personne.nom }}{% endblock %}
+
+
+
+{% block body %}{% block body %}
+
+<div class="container-fluid"><div class="container-fluid">
+
+    <div class="row">    <div class="row">
+
+        <div class="col-12">        <div class="col-12">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">            <div class="card shadow-sm">
+
+                <h1><i class="fas fa-edit me-2"></i>Modifier {{ personne.prenom }} {{ personne.nom }}</h1>                <div class="card-header bg-warning text-dark">
+
+                <a href="{{ path('app_personne_index') }}" class="btn btn-secondary">                    <div class="d-flex justify-content-between align-items-center">
+
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste                        <h5 class="mb-0">
+
+                </a>                            <i class="fas fa-edit me-2"></i>Modifier {{ personne.prenom }} {{ personne.nom }}
+
+            </div>                        </h5>
+
                         <div class="btn-group">
-                            <a href="{{ path('app_personne_show', {'id_personne': personne.idPersonne}) }}" class="btn btn-info btn-sm">
-                                <i class="fas fa-eye me-1"></i>Voir
-                            </a>
-                            <a href="{{ path('app_personne_index') }}" class="btn btn-light btn-sm">
-                                <i class="fas fa-arrow-left me-1"></i>Retour à la liste
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    {{ form_start(form, {'attr': {'class': 'row g-3'}}) }}
+
+            {% if form.vars.errors|length > 0 %}                            <a href="{{ path('app_personne_show', {'id_personne': personne.idPersonne}) }}" class="btn btn-info btn-sm">
+
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">                                <i class="fas fa-eye me-1"></i>Voir
+
+                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>                            </a>
+
+                    <ul class="mb-0 mt-2">                            <a href="{{ path('app_personne_index') }}" class="btn btn-light btn-sm">
+
+                        {% for error in form.vars.errors %}                                <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+
+                            <li>{{ error.message }}</li>                            </a>
+
+                        {% endfor %}                        </div>
+
+                    </ul>                    </div>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>                </div>
+
+                </div>                <div class="card-body">
+
+            {% endif %}                    {{ form_start(form, {'attr': {'class': 'row g-3'}}) }}
+
                     {{ form_rest(form) }}
-                    
-                    <div class="col-12">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-warning">
-                                <i class="fas fa-save me-1"></i>Mettre à jour
-                            </button>
-                            <a href="{{ path('app_personne_show', {'id_personne': personne.idPersonne}) }}" class="btn btn-info">
-                                <i class="fas fa-eye me-1"></i>Voir
-                            </a>
-                            <a href="{{ path('app_personne_index') }}" class="btn btn-secondary">
-                                <i class="fas fa-times me-1"></i>Annuler
-                            </a>
+
+            <div class="card shadow-sm">                    
+
+                <div class="card-body">                    <div class="col-12">
+
+                    <div class="row">                        <div class="d-flex gap-2">
+
+                        <div class="col-lg-6">                            <button type="submit" class="btn btn-warning">
+
+                            {{ form_start(form, {'attr': {'novalidate': false, 'id': 'personne_edit_form'}}) }}                                <i class="fas fa-save me-1"></i>Mettre à jour
+
+                                                        </button>
+
+                            <div class="mb-3">                            <a href="{{ path('app_personne_show', {'id_personne': personne.idPersonne}) }}" class="btn btn-info">
+
+                                {{ form_label(form.civilite, 'Civilité', {'label_attr': {'class': 'form-label'}}) }}                                <i class="fas fa-eye me-1"></i>Voir
+
+                                {{ form_widget(form.civilite, {'attr': {'class': 'form-select' ~ (form.civilite.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                            </a>
+
+                                {% if form.civilite.vars.errors|length > 0 %}                            <a href="{{ path('app_personne_index') }}" class="btn btn-secondary">
+
+                                    <div class="invalid-feedback">                                <i class="fas fa-times me-1"></i>Annuler
+
+                                        {% for error in form.civilite.vars.errors %}                            </a>
+
+                                            {{ error.message }}                        </div>
+
+                                        {% endfor %}                    </div>
+
+                                    </div>                    
+
+                                {% endif %}                    {{ form_end(form) }}
+
+                                {{ form_errors(form.civilite) }}                </div>
+
+                            </div>            </div>
+
+                                    </div>
+
+                            <div class="mb-3">    </div>
+
+                                {{ form_label(form.prenom, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}</div>
+
+                                {{ form_widget(form.prenom, {'attr': {'class': 'form-control' ~ (form.prenom.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}{% endblock %}
+                                {% if form.prenom.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.prenom.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.prenom) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.nom, {'attr': {'class': 'form-control' ~ (form.nom.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.nom.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.nom.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.nom) }}
+                            </div>
+
+                            <h6 class="text-muted border-bottom pb-2 mb-3">Adresse</h6>
+                            
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        {{ form_label(form.numero_voie, 'N°', {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(form.numero_voie, {'attr': {'class': 'form-control' ~ (form.numero_voie.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                        {{ form_errors(form.numero_voie) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="mb-3">
+                                        {{ form_label(form.rue, 'Rue', {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(form.rue, {'attr': {'class': 'form-control' ~ (form.rue.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                        {{ form_errors(form.rue) }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.complement_adresse, 'Complément d\'adresse', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.complement_adresse, {'attr': {'class': 'form-control' ~ (form.complement_adresse.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {{ form_errors(form.complement_adresse) }}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        {{ form_label(form.code_postal, 'Code postal', {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(form.code_postal, {'attr': {'class': 'form-control' ~ (form.code_postal.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                        {{ form_errors(form.code_postal) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="mb-3">
+                                        {{ form_label(form.ville, 'Ville', {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(form.ville, {'attr': {'class': 'form-control' ~ (form.ville.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                        {{ form_errors(form.ville) }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.pays, 'Pays', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.pays, {'attr': {'class': 'form-control' ~ (form.pays.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {{ form_errors(form.pays) }}
+                            </div>
+
+                            <h6 class="text-muted border-bottom pb-2 mb-3">Contact</h6>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.telephone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.telephone, {'attr': {'class': 'form-control' ~ (form.telephone.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {{ form_errors(form.telephone) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {{ form_errors(form.email) }}
+                            </div>
+                            
+                            {{ form_end(form) }}
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">
+                                <h6 class="text-muted mb-0">Actions</h6>
+                                <a href="{{ path('app_personne_show', {'id_personne': personne.idPersonne}) }}" class="btn btn-info btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-eye me-2"></i>Voir la personne
+                                </a>
+                                <a href="{{ path('app_personne_index') }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-times me-2"></i>Annuler
+                                </a>
+                                <button type="submit" class="btn btn-warning btn-lg py-3" style="margin: 0 3rem;" form="personne_edit_form">
+                                    <i class="fas fa-save me-2"></i>Mettre à jour
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    
-                    {{ form_end(form) }}
                 </div>
             </div>
         </div>
