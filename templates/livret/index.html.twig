@@ -116,7 +116,6 @@
                         <th>Retrait</th>
                         <th>Solde</th>
                         <th>Exercice</th>
-                        <th>Transaction liée</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -162,17 +161,6 @@
                             {% endif %}
                         </td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="exercice" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.exercice ? transaction.exercice.libelle : '' }}</td>
-                        <td>
-                            {% if transaction.isTransfert %}
-                                <a href="{{ path('app_transaction_show', {'id_transaction': transaction.transactionLieeId}) }}" 
-                                   class="btn btn-sm btn-outline-info">
-                                    <i class="fas fa-link"></i> 
-                                    #{{ transaction.transactionLieeId }}
-                                </a>
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
                         <td>
                             <div class="btn-group" role="group">
                                 <a href="{{ path('app_livret_show', {'id': transaction.idTransaction}) }}" class="btn btn-info btn-sm" title="Voir les détails">
