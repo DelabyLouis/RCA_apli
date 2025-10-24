@@ -68,6 +68,9 @@ class Transaction
     #[ORM\JoinColumn(name: 'id_entreprise', referencedColumnName: 'id_entreprise', nullable: true)]
     private ?Entreprise $entreprise = null;
 
+    #[ORM\ManyToOne(inversedBy: 'transactions')]
+    private ?ModeDePaiement $modeDePaiement = null;
+
     public function __construct()
     {
     }
@@ -242,5 +245,30 @@ class Transaction
                 ->atPath('personne')
                 ->addViolation();
         }
+    }
+
+    public function getModeDePaiement(): ?ModeDePaiement
+    {
+        return $this->modeDePaiement;
+    }
+
+    public function setModeDePaiement(?ModeDePaiement $modeDePaiement): static
+    {
+        $this->modeDePaiement = $modeDePaiement;
+
+        return $this;
+    }
+
+    /**
+     * Retourne le libellé complet avec le mode de paiement en préfixe
+     * Format: "Mode de paiement-Libellé" ou juste "Libellé" si pas de mode de paiement
+     */
+    public function getLibelleComplet(): string
+    {
+        if ($this->modeDePaiement) {
+            return $this->modeDePaiement->getLibelle() . '-' . $this->libelle;
+        }
+        
+        return $this->libelle;
     }
 }

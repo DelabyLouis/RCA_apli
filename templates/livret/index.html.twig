@@ -126,7 +126,7 @@
                     {% set is_exercice_clos = transaction.exercice and transaction.exercice.isClos %}
                     <tr data-id="{{ transaction.idTransaction }}">
                         <td>{{ transaction.idTransaction }}</td>
-                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="libelle" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.libelle }}</td>
+                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="libelle" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.libelleComplet }}</td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="numero_ordre" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.numeroOrdre }}</td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="date_transaction" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.dateTransaction ? transaction.dateTransaction|date('Y-m-d') : '' }}</td>
                         <td class="montant-cell {% if not is_exercice_clos %}editable-field{% endif %} text-end" 

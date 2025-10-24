@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Entreprise;
 use App\Entity\Exercice;
+use App\Entity\ModeDePaiement;
 use App\Entity\Personne;
 use App\Entity\Transaction;
 use App\Entity\TypeTransaction;
@@ -45,6 +46,12 @@ class TransactionType extends AbstractType
                 'choice_label' => 'nom_entreprise',
                 'required' => false,
                 'placeholder' => 'Choisir une entreprise (optionnel si personne sélectionnée)',
+            ])
+            ->add('modeDePaiement', EntityType::class, [
+                'class' => ModeDePaiement::class,
+                'choice_label' => 'libelle',
+                'required' => false,
+                'placeholder' => 'Choisir un mode de paiement (optionnel)',
             ])
         ;
     }

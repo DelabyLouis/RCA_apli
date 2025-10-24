@@ -12,6 +12,7 @@ use App\Repository\PersonneRepository;
 use App\Repository\EntrepriseRepository;
 use App\Repository\ExerciceRepository;
 use App\Repository\TypeTransactionRepository;
+use App\Repository\ModeDePaiementRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,7 +24,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class TransactionController extends AbstractController
 {
     #[Route(name: 'app_transaction_index', methods: ['GET'])]
-    public function index(Request $request, TransactionRepository $transactionRepository, PersonneRepository $personneRepository, EntrepriseRepository $entrepriseRepository, ExerciceRepository $exerciceRepository, TypeTransactionRepository $typeTransactionRepository): Response
+    public function index(Request $request, TransactionRepository $transactionRepository, PersonneRepository $personneRepository, EntrepriseRepository $entrepriseRepository, ExerciceRepository $exerciceRepository, TypeTransactionRepository $typeTransactionRepository, ModeDePaiementRepository $modeDePaiementRepository): Response
     {
         $exerciceId = $request->query->get('exercice_id');
         $exerciceFilter = null;
@@ -98,6 +99,7 @@ final class TransactionController extends AbstractController
             'entreprises' => $entrepriseRepository->findAll(),
             'exercices' => $exerciceRepository->findExercicesOuverts(),
             'types_transaction' => $typeTransactionRepository->findAll(),
+            'modes_de_paiement' => $modeDePaiementRepository->findAll(),
             'exercice_filter' => $exerciceFilter,
         ]);
     }
@@ -254,7 +256,7 @@ final class TransactionController extends AbstractController
     }
 
     #[Route('/{id_transaction}/update-field', name: 'app_transaction_update_field', methods: ['POST'])]
-    public function updateField(Request $request, int $id_transaction, TransactionRepository $transactionRepository, PersonneRepository $personneRepository, EntrepriseRepository $entrepriseRepository, ExerciceRepository $exerciceRepository, TypeTransactionRepository $typeTransactionRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function updateField(Request $request, int $id_transaction, TransactionRepository $transactionRepository, PersonneRepository $personneRepository, EntrepriseRepository $entrepriseRepository, ExerciceRepository $exerciceRepository, TypeTransactionRepository $typeTransactionRepository, ModeDePaiementRepository $modeDePaiementRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         $transaction = $transactionRepository->findOneBy(['id_transaction' => $id_transaction]);
         
@@ -353,6 +355,18 @@ final class TransactionController extends AbstractController
                         return new JsonResponse(['success' => false, 'message' => 'Type de transaction non trouvé'], 400);
                     }
                     $transaction->setTypeTransaction($typeTransaction);
+                    break;
+                    
+                case 'mode_de_paiement':
+                    if (empty($value)) {
+                        $transaction->setModeDePaiement(null);
+                    } else {
+                        $modeDePaiement = $modeDePaiementRepository->findOneBy(['id' => intval($value)]);
+                        if (!$modeDePaiement) {
+                            return new JsonResponse(['success' => false, 'message' => 'Mode de paiement non trouvé'], 400);
+                        }
+                        $transaction->setModeDePaiement($modeDePaiement);
+                    }
                     break;
                     
                 case 'tiers':

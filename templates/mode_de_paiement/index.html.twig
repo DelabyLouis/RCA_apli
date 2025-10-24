@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ModeDePaiement index{% endblock %}
+
+{% block body %}
+    <h1>ModeDePaiement index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Libelle</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for mode_de_paiement in mode_de_paiements %}
+            <tr>
+                <td>{{ mode_de_paiement.id }}</td>
+                <td>{{ mode_de_paiement.libelle }}</td>
+                <td>
+                    <a href="{{ path('app_mode_de_paiement_show', {'id': mode_de_paiement.id}) }}">show</a>
+                    <a href="{{ path('app_mode_de_paiement_edit', {'id': mode_de_paiement.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_mode_de_paiement_new') }}">Create new</a>
+{% endblock %}
