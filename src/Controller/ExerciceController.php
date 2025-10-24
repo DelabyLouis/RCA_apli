@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Exercice;
+use App\Entity\Transaction;
 use App\Form\ExerciceType;
 use App\Repository\ExerciceRepository;
 use App\Repository\TransactionRepository;
@@ -135,9 +136,21 @@ final class ExerciceController extends AbstractController
             return $this->redirectToRoute('app_exercice_index');
         }
 
+        // Vérifier si l'exercice a des transactions liées
+        $transactionCount = $entityManager->getRepository(Transaction::class)->count(['exercice' => $exercice]);
+        if ($transactionCount > 0) {
+            $this->addFlash('error', "Impossible de supprimer cet exercice car {$transactionCount} transaction(s) y sont liées. Supprimez d'abord les transactions ou transférez-les vers un autre exercice.");
+            return $this->redirectToRoute('app_exercice_index');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$exercice->getIdExercice(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($exercice);
-            $entityManager->flush();
+            try {
+                $entityManager->remove($exercice);
+                $entityManager->flush();
+                $this->addFlash('success', 'Exercice supprimé avec succès.');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Erreur lors de la suppression : ' . $e->getMessage());
+            }
         }
 
         return $this->redirectToRoute('app_exercice_index', [], Response::HTTP_SEE_OTHER);
