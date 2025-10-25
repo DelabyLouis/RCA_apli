@@ -60,6 +60,12 @@ class TransactionNewType extends AbstractType
                 'class' => Exercice::class,
                 'choice_label' => 'libelle',
                 'required' => true,
+                'query_builder' => function($repository) {
+                    return $repository->createQueryBuilder('e')
+                        ->where('e.clos = :clos')
+                        ->setParameter('clos', false)
+                        ->orderBy('e.libelle', 'DESC');
+                },
             ])
             ->add('type_transaction', EntityType::class, [
                 'class' => TypeTransaction::class,

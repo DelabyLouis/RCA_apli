@@ -1,0 +1,275 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle transaction{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-plus-circle me-2"></i>Nouvelle transaction</h1>
+                <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                </a>
+            </div>
+
+            {% if form.vars.errors|length > 0 %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>
+                    <ul class="mb-0 mt-2">
+                        {% for error in form.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endif %}
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            {{ form_start(form, {'attr': {'novalidate': false, 'id': 'transaction_new_form'}}) }}
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.libelle, 'Libellé', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control' ~ (form.libelle.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.libelle.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.libelle.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.libelle) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.exercice, 'Exercice', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.exercice, {'attr': {'class': 'form-select' ~ (form.exercice.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.exercice.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.exercice.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.exercice) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.type_transaction, 'Type de transaction', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.type_transaction, {'attr': {'class': 'form-select' ~ (form.type_transaction.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.type_transaction.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.type_transaction.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.type_transaction) }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Montant et Type</label>
+                                
+                                <!-- Boutons radio pour Débit/Crédit -->
+                                <div class="btn-group w-100 mb-2" role="group">
+                                    <input type="radio" class="btn-check" name="transaction_type" id="credit" value="credit" checked>
+                                    <label class="btn btn-outline-success" for="credit">
+                                        <i class="fas fa-plus-circle me-2"></i>CRÉDIT (Entrée)
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="transaction_type" id="debit" value="debit">
+                                    <label class="btn btn-outline-danger" for="debit">
+                                        <i class="fas fa-minus-circle me-2"></i>DÉBIT (Sortie)
+                                    </label>
+                                </div>
+                                
+                                <!-- Champ pour le montant avec gestion débit/crédit -->
+                                <div class="input-group">
+                                    {{ form_widget(form.montant, {'attr': {
+                                        'id': 'montant-field', 
+                                        'class': 'form-control', 
+                                        'placeholder': '0.00', 
+                                        'step': '0.01'
+                                    }}) }}
+                                    <span class="input-group-text">€</span>
+                                </div>
+                                
+                                {% if form.montant.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.montant.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.montant) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.date_transaction, 'Date', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control' ~ (form.date_transaction.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.date_transaction.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.date_transaction.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.date_transaction) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.tiers, 'Tiers (Personne ou Entreprise)', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.tiers, {'attr': {'class': 'form-select' ~ (form.tiers.vars.errors|length > 0 ? ' is-invalid' : ''), 'id': 'tiers'}}) }}
+                                {% if form.tiers.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.tiers.vars.errors %}
+                                            {{ error.message }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.tiers) }}
+                            </div>
+
+                            {{ form_end(form) }}
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">
+                                <h6 class="text-muted mb-0">Actions</h6>
+                                <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-times me-2"></i>Annuler
+                                </a>
+                                <button type="submit" class="btn btn-success btn-lg py-3" style="margin: 0 3rem;" form="transaction_new_form">
+                                    <i class="fas fa-save me-2"></i>Créer la transaction
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Gestion du montant avec débit/crédit
+(function() {
+    'use strict';
+    
+    // Attendre que la page soit chargée
+    window.addEventListener('load', function() {
+        // Gestion du montant avec débit/crédit
+        const montantField = document.getElementById('montant-field');
+        const debitRadio = document.getElementById('debit');
+        const creditRadio = document.getElementById('credit');
+        
+        if (montantField && debitRadio && creditRadio) {
+            // Fonction pour mettre à jour le montant selon le type sélectionné
+            function updateMontantValue() {
+                const currentValue = Math.abs(parseFloat(montantField.value) || 0);
+                const isDebit = debitRadio.checked;
+                
+                // Si c'est un débit (sortie), on met en négatif, sinon (crédit/entrée) on garde positif
+                montantField.value = isDebit ? -currentValue : currentValue;
+                console.log('Montant mis à jour:', montantField.value);
+            }
+            
+            // Fonction pour afficher la valeur absolue dans le champ (pour l'affichage)
+            function displayAbsoluteValue() {
+                const currentValue = parseFloat(montantField.value) || 0;
+                const absValue = Math.abs(currentValue);
+                
+                // Afficher la valeur absolue (temporairement)
+                if (montantField === document.activeElement) {
+                    return; // Ne pas modifier si l'utilisateur est en train de taper
+                }
+                
+                montantField.setAttribute('data-raw-value', montantField.value);
+                montantField.value = absValue;
+            }
+            
+            // Fonction pour mettre à jour les styles des boutons
+            function updateButtonStyles() {
+                const debitLabel = document.querySelector('label[for="debit"]');
+                const creditLabel = document.querySelector('label[for="credit"]');
+                
+                if (creditRadio.checked) {
+                    creditLabel.classList.remove('btn-outline-success');
+                    creditLabel.classList.add('btn-success');
+                    debitLabel.classList.remove('btn-danger');
+                    debitLabel.classList.add('btn-outline-danger');
+                } else {
+                    creditLabel.classList.remove('btn-success');
+                    creditLabel.classList.add('btn-outline-success');
+                    debitLabel.classList.remove('btn-outline-danger');
+                    debitLabel.classList.add('btn-danger');
+                }
+            }
+            
+            // Événements
+            montantField.addEventListener('input', function() {
+                // Convertir en valeur absolue pendant la saisie
+                const value = parseFloat(this.value) || 0;
+                this.value = Math.abs(value);
+            });
+            
+            montantField.addEventListener('blur', updateMontantValue);
+            
+            creditRadio.addEventListener('change', function() {
+                updateMontantValue();
+                updateButtonStyles();
+            });
+            
+            debitRadio.addEventListener('change', function() {
+                updateMontantValue();
+                updateButtonStyles();
+            });
+            
+            // Initialisation
+            updateButtonStyles();
+        }
+        
+        // Validation avant soumission - TEMPORAIREMENT DÉSACTIVÉE POUR DEBUG
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                console.log('Tentative de soumission du formulaire');
+                
+                // S'assurer que le montant est correct avant soumission
+                if (montantField) {
+                    updateMontantValue();
+                }
+                
+                // DEBUG: afficher toutes les valeurs
+                const tiersSelect = document.getElementById('tiers');
+                const tiersValue = tiersSelect ? tiersSelect.value.trim() : '';
+                const montantValue = parseFloat(montantField ? montantField.value : '0');
+                
+                console.log('Tiers sélectionné:', tiersValue);
+                console.log('Montant final:', montantValue);
+                
+                // VALIDATION RÉACTIVÉE
+                if (!tiersValue || tiersValue === '') {
+                    alert('Vous devez sélectionner une personne ou une entreprise.');
+                    event.preventDefault();
+                    return false;
+                }
+                
+                if (isNaN(montantValue) || montantValue === 0) {
+                    alert('Le montant ne peut pas être égal à zéro.');
+                    event.preventDefault();
+                    return false;
+                }
+                
+                console.log('Formulaire validé et soumis');
+                return true;
+            });
+        }
+    });
+})();
+</script>
+
+{% endblock %}
