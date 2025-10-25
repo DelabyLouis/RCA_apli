@@ -30,12 +30,6 @@
                             <span class="input-group-text">€</span>
                         </div>
                         {{ form_errors(form.montant) }}
-                        <div class="form-text">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Entrez un montant <strong>positif</strong> pour un crédit ou <strong>négatif</strong> (avec -) pour un débit
-                            </small>
-                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -58,7 +52,7 @@
 
                     <div class="mb-3">
                         {{ form_label(form.date_transaction, 'Date de transaction') }}
-                        {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control', 'value': 'now'|date('Y-m-d')}}) }}
                         {{ form_errors(form.date_transaction) }}
                     </div>
 
