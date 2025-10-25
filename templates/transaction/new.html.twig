@@ -4,66 +4,62 @@
 
 {% block body %}
 <div class="container-fluid">
+    <h1 class="mb-4">
+        <i class="fas fa-plus-circle me-2 text-primary"></i>Nouvelle transaction
+    </h1>
+
     <div class="row">
-        <div class="col-lg-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-plus me-2"></i>Nouvelle transaction
-                    </h4>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Informations de la transaction</h5>
                 </div>
                 <div class="card-body">
-                    {% if form.vars.errors|length > 0 %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>
-                            <ul class="mb-0 mt-2">
-                                {% for error in form.vars.errors %}
-                                    <li>{{ error.message }}</li>
-                                {% endfor %}
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endif %}
-
-                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+                    {{ form_start(form) }}
                     
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            {{ form_label(form.libelle, 'Libellé', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.libelle, {'attr': {'class': 'form-control' ~ (form.libelle.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                            {{ form_errors(form.libelle) }}
+                    <div class="mb-3">
+                        {{ form_label(form.libelle, 'Libelle') }}
+                        {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.libelle) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.montant, 'Montant') }}
+                        <div class="input-group">
+                            {{ form_widget(form.montant, {'attr': {'class': 'form-control', 'id': 'montant', 'step': '0.01'}}) }}
+                            <span class="input-group-text">€</span>
                         </div>
-                        <div class="col-md-6">
-                            {{ form_label(form.montant, 'Montant', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.montant, {'attr': {'class': 'form-control' ~ (form.montant.vars.errors|length > 0 ? ' is-invalid' : ''), 'step': '0.01'}}) }}
-                            {{ form_errors(form.montant) }}
+                        {{ form_errors(form.montant) }}
+                        <div class="form-text">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Entrez un montant <strong>positif</strong> pour un crédit ou <strong>négatif</strong> (avec -) pour un débit
+                            </small>
                         </div>
                     </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            {{ form_label(form.tiers, 'Tiers', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.tiers, {'attr': {'class': 'form-select' ~ (form.tiers.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                            {{ form_errors(form.tiers) }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_label(form.type_transaction, 'Type de transaction', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.type_transaction, {'attr': {'class': 'form-select' ~ (form.type_transaction.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                            {{ form_errors(form.type_transaction) }}
-                        </div>
+                    <div class="mb-3">
+                        {{ form_label(form.tiers, 'Tiers') }}
+                        {{ form_widget(form.tiers, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.tiers) }}
                     </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            {{ form_label(form.exercice, 'Exercice', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.exercice, {'attr': {'class': 'form-select' ~ (form.exercice.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                            {{ form_errors(form.exercice) }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_label(form.date_transaction, 'Date de transaction', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control' ~ (form.date_transaction.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                            {{ form_errors(form.date_transaction) }}
-                        </div>
+                    <div class="mb-3">
+                        {{ form_label(form.type_transaction, 'Type de transaction') }}
+                        {{ form_widget(form.type_transaction, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.type_transaction) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.exercice, 'Exercice') }}
+                        {{ form_widget(form.exercice, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.exercice) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.date_transaction, 'Date de transaction') }}
+                        {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.date_transaction) }}
                     </div>
 
                     {{ form_rest(form) }}
@@ -72,56 +68,26 @@
             </div>
         </div>
 
-        <div class="col-lg-6">
-            <div class="sticky-top" style="top: 1rem;">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-cogs me-2"></i>Actions
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg" form="{{ form.vars.id }}">
-                                <i class="fas fa-save me-2"></i>Créer la transaction
-                            </button>
-                            <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
-                            </a>
-                        </div>
-                        
-                        <hr class="my-4">
-                        
-                        <div class="alert alert-info">
-                            <h6 class="alert-heading">
-                                <i class="fas fa-info-circle me-2"></i>Instructions
-                            </h6>
-                            <ul class="mb-0 small">
-                                <li>Entrez un montant <strong>positif</strong> pour un crédit (entrée d'argent)</li>
-                                <li>Entrez un montant <strong>négatif</strong> pour un débit (sortie d'argent)</li>
-                                <li>Sélectionnez un tiers (personne ou entreprise)</li>
-                                <li>Tous les champs marqués d'un * sont obligatoires</li>
-                            </ul>
-                        </div>
-
-                        <div class="card border-light">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-lightbulb me-2"></i>Astuce
-                                </h6>
-                            </div>
-                            <div class="card-body small">
-                                <p class="mb-2"><strong>Exemples :</strong></p>
-                                <ul class="mb-0">
-                                    <li><span class="text-success">+500</span> : Vente de 500€</li>
-                                    <li><span class="text-danger">-120</span> : Achat de 120€</li>
-                                </ul>
-                            </div>
-                        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg" form="{{ form.vars.id }}">
+                            <i class="fas fa-save me-2"></i>Créer la transaction
+                        </button>
+                        <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+
 {% endblock %}
