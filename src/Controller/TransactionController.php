@@ -18,7 +18,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 #[Route('/transaction')]
 final class TransactionController extends AbstractController
@@ -180,6 +183,125 @@ final class TransactionController extends AbstractController
             'transaction' => $transaction,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/export-excel', name: 'app_transaction_export_excel', methods: ['GET'])]
+    public function exportExcel(Request $request, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository): Response
+    {
+        $exerciceId = $request->query->get('exercice_id');
+        $exerciceFilter = null;
+        
+        // Si un exercice est spécifié, le récupérer pour le filtre
+        if ($exerciceId) {
+            $exerciceFilter = $exerciceRepository->findOneBy(['id_exercice' => $exerciceId]);
+        }
+        
+        // Récupérer les transactions avec leurs relations
+        $queryBuilder = $transactionRepository->createQueryBuilder('t')
+            ->leftJoin('t.personne', 'p')
+            ->leftJoin('t.entreprise', 'e')
+            ->leftJoin('t.exercice', 'ex')
+            ->leftJoin('t.type_transaction', 'tt')
+            ->leftJoin('t.modeDePaiement', 'mp')
+            ->addSelect('p')
+            ->addSelect('e')
+            ->addSelect('ex')
+            ->addSelect('tt')
+            ->addSelect('mp');
+        
+        // Appliquer le filtre par exercice si spécifié
+        if ($exerciceFilter) {
+            $queryBuilder->where('t.exercice = :exercice')
+                        ->setParameter('exercice', $exerciceFilter);
+        }
+        
+        $transactions = $queryBuilder
+            ->orderBy('ex.numero_ordre', 'ASC')
+            ->addOrderBy('t.numero_ordre', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // Créer le fichier Excel
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Définir le titre de la feuille
+        $titre = $exerciceFilter ? 
+            'Transactions - Exercice ' . $exerciceFilter->getLibelle() : 
+            'Toutes les Transactions';
+        $sheet->setTitle('Transactions');
+        
+        // En-têtes des colonnes
+        $headers = [
+            'A1' => 'N° Ordre',
+            'B1' => 'Exercice', 
+            'C1' => 'Date',
+            'D1' => 'Libellé',
+            'E1' => 'Montant',
+            'F1' => 'Type de Compte',
+            'G1' => 'Type Transaction',
+            'H1' => 'Mode de Paiement',
+            'I1' => 'Personne',
+            'J1' => 'Entreprise'
+        ];
+        
+        // Appliquer les en-têtes
+        foreach ($headers as $cell => $value) {
+            $sheet->setCellValue($cell, $value);
+        }
+        
+        // Styliser les en-têtes
+        $sheet->getStyle('A1:J1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:J1')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('FFE0E0E0');
+        
+        // Ajouter les données
+        $row = 2;
+        foreach ($transactions as $transaction) {
+            $sheet->setCellValue('A' . $row, $transaction->getNumeroOrdre());
+            $sheet->setCellValue('B' . $row, $transaction->getExercice() ? $transaction->getExercice()->getLibelle() : '');
+            $sheet->setCellValue('C' . $row, $transaction->getDateTransaction() ? $transaction->getDateTransaction()->format('d/m/Y') : '');
+            $sheet->setCellValue('D' . $row, $transaction->getLibelle());
+            $sheet->setCellValue('E' . $row, floatval($transaction->getMontant()));
+            $sheet->setCellValue('F' . $row, $transaction->getTypeCompte());
+            $sheet->setCellValue('G' . $row, $transaction->getTypeTransaction() ? $transaction->getTypeTransaction()->getLibelle() : '');
+            $sheet->setCellValue('H' . $row, $transaction->getModeDePaiement() ? $transaction->getModeDePaiement()->getLibelle() : '');
+            $sheet->setCellValue('I' . $row, $transaction->getPersonne() ? $transaction->getPersonne()->getNom() . ' ' . $transaction->getPersonne()->getPrenom() : '');
+            $sheet->setCellValue('J' . $row, $transaction->getEntreprise() ? $transaction->getEntreprise()->getNomEntreprise() : '');
+            $row++;
+        }
+        
+        // Ajuster automatiquement la largeur des colonnes
+        foreach (range('A', 'J') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+        
+        // Formater la colonne montant en euros
+        $sheet->getStyle('E2:E' . ($row - 1))->getNumberFormat()
+            ->setFormatCode('#,##0.00 "€"');
+        
+        // Créer le nom de fichier
+        $filename = $exerciceFilter ? 
+            'transactions_exercice_' . $exerciceFilter->getLibelle() . '.xlsx' : 
+            'transactions_toutes.xlsx';
+        $filename = str_replace(' ', '_', $filename);
+        
+        // Créer la réponse
+        $writer = new Xlsx($spreadsheet);
+        $response = new Response();
+        
+        // Capturer le contenu du fichier Excel
+        ob_start();
+        $writer->save('php://output');
+        $content = ob_get_clean();
+        
+        $response->setContent($content);
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+        
+        return $response;
     }
 
     #[Route('/{id_transaction}', name: 'app_transaction_show', methods: ['GET'])]
