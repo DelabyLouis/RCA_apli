@@ -1,0 +1,322 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Attestations de {{ personne.prenom ~ ' ' ~ personne.nom }} - RCA Application{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ path('app_attestation_fiscale_index') }}">
+                            <i class="fas fa-file-invoice me-1"></i>Attestations Fiscales
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        {{ personne.prenom }} {{ personne.nom }}
+                    </li>
+                </ol>
+            </nav>
+
+            <!-- En-tête avec informations de la personne -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-user fa-2x text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-1">
+                                {{ personne.prenom }} {{ personne.nom }}
+                                <span class="badge bg-primary ms-2">Personne</span>
+                            </h4>
+                            <div class="text-muted">
+                                {% if personne.email %}
+                                    <i class="fas fa-envelope me-1"></i>{{ personne.email }}
+                                {% endif %}
+                                {% if personne.ville %}
+                                    <i class="fas fa-map-marker-alt me-1 ms-3"></i>
+                                    {{ personne.codePostal }} {{ personne.ville }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{{ path('app_attestation_fiscale_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title">Montant total des cotisations</h5>
+                                    <h3 class="mb-0">{{ montant_total_global|number_format(2, ',', ' ') }} €</h3>
+                                </div>
+                                <div class="fs-1 opacity-50">
+                                    <i class="fas fa-euro-sign"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title">Nombre de cotisations</h5>
+                                    <h3 class="mb-0">{{ total_cotisations }}</h3>
+                                </div>
+                                <div class="fs-1 opacity-50">
+                                    <i class="fas fa-list"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulaire de sélection des cotisations -->
+            {% if cotisations is empty %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Aucune cotisation trouvée pour cette personne.
+                </div>
+            {% else %}
+                <!-- Instructions d'utilisation -->
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Comment générer une attestation :</strong> 
+                    Cochez les cotisations que vous souhaitez inclure dans l'attestation fiscale, 
+                    puis cliquez sur "Générer l'attestation". Le bouton s'activera automatiquement dès qu'au moins une cotisation est sélectionnée.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                
+                <form method="POST" action="{{ path('app_attestation_fiscale_generer_selection', {'personne_id': personne.idPersonne}) }}" id="attestation-form" data-turbo="false">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-check-square me-2"></i>
+                                    Sélectionnez les cotisations pour l'attestation fiscale
+                                </h5>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div>
+                                        <label for="annee_attestation" class="form-label mb-0 me-2"><strong>Année de l'attestation :</strong></label>
+                                        <select name="annee_attestation" id="annee_attestation" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                                            {% set current_year = date('now')|date('Y') %}
+                                            {% for year in range(current_year - 5, current_year + 1) %}
+                                                <option value="{{ year }}" {{ year == current_year ? 'selected' : '' }}>{{ year }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-success" id="generer-btn" disabled title="Sélectionnez au moins une cotisation pour activer ce bouton">
+                                        <i class="fas fa-file-pdf me-1"></i>Générer l'attestation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Actions rapides -->
+                            <div class="mb-3">
+                                <div class="btn-toolbar" role="toolbar">
+                                    <div class="btn-group me-2" role="group">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="select-all">
+                                            <i class="fas fa-check-double me-1"></i>Tout sélectionner
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="deselect-all">
+                                            <i class="fas fa-times me-1"></i>Tout désélectionner
+                                        </button>
+                                    </div>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-info btn-sm" id="select-current-year">
+                                            <i class="fas fa-calendar me-1"></i>Sélectionner {{ date('now')|date('Y') }}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Sélectionnez les cotisations à inclure dans l'attestation fiscale. 
+                                        <span id="selection-info" class="fw-bold text-warning">⚠️ Aucune sélection - Le bouton "Générer" est désactivé</span>
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Tableau des cotisations avec cases à cocher -->
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40px;">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="check-all">
+                                                </div>
+                                            </th>
+                                            <th>Date</th>
+                                            <th>Libellé</th>
+                                            <th>Mode de paiement</th>
+                                            <th>Exercice</th>
+                                            <th class="text-end">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for cotisation in cotisations %}
+                                            <tr class="cotisation-row" data-year="{{ cotisation.dateTransaction|date('Y') }}" data-amount="{{ cotisation.montant }}">
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input cotisation-checkbox" 
+                                                               type="checkbox" 
+                                                               name="cotisations[]" 
+                                                               value="{{ cotisation.idTransaction }}"
+                                                               id="cotisation_{{ cotisation.idTransaction }}">
+                                                    </div>
+                                                </td>
+                                                <td>{{ cotisation.dateTransaction|date('d/m/Y') }}</td>
+                                                <td>
+                                                    <label for="cotisation_{{ cotisation.idTransaction }}" class="form-label mb-0" style="cursor: pointer;">
+                                                        {{ cotisation.libelle }}
+                                                    </label>
+                                                </td>
+                                                <td>
+                                                    {% if cotisation.modeDePaiement %}
+                                                        <span class="badge bg-light text-dark">
+                                                            {{ cotisation.modeDePaiement.libelle }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if cotisation.exercice %}
+                                                        <small class="text-muted">{{ cotisation.exercice.libelle }}</small>
+                                                    {% else %}
+                                                        <small class="text-muted">-</small>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-end">
+                                                    <strong>{{ cotisation.montant|number_format(2, ',', ' ') }} €</strong>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.cotisation-checkbox');
+    const checkAll = document.getElementById('check-all');
+    const selectAllBtn = document.getElementById('select-all');
+    const deselectAllBtn = document.getElementById('deselect-all');
+    const selectCurrentYearBtn = document.getElementById('select-current-year');
+    const genererBtn = document.getElementById('generer-btn');
+    const selectionInfo = document.getElementById('selection-info');
+    const currentYear = new Date().getFullYear();
+
+    function updateSelectionInfo() {
+        const selectedCheckboxes = document.querySelectorAll('.cotisation-checkbox:checked');
+        const selectedCount = selectedCheckboxes.length;
+        
+        if (selectedCount === 0) {
+            selectionInfo.textContent = '⚠️ Aucune sélection - Le bouton "Générer" est désactivé';
+            selectionInfo.className = 'fw-bold text-warning';
+            genererBtn.disabled = true;
+            genererBtn.title = 'Sélectionnez au moins une cotisation pour activer ce bouton';
+        } else {
+            // Calculer le montant total sélectionné
+            let totalAmount = 0;
+            selectedCheckboxes.forEach(checkbox => {
+                const row = checkbox.closest('.cotisation-row');
+                const amount = parseFloat(row.dataset.amount);
+                totalAmount += amount;
+            });
+            
+            selectionInfo.textContent = `✅ ${selectedCount} cotisation${selectedCount > 1 ? 's' : ''} sélectionnée${selectedCount > 1 ? 's' : ''} (${totalAmount.toLocaleString('fr-FR', {minimumFractionDigits: 2})} €)`;
+            selectionInfo.className = 'fw-bold text-success';
+            genererBtn.disabled = false;
+            genererBtn.title = 'Cliquez pour générer l\'attestation fiscale avec les cotisations sélectionnées';
+        }
+        
+        // Mettre à jour la case "tout sélectionner"
+        checkAll.indeterminate = selectedCount > 0 && selectedCount < checkboxes.length;
+        checkAll.checked = selectedCount === checkboxes.length;
+    }
+
+    // Gestion de la case "tout sélectionner"
+    checkAll.addEventListener('change', function() {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateSelectionInfo();
+    });
+
+    // Bouton "Tout sélectionner"
+    selectAllBtn.addEventListener('click', function() {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        updateSelectionInfo();
+    });
+
+    // Bouton "Tout désélectionner"
+    deselectAllBtn.addEventListener('click', function() {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        updateSelectionInfo();
+    });
+
+    // Bouton "Sélectionner année courante"
+    selectCurrentYearBtn.addEventListener('click', function() {
+        checkboxes.forEach(checkbox => {
+            const row = checkbox.closest('.cotisation-row');
+            const year = parseInt(row.dataset.year);
+            checkbox.checked = year === currentYear;
+        });
+        updateSelectionInfo();
+    });
+
+    // Écouter les changements sur chaque checkbox
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectionInfo);
+    });
+
+    // Permettre de cliquer sur toute la ligne pour sélectionner
+    document.querySelectorAll('.cotisation-row').forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Ne pas déclencher si on clique déjà sur la checkbox ou le label
+            if (e.target.type === 'checkbox' || e.target.tagName === 'LABEL') {
+                return;
+            }
+            
+            const checkbox = row.querySelector('.cotisation-checkbox');
+            checkbox.checked = !checkbox.checked;
+            updateSelectionInfo();
+        });
+        
+        // Ajouter un style de survol
+        row.style.cursor = 'pointer';
+    });
+
+    // Initialisation
+    updateSelectionInfo();
+});
+</script>
+{% endblock %}

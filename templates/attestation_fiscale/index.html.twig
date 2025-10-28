@@ -1,0 +1,208 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Attestations Fiscales - RCA Application{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">
+                    <i class="fas fa-file-invoice me-2 text-primary"></i>
+                    Attestations Fiscales
+                </h1>
+            </div>
+
+            <!-- Recherche rapide de personne -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-search me-2"></i>Recherche rapide de personne
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label for="search_donateur" class="form-label">Rechercher une personne</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="search_donateur" 
+                                   placeholder="Tapez le nom ou prénom d'une personne..."
+                                   autocomplete="off">
+                            <div id="search_results" class="list-group mt-2" style="display: none; position: absolute; z-index: 1000; max-width: 500px;"></div>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Tapez au moins 2 caractères pour démarrer la recherche. Cliquez sur un résultat pour sélectionner ses cotisations.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            {% if type_cotisation is null %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Le type de transaction "cotisation" n'existe pas. 
+                    <a href="{{ path('app_type_transaction_new') }}" class="alert-link">Créez-le d'abord</a> 
+                    pour pouvoir générer des attestations fiscales.
+                </div>
+            {% else %}
+                <!-- Liste des donateurs -->
+                {% if cotisations_groupees is empty %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Aucune cotisation trouvée avec les filtres sélectionnés.
+                    </div>
+                {% else %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-list me-2"></i>
+                                Personnes éligibles aux attestations fiscales
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Personne</th>
+                                            <th>Nombre de cotisations</th>
+                                            <th>Montant total</th>
+                                            <th>Années</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for cle, groupe in cotisations_groupees %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="me-2">
+                                                            <i class="fas fa-user text-primary"></i>
+                                                        </div>
+                                                        <div>
+                                                            <strong>{{ groupe.personne.prenom }} {{ groupe.personne.nom }}</strong>
+                                                            {% if groupe.personne.email %}
+                                                                <br><small class="text-muted">{{ groupe.personne.email }}</small>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ groupe.cotisations|length }}</td>
+                                                <td>
+                                                    <strong>{{ groupe.montant_total|number_format(2, ',', ' ') }} €</strong>
+                                                </td>
+                                                <td>
+                                                    {% for annee in groupe.annees %}
+                                                        <span class="badge bg-secondary me-1">{{ annee }}</span>
+                                                    {% endfor %}
+                                                </td>
+                                                <td>
+                                                    <a href="{{ path('app_attestation_fiscale_personne_details', {
+                                                        'personne_id': groupe.personne.idPersonne
+                                                    }) }}" 
+                                                       class="btn btn-sm btn-primary" 
+                                                       title="Sélectionner les cotisations pour l'attestation">
+                                                        <i class="fas fa-check-square me-1"></i>Sélectionner cotisations
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript pour la recherche en temps réel -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search_donateur');
+    const searchResults = document.getElementById('search_results');
+    let searchTimeout;
+
+    function performSearch() {
+        const query = searchInput.value.trim();
+        
+        if (query.length < 2) {
+            searchResults.style.display = 'none';
+            return;
+        }
+
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            fetch(`{{ path('app_attestation_fiscale_recherche_personne') }}?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Erreur de recherche:', error);
+                    searchResults.style.display = 'none';
+                });
+        }, 300);
+    }
+
+    function displayResults(results) {
+        searchResults.innerHTML = '';
+        
+        if (results.length === 0) {
+            searchResults.innerHTML = '<div class="list-group-item text-muted">Aucune personne trouvée</div>';
+        } else {
+            results.forEach(result => {
+                const item = document.createElement('a');
+                item.href = `{{ path('app_attestation_fiscale_personne_details', {'personne_id': '_ID_'}) }}`
+                    .replace('_ID_', result.id);
+                item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-start';
+                
+                item.innerHTML = `
+                    <div class="d-flex w-100">
+                        <div class="me-3">
+                            <i class="fas fa-user text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">${result.label}</h6>
+                                <span class="badge bg-primary">Personne</span>
+                            </div>
+                            <div class="text-muted small">
+                                ${result.email ? '<i class="fas fa-envelope me-1"></i>' + result.email : ''}
+                                ${result.ville ? '<i class="fas fa-map-marker-alt me-1 ms-2"></i>' + result.ville : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                searchResults.appendChild(item);
+            });
+        }
+        
+        searchResults.style.display = 'block';
+    }
+
+    searchInput.addEventListener('input', performSearch);
+    
+    // Cacher les résultats en cliquant ailleurs
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#search_donateur') && !e.target.closest('#search_results')) {
+            searchResults.style.display = 'none';
+        }
+    });
+    
+    // Montrer les résultats si on clique dans le champ et qu'il y a du contenu
+    searchInput.addEventListener('focus', function() {
+        if (searchResults.children.length > 0) {
+            searchResults.style.display = 'block';
+        }
+    });
+});
+</script>
+{% endblock %}
