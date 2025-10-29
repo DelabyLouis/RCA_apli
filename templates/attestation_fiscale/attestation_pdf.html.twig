@@ -139,6 +139,57 @@
             font-size: 12px;
         }
         
+        /* Section du montant principal */
+        .montant-box {
+            border: 3px solid #000;
+            padding: 15px;
+            margin: 15px 0;
+            background-color: #f8f8f8;
+            text-align: center;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        
+        .montant-title {
+            font-weight: bold;
+            font-size: 11px;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+        
+        .montant-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            border: 2px solid #000;
+            background-color: #fff;
+            padding: 10px 15px;
+            margin: 10px auto;
+            display: inline-block;
+            min-width: 150px;
+        }
+        
+        .euros-label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .somme-lettres {
+            margin: 15px 0;
+            text-align: left;
+        }
+        
+        .date-versement {
+            margin: 10px 0;
+            text-align: left;
+        }
+        
+        .date-dots {
+            border-bottom: 1px dotted #000;
+            padding-bottom: 2px;
+        }
+        
         /* Signatures */
         .signatures-section {
             margin-top: 15px;
@@ -160,6 +211,39 @@
         .signature-title {
             font-weight: bold;
             margin-bottom: 10px;
+        }
+        
+        .signature-box {
+            border: 1px solid #000;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            width: 200px;
+            float: right;
+        }
+        
+        .signature-date {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .signature-label {
+            font-size: 10px;
+            margin: 10px 0;
+        }
+        
+        .signature-image {
+            margin: 10px 0;
+            min-height: 60px;
+        }
+        
+        .signature-image img {
+            max-width: 150px;
+            max-height: 80px;
+        }
+        
+        .clearfix {
+            clear: both;
         }
         
         /* Informations légales */
@@ -206,10 +290,14 @@
     <table class="header-table">
         <tr>
             <td class="cerfa-logo">
-                <div class="logo-box">
-                    <strong>cerfa</strong><br>
-                    N° 11580*03
-                </div>
+                {% if logo_base64 %}
+                    <img src="{{ logo_base64 }}" alt="Logo CERFA N° 11580*03" style="max-width: 80px; max-height: 60px;">
+                {% else %}
+                    <div class="logo-box">
+                        <strong>cerfa</strong><br>
+                        N° 11580*03
+                    </div>
+                {% endif %}
             </td>
             <td class="title-cell">
                 <strong>Reçu au titre des dons<br>
@@ -336,6 +424,9 @@
         </tr>
     </table>
 
+    <!-- Espacement pour éviter la coupure de page -->
+    <div style="page-break-before: auto; margin-bottom: 30px; height: 20px;"></div>
+
     <!-- Section montant et nature du don -->
     <div class="montant-box">
         <div class="montant-title">
@@ -435,7 +526,13 @@
         <div class="signature-label">
             Signature du représentant<br>de l'organisme
         </div>
-        <div class="signature-line"></div>
+        <div class="signature-image">
+            {% if signature_base64 %}
+                <img src="{{ signature_base64 }}" alt="Signature" style="max-width: 150px; max-height: 80px;">
+            {% else %}
+                <div style="height: 60px; border-bottom: 1px solid #000; margin: 10px 0;"></div>
+            {% endif %}
+        </div>
     </div>
     
     <div class="clearfix"></div>

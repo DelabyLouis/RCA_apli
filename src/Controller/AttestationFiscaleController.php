@@ -138,7 +138,7 @@ final class AttestationFiscaleController extends AbstractController
         ]);
     }
     
-    #[Route('/generer-selection/{personne_id}', name: 'app_attestation_fiscale_generer_selection', methods: ['POST'])]
+    #[Route('/generer-selection/{personne_id}', name: 'app_attestation_fiscale_generer_selection', methods: ['GET', 'POST'])]
     public function genererAttestationSelection(
         int $personne_id,
         Request $request,
@@ -153,8 +153,13 @@ final class AttestationFiscaleController extends AbstractController
         }
         
         // Récupérer les IDs des cotisations sélectionnées
-        $cotisationIds = $request->request->all('cotisations');
-        $anneeAttestation = $request->request->get('annee_attestation', date('Y'));
+        $cotisationIds = $request->request->all('cotisations') ?: $request->query->all('cotisations');
+        $anneeAttestation = $request->request->get('annee_attestation') ?: $request->query->get('annee_attestation', date('Y'));
+        
+        // Si c'est une requête GET sans cotisations (rafraîchissement), rediriger vers la page de sélection
+        if (empty($cotisationIds) && $request->isMethod('GET')) {
+            return $this->redirectToRoute('app_attestation_fiscale_personne_details', ['personne_id' => $personne_id]);
+        }
         
         if (empty($cotisationIds)) {
             $this->addFlash('error', 'Veuillez sélectionner au moins une cotisation.');
@@ -325,6 +330,23 @@ final class AttestationFiscaleController extends AbstractController
         
         $dompdf = new Dompdf($options);
         
+        // Encoder les images en base64
+        $publicDir = $this->getParameter('kernel.project_dir') . '/public';
+        $signatureBase64 = '';
+        $logoBase64 = '';
+        
+        $signaturePath = $publicDir . '/assets/images/Signature.jpg';
+        if (file_exists($signaturePath)) {
+            $signatureData = file_get_contents($signaturePath);
+            $signatureBase64 = 'data:image/jpeg;base64,' . base64_encode($signatureData);
+        }
+        
+        $logoPath = $publicDir . '/assets/images/Logo_Cerfa.svg';
+        if (file_exists($logoPath)) {
+            $logoData = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/svg+xml;base64,' . base64_encode($logoData);
+        }
+        
         // Générer le HTML de l'attestation
         $html = $this->renderView('attestation_fiscale/attestation_pdf.html.twig', [
             'donateur' => $donateur,
@@ -334,6 +356,8 @@ final class AttestationFiscaleController extends AbstractController
             'annee' => $annee,
             'numero_ordre' => $numeroOrdre,
             'date_generation' => new \DateTime(),
+            'signature_base64' => $signatureBase64,
+            'logo_base64' => $logoBase64,
         ]);
         
         // Charger le HTML dans Dompdf
