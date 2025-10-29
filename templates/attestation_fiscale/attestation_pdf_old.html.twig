@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reçu fiscal CERFA N°11580*03</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            line-height: 1.4;
+            margin: 0;
+            padding: 15px;
+            color: #000;
+        }
+        
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+        
+        .header-table td {
+            border: 2px solid #000;
+            padding: 8px;
+            vertical-align: middle;
+        }
+        
+        .cerfa-logo {
+            width: 80px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        
+        .cerfa-logo .logo-box {
+            border: 2px solid #000;
+            padding: 5px;
+            margin: 2px;
+        }
+        
+        .title-cell {
+            text-align: center;
+            font-weight: bold;
+            font-size: 13px;
+            line-height: 1.3;
+        }
+        
+        .numero-ordre {
+            width: 140px;
+            text-align: center;
+            font-size: 9px;
+        }
+        
+        .numero-box {
+            border: 1px solid #000;
+            height: 25px;
+            margin-top: 8px;
+            padding: 5px;
+            background-color: #f9f9f9;
+            font-weight: bold;
+        }
+        
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+        
+        .main-table td {
+            border: 1px solid #000;
+            padding: 6px;
+            vertical-align: top;
+        }
+        
+        .section-header {
+            background-color: #d0d0d0;
+            font-weight: bold;
+            text-align: center;
+            padding: 8px;
+            font-size: 11px;
+        }
+        
+        .field-label {
+            font-weight: bold;
+            display: inline;
+        }
+        
+        .underline {
+            border-bottom: 1px dotted #000;
+            display: inline-block;
+            min-width: 150px;
+            height: 14px;
+        }
+        
+        .underline.long {
+            min-width: 300px;
+        }
+        
+        .underline.short {
+            min-width: 80px;
+        }
+        
+        .checkbox-line {
+            margin: 4px 0;
+            font-size: 9px;
+            line-height: 1.3;
+        }
+        
+        .checkbox {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 1.5px solid #000;
+            margin-right: 6px;
+            vertical-align: baseline;
+            text-align: center;
+            line-height: 10px;
+        }
+        
+        .checkbox.checked::after {
+            content: "X";
+            font-size: 9px;
+            font-weight: bold;
+        }
+        
+        .montant-box {
+            border: 3px solid #000;
+            padding: 12px;
+            margin: 15px 0;
+            text-align: center;
+            background-color: #f8f8f8;
+        }
+        
+        .montant-value {
+            border: 2px solid #000;
+            padding: 8px 15px;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: white;
+            margin: 5px;
+        }
+        
+        .signature-box {
+            border: 2px solid #000;
+            width: 180px;
+            height: 100px;
+            float: right;
+            margin-top: 25px;
+            text-align: center;
+            font-size: 9px;
+            padding: 8px;
+            background-color: #f9f9f9;
+        }
+        
+        .notes {
+            font-size: 8px;
+            margin-top: 25px;
+            line-height: 1.2;
+            text-align: justify;
+        }
+        
+        .form-section {
+            margin-bottom: 8px;
+        }
+        
+        .amount-section {
+            background-color: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+        }
+        
+        .signature-section {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .signature-block {
+            width: 45%;
+            text-align: left;
+        }
+        
+        .underline {
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            min-width: 200px;
+            padding-bottom: 2px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        td {
+            padding: 5px;
+            vertical-align: top;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .bold {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Variables pour les totaux -->
+    {% set total_numeraire = 0 %}
+    {% set total_cheque = 0 %}
+    {% set total_virement = 0 %}
+    {% set total_autre = 0 %}
+    
+    {% for cotisation in cotisations %}
+        {% set mode = cotisation.modeDePaiement ? cotisation.modeDePaiement.libelle|lower : 'autre' %}
+        {% if 'numéraire' in mode or 'liquide' in mode or 'espèce' in mode %}
+            {% set total_numeraire = total_numeraire + cotisation.montant %}
+        {% elseif 'chèque' in mode or 'cheque' in mode %}
+            {% set total_cheque = total_cheque + cotisation.montant %}
+        {% elseif 'virement' in mode or 'carte' in mode %}
+            {% set total_virement = total_virement + cotisation.montant %}
+        {% else %}
+            {% set total_autre = total_autre + cotisation.montant %}
+        {% endif %}
+    {% endfor %}
+
+    <!-- En-tête avec logo CERFA -->
+    <table class="header-table">
+        <tr>
+            <td class="cerfa-logo">
+                <div class="logo-box">
+                    <strong>cerfa</strong><br>
+                    N° 11580*03
+                </div>
+            </td>
+            <td class="title-cell">
+                <strong>Reçu au titre des dons<br>
+                à certains organismes d'intérêt général</strong><br>
+                <div style="font-size: 9px; margin-top: 5px;">
+                    Articles 200, 238 bis et 885-0 V bis A du code général des impôts (CGI)
+                </div>
+            </td>
+            <td class="numero-ordre">
+                <div style="font-weight: bold; margin-bottom: 5px;">
+                    Numéro d'ordre du reçu
+                </div>
+                <div class="numero-box">
+                    {{ numero_ordre }}
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Section Bénéficiaire des versements -->
+    <table class="main-table">
+        <tr>
+            <td class="section-header" colspan="2">Bénéficiaire des versements</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding: 10px;">
+                <div class="form-section">
+                    <span class="field-label">Nom ou dénomination :</span> 
+                    <strong>Racing Club Arras</strong><br>
+                    <span class="underline long"></span>
+                </div>
+                
+                <div class="form-section">
+                    <span class="field-label">Adresse :</span><br>
+                    N°<span class="underline short"></span> Rue <strong>Stade Degouve, Rue du Temple</strong><br>
+                    <span class="underline long"></span><br>
+                    Code postal <span class="underline short" style="text-align: center;"><strong>62000</strong></span> 
+                    Commune <span class="underline" style="min-width: 200px;"><strong>ARRAS</strong></span>
+                </div>
+                
+                <div class="form-section">
+                    <span class="field-label">Objet :</span> 
+                    <strong>Association sportive de football</strong><br>
+                    <span class="underline long"></span><br>
+                    <span class="underline long"></span><br>
+                    <span class="underline long"></span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding: 10px;">
+                <strong>Cochez la case concernée (1) :</strong><br><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Association ou fondation reconnue d'utilité publique par décret en date du ....../../.../......... publié au Journal officiel du ....../....../......... ou association située dans le département de la Moselle, du Bas-Rhin ou du Haut-Rhin dont la mission a été reconnue d'utilité publique par arrêté préfectoral en date du ....../....../.......</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Fondation universitaire ou fondation partenariale mentionnées respectivement aux articles L. 719-12 et L. 719-13 du code de l'éducation</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Fondation d'entreprise</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Œuvre ou organisme d'intérêt général</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Musée de France</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Établissement d'enseignement supérieur ou d'enseignement artistique public ou privé, d'intérêt général, à but non lucratif</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Organisme ayant pour objet exclusif de participer financement à la création d'entreprises</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Association cultuelle ou de bienfaisance et établissement public des cultes reconnus d'Alsace-Moselle</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Organisme ayant pour activité principale l'organisation de festivals</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Association fournissant gratuitement une aide alimentaire ou des soins médicaux à des personnes en difficulté ou favorisant leur logement</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Fondation du patrimoine ou fondation ou association qui affecte irrévocablement les dons à la Fondation du patrimoine, ou que les travaux prévus par les conventions conclues par la Fondation du patrimoine et les propriétaires des immeubles (article L. 143-2-1 du code du patrimoine)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Établissement de recherche public ou privé, d'intérêt général, à but non lucratif</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Entreprise d'insertion ou entreprise de travail temporaire d'insertion (articles L. 5132-5 et L. 5132-6 du code du travail)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Associations intermédiaires (article L. 5132-7 du code du travail)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Ateliers et chantiers d'insertion (article L. 5132-15 du code du travail)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Entreprises adaptées (article L. 5213-13 du code du travail)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Agence nationale de la recherche (ANR)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Société ou organisme agréé de recherche scientifique ou technique (2)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox checked"></span> Autre organisme : <span class="underline" style="width: 300px;">Association sportive</span></div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Section Donateur -->
+    <table class="main-table">
+        <tr>
+            <td class="section-header" colspan="2">Donateur</td>
+        </tr>
+        <tr>
+            <td style="width: 50%; padding: 8px;">
+                <span class="field-label">Nom :</span><br>
+                <strong style="font-size: 11px;">
+                    {% if donateur_type == 'personne' %}{{ donateur.nom|upper }}{% else %}{{ donateur.nomEntreprise }}{% endif %}
+                </strong><br>
+                <span class="underline" style="width: 95%;"></span>
+            </td>
+            <td style="width: 50%; padding: 8px;">
+                <span class="field-label">Prénoms :</span><br>
+                <strong style="font-size: 11px;">
+                    {% if donateur_type == 'personne' %}{{ donateur.prenom }}{% endif %}
+                </strong><br>
+                <span class="underline" style="width: 95%;"></span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding: 8px;">
+                <span class="field-label">Adresse :</span><br>
+                <strong>{{ donateur.adresse ?? '' }}</strong><br>
+                <span class="underline long"></span><br>
+                Code postal <span class="underline short" style="text-align: center;"><strong>{{ donateur.codePostal ?? '' }}</strong></span> 
+                Commune <span class="underline" style="min-width: 250px;"><strong>{{ donateur.ville ?? '' }}</strong></span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Section montant et nature du don -->
+    <div class="montant-box">
+        <div style="font-weight: bold; font-size: 11px; margin-bottom: 15px;">
+            Le bénéficiaire reconnaît avoir reçu au titre des dons et versements<br>
+            ouvrant droit à réduction d'impôt, la somme de :
+        </div>
+        
+        <div class="montant-value">
+            {{ montant_total|number_format(2, ',', ' ') }}
+        </div>
+        <strong style="margin-left: 10px; font-size: 12px;">euros</strong><br><br>
+        
+        <div style="margin: 15px 0;">
+            <strong>Somme en toutes lettres :</strong><br>
+            <span class="underline long" style="min-width: 450px;"></span>
+        </div>
+        
+        <div style="margin: 15px 0;">
+            <strong>Date du versement ou du don :</strong> 
+            <span style="font-family: monospace;">...../............../...................</span>
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 10px; line-height: 1.4;">
+            Le bénéficiaire certifie sur l'honneur que les dons et versements qu'il reçoit<br>
+            ouvrent droit à la réduction d'impôt prévue à l'article (3) :<br><br>
+            <span class="checkbox checked"></span> <strong>200 du CGI</strong> &nbsp;&nbsp;
+            <span class="checkbox"></span> 238 bis du CGI &nbsp;&nbsp;
+            <span class="checkbox"></span> 885-0 V bis A du CGI
+        </div>
+    </div>
+
+    <!-- Section Forme et nature du don -->
+    <table class="main-table">
+        <tr>
+            <td colspan="4" style="padding: 8px; font-weight: bold; background-color: #f0f0f0;">
+                Forme du don :
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 6px;"><span class="checkbox"></span> Acte authentique</td>
+            <td style="padding: 6px;"><span class="checkbox"></span> Acte sous seing privé</td>
+            <td style="padding: 6px;"><span class="checkbox"></span> Déclaration de don manuel</td>
+            <td style="padding: 6px;"><span class="checkbox"></span> Autres</td>
+        </tr>
+        <tr>
+            <td colspan="4" style="padding: 8px; font-weight: bold; background-color: #f0f0f0;">
+                Nature du don :
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 6px;"><span class="checkbox checked"></span> <strong>Numéraire</strong></td>
+            <td style="padding: 6px;"><span class="checkbox"></span> Titres de sociétés cotés</td>
+            <td style="padding: 6px;"><span class="checkbox"></span> Autres (4)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td colspan="4" style="border-top: 2px solid #000; padding: 8px; font-weight: bold; background-color: #e8e8e8;">
+                En cas de don en numéraire, mode de versement du don :
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 6px;">
+                <span class="checkbox {{ total_numeraire > 0 ? 'checked' : '' }}"></span> 
+                {% if total_numeraire > 0 %}<strong>{% endif %}
+                Remise d'espèces
+                {% if total_numeraire > 0 %}</strong>{% endif %}
+            </td>
+            <td style="padding: 6px;">
+                <span class="checkbox {{ total_cheque > 0 ? 'checked' : '' }}"></span> 
+                {% if total_cheque > 0 %}<strong>{% endif %}
+                Chèque
+                {% if total_cheque > 0 %}</strong>{% endif %}
+            </td>
+            <td style="padding: 6px;">
+                <span class="checkbox {{ total_virement > 0 ? 'checked' : '' }}"></span> 
+                {% if total_virement > 0 %}<strong>{% endif %}
+                Virement, prélèvement, carte bancaire
+                {% if total_virement > 0 %}</strong>{% endif %}
+            </td>
+            <td></td>
+        </tr>
+    </table>
+
+    <!-- Notes en bas de page -->
+    <div class="notes">
+        <strong>(1)</strong> ou indiquez que les renseignements concernant l'organisme<br>
+        <strong>(2)</strong> dons effectués par les entreprises<br><br>
+        
+        <strong>(3)</strong> L'organisme bénéficiaire peut cocher une ou plusieurs cases.<br>
+        L'organisme bénéficiaire peut, en application de l'article L. 80 C du livre des procédures fiscales, 
+        demander à l'administration s'il relève de l'une des catégories d'organismes mentionnées aux articles 200 et 238 bis du code général des impôts.<br><br>
+        
+        Il est rappelé que la délivrance irrégulière de reçus fiscaux par l'organisme bénéficiaire est susceptible de donner lieu, 
+        en application des dispositions de l'article 1740 A du code général des impôts, à une amende fiscale égale à 25 % 
+        des sommes indûment mentionnées sur ces documents.<br><br>
+        
+        <strong>(4)</strong> notamment : abandon de revenus ou de produits ; frais engagés par les bénévoles, 
+        dont ils renoncent expressément au remboursement
+    </div>
+
+    <!-- Signature -->
+    <div class="signature-box">
+        <div style="font-weight: bold; margin-bottom: 10px;">Date et signature</div>
+        <div style="font-size: 10px; font-weight: bold; margin-bottom: 15px;">
+            {{ date_generation|date('d/m/Y') }}
+        </div>
+        <div style="margin-top: 10px; font-size: 8px;">
+            Signature du représentant<br>de l'organisme
+        </div>
+        <div style="height: 35px; border-bottom: 2px solid #000; margin-top: 15px;"></div>
+    </div>
+    
+    <div style="clear: both;"></div>
+
+</body>
+</html>

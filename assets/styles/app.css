@@ -1589,6 +1589,12 @@ body {
     color: #17a2b8; /* Bleu pour les personnes */
 }
 
+/* ============================================== */
+/* IMPORTS - STYLES MODULES */
+/* ============================================== */
+@import './attestation_fiscale.css';
+@import './attestation_interface.css';
+
 #tiers-selector option[value^="entreprise-"] {
     color: #fd7e14; /* Orange pour les entreprises */
 }

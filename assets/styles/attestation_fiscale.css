@@ -1,0 +1,284 @@
+/* Styles pour les attestations fiscales - CERFA N°11580*03 */
+
+/* Base */
+.attestation-pdf body {
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    line-height: 1.4;
+    margin: 0;
+    padding: 15px;
+    color: #000;
+}
+
+/* En-tête */
+.attestation-pdf .header-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+}
+
+.attestation-pdf .header-table td {
+    border: 2px solid #000;
+    padding: 8px;
+    vertical-align: middle;
+}
+
+.attestation-pdf .cerfa-logo {
+    width: 80px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 10px;
+}
+
+.attestation-pdf .cerfa-logo .logo-box {
+    border: 2px solid #000;
+    padding: 5px;
+    margin: 2px;
+}
+
+.attestation-pdf .title-cell {
+    text-align: center;
+    font-weight: bold;
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+.attestation-pdf .numero-ordre {
+    width: 140px;
+    text-align: center;
+    font-size: 9px;
+}
+
+.attestation-pdf .numero-box {
+    border: 1px solid #000;
+    height: 25px;
+    margin-top: 8px;
+    padding: 5px;
+    background-color: #f9f9f9;
+    font-weight: bold;
+}
+
+/* Tableaux principaux */
+.attestation-pdf .main-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+}
+
+.attestation-pdf .main-table td {
+    border: 1px solid #000;
+    padding: 6px;
+    vertical-align: top;
+}
+
+.attestation-pdf .section-header {
+    background-color: #d0d0d0;
+    font-weight: bold;
+    text-align: center;
+    padding: 8px;
+    font-size: 11px;
+}
+
+/* Champs de formulaire */
+.attestation-pdf .field-label {
+    font-weight: bold;
+    display: inline;
+}
+
+.attestation-pdf .underline {
+    border-bottom: 1px dotted #000;
+    display: inline-block;
+    min-width: 150px;
+    height: 14px;
+}
+
+.attestation-pdf .underline.long {
+    min-width: 300px;
+}
+
+.attestation-pdf .underline.short {
+    min-width: 80px;
+}
+
+.attestation-pdf .form-section {
+    margin-bottom: 8px;
+}
+
+/* Cases à cocher */
+.attestation-pdf .checkbox-line {
+    margin: 4px 0;
+    font-size: 9px;
+    line-height: 1.3;
+}
+
+.attestation-pdf .checkbox {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid #000;
+    margin-right: 6px;
+    vertical-align: baseline;
+    text-align: center;
+    line-height: 10px;
+}
+
+.attestation-pdf .checkbox.checked::after {
+    content: "X";
+    font-size: 9px;
+    font-weight: bold;
+}
+
+/* Section montant */
+.attestation-pdf .montant-box {
+    border: 3px solid #000;
+    padding: 12px;
+    margin: 15px 0;
+    text-align: center;
+    background-color: #f8f8f8;
+}
+
+.attestation-pdf .montant-value {
+    border: 2px solid #000;
+    padding: 8px 15px;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: white;
+    margin: 5px;
+}
+
+/* Signature */
+.attestation-pdf .signature-box {
+    border: 2px solid #000;
+    width: 180px;
+    height: 100px;
+    float: right;
+    margin-top: 25px;
+    text-align: center;
+    font-size: 9px;
+    padding: 8px;
+    background-color: #f9f9f9;
+}
+
+/* Notes légales */
+.attestation-pdf .notes {
+    font-size: 8px;
+    margin-top: 25px;
+    line-height: 1.2;
+    text-align: justify;
+}
+
+/* Classes supplémentaires pour la mise en forme */
+.attestation-pdf .subtitle {
+    font-size: 9px;
+    margin-top: 5px;
+}
+
+.attestation-pdf .numero-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.attestation-pdf .section-content {
+    padding: 10px;
+}
+
+.attestation-pdf .checkbox-section {
+    padding: 10px;
+}
+
+.attestation-pdf .donateur-nom,
+.attestation-pdf .donateur-prenom {
+    width: 50%;
+    padding: 8px;
+}
+
+.attestation-pdf .donateur-adresse {
+    padding: 8px;
+}
+
+.attestation-pdf .donateur-value {
+    font-size: 11px;
+}
+
+.attestation-pdf .underline.center {
+    text-align: center;
+}
+
+.attestation-pdf .underline.medium {
+    min-width: 200px;
+}
+
+.attestation-pdf .montant-title {
+    font-weight: bold;
+    font-size: 11px;
+    margin-bottom: 15px;
+}
+
+.attestation-pdf .euros-label {
+    margin-left: 10px;
+    font-size: 12px;
+}
+
+.attestation-pdf .somme-lettres {
+    margin: 15px 0;
+}
+
+.attestation-pdf .date-versement {
+    margin: 15px 0;
+}
+
+.attestation-pdf .date-dots {
+    font-family: monospace;
+}
+
+.attestation-pdf .certification {
+    margin-top: 20px;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.attestation-pdf .subsection-header {
+    padding: 8px;
+    font-weight: bold;
+    background-color: #f0f0f0;
+}
+
+.attestation-pdf .subsection-header.special {
+    border-top: 2px solid #000;
+    background-color: #e8e8e8;
+}
+
+.attestation-pdf .form-option {
+    padding: 6px;
+}
+
+.attestation-pdf .mode-paiement {
+    /* Style spécifique pour les modes de paiement */
+}
+
+.attestation-pdf .signature-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.attestation-pdf .signature-date {
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.attestation-pdf .signature-label {
+    margin-top: 10px;
+    font-size: 8px;
+}
+
+.attestation-pdf .signature-line {
+    height: 35px;
+    border-bottom: 2px solid #000;
+    margin-top: 15px;
+}
+
+.attestation-pdf .clearfix {
+    clear: both;
+}

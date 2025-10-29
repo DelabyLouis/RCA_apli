@@ -1,0 +1,452 @@
+/* Styles pour l'interface des attestations fiscales */
+
+/* Page d'index */
+.attestation-index {
+    padding: 1rem 0;
+}
+
+.attestation-index .search-section {
+    background-color: var(--light-gray);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.attestation-index .search-input {
+    background-color: var(--secondary-color);
+    border: 2px solid var(--border-color);
+    color: var(--primary-color);
+    transition: border-color 0.3s ease;
+}
+
+.attestation-index .search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+/* Résultats de recherche */
+.search-results {
+    position: absolute !important;
+    z-index: 1000 !important;
+    max-width: 500px !important;
+    margin-top: 0.5rem !important;
+    background: white !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    list-style: none !important;
+    padding: 0 !important;
+    display: none !important;
+}
+
+.search-results:not(.d-none) {
+    display: block !important;
+}
+
+.search-result-item {
+    display: block !important;
+    padding: 0.75rem 1rem !important;
+    color: #212529 !important;
+    text-decoration: none !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa !important;
+    color: #0d6efd !important;
+    text-decoration: none !important;
+}
+
+.search-result-item:last-child {
+    border-bottom: none !important;
+}
+
+.search-result-content {
+    display: flex !important;
+    width: 100% !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+.search-result-info {
+    flex-grow: 1 !important;
+}
+
+.search-result-header {
+    display: flex !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 0.25rem !important;
+}
+
+.search-result-header h6 {
+    margin: 0 !important;
+    font-size: 0.875rem !important;
+}
+
+.search-result-details {
+    font-size: 0.75rem !important;
+    color: #6c757d !important;
+}
+
+.search-no-results {
+    padding: 0.75rem 1rem !important;
+    color: #6c757d !important;
+    text-align: center !important;
+    font-style: italic !important;
+}
+
+.attestation-index .personne-details-container {
+    display: none;
+    margin-top: 2rem;
+}
+
+/* Tables des personnes */
+.attestation-index .personnes-table-section {
+    background: var(--light-gray);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    padding: 1.5rem;
+}
+
+/* Liste des personnes */
+.attestation-index .person-card {
+    background-color: var(--light-gray);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.attestation-index .person-card:hover {
+    background-color: var(--medium-gray);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.attestation-index .person-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.attestation-index .person-info {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Page de détails d'une personne */
+.attestation-details {
+    padding: 1rem 0;
+}
+
+.attestation-details .person-header {
+    background: var(--light-gray);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.person-header-content {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+}
+
+.person-header-content > div:first-child {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    flex-grow: 1 !important;
+}
+
+.attestation-details .person-header h4 {
+    margin-bottom: 0.25rem;
+}
+
+.attestation-details .person-contact-info {
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+/* Statistiques */
+.attestation-details .statistics-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.attestation-details .statistics-section > * {
+    flex: 1;
+    min-width: 300px;
+}
+
+.attestation-details .stat-card {
+    border-radius: 0.375rem;
+    padding: 1.5rem;
+    color: white;
+}
+
+.attestation-details .stat-card-total {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.attestation-details .stat-card-count {
+    background: linear-gradient(135deg, #17a2b8, #6f42c1);
+}
+
+.attestation-details .stat-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.attestation-details .stat-content h5 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.attestation-details .stat-content h3 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.attestation-details .stat-icon {
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
+.attestation-details .info-card {
+    background: linear-gradient(135deg, var(--light-gray), var(--medium-gray));
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+}
+
+.attestation-details .info-value {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.attestation-details .selection-info {
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.attestation-details .selection-info.text-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border: 1px solid #ffc107;
+}
+
+.attestation-details .selection-info.text-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    border: 1px solid #28a745;
+}
+
+/* Formulaires */
+.attestation-details .cotisations-form {
+    margin-top: 2rem;
+}
+
+.attestation-details .form-section {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.form-header {
+    background: var(--light-gray) !important;
+    padding: 1rem 1.5rem !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+}
+
+.form-header h5 {
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.form-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    flex-wrap: wrap !important;
+}
+
+.attestation-details .year-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.attestation-details .year-selector select {
+    width: auto;
+}
+
+.attestation-details .generate-btn {
+    white-space: nowrap;
+}
+
+.attestation-details .form-content {
+    padding: 1.5rem;
+}
+
+/* Actions rapides */
+.attestation-details .quick-actions {
+    margin-bottom: 1.5rem;
+}
+
+.attestation-details .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.attestation-details .selection-info {
+    margin-top: 0.5rem;
+}
+
+.attestation-details .selection-status {
+    font-weight: bold;
+}
+
+.attestation-details .selection-warning {
+    color: #ffc107;
+}
+
+.attestation-details .selection-success {
+    color: #28a745;
+}
+
+/* Tableau des cotisations */
+.attestation-details .cotisations-table {
+    margin-top: 1rem;
+}
+
+.attestation-details .cotisation-label {
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.attestation-details .clickable-row {
+    cursor: pointer;
+}
+
+.attestation-details .cotisation-row {
+    transition: background-color 0.2s ease;
+}
+
+.attestation-details .cotisation-row:hover {
+    background-color: var(--border-color) !important;
+}
+
+.attestation-details .cotisation-checkbox {
+    transform: scale(1.2);
+    margin-right: 0.5rem;
+}
+
+/* Boutons d'action rapide */
+.attestation-details .action-buttons {
+    gap: 0.5rem;
+}
+
+.attestation-details .btn-outline-secondary {
+    border-width: 2px;
+    transition: all 0.3s ease;
+}
+
+.attestation-details .btn-outline-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Bouton générer attestation */
+.attestation-details .btn-generate {
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 0.75rem 2rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.attestation-details .btn-generate:disabled {
+    opacity: 0.6;
+    transform: none !important;
+    cursor: not-allowed;
+}
+
+.attestation-details .btn-generate:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
+}
+
+/* Alert d'instructions */
+.attestation-details .instruction-alert {
+    border-left: 4px solid #17a2b8;
+    background-color: rgba(23, 162, 184, 0.1);
+}
+
+.attestation-details .instruction-alert .btn-close {
+    filter: invert(1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .attestation-details .form-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .attestation-details .form-controls {
+        justify-content: space-between;
+    }
+    
+    .attestation-details .statistics-section {
+        flex-direction: column;
+    }
+    
+    .attestation-details .statistics-section > * {
+        min-width: auto;
+    }
+    
+    .attestation-details .person-header-content {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .attestation-details .action-buttons {
+        flex-direction: column;
+    }
+    
+    .attestation-details .btn-generate,
+    .attestation-details .generate-btn {
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .attestation-index .person-card {
+        margin-bottom: 1rem;
+    }
+    
+    .attestation-index .search-results {
+        max-width: calc(100vw - 2rem);
+    }
+}
