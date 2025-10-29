@@ -2,80 +2,116 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Attestation Fiscale {{ annee }}</title>
+    <title>Reçu fiscal CERFA N°11580*03</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
+            font-size: 9px;
+            line-height: 1.2;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
+            color: #000;
         }
         
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
         }
         
-        .title {
-            font-size: 16px;
-            font-weight: bold;
-            text-decoration: underline;
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            font-size: 11px;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        
-        .section {
-            margin-bottom: 25px;
+        .header-table td {
             border: 1px solid #000;
-            padding: 15px;
+            padding: 5px;
+            vertical-align: top;
         }
         
-        .section-title {
+        .cerfa-logo {
+            width: 60px;
+            text-align: center;
             font-weight: bold;
-            font-size: 13px;
-            margin-bottom: 10px;
-            text-decoration: underline;
+            font-size: 8px;
         }
         
-        .field-group {
-            margin-bottom: 8px;
+        .title-cell {
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        .numero-ordre {
+            width: 120px;
+            text-align: center;
+        }
+        
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        
+        .main-table td {
+            border: 1px solid #000;
+            padding: 3px;
+            vertical-align: top;
+        }
+        
+        .section-header {
+            background-color: #e0e0e0;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px;
         }
         
         .field-label {
             font-weight: bold;
-            display: inline-block;
-            margin-right: 5px;
+            display: inline;
         }
         
-        .field-value {
+        .underline {
+            border-bottom: 1px dotted #000;
             display: inline-block;
+            min-width: 200px;
+            height: 12px;
         }
         
-        .checkbox-group {
-            margin: 10px 0;
+        .checkbox-line {
+            margin: 2px 0;
+            font-size: 8px;
         }
         
         .checkbox {
             display: inline-block;
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border: 1px solid #000;
             margin-right: 5px;
-            vertical-align: top;
+            vertical-align: baseline;
             text-align: center;
-            line-height: 10px;
+            line-height: 8px;
         }
         
         .checkbox.checked::after {
             content: "X";
-            font-size: 10px;
+            font-size: 8px;
             font-weight: bold;
+        }
+        
+        .montant-box {
+            border: 2px solid #000;
+            padding: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .signature-box {
+            border: 1px solid #000;
+            width: 150px;
+            height: 80px;
+            float: right;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 8px;
+            padding: 5px;
         }
         
         .amount-section {
@@ -132,293 +168,205 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="title">REÇU AU TITRE DES DONS À CERTAINS ORGANISMES D'INTÉRÊT GÉNÉRAL</div>
-        <div class="subtitle">(Articles 200, 238 bis et 885-0 V bis A du Code général des impôts – DGFIP)</div>
-        
-        <table>
-            <tr>
-                <td style="width: 50%;">
-                    <div class="field-group">
-                        <span class="field-label">Année :</span>
-                        <span class="field-value underline">{{ annee }}</span>
-                    </div>
-                </td>
-                <td style="width: 50%;">
-                    <div class="field-group">
-                        <span class="field-label">N° d'ordre du reçu :</span>
-                        <span class="field-value underline">{{ numero_ordre }}</span>
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="section">
-        <div class="section-title">ORGANISME BÉNÉFICIAIRE DU DON</div>
-        <div class="field-group">
-            <span class="field-label">Nom :</span>
-            <span class="field-value">AMICALE DES ANCIENS DU RUGBY CLUB AUDOMAROIS</span>
-        </div>
-        <div class="field-group">
-            <span class="field-label">Adresse :</span>
-        </div>
-        <div class="field-group" style="margin-left: 20px;">
-            N° 3 Rue Allée des sports
-        </div>
-        <table>
-            <tr>
-                <td style="width: 50%;">
-                    <span class="field-label">Code postal :</span>
-                    <span class="field-value">62500</span>
-                </td>
-                <td style="width: 50%;">
-                    <span class="field-label">Commune :</span>
-                    <span class="field-value">SAINT OMER</span>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="section">
-        <div class="section-title">CATÉGORIE DE L'ORGANISME BÉNÉFICIAIRE</div>
-        <div style="font-style: italic; margin-bottom: 10px;">(cocher la case correspondante)</div>
-        
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Association ou fondation reconnue d'utilité publique par décret publié au Journal officiel
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Association située dans les départements du Bas-Rhin, du Haut-Rhin ou de la Moselle reconnue d'utilité publique par arrêté préfectoral
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Fondation universitaire ou fondation partenariale (articles L.719-12 et L.719-13 du code de l'éducation)
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Fondation d'entreprise
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Œuvre ou organisme d'intérêt général
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Musée de France
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Établissement d'enseignement supérieur ou artistique public ou privé, d'intérêt général, à but non lucratif
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Organisme finançant la création d'entreprises
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Association cultuelle ou de bienfaisance et établissement public des cultes reconnus d'Alsace-Moselle
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Organisme dont l'activité principale est l'organisation de festivals
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Association fournissant gratuitement une aide alimentaire, des soins médicaux ou favorisant le logement de personnes en difficulté
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Fondation du patrimoine ou organisme affectant irrévocablement les dons à la Fondation du patrimoine
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Établissement de recherche public ou privé, d'intérêt général, à but non lucratif
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Entreprise d'insertion ou entreprise de travail temporaire d'insertion
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Atelier et chantier d'insertion
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Association intermédiaire
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Organisme agréé d'intermédiation locative ou d'ingénierie sociale, financière et technique
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Organisme agréé d'aide à la création ou à la reprise d'entreprises
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox"></span> Société ou fonds d'investissement de proximité
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox checked"></span> <span class="bold">Autre organisme : Association sportive</span>
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">DONATEUR</div>
-        <div class="field-group">
-            <span class="field-label">Nom ou raison sociale :</span>
-            <span class="field-value underline">
-                {% if donateur_type == 'personne' %}
-                    {{ donateur.prenom }} {{ donateur.nom }}
-                {% else %}
-                    {{ donateur.nomEntreprise }}
-                {% endif %}
-            </span>
-        </div>
-        <div class="field-group">
-            <span class="field-label">Adresse :</span>
-            <span class="field-value underline">
-                {% if donateur_type == 'personne' %}
-                    {% if donateur.numeroVoie %}{{ donateur.numeroVoie }} {% endif %}
-                    {% if donateur.rue %}{{ donateur.rue }}{% endif %}
-                    {% if donateur.complementAdresse %}, {{ donateur.complementAdresse }}{% endif %}
-                {% else %}
-                    {% if donateur.numeroVoie %}{{ donateur.numeroVoie }} {% endif %}
-                    {% if donateur.rue %}{{ donateur.rue }}{% endif %}
-                    {% if donateur.complementAdresse %}, {{ donateur.complementAdresse }}{% endif %}
-                {% endif %}
-            </span>
-        </div>
-        <table>
-            <tr>
-                <td style="width: 50%;">
-                    <span class="field-label">Code postal :</span>
-                    <span class="field-value underline">
-                        {% if donateur_type == 'personne' %}
-                            {{ donateur.codePostal ?? '' }}
-                        {% else %}
-                            {{ donateur.codePostal ?? '' }}
-                        {% endif %}
-                    </span>
-                </td>
-                <td style="width: 50%;">
-                    <span class="field-label">Commune :</span>
-                    <span class="field-value underline">
-                        {% if donateur_type == 'personne' %}
-                            {{ donateur.ville ?? '' }}
-                        {% else %}
-                            {{ donateur.ville ?? '' }}
-                        {% endif %}
-                    </span>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="section">
-        <div class="section-title">NATURE ET MONTANT DU DON</div>
-        
-        {% set total_numeraire = 0 %}
-        {% set total_cheque = 0 %}
-        {% set total_virement = 0 %}
-        {% set total_autre = 0 %}
-        
-        {% for cotisation in cotisations %}
-            {% set mode = cotisation.modeDePaiement ? cotisation.modeDePaiement.libelle|lower : 'autre' %}
-            {% set montant = cotisation.montant|number_format(2, '.', '') %}
-            
-            {% if 'espèce' in mode or 'liquide' in mode or 'numéraire' in mode %}
-                {% set total_numeraire = total_numeraire + montant %}
-            {% elseif 'chèque' in mode or 'cheque' in mode %}
-                {% set total_cheque = total_cheque + montant %}
-            {% elseif 'virement' in mode or 'vir' in mode %}
-                {% set total_virement = total_virement + montant %}
-            {% else %}
-                {% set total_autre = total_autre + montant %}
-            {% endif %}
-        {% endfor %}
-        
-        <div class="checkbox-group">
-            <span class="checkbox {{ total_numeraire > 0 ? 'checked' : '' }}"></span> 
-            Numéraire Montant : <span class="underline">{{ total_numeraire > 0 ? (total_numeraire|number_format(2, ',', ' ') ~ ' €') : '……………… €' }}</span>
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox {{ total_cheque > 0 ? 'checked' : '' }}"></span> 
-            Chèque Montant : <span class="underline">{{ total_cheque > 0 ? (total_cheque|number_format(2, ',', ' ') ~ ' €') : '……………… €' }}</span>
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox {{ total_virement > 0 ? 'checked' : '' }}"></span> 
-            Virement Montant : <span class="underline">{{ total_virement > 0 ? (total_virement|number_format(2, ',', ' ') ~ ' €') : '……………… €' }}</span>
-        </div>
-        <div class="checkbox-group">
-            <span class="checkbox {{ total_autre > 0 ? 'checked' : '' }}"></span> 
-            Autre don en nature : description <span class="underline">{{ total_autre > 0 ? 'Cotisation association' : '……………………………………………………………………' }}</span>
-        </div>
-        <div style="margin-left: 20px;">
-            Évaluation du don en nature : <span class="underline">{{ total_autre > 0 ? (total_autre|number_format(2, ',', ' ') ~ ' €') : '……………… €' }}</span>
-        </div>
-
-        <div style="margin-top: 15px;">
-            <span class="field-label">Date du don :</span>
-            <span class="underline">
-                {% if cotisations|length == 1 %}
-                    {{ cotisations[0].dateTransaction|date('d/m/Y') }}
-                {% else %}
-                    Multiples ({{ cotisations|first.dateTransaction|date('d/m/Y') }} au {{ cotisations|last.dateTransaction|date('d/m/Y') }})
-                {% endif %}
-            </span>
-        </div>
-        
-        <div class="amount-section">
-            <div class="bold text-center">
-                MONTANT TOTAL DES DONS : {{ montant_total|number_format(2, ',', ' ') }} €
-            </div>
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">ENGAGEMENT DE L'ORGANISME</div>
-        <p>L'organisme bénéficiaire certifie sur l'honneur :</p>
-        <p>• que les dons et versements reçus ouvrent droit à la réduction d'impôt prévue aux articles 200, 238 bis ou 885-0 V bis A du CGI ;</p>
-        <p>• qu'il répond aux conditions fixées par ces articles ;</p>
-        <p>• que le don n'a donné lieu à aucune contrepartie au profit du donateur.</p>
-        
-        <div class="signature-section">
-            <div class="signature-block">
-                <div class="field-group">
-                    <span class="field-label">Fait à :</span>
-                    <span class="underline">SAINT OMER</span>
-                </div>
-            </div>
-            <div class="signature-block">
-                <div class="field-group">
-                    <span class="field-label">Le :</span>
-                    <span class="underline">{{ date_generation|date('d/m/Y') }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <div style="margin-top: 30px;">
-            <div class="bold">Signature du représentant de l'organisme</div>
-            <div>(Nom, qualité et signature)</div>
-            <div style="margin-top: 50px; border-bottom: 1px solid #000; width: 300px;"></div>
-        </div>
-    </div>
+    <!-- Variables pour les totaux -->
+    {% set total_numeraire = 0 %}
+    {% set total_cheque = 0 %}
+    {% set total_virement = 0 %}
+    {% set total_autre = 0 %}
     
-    <!-- Détail des cotisations en annexe -->
-    {% if cotisations|length > 1 %}
-        <div class="page-break">
-            <div class="section">
-                <div class="section-title">DÉTAIL DES COTISATIONS POUR L'ANNÉE {{ annee }}</div>
-                <table style="border: 1px solid #000;">
-                    <thead>
-                        <tr style="background-color: #f0f0f0;">
-                            <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Date</td>
-                            <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Libellé</td>
-                            <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Mode de paiement</td>
-                            <td style="border: 1px solid #000; padding: 8px; font-weight: bold; text-align: right;">Montant</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for cotisation in cotisations %}
-                            <tr>
-                                <td style="border: 1px solid #000; padding: 5px;">{{ cotisation.dateTransaction|date('d/m/Y') }}</td>
-                                <td style="border: 1px solid #000; padding: 5px;">{{ cotisation.libelle }}</td>
-                                <td style="border: 1px solid #000; padding: 5px;">{{ cotisation.modeDePaiement ? cotisation.modeDePaiement.libelle : '-' }}</td>
-                                <td style="border: 1px solid #000; padding: 5px; text-align: right;">{{ cotisation.montant|number_format(2, ',', ' ') }} €</td>
-                            </tr>
-                        {% endfor %}
-                        <tr style="background-color: #f0f0f0; font-weight: bold;">
-                            <td colspan="3" style="border: 1px solid #000; padding: 8px; text-align: right;">TOTAL :</td>
-                            <td style="border: 1px solid #000; padding: 8px; text-align: right;">{{ montant_total|number_format(2, ',', ' ') }} €</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    {% for cotisation in cotisations %}
+        {% set mode = cotisation.modeDePaiement ? cotisation.modeDePaiement.libelle|lower : 'autre' %}
+        {% if 'numéraire' in mode or 'liquide' in mode or 'espèce' in mode %}
+            {% set total_numeraire = total_numeraire + cotisation.montant %}
+        {% elseif 'chèque' in mode or 'cheque' in mode %}
+            {% set total_cheque = total_cheque + cotisation.montant %}
+        {% elseif 'virement' in mode or 'carte' in mode %}
+            {% set total_virement = total_virement + cotisation.montant %}
+        {% else %}
+            {% set total_autre = total_autre + cotisation.montant %}
+        {% endif %}
+    {% endfor %}
+
+    <!-- En-tête avec logo CERFA -->
+    <table class="header-table">
+        <tr>
+            <td class="cerfa-logo">
+                <div style="border: 2px solid #000; padding: 3px;">
+                    <strong>cerfa</strong><br>
+                    N° 11580*03
+                </div>
+            </td>
+            <td class="title-cell">
+                <strong>Reçu au titre des dons<br>
+                à certains organismes d'intérêt général</strong><br>
+                <span style="font-size: 8px;">Articles 200, 238 bis et 885-0 V bis A du code général des impôts (CGI)</span>
+            </td>
+            <td class="numero-ordre">
+                <strong>Numéro d'ordre du reçu</strong><br>
+                <div style="border: 1px solid #000; height: 20px; margin-top: 5px; text-align: center; padding-top: 5px;">
+                    {{ numero_ordre }}
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Section Bénéficiaire des versements -->
+    <table class="main-table">
+        <tr>
+            <td class="section-header" colspan="2">Bénéficiaire des versements</td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <span class="field-label">Nom ou dénomination :</span> Racing Club Arras<br>
+                <span class="underline" style="width: 90%; margin-left: 20px;"></span><br><br>
+                
+                <span class="field-label">Adresse :</span><br>
+                N°<span class="underline" style="width: 40px;"></span> Rue Stade Degouve, Rue du Temple<br>
+                <span class="underline" style="width: 90%;"></span><br>
+                Code postal <span class="underline" style="width: 60px;">62000</span> Commune <span class="underline" style="width: 150px;">ARRAS</span><br><br>
+                
+                <span class="field-label">Objet :</span> Association sportive de football<br>
+                <span class="underline" style="width: 90%;"></span><br>
+                <span class="underline" style="width: 90%;"></span><br>
+                <span class="underline" style="width: 90%;"></span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding: 10px;">
+                <strong>Cochez la case concernée (1) :</strong><br><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Association ou fondation reconnue d'utilité publique par décret en date du ....../../.../......... publié au Journal officiel du ....../....../......... ou association située dans le département de la Moselle, du Bas-Rhin ou du Haut-Rhin dont la mission a été reconnue d'utilité publique par arrêté préfectoral en date du ....../....../.......</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Fondation universitaire ou fondation partenariale mentionnées respectivement aux articles L. 719-12 et L. 719-13 du code de l'éducation</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Fondation d'entreprise</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Œuvre ou organisme d'intérêt général</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Musée de France</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Établissement d'enseignement supérieur ou d'enseignement artistique public ou privé, d'intérêt général, à but non lucratif</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Organisme ayant pour objet exclusif de participer financement à la création d'entreprises</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Association cultuelle ou de bienfaisance et établissement public des cultes reconnus d'Alsace-Moselle</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Organisme ayant pour activité principale l'organisation de festivals</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Association fournissant gratuitement une aide alimentaire ou des soins médicaux à des personnes en difficulté ou favorisant leur logement</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Fondation du patrimoine ou fondation ou association qui affecte irrévocablement les dons à la Fondation du patrimoine, ou que les travaux prévus par les conventions conclues par la Fondation du patrimoine et les propriétaires des immeubles (article L. 143-2-1 du code du patrimoine)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Établissement de recherche public ou privé, d'intérêt général, à but non lucratif</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Entreprise d'insertion ou entreprise de travail temporaire d'insertion (articles L. 5132-5 et L. 5132-6 du code du travail)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Associations intermédiaires (article L. 5132-7 du code du travail)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Ateliers et chantiers d'insertion (article L. 5132-15 du code du travail)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Entreprises adaptées (article L. 5213-13 du code du travail)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Agence nationale de la recherche (ANR)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox"></span> Société ou organisme agréé de recherche scientifique ou technique (2)</div><br>
+                
+                <div class="checkbox-line"><span class="checkbox checked"></span> Autre organisme : <span class="underline" style="width: 300px;">Association sportive</span></div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Section Donateur -->
+    <table class="main-table">
+        <tr>
+            <td class="section-header" colspan="2">Donateur</td>
+        </tr>
+        <tr>
+            <td style="width: 50%;">
+                <span class="field-label">Nom :</span> 
+                {% if donateur_type == 'personne' %}{{ donateur.nom|upper }}{% else %}{{ donateur.nomEntreprise }}{% endif %}<br>
+                <span class="underline" style="width: 90%;"></span>
+            </td>
+            <td style="width: 50%;">
+                <span class="field-label">Prénoms :</span> 
+                {% if donateur_type == 'personne' %}{{ donateur.prenom }}{% endif %}<br>
+                <span class="underline" style="width: 90%;"></span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <span class="field-label">Adresse :</span> {{ donateur.adresse ?? '' }}<br>
+                <span class="underline" style="width: 90%;"></span><br>
+                Code postal <span class="underline" style="width: 80px;">{{ donateur.codePostal ?? '' }}</span> Commune <span class="underline" style="width: 200px;">{{ donateur.ville ?? '' }}</span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Section montant et nature du don -->
+    <div class="montant-box">
+        <strong>Le bénéficiaire reconnaît avoir reçu au titre des dons et versements ouvrant droit à réduction d'impôt, la somme de :</strong><br><br>
+        <div style="border: 1px solid #000; width: 150px; height: 25px; display: inline-block; text-align: center; padding-top: 8px; font-size: 12px; font-weight: bold;">
+            {{ montant_total|number_format(2, ',', ' ') }}
         </div>
-    {% endif %}
+        <strong style="margin-left: 10px;">euros</strong><br><br>
+        
+        <strong>Somme en toutes lettres :</strong> <span class="underline" style="width: 400px;"></span><br><br>
+        
+        <strong>Date du versement ou du don :</strong> ....../............../...................<br><br>
+        
+        Le bénéficiaire certifie sur l'honneur que les dons et versements qu'il reçoit ouvrent droit à la réduction d'impôt prévue à l'article (3) : 
+        <span class="checkbox checked"></span> 200 du CGI 
+        <span class="checkbox"></span> 238 bis du CGI 
+        <span class="checkbox"></span> 885-0 V bis A du CGI
+    </div>
+
+    <!-- Section Forme et nature du don -->
+    <table class="main-table">
+        <tr>
+            <td colspan="4"><strong>Forme du don :</strong></td>
+        </tr>
+        <tr>
+            <td><span class="checkbox"></span> Acte authentique</td>
+            <td><span class="checkbox"></span> Acte sous seing privé</td>
+            <td><span class="checkbox"></span> Déclaration de don manuel</td>
+            <td><span class="checkbox"></span> Autres</td>
+        </tr>
+        <tr>
+            <td colspan="4"><strong>Nature du don :</strong></td>
+        </tr>
+        <tr>
+            <td><span class="checkbox checked"></span> Numéraire</td>
+            <td><span class="checkbox"></span> Titres de sociétés cotés</td>
+            <td><span class="checkbox"></span> Autres (4)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td colspan="4" style="border-top: 2px solid #000;"><strong>En cas de don en numéraire, mode de versement du don :</strong></td>
+        </tr>
+        <tr>
+            <td><span class="checkbox {{ total_numeraire > 0 ? 'checked' : '' }}"></span> Remise d'espèces</td>
+            <td><span class="checkbox {{ total_cheque > 0 ? 'checked' : '' }}"></span> Chèque</td>
+            <td><span class="checkbox {{ total_virement > 0 ? 'checked' : '' }}"></span> Virement, prélèvement, carte bancaire</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <!-- Notes en bas de page -->
+    <div style="font-size: 7px; margin-top: 20px;">
+        (1) ou indiquez que les renseignements concernant l'organisme<br>
+        (2) dons effectués par les entreprises<br>
+        (3) L'organisme bénéficiaire peut cocher une ou plusieurs cases.<br>
+        L'organisme bénéficiaire peut, en application de l'article L. 80 C du livre des procédures fiscales, demander à l'administration s'il relève de l'une des catégories d'organismes mentionnées aux articles 200 et 238 bis du code général des impôts.<br>
+        Il est rappelé que la délivrance irrégulière de reçus fiscaux par l'organisme bénéficiaire est susceptible de donner lieu, en application des dispositions de l'article 1740 A du code général des impôts, à une amende fiscale égale à 25 % des sommes indûment mentionnées sur ces documents.<br>
+        (4) notamment : abandon de revenus ou de produits ; frais engagés par les bénévoles, dont ils renoncent expressément au remboursement
+    </div>
+
+    <!-- Signature -->
+    <div class="signature-box">
+        <strong>Date et signature</strong><br><br>
+        {{ date_generation|date('d/m/Y') }}<br><br>
+        <div style="height: 40px; border-bottom: 1px solid #000; margin-top: 10px;"></div>
+    </div>
+
 </body>
 </html>
