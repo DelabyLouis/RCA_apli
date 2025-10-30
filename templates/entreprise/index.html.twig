@@ -115,12 +115,7 @@
                 <th>Nom entreprise</th>
                 <th>Siret</th>
                 <th>Siren</th>
-                <th>N° Voie</th>
-                <th>Rue</th>
-                <th>Complément</th>
-                <th>Ville</th>
-                <th>Code Postal</th>
-                <th>Pays</th>
+                <th>Adresse complète</th>
                 <th>Téléphone</th>
                 <th>Email</th>
                 <th>Actions</th>
@@ -132,13 +127,20 @@
                 <td class="editable-field" data-field="nom_entreprise">{{ entreprise.nomEntreprise }}</td>
                 <td class="editable-field" data-field="siret">{{ entreprise.siret }}</td>
                 <td class="editable-field" data-field="siren">{{ entreprise.siren }}</td>
-                <td class="editable-field" data-field="numero_voie">{{ entreprise.numeroVoie }}</td>
-                <td class="editable-field" data-field="rue">{{ entreprise.rue }}</td>
-                <td class="editable-field" data-field="complement_adresse">{{ entreprise.complementAdresse }}</td>
-                <td class="editable-field" data-field="ville">{{ entreprise.ville }}</td>
-                <td class="editable-field" data-field="code_postal">{{ entreprise.codePostal }}</td>
-                <td class="editable-field" data-field="pays">{{ entreprise.pays }}</td>
-                <td class="editable-field" data-field="telephone">{{ entreprise.telephone }}</td>
+                <td class="adresse-complete" title="Cliquer pour modifier l'adresse">
+                    <div class="adresse-ligne">
+                        {% if entreprise.numeroVoie or entreprise.rue %}
+                            <strong>{{ entreprise.numeroVoie }} {{ entreprise.rue }}</strong><br>
+                        {% endif %}
+                        {% if entreprise.complementAdresse %}
+                            <em>{{ entreprise.complementAdresse }}</em><br>
+                        {% endif %}
+                        {% if entreprise.ville or entreprise.codePostal or entreprise.pays %}
+                            {{ entreprise.codePostal }} {{ entreprise.ville }}{% if entreprise.pays %}, {{ entreprise.pays }}{% endif %}
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="editable-field telephone-compact" data-field="telephone">{{ entreprise.telephone }}</td>
                 <td class="editable-field" data-field="email">{{ entreprise.email }}</td>
                 <td>
                     <div class="btn-group" role="group">

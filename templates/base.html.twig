@@ -29,11 +29,6 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_home') }}">
-                                <i class="fas fa-home me-1"></i>Accueil
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="{{ path('app_exercice_index') }}">
                                 <i class="fas fa-calendar-alt me-1"></i>Exercices
                             </a>
@@ -52,25 +47,6 @@
                             <a class="nav-link" href="{{ path('app_attestation_fiscale_index') }}">
                                 <i class="fas fa-file-invoice me-1"></i>Attestations Fiscales
                             </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-users me-1"></i>Gestion
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ path('app_entreprise_index') }}">
-                                    <i class="fas fa-building me-1"></i>Entreprises
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ path('app_personne_index') }}">
-                                    <i class="fas fa-user me-1"></i>Personnes
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ path('app_type_transaction_index') }}">
-                                    <i class="fas fa-tags me-1"></i>Types de Transaction
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ path('app_mode_de_paiement_index') }}">
-                                    <i class="fas fa-credit-card me-1"></i>Modes de Paiement
-                                </a></li>
-                            </ul>
                         </li>
                         {% if app.user and is_granted('ROLE_ADMIN') %}
                         <li class="nav-item dropdown">
@@ -171,6 +147,11 @@
             });
         </script>
         
+        <!-- Bootstrap JavaScript AVANT les autres scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        
+
+
         {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}

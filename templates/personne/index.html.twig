@@ -115,12 +115,7 @@
                 <th>Nom</th>
                 <th>Prénom</th>
                 <th>Civilité</th>
-                <th>N° Voie</th>
-                <th>Rue</th>
-                <th>Complément</th>
-                <th>Ville</th>
-                <th>Code Postal</th>
-                <th>Pays</th>
+                <th>Adresse complète</th>
                 <th>Téléphone</th>
                 <th>Email</th>
                 <th>Entreprises</th>
@@ -134,14 +129,21 @@
             <tr data-id="{{ personne.idPersonne }}">
                 <td class="editable-field" data-field="nom">{{ personne.nom }}</td>
                 <td class="editable-field" data-field="prenom">{{ personne.prenom }}</td>
-                <td class="editable-field" data-field="civilite">{{ personne.civilite }}</td>
-                <td class="editable-field" data-field="numero_voie">{{ personne.numeroVoie }}</td>
-                <td class="editable-field" data-field="rue">{{ personne.rue }}</td>
-                <td class="editable-field" data-field="complement_adresse">{{ personne.complementAdresse }}</td>
-                <td class="editable-field" data-field="ville">{{ personne.ville }}</td>
-                <td class="editable-field" data-field="code_postal">{{ personne.codePostal }}</td>
-                <td class="editable-field" data-field="pays">{{ personne.pays }}</td>
-                <td class="editable-field" data-field="telephone">{{ personne.telephone }}</td>
+                <td class="editable-field civilite-compact" data-field="civilite">{{ personne.civilite }}</td>
+                <td class="adresse-complete" title="Cliquer pour modifier l'adresse">
+                    <div class="adresse-ligne">
+                        {% if personne.numeroVoie or personne.rue %}
+                            <strong>{{ personne.numeroVoie }} {{ personne.rue }}</strong><br>
+                        {% endif %}
+                        {% if personne.complementAdresse %}
+                            <em>{{ personne.complementAdresse }}</em><br>
+                        {% endif %}
+                        {% if personne.ville or personne.codePostal or personne.pays %}
+                            {{ personne.codePostal }} {{ personne.ville }}{% if personne.pays %}, {{ personne.pays }}{% endif %}
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="editable-field telephone-compact" data-field="telephone">{{ personne.telephone }}</td>
                 <td class="editable-field" data-field="email">{{ personne.email }}</td>
                 <td>
                     {% if personne.entreprise|length > 0 %}
@@ -159,8 +161,8 @@
                         <span class="badge bg-secondary">Non</span>
                     {% endif %}
                 </td>
-                <td>
-                    <span class="badge bg-info">{{ personne.transactions|length }}</span>
+                <td class="transaction-count">
+                    <span class="badge bg-info text-dark">{{ personne.transactions|length }}</span>
                 </td>
                 <td>
                     <div class="btn-group" role="group">
@@ -178,7 +180,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="16">no records found</td>
+                <td colspan="10">no records found</td>
             </tr>
         {% endfor %}
         </tbody>
