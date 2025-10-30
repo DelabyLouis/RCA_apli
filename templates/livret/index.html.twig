@@ -112,7 +112,7 @@
                             data-current-value="{{ transaction.montant }}"
                             {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>
                             {% if transaction.montant >= 0 %}
-                                <span class="badge bg-success fs-6 fw-bold">{{ transaction.montant|number_format(2, ',', ' ') }} €</span>
+                                <span class="badge bg-success text-dark fs-6 fw-bold">{{ transaction.montant|number_format(2, ',', ' ') }} €</span>
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}
@@ -123,7 +123,7 @@
                             data-current-value="{{ transaction.montant }}"
                             {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>
                             {% if transaction.montant < 0 %}
-                                <span class="badge bg-danger fs-6 fw-bold">{{ (transaction.montant * -1)|number_format(2, ',', ' ') }} €</span>
+                                <span class="badge bg-danger text-dark fs-6 fw-bold">{{ (transaction.montant * -1)|number_format(2, ',', ' ') }} €</span>
                             {% else %}
                                 <span class="text-muted">-</span>
                             {% endif %}

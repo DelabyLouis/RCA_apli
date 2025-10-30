@@ -112,7 +112,6 @@
     <table class="table" data-turbo="false">
         <thead>
             <tr>
-                <th>Id entreprise</th>
                 <th>Nom entreprise</th>
                 <th>Siret</th>
                 <th>Siren</th>
@@ -130,7 +129,6 @@
         <tbody>
         {% for entreprise in entreprises %}
             <tr data-id="{{ entreprise.idEntreprise }}">
-                <td>{{ entreprise.idEntreprise }}</td>
                 <td class="editable-field" data-field="nom_entreprise">{{ entreprise.nomEntreprise }}</td>
                 <td class="editable-field" data-field="siret">{{ entreprise.siret }}</td>
                 <td class="editable-field" data-field="siren">{{ entreprise.siren }}</td>

@@ -25,7 +25,6 @@
             <table class="table table-striped table-hover">
                 <thead class="table-dark">
                     <tr>
-                        <th>ID</th>
                         <th>Libellé</th>
                         <th>Description</th>
                         <th>Nb Transactions</th>
@@ -35,11 +34,10 @@
                 <tbody>
                 {% for type_transaction in type_transactions %}
                     <tr data-id="{{ type_transaction.idType }}">
-                        <td>{{ type_transaction.idType }}</td>
                         <td class="editable-field" data-field="libelle">{{ type_transaction.libelle }}</td>
                         <td class="editable-field" data-field="description">{{ type_transaction.description ?: 'Aucune description' }}</td>
                         <td>
-                            <span class="badge bg-info">{{ type_transaction.transactions|length }}</span>
+                            <span class="badge bg-info text-dark">{{ type_transaction.transactions|length }}</span>
                         </td>
                         <td>
                             <div class="btn-group" role="group">
@@ -57,7 +55,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5" class="text-center">Aucun type de transaction trouvé</td>
+                        <td colspan="4" class="text-center">Aucun type de transaction trouvé</td>
                     </tr>
                 {% endfor %}
                 </tbody>

@@ -8,7 +8,6 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Id</th>
                 <th>Libelle</th>
                 <th>actions</th>
             </tr>
@@ -16,7 +15,6 @@
         <tbody>
         {% for mode_de_paiement in mode_de_paiements %}
             <tr>
-                <td>{{ mode_de_paiement.id }}</td>
                 <td>{{ mode_de_paiement.libelle }}</td>
                 <td>
                     <a href="{{ path('app_mode_de_paiement_show', {'id': mode_de_paiement.id}) }}">show</a>
@@ -25,7 +23,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="3">no records found</td>
+                <td colspan="2">no records found</td>
             </tr>
         {% endfor %}
         </tbody>

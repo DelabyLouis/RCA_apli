@@ -112,7 +112,6 @@
     <table class="table" data-turbo="false">
         <thead>
             <tr>
-                <th>Id</th>
                 <th>Nom</th>
                 <th>Prénom</th>
                 <th>Civilité</th>
@@ -133,7 +132,6 @@
         <tbody>
         {% for personne in personnes %}
             <tr data-id="{{ personne.idPersonne }}">
-                <td>{{ personne.idPersonne }}</td>
                 <td class="editable-field" data-field="nom">{{ personne.nom }}</td>
                 <td class="editable-field" data-field="prenom">{{ personne.prenom }}</td>
                 <td class="editable-field" data-field="civilite">{{ personne.civilite }}</td>
