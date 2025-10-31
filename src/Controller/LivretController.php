@@ -204,7 +204,8 @@ class LivretController extends AbstractController
         int $id, 
         Request $request, 
         TransactionRepository $transactionRepository, 
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ExerciceRepository $exerciceRepository
     ): Response {
         $transaction = $transactionRepository->find($id);
         
@@ -221,14 +222,27 @@ class LivretController extends AbstractController
         if ($request->isMethod('POST')) {
             // Traitement de la modification
             $libelle = $request->request->get('libelle');
+            $montant = $request->request->get('montant');
             $dateTransaction = $request->request->get('date_transaction');
+            $exerciceId = $request->request->get('exercice');
             
             if ($libelle) {
                 $transaction->setLibelle($libelle);
             }
             
+            if ($montant !== null && $montant !== '') {
+                $transaction->setMontant($montant);
+            }
+            
             if ($dateTransaction) {
                 $transaction->setDateTransaction(new \DateTime($dateTransaction));
+            }
+            
+            if ($exerciceId) {
+                $exercice = $exerciceRepository->find($exerciceId);
+                if ($exercice) {
+                    $transaction->setExercice($exercice);
+                }
             }
             
             $entityManager->flush();
@@ -237,8 +251,12 @@ class LivretController extends AbstractController
             return $this->redirectToRoute('app_livret_index');
         }
         
+        // Récupérer tous les exercices pour le formulaire
+        $exercices = $exerciceRepository->findBy([], ['libelle' => 'ASC']);
+        
         return $this->render('livret/edit.html.twig', [
-            'transaction' => $transaction
+            'transaction' => $transaction,
+            'exercices' => $exercices
         ]);
     }
 
