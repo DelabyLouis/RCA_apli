@@ -96,11 +96,15 @@ final class TransactionController extends AbstractController
             }
         }
         
-        // Si on filtre par exercice, utiliser le template simple
+        // Si on filtre par exercice, utiliser le nouveau template spécialisé
         if ($exerciceFilter) {
-            return $this->render('transaction/index_exercice_simple.html.twig', [
-                'transactions' => $transactions,
+            return $this->render('transaction/index_exercice_filtered.html.twig', [
+                'transactions_avec_montant' => $transactionsAvecMontant,
+                'montants_par_exercice' => $montantsParExercice,
+                'solde_precedent' => $soldePrecedent,
+                'exercice_precedent_existe' => $soldePrecedent != 0,
                 'exercice_filter' => $exerciceFilter,
+                'types_transaction' => $typeTransactionRepository->findAll(),
             ]);
         }
         
@@ -316,7 +320,7 @@ final class TransactionController extends AbstractController
     }
 
     #[Route('/{id_transaction}', name: 'app_transaction_show', methods: ['GET'])]
-    public function show(int $id_transaction, TransactionRepository $transactionRepository): Response
+    public function show(Request $request, int $id_transaction, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository): Response
     {
         $transaction = $transactionRepository->findOneBy(['id_transaction' => $id_transaction]);
         
@@ -324,13 +328,28 @@ final class TransactionController extends AbstractController
             throw $this->createNotFoundException('Transaction non trouvée');
         }
 
-        return $this->render('transaction/show.html.twig', [
+        // Détecter si on vient d'un contexte d'exercice filtré
+        $exerciceId = $request->query->get('exercice_id');
+        $exerciceFilter = null;
+        
+        if ($exerciceId) {
+            $exerciceFilter = $exerciceRepository->findOneBy(['id_exercice' => $exerciceId]);
+        } elseif ($transaction->getExercice()) {
+            // Si pas d'exercice spécifié mais la transaction a un exercice, l'utiliser pour le contexte
+            $exerciceFilter = $transaction->getExercice();
+        }
+
+        // Choisir le template selon le contexte
+        $template = $exerciceFilter ? 'transaction/show_exercice_filtered.html.twig' : 'transaction/show.html.twig';
+
+        return $this->render($template, [
             'transaction' => $transaction,
+            'exercice_filter' => $exerciceFilter,
         ]);
     }
 
     #[Route('/{id_transaction}/edit', name: 'app_transaction_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, int $id_transaction, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id_transaction, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager, ExerciceRepository $exerciceRepository): Response
     {
         $transaction = $transactionRepository->findOneBy(['id_transaction' => $id_transaction]);
         
@@ -342,6 +361,17 @@ final class TransactionController extends AbstractController
         if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
             $this->addFlash('error', 'Impossible de modifier une transaction d\'un exercice clôturé. Vous devez d\'abord déclôturer l\'exercice.');
             return $this->redirectToRoute('app_transaction_index');
+        }
+
+        // Détecter si on vient d'un contexte d'exercice filtré
+        $exerciceId = $request->query->get('exercice_id');
+        $exerciceFilter = null;
+        
+        if ($exerciceId) {
+            $exerciceFilter = $exerciceRepository->findOneBy(['id_exercice' => $exerciceId]);
+        } elseif ($transaction->getExercice()) {
+            // Si pas d'exercice spécifié mais la transaction a un exercice, l'utiliser pour le contexte
+            $exerciceFilter = $transaction->getExercice();
         }
 
         $form = $this->createForm(TransactionType::class, $transaction);
@@ -356,12 +386,21 @@ final class TransactionController extends AbstractController
             
             $entityManager->flush();
 
+            // Rediriger vers le bon contexte selon d'où on vient
+            if ($exerciceFilter && $request->query->get('exercice_id')) {
+                return $this->redirectToRoute('app_transaction_index', ['exercice_id' => $exerciceFilter->getIdExercice()], Response::HTTP_SEE_OTHER);
+            }
+            
             return $this->redirectToRoute('app_transaction_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('transaction/edit.html.twig', [
+        // Choisir le template selon le contexte
+        $template = $exerciceFilter ? 'transaction/edit_exercice_filtered.html.twig' : 'transaction/edit.html.twig';
+
+        return $this->render($template, [
             'transaction' => $transaction,
             'form' => $form,
+            'exercice_filter' => $exerciceFilter,
         ]);
     }
 

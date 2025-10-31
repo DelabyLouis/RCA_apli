@@ -1,0 +1,264 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Transaction {{ transaction.numeroOrdre }}{% if exercice_filter %} - {{ exercice_filter.libelle }}{% endif %}{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-file-invoice-dollar me-2"></i>
+                    Transaction {{ transaction.numeroOrdre }}
+                    {% if exercice_filter %}
+                        <small class="text-muted">- {{ exercice_filter.libelle }}</small>
+                    {% endif %}
+                </h1>
+                <div>
+                    {% if exercice_filter %}
+                        <a href="{{ path('app_transaction_index') }}?exercice_id={{ exercice_filter.idExercice }}" class="btn btn-secondary me-2">
+                            <i class="fas fa-arrow-left me-1"></i>Retour à l'exercice
+                        </a>
+                    {% endif %}
+                    <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}{% if exercice_filter %}?exercice_id={{ exercice_filter.idExercice }}{% endif %}" class="btn btn-warning me-2">
+                        <i class="fas fa-edit me-1"></i>Modifier
+                    </a>
+                    <a href="{{ path('app_transaction_index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-list me-1"></i>Toutes les transactions
+                    </a>
+                </div>
+            </div>
+
+            {% if exercice_filter %}
+                <!-- Informations sur l'exercice -->
+                <div class="card mb-4 border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Transaction de l'exercice : {{ exercice_filter.libelle }}
+                            {% if exercice_filter.isClos %}
+                                <span class="badge bg-danger ms-2">
+                                    <i class="fas fa-lock me-1"></i>CLÔTURÉ
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success ms-2">
+                                    <i class="fas fa-unlock me-1"></i>EN COURS
+                                </span>
+                            {% endif %}
+                        </h6>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <small class="text-muted">Période :</small>
+                                <strong>{{ exercice_filter.dateDebut ? exercice_filter.dateDebut|date('d/m/Y') : 'Non défini' }}</strong> - 
+                                <strong>{{ exercice_filter.dateFin ? exercice_filter.dateFin|date('d/m/Y') : 'Non défini' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Informations générales -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Informations générales
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold mb-1">Numéro d'ordre</label>
+                                    <div class="h4 text-primary">{{ transaction.numeroOrdre }}</div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold mb-1">Date</label>
+                                    <div class="h5">{{ transaction.dateTransaction ? transaction.dateTransaction|date('d/m/Y') : 'Non définie' }}</div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold mb-1">Type de compte</label>
+                                    <div>
+                                        {% if transaction.typeCompte == 'livret' %}
+                                            <span class="badge bg-info fs-6">
+                                                <i class="fas fa-piggy-bank me-1"></i>Livret
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-primary fs-6">
+                                                <i class="fas fa-university me-1"></i>Compte courant
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label fw-bold mb-1">Libellé</label>
+                                    <div class="h5">{{ transaction.libelleComplet|raw }}</div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold mb-1">Montant</label>
+                                    <div class="h4">
+                                        {% if transaction.montant >= 0 %}
+                                            <span class="text-success">
+                                                <i class="fas fa-plus-circle me-1"></i>{{ transaction.montant|number_format(2, ',', ' ') }} €
+                                            </span>
+                                        {% else %}
+                                            <span class="text-danger">
+                                                <i class="fas fa-minus-circle me-1"></i>{{ transaction.montant|number_format(2, ',', ' ') }} €
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% if transaction.description %}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold mb-1">Description</label>
+                                        <div class="border rounded p-3 bg-light">
+                                            {{ transaction.description|nl2br }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Tiers -->
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-address-card me-2"></i>Tiers
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if transaction.personne %}
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-user fa-2x text-info"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <p class="mb-1 text-muted small">{{ transaction.personne.civilite }}</p>
+                                                <h5 class="mb-0">{{ transaction.personne.prenom }} {{ transaction.personne.nom }}</h5>
+                                            </div>
+                                            <div class="text-end">
+                                                {% if transaction.personne.email %}
+                                                    <div class="mb-1 small">
+                                                        <i class="fas fa-envelope me-1"></i>{{ transaction.personne.email }}
+                                                    </div>
+                                                {% endif %}
+                                                {% if transaction.personne.telephone %}
+                                                    <div class="small">
+                                                        <i class="fas fa-phone me-1"></i>{{ transaction.personne.telephone }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% elseif transaction.entreprise %}
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-building fa-2x text-warning"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="mb-1">{{ transaction.entreprise.nomEntreprise }}</h5>
+                                        {% if transaction.entreprise.ville %}
+                                            <p class="mb-0 text-muted">
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ transaction.entreprise.ville }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-user-slash fa-2x mb-3"></i>
+                                    <h6>Aucun tiers associé</h6>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Classification -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tags me-2"></i>Classification
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold mb-1">Exercice</label>
+                                <div>
+                                    {% if transaction.exercice %}
+                                        <span class="badge bg-primary fs-6 mb-2">{{ transaction.exercice.libelle }}</span>
+                                        <br><span class="small text-muted">
+                                            {{ transaction.exercice.dateDebut|date('d/m/Y') }} - 
+                                            {{ transaction.exercice.dateFin|date('d/m/Y') }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">Non défini</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold mb-1">Type de transaction</label>
+                                <div>
+                                    {% if transaction.typeTransaction %}
+                                        <span class="badge bg-secondary fs-6">{{ transaction.typeTransaction.libelle }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Non défini</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label fw-bold mb-1">Mode de paiement</label>
+                                <div>
+                                    {% if transaction.modeDePaiement %}
+                                        <span class="badge bg-info fs-6">{{ transaction.modeDePaiement.libelle }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Non défini</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-cogs me-2"></i>Actions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ path('app_transaction_edit', {'id_transaction': transaction.idTransaction}) }}{% if exercice_filter %}?exercice_id={{ exercice_filter.idExercice }}{% endif %}" class="btn btn-warning">
+                                    <i class="fas fa-edit me-2"></i>Modifier cette transaction
+                                </a>
+                                {% if exercice_filter %}
+                                    <a href="{{ path('app_transaction_index') }}?exercice_id={{ exercice_filter.idExercice }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Retour à l'exercice
+                                    </a>
+                                {% endif %}
+                                <a href="{{ path('app_transaction_index') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-list me-2"></i>Toutes les transactions
+                                </a>
+                                <a href="{{ path('app_transaction_new') }}" class="btn btn-success">
+                                    <i class="fas fa-plus me-2"></i>Nouvelle transaction
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
