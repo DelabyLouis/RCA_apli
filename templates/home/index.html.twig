@@ -50,63 +50,71 @@
         </div>
     </div>
     
-    <!-- Section de gestion -->
+    <!-- Section principale avec boutons et actions rapides -->
     <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Gestion des entités</h5>
+        <!-- Boutons de gestion des entités -->
+        <div class="col-md-6">
+            <h3 class="mb-3"><i class="fas fa-cogs me-2"></i>Gestion des entités</h3>
+            
+            <!-- Première ligne -->
+            <div class="row mb-2">
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ path('app_entreprise_index') }}" class="btn btn-outline-primary btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
+                        <i class="fas fa-building mb-1"></i>
+                        <small>Entreprises</small>
+                    </a>
                 </div>
-                <div class="card-body">
-                    <p>Utilisez la navigation ci-dessus pour consulter et gérer les différentes entités de l'application :</p>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <ul class="list-unstyled">
-                                <li class="mb-2">
-                                    <i class="fas fa-building text-primary me-2"></i>
-                                    <a href="{{ path('app_entreprise_index') }}">Entreprises</a>
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-calendar-alt text-success me-2"></i>
-                                    <a href="{{ path('app_exercice_index') }}">Exercices</a>
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-users text-info me-2"></i>
-                                    <a href="{{ path('app_personne_index') }}">Personnes</a>
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-user-tag text-warning me-2"></i>
-                                    <a href="{{ path('app_role_index') }}">Rôles</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <ul class="list-unstyled">
-                                <li class="mb-2">
-                                    <i class="fas fa-exchange-alt text-primary me-2"></i>
-                                    <a href="{{ path('app_transaction_index') }}">Transactions</a>
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-tags text-success me-2"></i>
-                                    <a href="{{ path('app_type_transaction_index') }}">Types de Transaction</a>
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-credit-card text-info me-2"></i>
-                                    <a href="{{ path('app_mode_de_paiement_index') }}">Modes de Paiement</a>
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-user-cog text-warning me-2"></i>
-                                    <a href="{{ path('app_user_index') }}">Utilisateurs</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ path('app_exercice_index') }}" class="btn btn-outline-success btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
+                        <i class="fas fa-calendar-alt mb-1"></i>
+                        <small>Exercices</small>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ path('app_personne_index') }}" class="btn btn-outline-info btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
+                        <i class="fas fa-users mb-1"></i>
+                        <small>Personnes</small>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ path('app_role_index') }}" class="btn btn-outline-warning btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
+                        <i class="fas fa-user-tag mb-1"></i>
+                        <small>Rôles</small>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Deuxième ligne -->
+            <div class="row mb-2">
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ path('app_transaction_index') }}" class="btn btn-outline-primary btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
+                        <i class="fas fa-exchange-alt mb-1"></i>
+                        <small>Transactions</small>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ path('app_type_transaction_index') }}" class="btn btn-outline-success btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
+                        <i class="fas fa-tags mb-1"></i>
+                        <small>Types Transaction</small>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ path('app_mode_de_paiement_index') }}" class="btn btn-outline-info btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
+                        <i class="fas fa-credit-card mb-1"></i>
+                        <small>Modes Paiement</small>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <a href="{{ path('app_user_index') }}" class="btn btn-outline-warning btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
+                        <i class="fas fa-user-cog mb-1"></i>
+                        <small>Utilisateurs</small>
+                    </a>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-4">
+        <!-- Actions rapides à droite -->
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Actions rapides</h5>
