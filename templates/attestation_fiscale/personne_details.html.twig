@@ -110,15 +110,6 @@
                                     Sélectionnez les cotisations pour l'attestation fiscale
                                 </h5>
                                 <div class="d-flex align-items-center gap-3">
-                                    <div>
-                                        <label for="annee_attestation" class="form-label mb-0 me-2"><strong>Année de l'attestation :</strong></label>
-                                        <select name="annee_attestation" id="annee_attestation" class="form-select form-select-sm" style="width: auto; display: inline-block;">
-                                            {% set current_year = date('now')|date('Y') %}
-                                            {% for year in range(current_year - 5, current_year + 1) %}
-                                                <option value="{{ year }}" {{ year == current_year ? 'selected' : '' }}>{{ year }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
                                     <button type="submit" class="btn btn-success" id="generer-btn" disabled title="Sélectionnez au moins une cotisation pour activer ce bouton">
                                         <i class="fas fa-file-pdf me-1"></i>Générer l'attestation
                                     </button>
@@ -154,15 +145,15 @@
 
                             <!-- Tableau des cotisations avec cases à cocher -->
                             <div class="table-responsive">
-                                <table class="table table-hover">
+                                <table class="table cotisations-table">
                                     <thead>
                                         <tr>
                                             <th style="width: 40px;">Sélection</th>
-                                            <th>Date</th>
-                                            <th>Libellé</th>
-                                            <th>Mode de paiement</th>
-                                            <th>Exercice</th>
-                                            <th class="text-end">Montant</th>
+                                            <th style="width: 100px;">Date</th>
+                                            <th class="libelle-column">Libellé</th>
+                                            <th style="width: 120px;">Mode de paiement</th>
+                                            <th style="width: 80px;">Exercice</th>
+                                            <th class="text-end" style="width: 100px;">Montant</th>
                                         </tr>
                                     </thead>
                                     <tbody>

@@ -1,0 +1,244 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la transaction{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-edit me-2"></i>Modifier la transaction</h1>
+                <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                </a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.libelle, 'Libellé', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.libelle) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.exercice, 'Exercice', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.exercice, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.exercice) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.type_transaction, 'Type de transaction', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.type_transaction, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.type_transaction) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Montant et Type</label>
+                                
+                                <!-- Boutons radio pour Débit/Crédit -->
+                                <div class="btn-group w-100 mb-2" role="group">
+                                    <input type="radio" class="btn-check" name="transaction_type_edit" id="credit-edit" value="credit" 
+                                           {{ (transaction.montant >= 0) ? 'checked' : '' }}>
+                                    <label class="btn {{ (transaction.montant >= 0) ? 'btn-success' : 'btn-outline-success' }}" for="credit-edit">
+                                        <i class="fas fa-plus-circle me-2"></i>CRÉDIT (Entrée)
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="transaction_type_edit" id="debit-edit" value="debit"
+                                           {{ (transaction.montant < 0) ? 'checked' : '' }}>
+                                    <label class="btn {{ (transaction.montant < 0) ? 'btn-danger' : 'btn-outline-danger' }}" for="debit-edit">
+                                        <i class="fas fa-minus-circle me-2"></i>DÉBIT (Sortie)
+                                    </label>
+                                </div>
+                                
+                                <!-- Champ pour le montant (toujours positif) -->
+                                <div class="input-group">
+                                    <input type="number" 
+                                           id="montant-display-edit" 
+                                           class="form-control" 
+                                           placeholder="0.00" 
+                                           step="0.01" 
+                                           min="0"
+                                           value="{{ transaction.montant ? (transaction.montant|abs) : '' }}"
+                                           required>
+                                    <span class="input-group-text">€</span>
+                                </div>
+                                
+                                <!-- Champ caché pour le montant réel (avec signe) -->
+                                <div style="display: none;">
+                                    {{ form_widget(form.montant, {'attr': {'id': 'montant-hidden-edit'}}) }}
+                                </div>
+                                
+                                {{ form_errors(form.montant) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.date_transaction, 'Date', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.date_transaction) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Tiers</label>
+                                <select id="tiers-selector" class="form-select">
+                                    <option value="">-- Sélectionner un tiers --</option>
+                                    <optgroup label="Personnes">
+                                        {% for personne in form.personne.vars.choices %}
+                                            <option value="personne-{{ personne.value }}" 
+                                                    {% if form.personne.vars.value == personne.value %}selected{% endif %}>
+                                                👤 {{ personne.label }}
+                                            </option>
+                                        {% endfor %}
+                                    </optgroup>
+                                    <optgroup label="Entreprises">
+                                        {% for entreprise in form.entreprise.vars.choices %}
+                                            <option value="entreprise-{{ entreprise.value }}" 
+                                                    {% if form.entreprise.vars.value == entreprise.value %}selected{% endif %}>
+                                                🏢 {{ entreprise.label }}
+                                            </option>
+                                        {% endfor %}
+                                    </optgroup>
+                                </select>
+                                
+                                <!-- Champs cachés pour maintenir la compatibilité avec le formulaire -->
+                                <div style="display: none;">
+                                    {{ form_widget(form.personne) }}
+                                    {{ form_widget(form.entreprise) }}
+                                </div>
+                                
+                                {{ form_errors(form.personne) }}
+                                {{ form_errors(form.entreprise) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i>Annuler
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save me-1"></i>Sauvegarder
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Gestion du sélecteur de tiers unifié
+document.addEventListener('DOMContentLoaded', function() {
+    const tiersSelector = document.getElementById('tiers-selector');
+    const personneField = document.querySelector('select[name*="[personne]"]');
+    const entrepriseField = document.querySelector('select[name*="[entreprise]"]');
+    
+    if (tiersSelector && personneField && entrepriseField) {
+        // Fonction pour mettre à jour les champs cachés
+        function updateHiddenFields() {
+            const selectedValue = tiersSelector.value;
+            
+            // Réinitialiser les deux champs
+            personneField.value = '';
+            entrepriseField.value = '';
+            
+            if (selectedValue.startsWith('personne-')) {
+                personneField.value = selectedValue.replace('personne-', '');
+            } else if (selectedValue.startsWith('entreprise-')) {
+                entrepriseField.value = selectedValue.replace('entreprise-', '');
+            }
+        }
+        
+        // Événement de changement sur le sélecteur unifié
+        tiersSelector.addEventListener('change', updateHiddenFields);
+        
+        // Initialisation : définir la valeur du sélecteur unifié basée sur les champs existants
+        function initializeSelector() {
+            if (personneField.value) {
+                tiersSelector.value = 'personne-' + personneField.value;
+            } else if (entrepriseField.value) {
+                tiersSelector.value = 'entreprise-' + entrepriseField.value;
+            }
+        }
+        
+        initializeSelector();
+    }
+    
+    // Gestion du montant avec débit/crédit (edit)
+    const montantDisplayEdit = document.getElementById('montant-display-edit');
+    const montantHiddenEdit = document.getElementById('montant-hidden-edit');
+    const debitRadioEdit = document.getElementById('debit-edit');
+    const creditRadioEdit = document.getElementById('credit-edit');
+    
+    if (montantDisplayEdit && montantHiddenEdit && debitRadioEdit && creditRadioEdit) {
+        // Les valeurs sont déjà initialisées par le template Twig
+        // Pas besoin de les réinitialiser ici
+        
+        // Fonction pour mettre à jour le montant caché
+        function updateMontantEdit() {
+            const displayValue = parseFloat(montantDisplayEdit.value) || 0;
+            const finalValue = debitRadioEdit.checked ? -Math.abs(displayValue) : Math.abs(displayValue);
+            montantHiddenEdit.value = finalValue;
+            
+            // Mettre à jour le style des boutons
+            if (creditRadioEdit.checked) {
+                creditRadioEdit.nextElementSibling.classList.remove('btn-outline-success');
+                creditRadioEdit.nextElementSibling.classList.add('btn-success');
+                debitRadioEdit.nextElementSibling.classList.remove('btn-danger');
+                debitRadioEdit.nextElementSibling.classList.add('btn-outline-danger');
+            } else {
+                debitRadioEdit.nextElementSibling.classList.remove('btn-outline-danger');
+                debitRadioEdit.nextElementSibling.classList.add('btn-danger');
+                creditRadioEdit.nextElementSibling.classList.remove('btn-success');
+                creditRadioEdit.nextElementSibling.classList.add('btn-outline-success');
+            }
+        }
+        
+        // Événements
+        montantDisplayEdit.addEventListener('input', updateMontantEdit);
+        debitRadioEdit.addEventListener('change', updateMontantEdit);
+        creditRadioEdit.addEventListener('change', updateMontantEdit);
+        
+        // Initialisation
+        updateMontantEdit();
+    }
+});
+
+// Validation Bootstrap
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}

@@ -154,7 +154,6 @@ final class AttestationFiscaleController extends AbstractController
         
         // Récupérer les IDs des cotisations sélectionnées
         $cotisationIds = $request->request->all('cotisations') ?: $request->query->all('cotisations');
-        $anneeAttestation = $request->request->get('annee_attestation') ?: $request->query->get('annee_attestation', date('Y'));
         
         // Si c'est une requête GET sans cotisations (rafraîchissement), rediriger vers la page de sélection
         if (empty($cotisationIds) && $request->isMethod('GET')) {
@@ -193,14 +192,11 @@ final class AttestationFiscaleController extends AbstractController
             return $this->redirectToRoute('app_attestation_fiscale_personne_details', ['personne_id' => $personne_id]);
         }
         
-        // Calculer le montant total des cotisations sélectionnées
-        $montantTotal = array_sum(array_map(fn($c) => (float)$c->getMontant(), $cotisations));
+        // Déduire l'année d'attestation à partir de la première cotisation sélectionnée
+        $anneeAttestation = $cotisations[0]->getDateTransaction()->format('Y');
         
-        // Générer un numéro d'ordre unique pour l'attestation
-        $numeroOrdre = $this->genererNumeroOrdreSelection($anneeAttestation, $personne_id, $cotisationIds);
-        
-        // Générer le PDF
-        return $this->genererPDF($personne, 'personne', $cotisations, $montantTotal, $anneeAttestation, $numeroOrdre);
+        // Générer plusieurs PDF séparés (un par cotisation)
+        return $this->genererMultiplesPDF($personne, $cotisations, $anneeAttestation);
     }
     
     #[Route('/generer/{donateur_type}/{donateur_id}', name: 'app_attestation_fiscale_generer', methods: ['GET'])]
@@ -384,5 +380,67 @@ final class AttestationFiscaleController extends AbstractController
                 'Content-Disposition' => 'inline; filename="' . $nomFichier . '"'
             ]
         );
+    }
+    
+    private function genererMultiplesPDF($personne, array $cotisations, string $anneeAttestation): Response
+    {
+        // Si une seule cotisation, générer un seul PDF
+        if (count($cotisations) === 1) {
+            $cotisation = $cotisations[0];
+            $anneeCotisation = $cotisation->getDateTransaction()->format('Y');
+            $numeroOrdre = $this->genererNumeroOrdreSelection($anneeCotisation, $personne->getIdPersonne(), [$cotisation->getIdTransaction()]);
+            return $this->genererPDF($personne, 'personne', [$cotisation], (float)$cotisation->getMontant(), $anneeCotisation, $numeroOrdre);
+        }
+        
+        // Créer un ZIP avec tous les PDFs
+        $zip = new \ZipArchive();
+        $zipFilename = tempnam(sys_get_temp_dir(), 'attestations_') . '.zip';
+        
+        if ($zip->open($zipFilename, \ZipArchive::CREATE) !== TRUE) {
+            throw new \Exception('Impossible de créer le fichier ZIP');
+        }
+        
+        foreach ($cotisations as $index => $cotisation) {
+            // Utiliser l'année de la cotisation individuelle
+            $anneeCotisation = $cotisation->getDateTransaction()->format('Y');
+            
+            // Générer un numéro d'ordre unique pour chaque cotisation
+            $numeroOrdre = $this->genererNumeroOrdreSelection($anneeCotisation, $personne->getIdPersonne(), [$cotisation->getIdTransaction()]);
+            
+            // Créer un PDF temporaire pour cette cotisation
+            $pdfResponse = $this->genererPDF($personne, 'personne', [$cotisation], (float)$cotisation->getMontant(), $anneeCotisation, $numeroOrdre);
+            
+            // Nom du fichier PDF
+            $pdfFilename = sprintf(
+                'Attestation_%s_%s_%s_%d.pdf',
+                $anneeCotisation,
+                $personne->getPrenom(),
+                $personne->getNom(),
+                $index + 1
+            );
+            
+            // Ajouter le PDF au ZIP
+            $zip->addFromString($pdfFilename, $pdfResponse->getContent());
+        }
+        
+        $zip->close();
+        
+        // Nom du fichier ZIP
+        $zipName = sprintf(
+            'Attestations_%s_%s_%s.zip',
+            $anneeAttestation,
+            $personne->getPrenom(),
+            $personne->getNom()
+        );
+        
+        // Retourner le ZIP
+        $response = new Response(file_get_contents($zipFilename));
+        $response->headers->set('Content-Type', 'application/zip');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $zipName . '"');
+        
+        // Supprimer le fichier temporaire
+        unlink($zipFilename);
+        
+        return $response;
     }
 }
