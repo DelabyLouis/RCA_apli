@@ -19,10 +19,6 @@
                             <h6 class="fw-bold">Informations générales</h6>
                             <table class="table table-borderless">
                                 <tr>
-                                    <td><strong>ID :</strong></td>
-                                    <td>{{ transaction.idTransaction }}</td>
-                                </tr>
-                                <tr>
                                     <td><strong>Libellé :</strong></td>
                                     <td>{{ transaction.libelle }}</td>
                                 </tr>
@@ -96,7 +92,6 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <strong>ID :</strong> {{ transaction_liee.idTransaction }}<br>
                                                 <strong>Libellé :</strong> {{ transaction_liee.libelle }}<br>
                                                 <strong>Date :</strong> {{ transaction_liee.dateTransaction|date('d/m/Y H:i') }}
                                             </div>
