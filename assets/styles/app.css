@@ -1242,10 +1242,10 @@ body:has([href*="attestation"]) .table tbody tr:hover,
     font-weight: bold !important;
 }
 
-/* Colonne Libellé - Réduit légèrement */
+/* Colonne Libellé - Réduite pour faire place aux actions */
 .table-exercices th:nth-child(2),
 .table-exercices td:nth-child(2) {
-    width: 30% !important;
+    width: 25% !important;
     white-space: normal !important;
     word-wrap: break-word !important;
     text-align: left !important;
@@ -1271,12 +1271,13 @@ body:has([href*="attestation"]) .table tbody tr:hover,
     text-align: center !important;
 }
 
-/* Colonne Actions - Élargie */
+/* Colonne Actions - Élargie pour boutons avec texte */
 .table-exercices th:nth-child(6),
 .table-exercices td:nth-child(6) {
-    width: 17% !important;
+    width: 22% !important;
     text-align: center !important;
-    min-width: 140px !important;
+    min-width: 120px !important;
+    vertical-align: middle !important;
 }
 
 /* ===============================================
@@ -1307,4 +1308,35 @@ body:has([href*="attestation"]) .table tbody tr:hover,
         min-width: 60px !important;
         max-width: 60px !important;
     }
+}
+
+/* ===============================================
+   AMÉLIORATION LISIBILITÉ TEXTES
+   =============================================== */
+
+/* Textes d'aide des formulaires - Contraste maximal pour fond noir */
+.form-text {
+    color: var(--blanc-secondaire) !important;
+    font-weight: 600 !important;
+    font-size: 0.95em !important;
+    opacity: 0.9 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
+}
+
+/* Textes mutés - Visibilité sur fond noir */
+.text-muted {
+    color: var(--gris-clair) !important;
+    opacity: 0.8 !important;
+    font-weight: 500 !important;
+}
+
+/* Amélioration pour les badges et labels */
+.badge {
+    font-weight: 600 !important;
+}
+
+/* Small text - Meilleur contraste */
+small, .small {
+    color: var(--gris-fonce) !important;
+    font-weight: 500 !important;
 }

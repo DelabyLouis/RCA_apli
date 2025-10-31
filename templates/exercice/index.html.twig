@@ -142,12 +142,19 @@
                                             {% endif %}
                                         </td>
                                         <td class="text-center">
-                                            <button type="button" 
-                                                    class="btn btn-warning btn-sm btn-transactions-exercice" 
-                                                    title="Voir les transactions de cet exercice"
-                                                    onclick="window.location.href='{{ path('app_transaction_index') }}?exercice_id={{ exercice.idExercice }}'">
-                                                <i class="fas fa-list me-1"></i>Transactions
-                                            </button>
+                                            <div class="btn-group-vertical d-grid gap-1" role="group">
+                                                <a href="{{ path('app_exercice_edit', {'id_exercice': exercice.idExercice}) }}" 
+                                                   class="btn btn-primary btn-sm" 
+                                                   title="Modifier cet exercice">
+                                                    <i class="fas fa-edit me-1"></i>Modifier
+                                                </a>
+                                                <button type="button" 
+                                                        class="btn btn-warning btn-sm btn-transactions-exercice" 
+                                                        title="Voir les transactions de cet exercice"
+                                                        onclick="window.location.href='{{ path('app_transaction_index') }}?exercice_id={{ exercice.idExercice }}'">
+                                                    <i class="fas fa-list me-1"></i>Transactions
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% else %}

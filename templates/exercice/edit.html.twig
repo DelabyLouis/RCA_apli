@@ -1,0 +1,198 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'exercice{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-edit me-2"></i>Modifier l'exercice</h1>
+                <a href="{{ path('app_exercice_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                </a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-4">
+                                {{ form_label(form.libelle, 'Libellé de l\'exercice', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control', 'placeholder': 'Exemple: Exercice 2024'}}) }}
+                                {{ form_errors(form.libelle) }}
+                                <div class="form-text">Nom descriptif de l'exercice comptable</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                {{ form_label(form.date_debut, 'Date de début', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.date_debut, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.date_debut) }}
+                                <div class="form-text">Première date de l'exercice</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                {{ form_label(form.date_fin, 'Date de fin', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.date_fin, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.date_fin) }}
+                                <div class="form-text">Dernière date de l'exercice</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Information :</strong> La modification d'un exercice affectera toutes les transactions qui y sont liées.
+                                Assurez-vous que les nouvelles dates englobent bien toutes les transactions existantes.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_exercice_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Annuler
+                        </a>
+                        
+                        <div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i>Enregistrer les modifications
+                            </button>
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            <!-- Informations complémentaires -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations sur l'exercice</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>ID :</strong> {{ exercice.idExercice }}</p>
+                            <p><strong>N° d'ordre :</strong> {{ exercice.numeroOrdre }}</p>
+                            <p><strong>Statut :</strong> 
+                                {% if exercice.clos %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-lock me-1"></i>CLÔTURÉ
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-unlock me-1"></i>OUVERT
+                                    </span>
+                                {% endif %}
+                            </p>
+                            {% if exercice.clos and exercice.derniereActionCloture %}
+                                <p><strong>Date de clôture :</strong> {{ exercice.derniereActionCloture.dateAction|date('d/m/Y H:i') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Actions rapides</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ path('app_transaction_index') }}?exercice_id={{ exercice.idExercice }}" 
+                                   class="btn btn-outline-warning">
+                                    <i class="fas fa-list me-2"></i>Voir les transactions
+                                </a>
+                                
+                                {% if not exercice.clos %}
+                                    <button type="button" 
+                                            class="btn btn-outline-danger"
+                                            onclick="if(confirm('Êtes-vous sûr de vouloir clôturer cet exercice ? Cette action ne peut pas être annulée facilement.')) { window.location.href='{{ path('app_exercice_index') }}'; }">
+                                        <i class="fas fa-lock me-2"></i>Clôturer l'exercice
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.needs-validation .form-control:invalid {
+    border-color: #dc3545;
+}
+
+.needs-validation .form-control:valid {
+    border-color: #28a745;
+}
+
+.form-label.fw-bold {
+    color: var(--bs-gray-800);
+}
+
+.alert-info {
+    background-color: rgba(13, 202, 240, 0.1);
+    border-color: rgba(13, 202, 240, 0.2);
+}
+
+/* Amélioration de la visibilité des textes d'aide */
+.form-text {
+    color: var(--bs-gray-700) !important;
+    font-weight: 500 !important;
+    font-size: 0.9em !important;
+}
+
+/* Style pour les textes d'aide avec fond sombre */
+body[data-bs-theme="dark"] .form-text,
+.bg-dark .form-text {
+    color: var(--bs-gray-300) !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation du formulaire
+    const form = document.querySelector('.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    }
+
+    // Validation des dates
+    const dateDebut = document.getElementById('exercice_date_debut');
+    const dateFin = document.getElementById('exercice_date_fin');
+    
+    if (dateDebut && dateFin) {
+        function validateDates() {
+            if (dateDebut.value && dateFin.value) {
+                if (new Date(dateDebut.value) >= new Date(dateFin.value)) {
+                    dateFin.setCustomValidity('La date de fin doit être postérieure à la date de début');
+                } else {
+                    dateFin.setCustomValidity('');
+                }
+            }
+        }
+        
+        dateDebut.addEventListener('change', validateDates);
+        dateFin.addEventListener('change', validateDates);
+    }
+});
+</script>
+{% endblock %}
