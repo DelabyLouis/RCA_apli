@@ -1087,6 +1087,212 @@ body:has([href*="attestation"]) .table tbody tr:hover,
     }
 }
 
+/* Largeurs spécifiques des colonnes de transactions */
+.transactions-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+.transactions-table th,
+.transactions-table td {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    padding: 0.75rem 0.5rem !important;
+}
+
+/* Colonne Libellé - Plus large */
+.transactions-table th:nth-child(1),
+.transactions-table td:nth-child(1) {
+    width: 25% !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    text-align: left !important;
+}
+
+/* Colonne N° Ordre - Assez large pour être lisible */
+.transactions-table th:nth-child(2),
+.transactions-table td:nth-child(2) {
+    width: 8% !important;
+    text-align: center !important;
+}
+
+/* Colonne Date */
+.transactions-table th:nth-child(3),
+.transactions-table td:nth-child(3) {
+    width: 8% !important;
+    text-align: center !important;
+}
+
+/* Colonne Tiers - Plus petite */
+.transactions-table th:nth-child(4),
+.transactions-table td:nth-child(4) {
+    width: 12% !important;
+    text-align: center !important;
+}
+
+/* Colonnes Crédit, Débit, Montant */
+.transactions-table th:nth-child(5),
+.transactions-table td:nth-child(5),
+.transactions-table th:nth-child(6),
+.transactions-table td:nth-child(6),
+.transactions-table th:nth-child(7),
+.transactions-table td:nth-child(7) {
+    width: 10% !important;
+    text-align: center !important;
+}
+
+/* Colonne Mode de paiement (sans Type) */
+.transactions-table th:nth-child(8),
+.transactions-table td:nth-child(8) {
+    width: 12% !important;
+    text-align: center !important;
+}
+
+/* Colonne Actions - Plus large pour les boutons */
+.transactions-table th:nth-child(9),
+.transactions-table td:nth-child(9) {
+    width: 12% !important;
+    text-align: center !important;
+    min-width: 120px !important;
+}
+
+/* Séparateur d'exercice */
+.exercice-separator {
+    background: linear-gradient(
+        135deg,
+        var(--noir-principal),
+        var(--gris-fonce)
+    ) !important;
+    border: 2px solid var(--or) !important;
+    color: var(--or) !important;
+    font-weight: bold !important;
+    font-size: 1.1em !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.exercice-separator:hover {
+    background: linear-gradient(
+        135deg,
+        var(--gris-fonce),
+        var(--noir-principal)
+    ) !important;
+    border-color: var(--argent) !important;
+    color: var(--argent) !important;
+}
+
+.exercice-separator td {
+    padding: 1rem !important;
+    border: none !important;
+}
+
+.exercice-separator .exercice-title {
+    text-align: left !important;
+}
+
+.exercice-separator .exercice-info {
+    text-align: center !important;
+}
+
+.exercice-separator .exercice-montant {
+    text-align: right !important;
+    font-size: 1em !important;
+}
+
+.exercice-separator .exercice-actions {
+    text-align: center !important;
+}
+
+.exercice-separator .collapse-indicator {
+    font-size: 1.2em !important;
+    transition: transform 0.3s ease !important;
+}
+
+.exercice-separator.collapsed .collapse-indicator {
+    transform: rotate(180deg) !important;
+}
+
+/* ===============================================
+   STYLES TABLEAU EXERCICES
+   =============================================== */
+
+/* Largeurs spécifiques des colonnes d'exercices */
+.table-exercices {
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+.table-exercices th,
+.table-exercices td {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    padding: 0.75rem 0.5rem !important;
+}
+
+/* Colonne N° - Réduite */
+.table-exercices th:nth-child(1),
+.table-exercices td:nth-child(1) {
+    width: 8% !important;
+    text-align: center !important;
+    font-size: 1.1em !important;
+    font-weight: bold !important;
+}
+
+/* Colonne Libellé - Réduit légèrement */
+.table-exercices th:nth-child(2),
+.table-exercices td:nth-child(2) {
+    width: 30% !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    text-align: left !important;
+    font-size: 1.1em !important;
+    font-weight: 500 !important;
+}
+
+/* Colonnes Début et Fin - Même largeur */
+.table-exercices th:nth-child(3),
+.table-exercices td:nth-child(3),
+.table-exercices th:nth-child(4),
+.table-exercices td:nth-child(4) {
+    width: 15% !important;
+    text-align: center !important;
+    font-size: 1.1em !important;
+    font-weight: 500 !important;
+}
+
+/* Colonne Statut - Élargie */
+.table-exercices th:nth-child(5),
+.table-exercices td:nth-child(5) {
+    width: 15% !important;
+    text-align: center !important;
+}
+
+/* Colonne Actions - Élargie */
+.table-exercices th:nth-child(6),
+.table-exercices td:nth-child(6) {
+    width: 17% !important;
+    text-align: center !important;
+    min-width: 140px !important;
+}
+
+/* ===============================================
+   STYLES TRANSACTIONS - TYPE SOULIGNÉ
+   =============================================== */
+
+/* Style pour souligner le type de transaction dans le libellé */
+.transaction-type-underline {
+    text-decoration: underline !important;
+    text-decoration-color: var(--or) !important;
+    text-decoration-thickness: 2px !important;
+    text-underline-offset: 3px !important;
+    font-weight: 600 !important;
+    color: var(--or) !important;
+}
+
 @media (max-width: 576px) {
     .table th,
     .table td {

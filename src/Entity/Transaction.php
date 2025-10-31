@@ -260,13 +260,13 @@ class Transaction
     }
 
     /**
-     * Retourne le libellé complet avec le mode de paiement en préfixe
-     * Format: "Mode de paiement-Libellé" ou juste "Libellé" si pas de mode de paiement
+     * Retourne le libellé complet avec le type de transaction en préfixe
+     * Format: "Type - Libellé" ou juste "Libellé" si pas de type
      */
     public function getLibelleComplet(): string
     {
-        if ($this->modeDePaiement) {
-            return $this->modeDePaiement->getLibelle() . '-' . $this->libelle;
+        if ($this->getTypeTransaction()) {
+            return '<span class="transaction-type-underline">' . $this->getTypeTransaction()->getLibelle() . '</span> - ' . $this->libelle;
         }
         
         return $this->libelle;

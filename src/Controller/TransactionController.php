@@ -86,6 +86,16 @@ final class TransactionController extends AbstractController
             ];
         }
         
+        // Calculer les montants finaux par exercice
+        $montantsParExercice = [];
+        foreach ($transactionsAvecMontant as $item) {
+            $exercice = $item['transaction']->getExercice();
+            if ($exercice) {
+                $exerciceId = $exercice->getIdExercice();
+                $montantsParExercice[$exerciceId] = $item['montant_cumule'];
+            }
+        }
+        
         // Si on filtre par exercice, utiliser le template simple
         if ($exerciceFilter) {
             return $this->render('transaction/index_exercice_simple.html.twig', [
@@ -96,6 +106,7 @@ final class TransactionController extends AbstractController
         
         return $this->render('transaction/index.html.twig', [
             'transactions_avec_montant' => $transactionsAvecMontant,
+            'montants_par_exercice' => $montantsParExercice,
             'solde_precedent' => $soldePrecedent,
             'exercice_precedent_existe' => $exerciceFilter && $soldePrecedent != 0,
             'personnes' => $personneRepository->findAll(),

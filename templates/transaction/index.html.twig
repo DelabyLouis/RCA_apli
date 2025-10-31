@@ -134,7 +134,7 @@
         </div>
         
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover transactions-table">
                 <thead class="table-dark">
                     <tr>
                         <th>Libellé</th>
@@ -145,15 +145,13 @@
                         <th>Débit (Sortie)</th>
                         <th>Montant</th>
                         <th>Mode de paiement</th>
-                        <th>Exercice</th>
-                        <th>Type</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% if exercice_precedent_existe %}
                     <tr class="table-secondary">
-                        <td colspan="7" class="text-muted fst-italic">
+                        <td colspan="6" class="text-muted fst-italic">
                             <i class="fas fa-level-up-alt me-2"></i>Solde de l'exercice précédent
                         </td>
                         <td class="text-end">
@@ -163,15 +161,60 @@
                                 <span class="text-danger fw-bold">{{ solde_precedent|number_format(2, ',', ' ') }} €</span>
                             {% endif %}
                         </td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                     </tr>
                 {% endif %}
+                {% set current_exercice = null %}
                 {% for item in transactions_avec_montant %}
                     {% set transaction = item.transaction %}
                     {% set montant_cumule = item.montant_cumule %}
                     {% set is_exercice_clos = transaction.exercice and transaction.exercice.isClos %}
-                    <tr data-id="{{ transaction.idTransaction }}">
-                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="libelle" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.libelleComplet }}</td>
+                    
+                    {# Affichage du séparateur d'exercice si changement #}
+                    {% if transaction.exercice and current_exercice != transaction.exercice.idExercice %}
+                        {% set current_exercice = transaction.exercice.idExercice %}
+                        {% set montant_final_exercice = montants_par_exercice[transaction.exercice.idExercice] %}
+                        <tr class="exercice-separator" data-exercice-id="{{ transaction.exercice.idExercice }}" title="Cliquer pour enrouler/dérouler les transactions de cet exercice">
+                            <td class="exercice-title">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                {{ transaction.exercice.libelle }}
+                                {% if transaction.exercice.isClos %}
+                                    <span class="badge bg-danger ms-2">
+                                        <i class="fas fa-lock me-1"></i>CLÔTURÉ
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success ms-2">
+                                        <i class="fas fa-unlock me-1"></i>EN COURS
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="exercice-info"></td>
+                            <td class="exercice-info"></td>
+                            <td class="exercice-info"></td>
+                            <td class="exercice-info"></td>
+                            <td class="exercice-info"></td>
+                            <td class="exercice-montant text-end">
+                                <span class="exercice-montant-collapsed" style="display: none;">
+                                    {% if montant_final_exercice >= 0 %}
+                                        <span class="text-success fw-bold">{{ montant_final_exercice|number_format(2, ',', ' ') }} €</span>
+                                    {% else %}
+                                        <span class="fw-bold" style="color: #dc3545 !important;">
+                                            <i class="fas fa-exclamation-triangle me-1" style="color: #dc3545 !important;"></i>{{ montant_final_exercice|number_format(2, ',', ' ') }} €
+                                        </span>
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="exercice-info"></td>
+                            <td class="exercice-actions text-end">
+                                <span class="collapse-indicator">
+                                    <i class="fas fa-chevron-up"></i>
+                                </span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    
+                    <tr data-id="{{ transaction.idTransaction }}" data-exercice-id="{{ transaction.exercice ? transaction.exercice.idExercice : '' }}" class="transaction-row">
+                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="libelle" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.libelleComplet|raw }}</td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="numero_ordre" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.numeroOrdre }}</td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="date_transaction" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.dateTransaction ? transaction.dateTransaction|date('Y-m-d') : '' }}</td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="tiers" data-current-personne="{{ transaction.personne ? transaction.personne.idPersonne : '' }}" data-current-entreprise="{{ transaction.entreprise ? transaction.entreprise.idEntreprise : '' }}" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>
@@ -220,8 +263,6 @@
                             {% endif %}
                         </td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="mode_de_paiement" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.modeDePaiement ? transaction.modeDePaiement.libelle : '' }}</td>
-                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="exercice" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.exercice ? transaction.exercice.libelle : '' }}</td>
-                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="type_transaction" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.typeTransaction ? transaction.typeTransaction.libelle : '' }}</td>
                         <td>
                             <div class="btn-group" role="group">
                                 <a href="{{ path('app_transaction_show', {'id_transaction': transaction.idTransaction}) }}" class="btn btn-info btn-sm" title="Voir les détails">
@@ -247,7 +288,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="12" class="text-center">Aucune transaction trouvée</td>
+                        <td colspan="9" class="text-center">Aucune transaction trouvée</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -437,6 +478,40 @@
                         alert('Erreur de connexion');
                     });
                 });
+            });
+        });
+
+        // Gestion du collapse/expand des exercices
+        document.querySelectorAll('.exercice-separator').forEach(function(separator) {
+            separator.addEventListener('click', function() {
+                const exerciceId = this.dataset.exerciceId;
+                const transactionRows = document.querySelectorAll(`tr.transaction-row[data-exercice-id="${exerciceId}"]`);
+                const montantCollapsed = this.querySelector('.exercice-montant-collapsed');
+                const isCollapsed = this.classList.contains('collapsed');
+                
+                if (isCollapsed) {
+                    // Dérouler - afficher toutes les transactions de cet exercice
+                    transactionRows.forEach(function(row) {
+                        row.style.display = '';
+                    });
+                    this.classList.remove('collapsed');
+                    // Masquer le montant final
+                    if (montantCollapsed) {
+                        montantCollapsed.style.display = 'none';
+                    }
+                } else {
+                    // Enrouler - masquer toutes les transactions de cet exercice
+                    transactionRows.forEach(function(row) {
+                        row.style.display = 'none';
+                    });
+                    this.classList.add('collapsed');
+                    // Afficher le montant final
+                    if (montantCollapsed) {
+                        montantCollapsed.style.display = 'block';
+                    }
+                }
+                
+                console.log(`Exercice ${exerciceId} ${isCollapsed ? 'déroulé' : 'enroulé'}`);
             });
         });
     </script>
