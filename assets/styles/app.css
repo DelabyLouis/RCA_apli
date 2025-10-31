@@ -1341,3 +1341,36 @@ small,
     color: var(--gris-clair) !important;
     font-weight: 500 !important;
 }
+
+/* ===============================================
+   HOVER DÉSACTIVÉ UNIQUEMENT SUR LA PAGE LISTE EXERCICES
+   =============================================== */
+
+/* Désactiver COMPLÈTEMENT tout hover sur TOUS les exercices de la page /exercice */
+.exercice-index-page .table-exercices tbody tr:hover,
+.exercice-index-page .table-exercices tbody tr.table-secondary:hover {
+    background-color: inherit !important;
+}
+
+/* Désactiver Bootstrap hover sur cellules - TOUS les exercices */
+.exercice-index-page .table-hover .table-exercices tbody tr:hover > td,
+.exercice-index-page .table-hover .table-exercices tbody tr:hover > th,
+.exercice-index-page
+    .table-hover
+    .table-exercices
+    tbody
+    tr.table-secondary:hover
+    > td,
+.exercice-index-page
+    .table-hover
+    .table-exercices
+    tbody
+    tr.table-secondary:hover
+    > th {
+    background-color: inherit !important;
+}
+
+/* Désactiver transitions sur page /exercice */
+.exercice-index-page .table-exercices tbody tr {
+    transition: none !important;
+}
