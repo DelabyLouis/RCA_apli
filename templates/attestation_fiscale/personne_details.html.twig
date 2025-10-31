@@ -145,22 +145,22 @@
 
                             <!-- Tableau des cotisations avec cases à cocher -->
                             <div class="table-responsive">
-                                <table class="table cotisations-table">
+                                <table class="table cotisations-table fs-5">
                                     <thead>
                                         <tr>
-                                            <th style="width: 40px;">Sélection</th>
-                                            <th style="width: 100px;">Date</th>
-                                            <th class="libelle-column">Libellé</th>
-                                            <th style="width: 120px;">Mode de paiement</th>
-                                            <th style="width: 80px;">Exercice</th>
-                                            <th class="text-end" style="width: 100px;">Montant</th>
+                                            <th class="text-center fs-5" style="width: 40px;">Sélection</th>
+                                            <th class="fs-5" style="width: 100px;">Date</th>
+                                            <th class="libelle-column fs-5">Libellé</th>
+                                            <th class="fs-5" style="width: 120px;">Mode de paiement</th>
+                                            <th class="fs-5" style="width: 80px;">Exercice</th>
+                                            <th class="text-end fs-5" style="width: 100px;">Montant</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for cotisation in cotisations %}
                                             <tr class="cotisation-row" data-year="{{ cotisation.dateTransaction|date('Y') }}" data-amount="{{ cotisation.montant }}">
-                                                <td>
-                                                    <div class="form-check">
+                                                <td class="text-center">
+                                                    <div class="form-check d-flex justify-content-center">
                                                         <input class="form-check-input cotisation-checkbox" 
                                                                type="checkbox" 
                                                                name="cotisations[]" 
