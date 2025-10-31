@@ -27,12 +27,6 @@
                                    required value="{{ transaction.dateTransaction|date('Y-m-d\\TH:i') }}">
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" 
-                                      rows="3" placeholder="Description optionnelle...">{{ transaction.description ?? '' }}</textarea>
-                        </div>
-                        
                         <!-- Informations non modifiables -->
                         <div class="card bg-light mb-3">
                             <div class="card-body">

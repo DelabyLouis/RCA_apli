@@ -231,7 +231,7 @@
                             {% endif %}
                         </td>
                         {% set display_montant = item.montant_compte_courant is defined ? item.montant_compte_courant : transaction.montant %}
-                        <td class="montant-cell {% if not is_exercice_clos %}editable-field{% endif %} text-end" 
+                        <td class="montant-cell {% if not is_exercice_clos and display_montant >= 0 %}editable-field{% endif %} text-end" 
                             data-field="montant" 
                             data-type="credit" 
                             data-current-value="{{ transaction.montant }}"
@@ -242,7 +242,7 @@
                                 <span class="text-muted">-</span>
                             {% endif %}
                         </td>
-                        <td class="montant-cell {% if not is_exercice_clos %}editable-field{% endif %} text-end" 
+                        <td class="montant-cell {% if not is_exercice_clos and display_montant < 0 %}editable-field{% endif %} text-end" 
                             data-field="montant" 
                             data-type="debit" 
                             data-current-value="{{ transaction.montant }}"
@@ -487,6 +487,7 @@
                 const exerciceId = this.dataset.exerciceId;
                 const transactionRows = document.querySelectorAll(`tr.transaction-row[data-exercice-id="${exerciceId}"]`);
                 const montantCollapsed = this.querySelector('.exercice-montant-collapsed');
+                const chevron = this.querySelector('.collapse-indicator i');
                 const isCollapsed = this.classList.contains('collapsed');
                 
                 if (isCollapsed) {
@@ -499,6 +500,10 @@
                     if (montantCollapsed) {
                         montantCollapsed.style.display = 'none';
                     }
+                    // Changer l'icône du chevron
+                    if (chevron) {
+                        chevron.className = 'fas fa-chevron-up';
+                    }
                 } else {
                     // Enrouler - masquer toutes les transactions de cet exercice
                     transactionRows.forEach(function(row) {
@@ -509,9 +514,43 @@
                     if (montantCollapsed) {
                         montantCollapsed.style.display = 'block';
                     }
+                    // Changer l'icône du chevron
+                    if (chevron) {
+                        chevron.className = 'fas fa-chevron-down';
+                    }
                 }
                 
                 console.log(`Exercice ${exerciceId} ${isCollapsed ? 'déroulé' : 'enroulé'}`);
+            });
+        });
+
+        // Enrouler automatiquement les exercices clôturés au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.exercice-separator').forEach(function(separator) {
+                const exerciceId = separator.dataset.exerciceId;
+                // Vérifier si l'exercice est clôturé (présence du badge "CLÔTURÉ")
+                const isClosedExercice = separator.querySelector('.badge.bg-danger');
+                
+                if (isClosedExercice) {
+                    // Enrouler cet exercice clôturé
+                    const transactionRows = document.querySelectorAll(`tr.transaction-row[data-exercice-id="${exerciceId}"]`);
+                    const montantCollapsed = separator.querySelector('.exercice-montant-collapsed');
+                    const chevron = separator.querySelector('.collapse-indicator i');
+                    
+                    transactionRows.forEach(function(row) {
+                        row.style.display = 'none';
+                    });
+                    separator.classList.add('collapsed');
+                    
+                    if (montantCollapsed) {
+                        montantCollapsed.style.display = 'block';
+                    }
+                    
+                    // Changer l'icône du chevron pour indiquer que c'est enroulé
+                    if (chevron) {
+                        chevron.className = 'fas fa-chevron-down';
+                    }
+                }
             });
         });
     </script>

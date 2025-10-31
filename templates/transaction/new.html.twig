@@ -8,8 +8,8 @@
         <i class="fas fa-plus-circle me-2 text-primary"></i>Nouvelle transaction
     </h1>
 
-    <div class="row">
-        <div class="col-md-8">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">Informations de la transaction</h5>
@@ -17,65 +17,78 @@
                 <div class="card-body">
                     {{ form_start(form) }}
                     
-                    <div class="mb-3">
-                        {{ form_label(form.libelle, 'Libelle') }}
-                        {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.libelle) }}
-                    </div>
-
-                    <div class="mb-3">
-                        {{ form_label(form.montant, 'Montant') }}
-                        <div class="input-group">
-                            {{ form_widget(form.montant, {'attr': {'class': 'form-control', 'id': 'montant', 'step': '0.01'}}) }}
-                            <span class="input-group-text">€</span>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.libelle, 'Libelle') }}
+                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.libelle) }}
+                            </div>
                         </div>
-                        {{ form_errors(form.montant) }}
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.montant, 'Montant') }}
+                                <div class="input-group">
+                                    {{ form_widget(form.montant, {'attr': {'class': 'form-control', 'id': 'montant', 'step': '0.01'}}) }}
+                                    <span class="input-group-text">€</span>
+                                </div>
+                                {{ form_errors(form.montant) }}
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        {{ form_label(form.tiers, 'Tiers') }}
-                        {{ form_widget(form.tiers, {'attr': {'class': 'form-select'}}) }}
-                        {{ form_errors(form.tiers) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.tiers, 'Tiers') }}
+                                {{ form_widget(form.tiers, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.tiers) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.type_transaction, 'Type de transaction') }}
+                                {{ form_widget(form.type_transaction, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.type_transaction) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.mode_de_paiement, 'Mode de paiement') }}
+                                {{ form_widget(form.mode_de_paiement, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.mode_de_paiement) }}
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        {{ form_label(form.type_transaction, 'Type de transaction') }}
-                        {{ form_widget(form.type_transaction, {'attr': {'class': 'form-select'}}) }}
-                        {{ form_errors(form.type_transaction) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.exercice, 'Exercice') }}
+                                {{ form_widget(form.exercice, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.exercice) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.date_transaction, 'Date de transaction') }}
+                                {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control', 'value': 'now'|date('Y-m-d')}}) }}
+                                {{ form_errors(form.date_transaction) }}
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        {{ form_label(form.exercice, 'Exercice') }}
-                        {{ form_widget(form.exercice, {'attr': {'class': 'form-select'}}) }}
-                        {{ form_errors(form.exercice) }}
-                    </div>
-
-                    <div class="mb-3">
-                        {{ form_label(form.date_transaction, 'Date de transaction') }}
-                        {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control', 'value': 'now'|date('Y-m-d')}}) }}
-                        {{ form_errors(form.date_transaction) }}
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Créer la transaction
+                        </button>
                     </div>
 
                     {{ form_rest(form) }}
                     {{ form_end(form) }}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">Actions</h6>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-3">
-                        <button type="submit" class="btn btn-primary btn-lg" form="{{ form.vars.id }}">
-                            <i class="fas fa-save me-2"></i>Créer la transaction
-                        </button>
-                        <a href="{{ path('app_transaction_index') }}" class="btn btn-secondary btn-lg">
-                            <i class="fas fa-times me-2"></i>Annuler
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

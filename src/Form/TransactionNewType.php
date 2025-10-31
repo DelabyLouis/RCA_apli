@@ -7,6 +7,7 @@ use App\Entity\Exercice;
 use App\Entity\Personne;
 use App\Entity\Transaction;
 use App\Entity\TypeTransaction;
+use App\Entity\ModeDePaiement;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -15,6 +16,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpParser\Node\Expr\AssignOp\Mod;
 
 class TransactionNewType extends AbstractType
 {
@@ -72,6 +74,12 @@ class TransactionNewType extends AbstractType
                 'choice_label' => 'libelle',
                 'required' => false,
                 'placeholder' => 'Aucun type (optionnel)',
+            ])
+            ->add('mode_de_paiement', EntityType::class, [
+                'class' => ModeDePaiement::class,
+                'choice_label' => 'libelle',
+                'required' => false,
+                'placeholder' => 'Aucun mode de paiement (optionnel)',
             ])
             ->add('tiers', ChoiceType::class, [
                 'choices' => $choices,
