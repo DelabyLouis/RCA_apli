@@ -56,8 +56,17 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="checkbox-container border rounded p-3" style="max-height: 300px; overflow-y: auto;">
-                                    {{ form_widget(form.permissions) }}
+                                <div class="checkbox-container border rounded p-3" style="max-height: 400px; overflow-y: auto;">
+                                    <div class="row">
+                                        {% for permission in form.permissions %}
+                                            <div class="col-md-6 col-lg-4 mb-2">
+                                                <div class="form-check p-2 border rounded bg-light">
+                                                    {{ form_widget(permission, {'attr': {'class': 'form-check-input me-2'}}) }}
+                                                    {{ form_label(permission, null, {'label_attr': {'class': 'form-check-label small'}}) }}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                                 {{ form_errors(form.permissions) }}
                             </div>
