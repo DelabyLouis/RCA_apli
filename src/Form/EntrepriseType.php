@@ -34,8 +34,9 @@ class EntrepriseType extends AbstractType
                 'expanded' => true,
                 'required' => false,
                 'attr' => [
-                    'class' => 'form-check-list-dropdown'
-                ]
+                    'class' => 'checkbox-list-container'
+                ],
+                'help' => 'Cochez les personnes à associer à cette entreprise'
             ])
         ;
     }

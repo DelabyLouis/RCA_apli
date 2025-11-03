@@ -30,10 +30,14 @@ class UserType extends AbstractType
                 'class' => Role::class,
                 'choice_label' => 'libelle',
                 'multiple' => true,
-                'expanded' => true, // affiche des checkboxes
+                'expanded' => true,
                 'by_reference' => false,
                 'label' => 'Rôles',
                 'required' => false,
+                'attr' => [
+                    'class' => 'checkbox-list-container'
+                ],
+                'help' => 'Cochez les rôles à attribuer à cet utilisateur'
             ])
         ;
     }

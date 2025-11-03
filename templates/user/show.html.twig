@@ -6,36 +6,74 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-user me-2"></i>{{ user.username }}</h1>
+                <div>
+                    <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                    </a>
+                    <a href="{{ path('app_user_edit', {'id_user': user.idUser}) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i>Modifier
+                    </a>
+                </div>
+            </div>
+
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-user me-2"></i>{{ user.username }}
+                        <i class="fas fa-info-circle me-2"></i>Informations de l'utilisateur
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <tr>
-                                <th class="text-muted" style="width: 20%;">Nom d'utilisateur :</th>
-                                <td><strong>{{ user.username }}</strong></td>
-                            </tr>
-                            {% if user.personne %}
-                            <tr>
-                                <th class="text-muted">Personne liée :</th>
-                                <td>{{ user.personne.prenom }} {{ user.personne.nom }}</td>
-                            </tr>
-                            {% endif %}
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer bg-light">
-                    <div class="d-flex gap-2">
-                        <a href="{{ path('app_user_edit', {'id_user': user.idUser}) }}" class="btn btn-warning">
-                            <i class="fas fa-edit me-1"></i>Modifier
-                        </a>
-                        <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Retour à la liste
-                        </a>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">ID :</th>
+                                    <td><span class="badge bg-primary">{{ user.idUser }}</span></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Nom d'utilisateur :</th>
+                                    <td><strong>{{ user.username }}</strong></td>
+                                </tr>
+                                {% if user.personne %}
+                                <tr>
+                                    <th class="text-muted">Personne liée :</th>
+                                    <td>
+                                        <i class="fas fa-user-tie me-1"></i>
+                                        {{ user.personne.prenom }} {{ user.personne.nom }}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% if user.roles %}
+                                <tr>
+                                    <th class="text-muted">Rôles :</th>
+                                    <td>
+                                        {% for role in user.roles %}
+                                            <span class="badge bg-secondary me-1">{{ role }}</span>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">
+                                <h6 class="text-muted mb-0">Actions rapides</h6>
+                                <a href="{{ path('app_user_edit', {'id_user': user.idUser}) }}" class="btn btn-warning btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-edit me-2"></i>Modifier
+                                </a>
+                                <a href="{{ path('app_user_index') }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                                </a>
+                                {% if user.personne %}
+                                <a href="{{ path('app_personne_show', {'id_personne': user.personne.idPersonne}) }}" class="btn btn-info btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-user-tie me-2"></i>Voir la personne
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

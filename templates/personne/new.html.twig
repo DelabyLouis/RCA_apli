@@ -132,6 +132,38 @@
                                 {{ form_errors(form.email) }}
                             </div>
                             
+                            <h6 class="text-muted border-bottom pb-2 mb-3">
+                                <i class="fas fa-building me-1"></i>Entreprises liées
+                            </h6>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    {{ form_label(form.entreprise, 'Entreprises associées', {'label_attr': {'class': 'form-label mb-0'}}) }}
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleAllCheckboxes('entreprise', true)">
+                                            <i class="fas fa-check-square me-1"></i>Tout sélectionner
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAllCheckboxes('entreprise', false)">
+                                            <i class="fas fa-square me-1"></i>Tout déselectionner
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="checkbox-container p-3 border rounded bg-light" style="max-height: 200px; overflow-y: auto;" data-checkbox-group="entreprise">
+                                    {% for choice in form.entreprise %}
+                                        <div class="form-check mb-2">
+                                            {{ form_widget(choice, {'attr': {'class': 'form-check-input'}}) }}
+                                            {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label ms-2'}}) }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% if form.entreprise.vars.help %}
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>{{ form.entreprise.vars.help }}
+                                    </div>
+                                {% endif %}
+                                {{ form_errors(form.entreprise) }}
+                            </div>
+                            
                             {{ form_end(form) }}
                         </div>
                         
@@ -152,4 +184,16 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleAllCheckboxes(groupName, selectAll) {
+    const container = document.querySelector(`[data-checkbox-group="${groupName}"]`);
+    if (!container) return;
+    
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll;
+    });
+}
+</script>
 {% endblock %}

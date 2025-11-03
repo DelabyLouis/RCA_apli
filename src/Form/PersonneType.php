@@ -32,8 +32,9 @@ class PersonneType extends AbstractType
                 'expanded' => true,
                 'required' => false,
                 'attr' => [
-                    'class' => 'form-check-list-dropdown'
-                ]
+                    'class' => 'checkbox-list-container'
+                ],
+                'help' => 'Cochez les entreprises à associer à cette personne'
             ])
         ;
     }

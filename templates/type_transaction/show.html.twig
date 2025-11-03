@@ -6,36 +6,68 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-tags me-2"></i>{{ type_transaction.libelle }}</h1>
+                <div>
+                    <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                    </a>
+                    <a href="{{ path('app_type_transaction_edit', {'id_type': type_transaction.idType}) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i>Modifier
+                    </a>
+                </div>
+            </div>
+
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-tags me-2"></i>{{ type_transaction.libelle }}
+                        <i class="fas fa-info-circle me-2"></i>Informations du type de transaction
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <tr>
-                                <th class="text-muted" style="width: 20%;">Libellé :</th>
-                                <td><strong>{{ type_transaction.libelle }}</strong></td>
-                            </tr>
-                            {% if type_transaction.description %}
-                            <tr>
-                                <th class="text-muted">Description :</th>
-                                <td>{{ type_transaction.description }}</td>
-                            </tr>
-                            {% endif %}
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer bg-light">
-                    <div class="d-flex gap-2">
-                        <a href="{{ path('app_type_transaction_edit', {'id_type': type_transaction.idType}) }}" class="btn btn-warning">
-                            <i class="fas fa-edit me-1"></i>Modifier
-                        </a>
-                        <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Retour à la liste
-                        </a>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">ID :</th>
+                                    <td><span class="badge bg-primary">{{ type_transaction.idType }}</span></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Libellé :</th>
+                                    <td><strong>{{ type_transaction.libelle }}</strong></td>
+                                </tr>
+                                {% if type_transaction.description %}
+                                <tr>
+                                    <th class="text-muted">Description :</th>
+                                    <td>{{ type_transaction.description }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <th class="text-muted">Type de montant autorisé :</th>
+                                    <td>
+                                        {% if type_transaction.typeMontantAutorise == 'debit' %}
+                                            <span class="badge bg-danger">Débit uniquement</span>
+                                        {% elseif type_transaction.typeMontantAutorise == 'credit' %}
+                                            <span class="badge bg-success">Crédit uniquement</span>
+                                        {% else %}
+                                            <span class="badge bg-info">Débit et Crédit</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">
+                                <h6 class="text-muted mb-0">Actions rapides</h6>
+                                <a href="{{ path('app_type_transaction_edit', {'id_type': type_transaction.idType}) }}" class="btn btn-warning btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-edit me-2"></i>Modifier
+                                </a>
+                                <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

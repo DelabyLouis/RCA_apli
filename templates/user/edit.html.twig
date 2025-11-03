@@ -4,111 +4,107 @@
 
 {% block body %}
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1><i class="fas fa-edit me-2"></i>Modifier {{ user.username }}</h1>
-                <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
-                </a>
-            </div>
+    <h1 class="mb-4">
+        <i class="fas fa-edit me-2 text-warning"></i>Modifier {{ user.username }}
+    </h1>
 
-            {% if form.vars.errors|length > 0 %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>
-                    <ul class="mb-0 mt-2">
-                        {% for error in form.vars.errors %}
-                            <li>{{ error.message }}</li>
-                        {% endfor %}
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endif %}
-
-            <div class="card shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">
-                        <i class="fas fa-edit me-2"></i>Modifier {{ user.username }}
-                    </h5>
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Modifier les informations de l'utilisateur</h5>
                 </div>
                 <div class="card-body">
+                    {{ form_start(form) }}
+                    
                     <div class="row">
-                        <div class="col-lg-6">
-                            {{ form_start(form, {'attr': {'id': 'user_edit_form'}}) }}
-                            
+                        <div class="col-md-6">
                             <div class="mb-3">
-                                {{ form_label(form.username, 'Nom d\'utilisateur', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.username, {'attr': {'class': 'form-control' ~ (form.username.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                                {% if form.username.vars.errors|length > 0 %}
-                                    <div class="invalid-feedback">
-                                        {% for error in form.username.vars.errors %}
-                                            {{ error.message }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
+                                {{ form_label(form.username, 'Nom d\'utilisateur') }}
+                                {{ form_widget(form.username, {'attr': {'class': 'form-control'}}) }}
                                 {{ form_errors(form.username) }}
                             </div>
-                            
-                            <div class="mb-3">
-                                {{ form_label(form.password, 'Mot de passe', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.password, {'attr': {'class': 'form-control' ~ (form.password.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                                {% if form.password.vars.errors|length > 0 %}
-                                    <div class="invalid-feedback">
-                                        {% for error in form.password.vars.errors %}
-                                            {{ error.message }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                {{ form_errors(form.password) }}
-                            </div>
-                            
-                            <div class="mb-3">
-                                {{ form_label(form.personne, 'Personne associée', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.personne, {'attr': {'class': 'form-select' ~ (form.personne.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                                {% if form.personne.vars.errors|length > 0 %}
-                                    <div class="invalid-feedback">
-                                        {% for error in form.personne.vars.errors %}
-                                            {{ error.message }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                {{ form_errors(form.personne) }}
-                            </div>
-                            
-                            <div class="mb-3">
-                                {{ form_label(form.userRoles, 'Rôles', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.userRoles, {'attr': {'class': 'form-check' ~ (form.userRoles.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                                {% if form.userRoles.vars.errors|length > 0 %}
-                                    <div class="invalid-feedback">
-                                        {% for error in form.userRoles.vars.errors %}
-                                            {{ error.message }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                {{ form_errors(form.userRoles) }}
-                            </div>
-                            
-                            {{ form_end(form) }}
                         </div>
-                        
-                        <div class="col-lg-6">
-                            <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">
-                                <h6 class="text-muted mb-0">Actions</h6>
-                                <a href="{{ path('app_user_show', {'id_user': user.idUser}) }}" class="btn btn-info btn-lg py-3" style="margin: 0 3rem;">
-                                    <i class="fas fa-eye me-2"></i>Voir l'utilisateur
-                                </a>
-                                <a href="{{ path('app_user_index') }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">
-                                    <i class="fas fa-times me-2"></i>Annuler
-                                </a>
-                                <button type="submit" class="btn btn-warning btn-lg py-3" style="margin: 0 3rem;" form="user_edit_form">
-                                    <i class="fas fa-save me-2"></i>Mettre à jour
-                                </button>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.password, 'Mot de passe') }}
+                                {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.password) }}
                             </div>
                         </div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.personne, 'Personne associée') }}
+                                {{ form_widget(form.personne, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.personne) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            {{ form_label(form.userRoles, 'Rôles attribués', {'label_attr': {'class': 'form-label mb-0'}}) }}
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleAllCheckboxes('userRoles', true)">
+                                    <i class="fas fa-check-square me-1"></i>Tout sélectionner
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAllCheckboxes('userRoles', false)">
+                                    <i class="fas fa-square me-1"></i>Tout déselectionner
+                                </button>
+                            </div>
+                        </div>
+                        <div class="checkbox-container p-3 border rounded bg-light" style="max-height: 200px; overflow-y: auto;" data-checkbox-group="userRoles">
+                            {% for choice in form.userRoles %}
+                                <div class="form-check mb-2">
+                                    {{ form_widget(choice, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label ms-2'}}) }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.userRoles.vars.help %}
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>{{ form.userRoles.vars.help }}
+                            </div>
+                        {% endif %}
+                        {{ form_errors(form.userRoles) }}
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <a href="{{ path('app_user_show', {'id_user': user.idUser}) }}" class="btn btn-secondary btn-lg me-2">
+                                <i class="fas fa-eye me-2"></i>Voir
+                            </a>
+                            <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-list me-2"></i>Liste
+                            </a>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-save me-2"></i>Modifier l'utilisateur
+                            </button>
+                        </div>
+                    </div>
+
+                    {{ form_rest(form) }}
+                    {{ form_end(form) }}
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function toggleAllCheckboxes(groupName, selectAll) {
+    const container = document.querySelector(`[data-checkbox-group="${groupName}"]`);
+    if (!container) return;
+    
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll;
+    });
+}
+</script>
 {% endblock %}
