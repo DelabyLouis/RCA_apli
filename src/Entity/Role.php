@@ -31,15 +31,30 @@ class Role
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column]
+    private ?int $hierarchy_level = 0;
+
     /**
      * @var Collection<int, User>
      */
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'roles')]
     private Collection $users;
 
+    /**
+     * @var Collection<int, Permission>
+     */
+    #[ORM\ManyToMany(targetEntity: Permission::class, inversedBy: 'roles')]
+    #[ORM\JoinTable(
+        name: 'role_permission',
+        joinColumns: [new ORM\JoinColumn(name: 'role_id', referencedColumnName: 'id_role')],
+        inverseJoinColumns: [new ORM\JoinColumn(name: 'permission_id', referencedColumnName: 'id')]
+    )]
+    private Collection $permissions;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->permissions = new ArrayCollection();
     }
 
     public function getIdRole(): ?int
@@ -95,6 +110,42 @@ class Role
             $user->removeRole($this);
         }
 
+        return $this;
+    }
+
+    public function getHierarchyLevel(): ?int
+    {
+        return $this->hierarchy_level;
+    }
+
+    public function setHierarchyLevel(int $hierarchy_level): static
+    {
+        $this->hierarchy_level = $hierarchy_level;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Permission>
+     */
+    public function getPermissions(): Collection
+    {
+        return $this->permissions;
+    }
+
+    public function addPermission(Permission $permission): static
+    {
+        if (!$this->permissions->contains($permission)) {
+            $this->permissions->add($permission);
+            $permission->addRole($this);
+        }
+        return $this;
+    }
+
+    public function removePermission(Permission $permission): static
+    {
+        if ($this->permissions->removeElement($permission)) {
+            $permission->removeRole($this);
+        }
         return $this;
     }
 

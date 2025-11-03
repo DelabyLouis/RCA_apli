@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Permissions{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <h1 class="mb-4">
+        <i class="fas fa-key me-2 text-info"></i>Gestion des Permissions
+    </h1>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('app_role_index') }}">Rôles</a></li>
+                <li class="breadcrumb-item active">Permissions</li>
+            </ol>
+        </nav>
+        <a href="{{ path('app_permission_new') }}" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>Nouvelle Permission
+        </a>
+    </div>
+
+    <!-- Section Permissions Publiques -->
+    <div class="card mb-4 border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">
+                <i class="fas fa-globe me-2"></i>Permissions Publiques (Sans Connexion)
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for permission in permissions %}
+                    {% if permission.publicAccess %}
+                    <div class="col-md-4 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <span>{{ permission.name }}</span>
+                            <small class="text-muted ms-2">({{ permission.route }})</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des Permissions -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Toutes les Permissions
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Route</th>
+                            <th>Description</th>
+                            <th>Public</th>
+                            <th>Rôles</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for permission in permissions %}
+                        <tr>
+                            <td><strong>{{ permission.name }}</strong></td>
+                            <td><code>{{ permission.route }}</code></td>
+                            <td>{{ permission.description|default('—') }}</td>
+                            <td>
+                                {% if permission.publicAccess %}
+                                    <span class="badge bg-success">Public</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Privé</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for role in permission.roles %}
+                                    <span class="badge bg-primary me-1">{{ role.libelle }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ path('app_permission_show', {'id': permission.id}) }}" class="btn btn-outline-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_permission_edit', {'id': permission.id}) }}" class="btn btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                <p class="mb-0">Aucune permission configurée</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
