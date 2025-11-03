@@ -45,6 +45,9 @@ body {
     ) !important;
     border-bottom: 3px solid var(--or);
     box-shadow: var(--ombre-large);
+    z-index: 10000 !important;
+    position: relative;
+    overflow: visible !important;
 }
 
 .navbar-brand {
@@ -118,14 +121,19 @@ body {
     position: absolute;
     top: 100%;
     left: 0;
-    z-index: 9999;
+    z-index: 99999 !important;
     min-width: 200px;
+    max-width: none !important;
     padding: 0.5rem 0;
     margin: 2px 0 0;
     background-color: var(--gris-fonce);
     border: 2px solid var(--or);
     border-radius: var(--bordure-radius);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    overflow: visible !important;
+    clip: unset !important;
+    transform: none !important;
+    will-change: auto !important;
 }
 
 .dropdown-menu.show {
@@ -135,6 +143,15 @@ body {
 /* Container dropdown */
 .nav-item.dropdown {
     position: relative;
+}
+
+/* S'assurer que la navbar collapse permet le débordement */
+.navbar-collapse {
+    overflow: visible !important;
+}
+
+.navbar .container-fluid {
+    overflow: visible !important;
 }
 
 /* Navbar z-index */
