@@ -5,6 +5,33 @@
 {% block body %}
     {{ include('components/inline_edit_styles.html.twig') }}
     
+    <style>
+        #personnes-table th:nth-child(1), #personnes-table td:nth-child(1) { width: 80px !important; max-width: 80px !important; }
+        #personnes-table th:nth-child(2), #personnes-table td:nth-child(2) { width: 150px !important; max-width: 150px !important; }
+        #personnes-table th:nth-child(3), #personnes-table td:nth-child(3) { width: 150px !important; max-width: 150px !important; }
+        #personnes-table th:nth-child(4), #personnes-table td:nth-child(4) { width: 200px !important; max-width: 200px !important; }
+        #personnes-table th:nth-child(5), #personnes-table td:nth-child(5) { width: 180px !important; max-width: 180px !important; }
+        #personnes-table th:nth-child(6), #personnes-table td:nth-child(6) { width: 120px !important; max-width: 120px !important; }
+        #personnes-table th:nth-child(7), #personnes-table td:nth-child(7) { width: 120px !important; max-width: 120px !important; }
+        
+        #personnes-table th:nth-child(1), #personnes-table td:nth-child(1),
+        #personnes-table th:nth-child(2), #personnes-table td:nth-child(2),
+        #personnes-table th:nth-child(3), #personnes-table td:nth-child(3),
+        #personnes-table th:nth-child(5), #personnes-table td:nth-child(5),
+        #personnes-table th:nth-child(6), #personnes-table td:nth-child(6),
+        #personnes-table th:nth-child(7), #personnes-table td:nth-child(7) {
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+        }
+        
+        /* Marges pour le tableau */
+        .container-fluid.mt-4 {
+            padding-left: 3rem !important;
+            padding-right: 3rem !important;
+        }
+    </style>
+    
     <div class="container-fluid mt-4">
         <h1 class="mb-4">Gestion des Personnes</h1>
         
@@ -75,15 +102,15 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover mb-0 fs-5">
+                    <table id="personnes-table" class="table table-striped table-hover mb-0 fs-5">
                         <thead class="table-dark">
                             <tr>
-                                <th class="fs-5">Civilité</th>
-                                <th class="fs-5">Nom</th>
-                                <th class="fs-5">Prénom</th>
+                                <th class="fs-5" style="width: 80px;">Civilité</th>
+                                <th class="fs-5" style="width: 150px;">Nom</th>
+                                <th class="fs-5" style="width: 150px;">Prénom</th>
                                 <th class="fs-5">Email</th>
-                                <th class="fs-5">Téléphone</th>
-                                <th class="fs-5">Ville</th>
+                                <th class="fs-5" style="width: 180px;">Téléphone</th>
+                                <th class="fs-5" style="width: 120px;">Ville</th>
                                 <th class="text-center fs-5" style="width: 120px;">Actions</th>
                             </tr>
                         </thead>
