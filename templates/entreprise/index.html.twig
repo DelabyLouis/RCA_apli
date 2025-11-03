@@ -5,6 +5,32 @@
 {% block body %}
     {{ include('components/inline_edit_styles.html.twig') }}
     
+    <style>
+        #entreprises-table th:nth-child(1), #entreprises-table td:nth-child(1) { width: 195px !important; max-width: 195px !important; }
+        #entreprises-table th:nth-child(2), #entreprises-table td:nth-child(2) { width: 155px !important; max-width: 155px !important; }
+        #entreprises-table th:nth-child(3), #entreprises-table td:nth-child(3) { width: 165px !important; max-width: 165px !important; }
+        #entreprises-table th:nth-child(4), #entreprises-table td:nth-child(4) { width: 175px !important; max-width: 175px !important; }
+        #entreprises-table th:nth-child(5), #entreprises-table td:nth-child(5) { width: 145px !important; max-width: 145px !important; }
+        #entreprises-table th:nth-child(6), #entreprises-table td:nth-child(6) { width: 120px !important; max-width: 120px !important; }
+        
+        #entreprises-table th:nth-child(1), #entreprises-table td:nth-child(1),
+        #entreprises-table th:nth-child(2), #entreprises-table td:nth-child(2),
+        #entreprises-table th:nth-child(3), #entreprises-table td:nth-child(3),
+        #entreprises-table th:nth-child(4), #entreprises-table td:nth-child(4),
+        #entreprises-table th:nth-child(5), #entreprises-table td:nth-child(5),
+        #entreprises-table th:nth-child(6), #entreprises-table td:nth-child(6) {
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+        }
+        
+        /* Marges pour le tableau */
+        .container-fluid.mt-4 {
+            padding-left: 3rem !important;
+            padding-right: 3rem !important;
+        }
+    </style>
+    
     <div class="container-fluid mt-4">
         <h1 class="mb-4">Gestion des Entreprises</h1>
         
@@ -64,7 +90,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover mb-0 fs-5">
+                    <table id="entreprises-table" class="table table-striped table-hover mb-0 fs-5">
                         <thead class="table-dark">
                             <tr>
                                 <th class="fs-5">Nom</th>
@@ -89,9 +115,6 @@
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}
-                                </td>
-                                <td>
-                                    <span class="text-muted">-</span>
                                 </td>
                                 <td>
                                     {% if entreprise.email %}
