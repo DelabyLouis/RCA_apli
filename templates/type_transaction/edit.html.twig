@@ -27,11 +27,21 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                {{ form_label(form.typeMontantAutorise, 'Type de montant autorisé') }}
+                                {{ form_label(form.description, 'Description') }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                {{ form_label(form.type_montant_autorise, 'Type de montant autorisé') }}
                                 <div class="form-check-container">
-                                    {{ form_widget(form.typeMontantAutorise) }}
+                                    {{ form_widget(form.type_montant_autorise) }}
                                 </div>
-                                {{ form_errors(form.typeMontantAutorise) }}
+                                {{ form_errors(form.type_montant_autorise) }}
                             </div>
                         </div>
                     </div>
