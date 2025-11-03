@@ -1,33 +1,173 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}ModeDePaiement index{% endblock %}
+{% block title %}Modes de Paiement - RCA Application{% endblock %}
 
 {% block body %}
-    <h1>ModeDePaiement index</h1>
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-primary">
+                <i class="fas fa-credit-card me-2"></i>Modes de Paiement
+            </h1>
+            <a href="{{ path('app_mode_de_paiement_new') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-plus me-2"></i>Nouveau Mode de Paiement
+            </a>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Libelle</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for mode_de_paiement in mode_de_paiements %}
-            <tr>
-                <td>{{ mode_de_paiement.libelle }}</td>
-                <td>
-                    <a href="{{ path('app_mode_de_paiement_show', {'id': mode_de_paiement.id}) }}">show</a>
-                    <a href="{{ path('app_mode_de_paiement_edit', {'id': mode_de_paiement.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="2">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <!-- Filtres -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtres</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Filtre Libellé -->
+                    <div class="col-md-8 mb-3">
+                        <label for="filter-libelle" class="form-label">Libellé du mode de paiement</label>
+                        <input type="text" class="form-control" id="filter-libelle" placeholder="Rechercher par libellé...">
+                    </div>
+                    
+                    <!-- Actions filtres -->
+                    <div class="col-md-4 mb-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-secondary me-2" onclick="clearAllFilters()">
+                            <i class="fas fa-eraser me-1"></i>Effacer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <a href="{{ path('app_mode_de_paiement_new') }}">Create new</a>
+        <!-- Tableau des modes de paiement -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Liste des Modes de Paiement
+                    <span id="total-count" class="badge bg-primary ms-2">{{ mode_de_paiements|length }}</span>
+                </h5>
+                <small class="text-muted">
+                    <span id="filtered-count">{{ mode_de_paiements|length }}</span> modes affichés
+                </small>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0 fs-5">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="fs-5">Libellé</th>
+                                <th class="fs-5">Transactions</th>
+                                <th class="text-center fs-5" style="width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modes-table-body">
+                            {% for mode_de_paiement in mode_de_paiements %}
+                            <tr class="mode-row" 
+                                data-libelle="{{ mode_de_paiement.libelle|lower }}">
+                                <td class="fw-semibold">
+                                    <i class="fas fa-credit-card me-2 text-primary"></i>
+                                    {{ mode_de_paiement.libelle }}
+                                </td>
+                                <td>
+                                    {% if mode_de_paiement.transactions is defined %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-exchange-alt me-1"></i>
+                                            {{ mode_de_paiement.transactions|length }} transactions
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-exchange-alt me-1"></i>
+                                            0 transactions
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group" aria-label="Actions">
+                                        <a href="{{ path('app_mode_de_paiement_show', {'id': mode_de_paiement.id}) }}" 
+                                           class="btn btn-outline-info btn-sm" 
+                                           title="Voir les détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_mode_de_paiement_edit', {'id': mode_de_paiement.id}) }}" 
+                                           class="btn btn-outline-warning btn-sm" 
+                                           title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_mode_de_paiement_delete', {'id': mode_de_paiement.id}) }}" 
+                                              class="d-inline" 
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce mode de paiement ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mode_de_paiement.id) }}">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr id="no-results-row">
+                                <td colspan="3" class="text-center py-4 text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                                    <p class="mb-0">Aucun mode de paiement trouvé</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript pour les filtres -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterLibelle = document.getElementById('filter-libelle');
+            const tableBody = document.getElementById('modes-table-body');
+            const filteredCount = document.getElementById('filtered-count');
+            const noResultsRow = document.getElementById('no-results-row');
+            
+            function applyFilters() {
+                const libelleValue = filterLibelle.value.toLowerCase();
+                
+                const rows = document.querySelectorAll('.mode-row');
+                let visibleCount = 0;
+                
+                rows.forEach(row => {
+                    const libelle = row.dataset.libelle || '';
+                    
+                    const matchesLibelle = libelleValue === '' || libelle.includes(libelleValue);
+                    
+                    if (matchesLibelle) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                filteredCount.textContent = visibleCount;
+                
+                // Afficher "Aucun résultat" si nécessaire
+                if (visibleCount === 0 && filterLibelle.value) {
+                    if (noResultsRow) noResultsRow.style.display = '';
+                } else {
+                    if (noResultsRow) noResultsRow.style.display = 'none';
+                }
+            }
+            
+            // Ajouter les event listeners
+            filterLibelle.addEventListener('input', applyFilters);
+        });
+        
+        function clearAllFilters() {
+            document.getElementById('filter-libelle').value = '';
+            
+            // Réappliquer les filtres (vides)
+            document.querySelectorAll('.mode-row').forEach(row => {
+                row.style.display = '';
+            });
+            
+            document.getElementById('filtered-count').textContent = document.querySelectorAll('.mode-row').length;
+            const noResultsRow = document.getElementById('no-results-row');
+            if (noResultsRow) noResultsRow.style.display = 'none';
+        }
+    </script>
 {% endblock %}

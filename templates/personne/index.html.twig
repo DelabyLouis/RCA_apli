@@ -1,389 +1,225 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Personne index{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .editable-field {
-            cursor: pointer;
-            padding: 5px;
-            border: 1px solid transparent;
-            border-radius: 3px;
-            transition: all 0.2s;
-        }
-        
-        .editable-field:hover {
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-        }
-        
-        .editable-field.editing {
-            background-color: #fff;
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-        
-        .editable-input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: inherit;
-            font-family: inherit;
-            padding: 0;
-            margin: 0;
-        }
-        
-        /* Masquer les rectangles blancs indésirables */
-        .editable-field input,
-        .editable-field textarea,
-        .editable-field select {
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-            background: transparent !important;
-        }
-        
-        .saving {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        .alert {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-    </style>
-{% endblock %}
+{% block title %}Gestion des Personnes - RCA Application{% endblock %}
 
 {% block body %}
-    <h1>Personne index</h1>
+    {{ include('components/inline_edit_styles.html.twig') }}
     
-    <div id="message-container"></div>
-
-        {% include 'components/entity_filter_detailed.html.twig' with {
-        'filters': [
-            {
-                'field': 'nom',
-                'label': 'Nom',
-                'type': 'text',
-                'placeholder': 'Rechercher par nom...',
-                'width': 3
-            },
-            {
-                'field': 'prenom',
-                'label': 'Prénom',
-                'type': 'text',
-                'placeholder': 'Rechercher par prénom...',
-                'width': 3
-            },
-            {
-                'field': 'email',
-                'label': 'Email',
-                'type': 'text',
-                'placeholder': 'Rechercher par email...',
-                'width': 3
-            },
-            {
-                'field': 'ville',
-                'label': 'Ville',
-                'type': 'text',
-                'placeholder': 'Rechercher par ville...',
-                'width': 3
-            }
-        ],
-        'tableSelector': '.table tbody'
-    } %}
-
-    <table class="table" data-turbo="false">
-        <thead>
-            <tr>
-                <th>Nom</th>
-                <th>Prénom</th>
-                <th>Civilité</th>
-                <th>Adresse complète</th>
-                <th>Téléphone</th>
-                <th>Email</th>
-                <th>Entreprises</th>
-                <th>Compte utilisateur</th>
-                <th>Transactions</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for personne in personnes %}
-            <tr data-id="{{ personne.idPersonne }}">
-                <td class="editable-field" data-field="nom">{{ personne.nom }}</td>
-                <td class="editable-field" data-field="prenom">{{ personne.prenom }}</td>
-                <td class="editable-field civilite-compact" data-field="civilite">{{ personne.civilite }}</td>
-                <td class="adresse-complete" title="Cliquer pour modifier l'adresse">
-                    <div class="adresse-ligne">
-                        {% if personne.numeroVoie or personne.rue %}
-                            <strong>{{ personne.numeroVoie }} {{ personne.rue }}</strong><br>
-                        {% endif %}
-                        {% if personne.complementAdresse %}
-                            <em>{{ personne.complementAdresse }}</em><br>
-                        {% endif %}
-                        {% if personne.ville or personne.codePostal or personne.pays %}
-                            {{ personne.codePostal }} {{ personne.ville }}{% if personne.pays %}, {{ personne.pays }}{% endif %}
-                        {% endif %}
+    <div class="container-fluid mt-4">
+        <h1 class="mb-4">Gestion des Personnes</h1>
+        
+        <div class="row mb-3">
+            <div class="col">
+                <a href="{{ path('app_personne_new') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Nouvelle Personne
+                </a>
+            </div>
+        </div>
+        
+        <!-- Filtres personnalisés -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtres</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Filtre Nom/Prénom -->
+                    <div class="col-md-3 mb-3">
+                        <label for="filter-nom" class="form-label">Nom/Prénom</label>
+                        <input type="text" class="form-control" id="filter-nom" placeholder="Rechercher par nom ou prénom...">
                     </div>
-                </td>
-                <td class="editable-field telephone-compact" data-field="telephone">{{ personne.telephone }}</td>
-                <td class="editable-field" data-field="email">{{ personne.email }}</td>
-                <td>
-                    {% if personne.entreprise|length > 0 %}
-                        {% for entreprise in personne.entreprise %}
-                            <span class="badge bg-primary me-1">{{ entreprise.nomEntreprise }}</span>
-                        {% endfor %}
-                    {% else %}
-                        <span class="text-muted">Aucune</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if personne.user %}
-                        <span class="badge bg-success">Oui</span>
-                    {% else %}
-                        <span class="badge bg-secondary">Non</span>
-                    {% endif %}
-                </td>
-                <td class="transaction-count">
-                    <span class="badge bg-info text-dark">{{ personne.transactions|length }}</span>
-                </td>
-                <td>
-                    <div class="btn-group" role="group">
-                        <a href="{{ path('app_personne_show', {'id_personne': personne.idPersonne}) }}" class="btn btn-info btn-sm" title="Voir les détails">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="{{ path('app_personne_edit', {'id_personne': personne.idPersonne}) }}" class="btn btn-warning btn-sm" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <button class="btn btn-danger btn-sm delete-btn" data-id="{{ personne.idPersonne }}" title="Supprimer">
-                            <i class="fas fa-trash"></i>
+                    
+                    <!-- Filtre Civilité -->
+                    <div class="col-md-2 mb-3">
+                        <label for="filter-civilite" class="form-label">Civilité</label>
+                        <select class="form-select" id="filter-civilite">
+                            <option value="">Toutes</option>
+                            <option value="M.">M.</option>
+                            <option value="Mme">Mme</option>
+                            <option value="Mlle">Mlle</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Filtre Email -->
+                    <div class="col-md-3 mb-3">
+                        <label for="filter-email" class="form-label">Email</label>
+                        <input type="text" class="form-control" id="filter-email" placeholder="Rechercher par email...">
+                    </div>
+                    
+                    <!-- Filtre Ville -->
+                    <div class="col-md-2 mb-3">
+                        <label for="filter-ville" class="form-label">Ville</label>
+                        <input type="text" class="form-control" id="filter-ville" placeholder="Ville...">
+                    </div>
+                    
+                    <!-- Actions filtres -->
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-secondary me-2" onclick="clearAllFilters()">
+                            <i class="fas fa-eraser me-1"></i>Effacer
                         </button>
                     </div>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="10">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                </div>
+            </div>
+        </div>
 
-    <a href="{{ path('app_personne_new') }}">Create new</a>
-{% endblock %}
+        <!-- Tableau des personnes -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>Liste des Personnes
+                    <span id="total-count" class="badge bg-primary ms-2">{{ personnes|length }}</span>
+                </h5>
+                <small class="text-muted">
+                    <span id="filtered-count">{{ personnes|length }}</span> personnes affichées
+                </small>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0 fs-5">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="fs-5">Civilité</th>
+                                <th class="fs-5">Nom</th>
+                                <th class="fs-5">Prénom</th>
+                                <th class="fs-5">Email</th>
+                                <th class="fs-5">Téléphone</th>
+                                <th class="fs-5">Ville</th>
+                                <th class="text-center fs-5" style="width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="personnes-table-body">
+                            {% for personne in personnes %}
+                            <tr class="personne-row" 
+                                data-nom="{{ personne.nom|lower }}" 
+                                data-prenom="{{ personne.prenom|lower }}" 
+                                data-email="{{ personne.email|lower }}" 
+                                data-civilite="{{ personne.civilite }}"
+                                data-ville="{{ personne.ville|lower }}">
+                                <td>{{ personne.civilite }}</td>
+                                <td class="fw-semibold">{{ personne.nom }}</td>
+                                <td>{{ personne.prenom }}</td>
+                                <td>
+                                    {% if personne.email %}
+                                        <a href="mailto:{{ personne.email }}" class="text-decoration-none">
+                                            <i class="fas fa-envelope me-1"></i>{{ personne.email }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if personne.telephone %}
+                                        <i class="fas fa-phone me-1"></i>{{ personne.telephone }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if personne.ville %}
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ personne.ville }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ path('app_personne_show', {'id_personne': personne.idPersonne}) }}" 
+                                           class="btn btn-outline-primary btn-sm" 
+                                           title="Voir les détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_personne_edit', {'id_personne': personne.idPersonne}) }}" 
+                                           class="btn btn-outline-secondary btn-sm" 
+                                           title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr id="no-results-row" style="display: none;">
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fas fa-search me-2"></i>Aucune personne ne correspond aux critères de recherche.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-{% block javascripts %}
-    {{ parent() }}
+    <!-- JavaScript pour les filtres -->
     <script>
-        // Attendre que tout soit complètement chargé
-        window.addEventListener('load', function() {
-            console.log('Window load - JavaScript chargé');
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterNom = document.getElementById('filter-nom');
+            const filterCivilite = document.getElementById('filter-civilite');
+            const filterEmail = document.getElementById('filter-email');
+            const filterVille = document.getElementById('filter-ville');
+            const tableBody = document.getElementById('personnes-table-body');
+            const filteredCount = document.getElementById('filtered-count');
+            const noResultsRow = document.getElementById('no-results-row');
             
-            let currentEditingCell = null;
-            let originalValue = '';
-            
-            // Petit délai pour s'assurer que Turbo a fini
-            setTimeout(function() {
-                const editableFields = document.querySelectorAll('.editable-field');
-                console.log('Nombre de champs éditables trouvés:', editableFields.length);
+            function applyFilters() {
+                const nomValue = filterNom.value.toLowerCase();
+                const civiliteValue = filterCivilite.value;
+                const emailValue = filterEmail.value.toLowerCase();
+                const villeValue = filterVille.value.toLowerCase();
                 
-                function showMessage(message, type) {
-                const container = document.getElementById('message-container');
-                const alert = document.createElement('div');
-                alert.className = `alert alert-${type}`;
-                alert.textContent = message;
-                container.appendChild(alert);
+                const rows = document.querySelectorAll('.personne-row');
+                let visibleCount = 0;
                 
-                setTimeout(() => {
-                    alert.remove();
-                }, 3000);
-            }
-            
-            function saveField(cell, field, value, personneId) {
-                const row = cell.closest('tr');
-                row.classList.add('saving');
-                
-                fetch(`/personne/${personneId}/update-field`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    row.classList.remove('saving');
+                rows.forEach(row => {
+                    const nom = row.dataset.nom || '';
+                    const prenom = row.dataset.prenom || '';
+                    const email = row.dataset.email || '';
+                    const civilite = row.dataset.civilite || '';
+                    const ville = row.dataset.ville || '';
                     
-                    if (data.success) {
-                        cell.textContent = value || '';
-                    } else {
-                        cell.textContent = originalValue;
-                        showMessage(data.message, 'danger');
-                    }
-                })
-                .catch(error => {
-                    row.classList.remove('saving');
-                    cell.textContent = originalValue;
-                    showMessage('Erreur de communication avec le serveur', 'danger');
-                    console.error('Error:', error);
-                });
-            }
-            
-            function startEditing(cell) {
-                console.log('startEditing appelé pour:', cell);
-                if (currentEditingCell && currentEditingCell !== cell) {
-                    stopEditing(currentEditingCell, false);
-                }
-                
-                currentEditingCell = cell;
-                originalValue = cell.textContent;
-                
-                cell.classList.add('editing');
-                
-                const input = document.createElement('input');
-                input.className = 'editable-input';
-                input.type = 'text';
-                input.value = originalValue;
-                
-                cell.textContent = '';
-                cell.appendChild(input);
-                
-                input.focus();
-                input.select();
-                
-                input.addEventListener('blur', function() {
-                    stopEditing(cell, true);
-                });
-                
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        stopEditing(cell, true);
-                    } else if (e.key === 'Escape') {
-                        e.preventDefault();
-                        stopEditing(cell, false);
-                    }
-                });
-                
-                // Empêcher la propagation du clic sur l'input pour éviter de relancer l'édition
-                input.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
-            
-            function stopEditing(cell, save) {
-                if (!cell || !cell.classList.contains('editing')) return;
-                
-                const input = cell.querySelector('input');
-                const newValue = input ? input.value.trim() : '';
-                
-                cell.classList.remove('editing');
-                
-                if (save && newValue !== originalValue) {
-                    const field = cell.dataset.field;
-                    const personneId = cell.closest('tr').dataset.id;
+                    const matchesNom = nomValue === '' || nom.includes(nomValue) || prenom.includes(nomValue);
+                    const matchesCivilite = civiliteValue === '' || civilite === civiliteValue;
+                    const matchesEmail = emailValue === '' || email.includes(emailValue);
+                    const matchesVille = villeValue === '' || ville.includes(villeValue);
                     
-                    if ((field === 'nom' || field === 'prenom') && !newValue) {
-                        showMessage('Le nom et le prénom ne peuvent pas être vides', 'danger');
-                        cell.textContent = originalValue;
+                    if (matchesNom && matchesCivilite && matchesEmail && matchesVille) {
+                        row.style.display = '';
+                        visibleCount++;
                     } else {
-                        saveField(cell, field, newValue, personneId);
+                        row.style.display = 'none';
                     }
+                });
+                
+                filteredCount.textContent = visibleCount;
+                
+                // Afficher "Aucun résultat" si nécessaire
+                if (visibleCount === 0) {
+                    noResultsRow.style.display = '';
                 } else {
-                    cell.textContent = originalValue;
+                    noResultsRow.style.display = 'none';
                 }
-                
-                currentEditingCell = null;
             }
             
-            // Délégation d'événements pour les cellules éditables - plus robuste
-            document.addEventListener('click', function(e) {
-                const cell = e.target.closest('.editable-field');
-                if (!cell) return;
-                
-                // Si on clique sur un input/textarea à l'intérieur, ne pas traiter le clic de la cellule
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-                    return;
-                }
-                
-                // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
-                if (cell.classList.contains('editing')) {
-                    return;
-                }
-                
-                startEditing(cell);
+            // Ajouter les event listeners
+            filterNom.addEventListener('input', applyFilters);
+            filterCivilite.addEventListener('change', applyFilters);
+            filterEmail.addEventListener('input', applyFilters);
+            filterVille.addEventListener('input', applyFilters);
+        });
+        
+        function clearAllFilters() {
+            document.getElementById('filter-nom').value = '';
+            document.getElementById('filter-civilite').value = '';
+            document.getElementById('filter-email').value = '';
+            document.getElementById('filter-ville').value = '';
+            
+            // Réappliquer les filtres (vides)
+            document.querySelectorAll('.personne-row').forEach(row => {
+                row.style.display = '';
             });
             
-            document.addEventListener('click', function(e) {
-                if (currentEditingCell && !currentEditingCell.contains(e.target)) {
-                    stopEditing(currentEditingCell, false);
-                }
-            });
-
-            // Délégation d'événements pour les boutons de suppression
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.delete-btn')) return;
-                
-                const button = e.target.closest('.delete-btn');
-                e.stopPropagation();
-                
-                const id = button.getAttribute('data-id');
-                const row = button.closest('tr');
-                
-                if (confirm('Êtes-vous sûr de vouloir supprimer cette personne ?')) {
-                    // Désactiver le bouton pendant la suppression
-                    button.disabled = true;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
-                        
-                        fetch(`/personne/${id}/delete-ajax`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Supprimer la ligne du tableau avec animation
-                                row.style.transition = 'opacity 0.3s';
-                                row.style.opacity = '0';
-                                setTimeout(() => {
-                                    row.remove();
-                                }, 300);
-                            } else {
-                                alert('Erreur lors de la suppression : ' + data.message);
-                                // Restaurer le bouton
-                                this.disabled = false;
-                                this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erreur:', error);
-                            alert('Erreur lors de la suppression');
-                            // Restaurer le bouton
-                            button.disabled = false;
-                            button.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
-                        });
-                    }
-                });
-            }, 100); // Délai pour s'assurer que les boutons sont prêts
-        });
+            document.getElementById('filtered-count').textContent = document.querySelectorAll('.personne-row').length;
+            document.getElementById('no-results-row').style.display = 'none';
+        }
     </script>
 {% endblock %}

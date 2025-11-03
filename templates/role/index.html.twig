@@ -1,338 +1,186 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Role index{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .editable-field {
-            cursor: pointer;
-            padding: 5px;
-            border: 1px solid transparent;
-            border-radius: 3px;
-            transition: all 0.2s;
-        }
-        
-        .editable-field:hover {
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-        }
-        
-        .editable-field.editing {
-            background-color: #fff;
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-        
-        .editable-input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: inherit;
-            font-family: inherit;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .editable-textarea {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: inherit;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 20px;
-            padding: 0;
-            margin: 0;
-        }
-        
-        /* Masquer les rectangles blancs indésirables */
-        .editable-field input,
-        .editable-field textarea,
-        .editable-field select {
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-            background: transparent !important;
-        }
-        
-        .saving {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        .alert {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-    </style>
-{% endblock %}
+{% block title %}Gestion des Rôles - RCA Application{% endblock %}
 
 {% block body %}
-    <h1>Role index</h1>
-    
-    {% include 'components/entity_filter.html.twig' with {
-        'placeholder': 'Rechercher par libellé, description...',
-        'tableSelector': '.table tbody'
-    } %}
-    
-    <div id="message-container"></div>
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-primary">
+                <i class="fas fa-user-tag me-2"></i>Gestion des Rôles
+            </h1>
+            <a href="{{ path('app_role_new') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-plus me-2"></i>Nouveau Rôle
+            </a>
+        </div>
 
-    <table class="table" data-turbo="false">
-        <thead>
-            <tr>
-                <th>Id role</th>
-                <th>Libelle</th>
-                <th>Description</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for role in roles %}
-            <tr data-id="{{ role.idRole }}">
-                <td>{{ role.idRole }}</td>
-                <td class="editable-field" data-field="libelle">{{ role.libelle }}</td>
-                <td class="editable-field" data-field="description">{{ role.description ?? 'Aucune description' }}</td>
-                <td>
-                    <div class="btn-group" role="group">
-                        <a href="{{ path('app_role_show', {'id_role': role.idRole}) }}" class="btn btn-info btn-sm" title="Voir les détails">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="{{ path('app_role_edit', {'id_role': role.idRole}) }}" class="btn btn-warning btn-sm" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <button class="btn btn-danger btn-sm delete-btn" data-id="{{ role.idRole }}" title="Supprimer">
-                            <i class="fas fa-trash"></i>
+        <!-- Filtres -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtres</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Filtre Libellé -->
+                    <div class="col-md-4 mb-3">
+                        <label for="filter-libelle" class="form-label">Libellé du rôle</label>
+                        <input type="text" class="form-control" id="filter-libelle" placeholder="Rechercher par libellé...">
+                    </div>
+                    
+                    <!-- Filtre Description -->
+                    <div class="col-md-6 mb-3">
+                        <label for="filter-description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="filter-description" placeholder="Rechercher dans la description...">
+                    </div>
+                    
+                    <!-- Actions filtres -->
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-secondary me-2" onclick="clearAllFilters()">
+                            <i class="fas fa-eraser me-1"></i>Effacer
                         </button>
                     </div>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="3">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                </div>
+            </div>
+        </div>
 
-    <a href="{{ path('app_role_new') }}">Create new</a>
-{% endblock %}
+        <!-- Tableau des rôles -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Liste des Rôles
+                    <span id="total-count" class="badge bg-primary ms-2">{{ roles|length }}</span>
+                </h5>
+                <small class="text-muted">
+                    <span id="filtered-count">{{ roles|length }}</span> rôles affichés
+                </small>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0 fs-5">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="fs-5">Libellé</th>
+                                <th class="fs-5">Description</th>
+                                <th class="fs-5">Utilisateurs</th>
+                                <th class="text-center fs-5" style="width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roles-table-body">
+                            {% for role in roles %}
+                            <tr class="role-row" 
+                                data-libelle="{{ role.libelle|lower }}" 
+                                data-description="{{ role.description|default('')|lower }}">
+                                <td class="fw-semibold">
+                                    <span class="badge bg-primary">{{ role.libelle }}</span>
+                                </td>
+                                <td>
+                                    {% if role.description %}
+                                        {{ role.description }}
+                                    {% else %}
+                                        <span class="text-muted">Aucune description</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-users me-1"></i>
+                                        {{ role.users|length }} utilisateurs
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group" aria-label="Actions">
+                                        <a href="{{ path('app_role_show', {'id_role': role.idRole}) }}" 
+                                           class="btn btn-outline-info btn-sm" 
+                                           title="Voir les détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_role_edit', {'id_role': role.idRole}) }}" 
+                                           class="btn btn-outline-warning btn-sm" 
+                                           title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_role_delete', {'id_role': role.idRole}) }}" 
+                                              class="d-inline" 
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ role.idRole) }}">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr id="no-results-row">
+                                <td colspan="4" class="text-center py-4 text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                                    <p class="mb-0">Aucun rôle trouvé</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-{% block javascripts %}
-    {{ parent() }}
+    <!-- JavaScript pour les filtres -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            let currentEditingCell = null;
-            let originalValue = '';
+            const filterLibelle = document.getElementById('filter-libelle');
+            const filterDescription = document.getElementById('filter-description');
+            const tableBody = document.getElementById('roles-table-body');
+            const filteredCount = document.getElementById('filtered-count');
+            const noResultsRow = document.getElementById('no-results-row');
             
-            function showMessage(message, type) {
-                const container = document.getElementById('message-container');
-                const alert = document.createElement('div');
-                alert.className = `alert alert-${type}`;
-                alert.textContent = message;
-                container.appendChild(alert);
+            function applyFilters() {
+                const libelleValue = filterLibelle.value.toLowerCase();
+                const descriptionValue = filterDescription.value.toLowerCase();
                 
-                setTimeout(() => {
-                    alert.remove();
-                }, 3000);
-            }
-            
-            function saveField(cell, field, value, roleId) {
-                const row = cell.closest('tr');
-                row.classList.add('saving');
+                const rows = document.querySelectorAll('.role-row');
+                let visibleCount = 0;
                 
-                fetch(`/role/${roleId}/update-field`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    row.classList.remove('saving');
+                rows.forEach(row => {
+                    const libelle = row.dataset.libelle || '';
+                    const description = row.dataset.description || '';
                     
-                    if (data.success) {
-                        cell.textContent = value || (field === 'description' ? 'Aucune description' : '');
-                    } else {
-                        cell.textContent = originalValue;
-                        showMessage(data.message, 'danger');
-                    }
-                })
-                .catch(error => {
-                    row.classList.remove('saving');
-                    cell.textContent = originalValue;
-                    showMessage('Erreur de communication avec le serveur', 'danger');
-                    console.error('Error:', error);
-                });
-            }
-            
-            function startEditing(cell) {
-                if (currentEditingCell && currentEditingCell !== cell) {
-                    stopEditing(currentEditingCell, false);
-                }
-                
-                currentEditingCell = cell;
-                originalValue = cell.textContent;
-                
-                let editValue = originalValue;
-                if (cell.dataset.field === 'description' && originalValue === 'Aucune description') {
-                    editValue = '';
-                }
-                
-                cell.classList.add('editing');
-                
-                let input;
-                if (cell.dataset.field === 'description') {
-                    input = document.createElement('textarea');
-                    input.className = 'editable-textarea';
-                    input.rows = 2;
-                } else {
-                    input = document.createElement('input');
-                    input.className = 'editable-input';
-                    input.type = 'text';
-                }
-                
-                input.value = editValue;
-                cell.textContent = '';
-                cell.appendChild(input);
-                
-                input.focus();
-                if (input.type === 'text') {
-                    input.select();
-                }
-                
-                input.addEventListener('blur', function() {
-                    stopEditing(cell, true);
-                });
-                
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        stopEditing(cell, true);
-                    } else if (e.key === 'Escape') {
-                        e.preventDefault();
-                        stopEditing(cell, false);
-                    }
-                });
-                
-                // Empêcher la propagation du clic sur l'input pour éviter de relancer l'édition
-                input.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
-            
-            function stopEditing(cell, save) {
-                if (!cell || !cell.classList.contains('editing')) return;
-                
-                const input = cell.querySelector('input, textarea');
-                const newValue = input ? input.value.trim() : '';
-                
-                cell.classList.remove('editing');
-                
-                if (save && newValue !== originalValue.replace('Aucune description', '')) {
-                    const field = cell.dataset.field;
-                    const roleId = cell.closest('tr').dataset.id;
+                    const matchesLibelle = libelleValue === '' || libelle.includes(libelleValue);
+                    const matchesDescription = descriptionValue === '' || description.includes(descriptionValue);
                     
-                    if (field === 'libelle' && !newValue) {
-                        showMessage('Le libellé ne peut pas être vide', 'danger');
-                        cell.textContent = originalValue;
+                    if (matchesLibelle && matchesDescription) {
+                        row.style.display = '';
+                        visibleCount++;
                     } else {
-                        saveField(cell, field, newValue, roleId);
+                        row.style.display = 'none';
                     }
-                } else {
-                    cell.textContent = originalValue;
-                }
+                });
                 
-                currentEditingCell = null;
+                filteredCount.textContent = visibleCount;
+                
+                // Afficher "Aucun résultat" si nécessaire
+                if (visibleCount === 0 && (filterLibelle.value || filterDescription.value)) {
+                    if (noResultsRow) noResultsRow.style.display = '';
+                } else {
+                    if (noResultsRow) noResultsRow.style.display = 'none';
+                }
             }
             
-            // Délégation d'événements pour les cellules éditables - plus robuste
-            document.addEventListener('click', function(e) {
-                const cell = e.target.closest('.editable-field');
-                if (!cell) return;
-                
-                // Si on clique sur un input/textarea à l'intérieur, ne pas traiter le clic de la cellule
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-                    return;
-                }
-                
-                // Si la cellule est déjà en cours d'édition, ne pas relancer l'édition
-                if (cell.classList.contains('editing')) {
-                    return;
-                }
-                
-                startEditing(cell);
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (currentEditingCell && !currentEditingCell.contains(e.target)) {
-                    stopEditing(currentEditingCell, false);
-                }
-            });
-
-            // Délégation d'événements pour les boutons de suppression
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.delete-btn')) return;
-                
-                const button = e.target.closest('.delete-btn');
-                e.stopPropagation();
-                
-                const id = button.getAttribute('data-id');
-                const row = button.closest('tr');
-                
-                if (confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?')) {
-                    // Désactiver le bouton pendant la suppression
-                    button.disabled = true;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Suppression...';
-                        
-                        fetch(`/role/${id}/delete-ajax`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Supprimer la ligne du tableau avec animation
-                                row.style.transition = 'opacity 0.3s';
-                                row.style.opacity = '0';
-                                setTimeout(() => {
-                                    row.remove();
-                                }, 300);
-                            } else {
-                                alert('Erreur lors de la suppression : ' + data.message);
-                                // Restaurer le bouton
-                                this.disabled = false;
-                                this.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erreur:', error);
-                            alert('Erreur lors de la suppression');
-                            // Restaurer le bouton
-                            button.disabled = false;
-                            button.innerHTML = '<i class="fas fa-trash me-1"></i> Supprimer';
-                        });
-                    }
-            });
-            }, 100); // Délai pour s'assurer que tous les éléments sont prêts
+            // Ajouter les event listeners
+            filterLibelle.addEventListener('input', applyFilters);
+            filterDescription.addEventListener('input', applyFilters);
         });
+        
+        function clearAllFilters() {
+            document.getElementById('filter-libelle').value = '';
+            document.getElementById('filter-description').value = '';
+            
+            // Réappliquer les filtres (vides)
+            document.querySelectorAll('.role-row').forEach(row => {
+                row.style.display = '';
+            });
+            
+            document.getElementById('filtered-count').textContent = document.querySelectorAll('.role-row').length;
+            const noResultsRow = document.getElementById('no-results-row');
+            if (noResultsRow) noResultsRow.style.display = 'none';
+        }
     </script>
 {% endblock %}
