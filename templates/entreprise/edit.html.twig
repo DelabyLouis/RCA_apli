@@ -1,294 +1,53 @@
-{% extends 'base.html.twig' %}{% extends 'base.html.twig' %}
-
-
-
-{% block title %}Modifier {{ entreprise.nomEntreprise }}{% endblock %}{% block title %}Modifier {{ entreprise.nomEntreprise }}{% endblock %}
-
-
-
-{% block body %}{% block body %}
-
-<div class="container-fluid"><div class="container-fluid">
-
-    <div class="row">    <div class="row">
-
-        <div class="col-12">        <div class="col-12">
-
-            <div class="d-flex justify-content-between align-items-center mb-4">            <div class="d-flex justify-content-between align-items-center mb-4">
-
-                <h1><i class="fas fa-edit me-2"></i>Modifier {{ entreprise.nomEntreprise }}</h1>                <h1><i class="fas fa-edit me-2"></i>Modifier {{ entreprise.nomEntreprise }}</h1>
-
-                <a href="{{ path('app_entreprise_index') }}" class="btn btn-secondary">                <a href="{{ path('app_entreprise_index') }}" class="btn btn-secondary">
-
-                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
-
-                </a>                </a>
-
-            </div>            </div>
-
-
-
-            {% if form.vars.errors|length > 0 %}            {% if form.vars.errors|length > 0 %}
-
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-
-                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>
-
-                    <ul class="mb-0 mt-2">                    <ul class="mb-0 mt-2">
-
-                        {% for error in form.vars.errors %}                        {% for error in form.vars.errors %}
-
-                            <li>{{ error.message }}</li>                            <li>{{ error.message }}</li>
-
-                        {% endfor %}                        {% endfor %}
-
-                    </ul>                    </ul>
-
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-
-                </div>                </div>
-
-            {% endif %}            {% endif %}
-
-
-
-            <div class="card shadow-sm">            <div class="card shadow-sm">
-
-                <div class="card-body">                <div class="card-body">
-
-                    <div class="row">                    <div class="row">
-
-                        <div class="col-lg-6">                        <div class="col-lg-6">
-
-                            {{ form_start(form, {'attr': {'novalidate': false, 'id': 'entreprise_edit_form'}}) }}                            {{ form_start(form, {'attr': {'novalidate': false, 'id': 'entreprise_edit_form'}})
-
-                                                
-
-                            <div class="mb-3">                    <div class="col-md-6">
-
-                                {{ form_label(form.nom_entreprise, 'Nom de l\'entreprise', {'label_attr': {'class': 'form-label'}}) }}                        <div class="mb-3">
-
-                                {{ form_widget(form.nom_entreprise, {'attr': {'class': 'form-control' ~ (form.nom_entreprise.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                            {{ form_label(form.nom_entreprise, 'Nom de l\'entreprise', {'label_attr': {'class': 'form-label'}}) }}
-
-                                {% if form.nom_entreprise.vars.errors|length > 0 %}                            {{ form_widget(form.nom_entreprise, {'attr': {'class': 'form-control' ~ (form.nom_entreprise.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                                    <div class="invalid-feedback">                            {{ form_errors(form.nom_entreprise) }}
-
-                                        {% for error in form.nom_entreprise.vars.errors %}                        </div>
-
-                                            {{ error.message }}                    </div>
-
-                                        {% endfor %}                    
-
-                                    </div>                    <div class="col-md-3">
-
-                                {% endif %}                        <div class="mb-3">
-
-                                {{ form_errors(form.nom_entreprise) }}                            {{ form_label(form.siret, 'SIRET', {'label_attr': {'class': 'form-label'}}) }}
-
-                            </div>                            {{ form_widget(form.siret, {'attr': {'class': 'form-control' ~ (form.siret.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                                                        {{ form_errors(form.siret) }}
-
-                            <div class="mb-3">                        </div>
-
-                                {{ form_label(form.siret, 'SIRET', {'label_attr': {'class': 'form-label'}}) }}                    </div>
-
-                                {{ form_widget(form.siret, {'attr': {'class': 'form-control' ~ (form.siret.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                    
-
-                                {% if form.siret.vars.errors|length > 0 %}                    <div class="col-md-3">
-
-                                    <div class="invalid-feedback">                        <div class="mb-3">
-
-                                        {% for error in form.siret.vars.errors %}                            {{ form_label(form.siren, 'SIREN', {'label_attr': {'class': 'form-label'}}) }}
-
-                                            {{ error.message }}                            {{ form_widget(form.siren, {'attr': {'class': 'form-control' ~ (form.siren.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                                        {% endfor %}                            {{ form_errors(form.siren) }}
-
-                                    </div>                        </div>
-
-                                {% endif %}                    </div>
-
-                                {{ form_errors(form.siret) }}
-
-                            </div>                    <div class="col-12"><h6 class="text-muted border-bottom pb-2">Adresse</h6></div>
-
-                                                
-
-                            <div class="mb-3">                    <div class="col-md-2">
-
-                                {{ form_label(form.siren, 'SIREN', {'label_attr': {'class': 'form-label'}}) }}                        <div class="mb-3">
-
-                                {{ form_widget(form.siren, {'attr': {'class': 'form-control' ~ (form.siren.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                            {{ form_label(form.numero_voie, 'N°', {'label_attr': {'class': 'form-label'}}) }}
-
-                                {% if form.siren.vars.errors|length > 0 %}                            {{ form_widget(form.numero_voie, {'attr': {'class': 'form-control' ~ (form.numero_voie.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                                    <div class="invalid-feedback">                            {{ form_errors(form.numero_voie) }}
-
-                                        {% for error in form.siren.vars.errors %}                        </div>
-
-                                            {{ error.message }}                    </div>
-
-                                        {% endfor %}                    
-
-                                    </div>                    <div class="col-md-4">
-
-                                {% endif %}                        <div class="mb-3">
-
-                                {{ form_errors(form.siren) }}                            {{ form_label(form.rue, 'Rue', {'label_attr': {'class': 'form-label'}}) }}
-
-                            </div>                            {{ form_widget(form.rue, {'attr': {'class': 'form-control' ~ (form.rue.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                            {{ form_errors(form.rue) }}
-
-                            <h6 class="text-muted border-bottom pb-2 mb-3">Adresse</h6>                        </div>
-
-                                                </div>
-
-                            <div class="row">                    
-
-                                <div class="col-md-3">                    <div class="col-md-6">
-
-                                    <div class="mb-3">                        <div class="mb-3">
-
-                                        {{ form_label(form.numero_voie, 'N°', {'label_attr': {'class': 'form-label'}}) }}                            {{ form_label(form.complement_adresse, 'Complément d\'adresse', {'label_attr': {'class': 'form-label'}}) }}
-
-                                        {{ form_widget(form.numero_voie, {'attr': {'class': 'form-control' ~ (form.numero_voie.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                            {{ form_widget(form.complement_adresse, {'attr': {'class': 'form-control' ~ (form.complement_adresse.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                                        {{ form_errors(form.numero_voie) }}                            {{ form_errors(form.complement_adresse) }}
-
-                                    </div>                        </div>
-
-                                </div>                    </div>
-
-                                <div class="col-md-9">                    
-
-                                    <div class="mb-3">                    <div class="col-md-4">
-
-                                        {{ form_label(form.rue, 'Rue', {'label_attr': {'class': 'form-label'}}) }}                        <div class="mb-3">
-
-                                        {{ form_widget(form.rue, {'attr': {'class': 'form-control' ~ (form.rue.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                            {{ form_label(form.ville, 'Ville', {'label_attr': {'class': 'form-label'}}) }}
-
-                                        {{ form_errors(form.rue) }}                            {{ form_widget(form.ville, {'attr': {'class': 'form-control' ~ (form.ville.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                                    </div>                            {{ form_errors(form.ville) }}
-
-                                </div>                        </div>
-
-                            </div>                    </div>
-
-                                                
-
-                            <div class="mb-3">                    <div class="col-md-2">
-
-                                {{ form_label(form.complement_adresse, 'Complément d\'adresse', {'label_attr': {'class': 'form-label'}}) }}                        <div class="mb-3">
-
-                                {{ form_widget(form.complement_adresse, {'attr': {'class': 'form-control' ~ (form.complement_adresse.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                            {{ form_label(form.code_postal, 'Code postal', {'label_attr': {'class': 'form-label'}}) }}
-
-                                {{ form_errors(form.complement_adresse) }}                            {{ form_widget(form.code_postal, {'attr': {'class': 'form-control' ~ (form.code_postal.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                            </div>                            {{ form_errors(form.code_postal) }}
-
-                                                    </div>
-
-                            <div class="row">                    </div>
-
-                                <div class="col-md-3">                    
-
-                                    <div class="mb-3">                    <div class="col-md-6">
-
-                                        {{ form_label(form.code_postal, 'Code postal', {'label_attr': {'class': 'form-label'}}) }}                        <div class="mb-3">
-
-                                        {{ form_widget(form.code_postal, {'attr': {'class': 'form-control' ~ (form.code_postal.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                            {{ form_label(form.pays, 'Pays', {'label_attr': {'class': 'form-label'}}) }}
-
-                                        {{ form_errors(form.code_postal) }}                            {{ form_widget(form.pays, {'attr': {'class': 'form-control' ~ (form.pays.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                                    </div>                            {{ form_errors(form.pays) }}
-
-                                </div>                        </div>
-
-                                <div class="col-md-9">                    </div>
-
-                                    <div class="mb-3">
-
-                                        {{ form_label(form.ville, 'Ville', {'label_attr': {'class': 'form-label'}}) }}                    <div class="col-12"><h6 class="text-muted border-bottom pb-2">Contact</h6></div>
-
-                                        {{ form_widget(form.ville, {'attr': {'class': 'form-control' ~ (form.ville.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                    
-
-                                        {{ form_errors(form.ville) }}                    <div class="col-md-6">
-
-                                    </div>                        <div class="mb-3">
-
-                                </div>                            {{ form_label(form.telephone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
-
-                            </div>                            {{ form_widget(form.telephone, {'attr': {'class': 'form-control' ~ (form.telephone.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                                                        {{ form_errors(form.telephone) }}
-
-                            <div class="mb-3">                        </div>
-
-                                {{ form_label(form.pays, 'Pays', {'label_attr': {'class': 'form-label'}}) }}                    </div>
-
-                                {{ form_widget(form.pays, {'attr': {'class': 'form-control' ~ (form.pays.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                    
-
-                                {{ form_errors(form.pays) }}                    <div class="col-md-6">
-
-                            </div>                        <div class="mb-3">
-
-                            {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
-
-                            <h6 class="text-muted border-bottom pb-2 mb-3">Contact</h6>                            {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-
-                                                        {{ form_errors(form.email) }}
-
-                            <div class="mb-3">                        </div>
-
-                                {{ form_label(form.telephone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}                    </div>
-
-                                {{ form_widget(form.telephone, {'attr': {'class': 'form-control' ~ (form.telephone.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                    
-
-                                {{ form_errors(form.telephone) }}                    <div class="col-12">
-
-                            </div>                        <div class="d-flex gap-2">
-
-                                                        <button type="submit" class="btn btn-warning">
-
-                            <div class="mb-3">                                <i class="fas fa-save me-1"></i>Mettre à jour
-
-                                {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}                            </button>
-
-                                {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                            <a href="{{ path('app_entreprise_show', {'id_entreprise': entreprise.idEntreprise}) }}" class="btn btn-info">
-
-                                {{ form_errors(form.email) }}                                <i class="fas fa-eye me-1"></i>Voir
-
-                            </div>                            </a>
-
-                                                        <a href="{{ path('app_entreprise_index') }}" class="btn btn-secondary">
-
-                            {{ form_end(form) }}                                <i class="fas fa-times me-1"></i>Annuler
-
-                        </div>                            </a>
-
-                                                </div>
-
-                        <div class="col-lg-6">                    </div>
-
-                            <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">                    
-
-                                <h6 class="text-muted mb-0">Actions</h6>                    {{ form_end(form) }}
-
-                                <a href="{{ path('app_entreprise_show', {'id_entreprise': entreprise.idEntreprise}) }}" class="btn btn-info btn-lg py-3" style="margin: 0 3rem;">                </div>
-
-                                    <i class="fas fa-eye me-2"></i>Voir l'entreprise            </div>
-
-                                </a>        </div>
-
-                                <a href="{{ path('app_entreprise_index') }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">    </div>
-
-                                    <i class="fas fa-times me-2"></i>Annuler</div>
-
-                                </a>{% endblock %}
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier {{ entreprise.nomEntreprise }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-edit me-2"></i>Modifier {{ entreprise.nomEntreprise }}</h1>
+                <a href="{{ path('app_entreprise_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                </a>
+            </div>
+
+            {% if form.vars.errors|length > 0 %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>
+                    <ul class="mb-0 mt-2">
+                        {% for error in form.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endif %}
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Modifier {{ entreprise.nomEntreprise }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            {{ form_start(form, {'attr': {'id': 'entreprise_edit_form'}}) }}
+                            {{ form_rest(form) }}
+                            {{ form_end(form) }}
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">
+                                <h6 class="text-muted mb-0">Actions</h6>
+                                <a href="{{ path('app_entreprise_show', {'id_entreprise': entreprise.idEntreprise}) }}" class="btn btn-info btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-eye me-2"></i>Voir l'entreprise
+                                </a>
+                                <a href="{{ path('app_entreprise_index') }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">
+                                    <i class="fas fa-times me-2"></i>Annuler
+                                </a>
                                 <button type="submit" class="btn btn-warning btn-lg py-3" style="margin: 0 3rem;" form="entreprise_edit_form">
                                     <i class="fas fa-save me-2"></i>Mettre à jour
                                 </button>

@@ -1,80 +1,47 @@
-{% extends 'base.html.twig' %}{% extends 'base.html.twig' %}
+{% extends 'base.html.twig' %}
 
+{% block title %}Modifier {{ user.username }}{% endblock %}
 
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-edit me-2"></i>Modifier {{ user.username }}</h1>
+                <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                </a>
+            </div>
 
-{% block title %}Modifier {{ user.username }}{% endblock %}{% block title %}Modifier {{ user.username }}{% endblock %}
+            {% if form.vars.errors|length > 0 %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>
+                    <ul class="mb-0 mt-2">
+                        {% for error in form.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endif %}
 
-
-
-{% block body %}{% block body %}
-
-<div class="container-fluid"><div class="container-fluid">
-
-    <div class="row">    <div class="row">
-
-        <div class="col-12">        <div class="col-12">
-
-            <div class="d-flex justify-content-between align-items-center mb-4">            <div class="card shadow-sm">
-
-                <h1><i class="fas fa-edit me-2"></i>Modifier {{ user.username }}</h1>                <div class="card-header bg-warning text-dark">
-
-                <a href="{{ path('app_user_index') }}" class="btn btn-secondary">                    <h5 class="mb-0">
-
-                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste                        <i class="fas fa-edit me-2"></i>Modifier {{ user.username }}
-
-                </a>                    </h5>
-
-            </div>                </div>
-
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Modifier {{ user.username }}
+                    </h5>
+                </div>
                 <div class="card-body">
-
-            {% if form.vars.errors|length > 0 %}                    {{ form_start(form, {'attr': {'class': 'row g-3'}}) }}
-
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">                    {{ form_rest(form) }}
-
-                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>                    
-
-                    <ul class="mb-0 mt-2">                    <div class="col-12">
-
-                        {% for error in form.vars.errors %}                        <div class="d-flex gap-2">
-
-                            <li>{{ error.message }}</li>                            <button type="submit" class="btn btn-warning">
-
-                        {% endfor %}                                <i class="fas fa-save me-1"></i>Mettre à jour
-
-                    </ul>                            </button>
-
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>                            <a href="{{ path('app_user_show', {'id_user': user.idUser}) }}" class="btn btn-info">
-
-                </div>                                <i class="fas fa-eye me-1"></i>Voir
-
-            {% endif %}                            </a>
-
-                            <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
-
-            <div class="card shadow-sm">                                <i class="fas fa-times me-1"></i>Annuler
-
-                <div class="card-body">                            </a>
-
-                    <div class="row">                        </div>
-
-                        <div class="col-lg-6">                    </div>
-
-                            {{ form_start(form, {'attr': {'novalidate': false, 'id': 'user_edit_form'}}) }}                    
-
-                                                {{ form_end(form) }}
-
-                            <div class="mb-3">                </div>
-
-                                {{ form_label(form.username, 'Nom d\'utilisateur', {'label_attr': {'class': 'form-label'}}) }}            </div>
-
-                                {{ form_widget(form.username, {'attr': {'class': 'form-control' ~ (form.username.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}        </div>
-
-                                {% if form.username.vars.errors|length > 0 %}    </div>
-
-                                    <div class="invalid-feedback"></div>
-
-                                        {% for error in form.username.vars.errors %}{% endblock %}
+                    <div class="row">
+                        <div class="col-lg-6">
+                            {{ form_start(form, {'attr': {'id': 'user_edit_form'}}) }}
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.username, 'Nom d\'utilisateur', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.username, {'attr': {'class': 'form-control' ~ (form.username.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.username.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.username.vars.errors %}
                                             {{ error.message }}
                                         {% endfor %}
                                     </div>
@@ -109,16 +76,16 @@
                             </div>
                             
                             <div class="mb-3">
-                                {{ form_label(form.roles, 'Rôles', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.roles, {'attr': {'class': 'form-select' ~ (form.roles.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                                {% if form.roles.vars.errors|length > 0 %}
+                                {{ form_label(form.userRoles, 'Rôles', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.userRoles, {'attr': {'class': 'form-check' ~ (form.userRoles.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                                {% if form.userRoles.vars.errors|length > 0 %}
                                     <div class="invalid-feedback">
-                                        {% for error in form.roles.vars.errors %}
+                                        {% for error in form.userRoles.vars.errors %}
                                             {{ error.message }}
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-                                {{ form_errors(form.roles) }}
+                                {{ form_errors(form.userRoles) }}
                             </div>
                             
                             {{ form_end(form) }}

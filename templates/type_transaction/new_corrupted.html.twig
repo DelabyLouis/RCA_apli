@@ -1,0 +1,176 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Type de Transaction{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid"><div class="container-fluid">
+
+    <div class="row">    <div class="row">
+
+        <div class="col-12">        <div class="col-12">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <h1><i class="fas fa-tags me-2"></i>Nouveau Type de Transaction</h1>                <h1><i class="fas fa-tags me-2"></i>Nouveau Type de Transaction</h1>
+
+                <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary">                <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary">
+
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+
+                </a>                </a>
+
+            </div>            </div>
+
+
+
+            {% if form.vars.errors|length > 0 %}            <div class="card shadow-sm">
+
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">                <div class="card-body">
+
+                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Erreurs de validation :</strong>                    <div class="row">
+
+                    <ul class="mb-0 mt-2">                        <div class="col-lg-6">
+
+                        {% for error in form.vars.errors %}                            {{ form_start(form, {'attr': {'novalidate': false, 'id': 'type_transaction_new_form'}}) }}
+
+                            <li>{{ error.message }}</li>                            
+
+                        {% endfor %}                            <div class="mb-3">
+
+                    </ul>                                {{ form_label(form.libelle, 'Libellé', {'label_attr': {'class': 'form-label'}}) }}
+
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control' ~ (form.libelle.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+
+                </div>                                {% if form.libelle.vars.errors|length > 0 %}
+
+            {% endif %}                                    <div class="invalid-feedback">
+
+                                        {% for error in form.libelle.vars.errors %}
+
+            <div class="card shadow-sm">                                            {{ error.message }}
+
+                <div class="card-body">                                        {% endfor %}
+
+                    <div class="row">                                    </div>
+
+                        <div class="col-lg-6">                                {% endif %}
+
+                            {{ form_start(form, {'attr': {'novalidate': false, 'id': 'type_transaction_new_form'}}) }}                                {{ form_errors(form.libelle) }}
+
+                                                        </div>
+
+                            <div class="mb-3">                            
+
+                                {{ form_label(form.libelle, 'Libellé', {'label_attr': {'class': 'form-label'}}) }}                            <div class="mb-3">
+
+                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control' ~ (form.libelle.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+
+                                {% if form.libelle.vars.errors|length > 0 %}                                {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : ''), 'rows': 3}}) }}
+
+                                    <div class="invalid-feedback">                                {% if form.description.vars.errors|length > 0 %}
+
+                                        {% for error in form.libelle.vars.errors %}                                    <div class="invalid-feedback">
+
+                                            {{ error.message }}                                        {% for error in form.description.vars.errors %}
+
+                                        {% endfor %}                                            {{ error.message }}
+
+                                    </div>                                        {% endfor %}
+
+                                {% endif %}                                    </div>
+
+                                {{ form_errors(form.libelle) }}                                {% endif %}
+
+                            </div>                                {{ form_errors(form.description) }}
+
+                                                        </div>
+
+                            <div class="mb-3">                            
+
+                                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}                            <div class="mb-4">
+
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                                {{ form_label(form.type_montant_autorise, null, {'label_attr': {'class': 'form-label fw-bold mb-3'}}) }}
+
+                                {% if form.description.vars.errors|length > 0 %}                                <div class="mt-3">
+
+                                    <div class="invalid-feedback">                                    {% for child in form.type_montant_autorise %}
+
+                                        {% for error in form.description.vars.errors %}                                        <div class="form-check mb-3 p-3 border rounded bg-light">
+
+                                            {{ error.message }}                                            {{ form_widget(child, {'attr': {'class': 'form-check-input me-3'}}) }}
+
+                                        {% endfor %}                                            {{ form_label(child, null, {'label_attr': {'class': 'form-check-label fw-semibold'}}) }}
+
+                                    </div>                                        </div>
+
+                                {% endif %}                                    {% endfor %}
+
+                                {{ form_errors(form.description) }}                                </div>
+
+                            </div>                                {% if form.type_montant_autorise.vars.errors|length > 0 %}
+
+                                                                <div class="invalid-feedback d-block">
+
+                            <div class="mb-3">                                        {% for error in form.type_montant_autorise.vars.errors %}
+
+                                {{ form_label(form.type_montant_autorise, 'Type de montant autorisé', {'label_attr': {'class': 'form-label'}}) }}                                            {{ error.message }}
+
+                                {{ form_widget(form.type_montant_autorise, {'attr': {'class': 'form-select' ~ (form.type_montant_autorise.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}                                        {% endfor %}
+
+                                {% if form.type_montant_autorise.vars.errors|length > 0 %}                                    </div>
+
+                                    <div class="invalid-feedback">                                {% endif %}
+
+                                        {% for error in form.type_montant_autorise.vars.errors %}                                {{ form_errors(form.type_montant_autorise) }}
+
+                                            {{ error.message }}                            </div>
+
+                                        {% endfor %}                            
+
+                                    </div>                            {{ form_end(form) }}
+
+                                {% endif %}                        </div>
+
+                                {{ form_errors(form.type_montant_autorise) }}                        
+
+                            </div>                        <div class="col-lg-6">
+
+                                                        <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">
+
+                            {{ form_end(form) }}                                <h6 class="text-muted mb-0">Actions</h6>
+
+                        </div>                                <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">
+
+                                                            <i class="fas fa-times me-2"></i>Annuler
+
+                        <div class="col-lg-6">                                </a>
+
+                            <div class="d-flex flex-column gap-3 sticky-top px-5" style="top: 20px;">                                <button type="submit" class="btn btn-success btn-lg py-3" style="margin: 0 3rem;" form="type_transaction_new_form">
+
+                                <h6 class="text-muted mb-0">Actions</h6>                                    <i class="fas fa-save me-2"></i>Créer le type
+
+                                <a href="{{ path('app_type_transaction_index') }}" class="btn btn-secondary btn-lg py-3" style="margin: 0 3rem;">                                </button>
+
+                                    <i class="fas fa-times me-2"></i>Annuler                            </div>
+
+                                </a>                        </div>
+
+                                <button type="submit" class="btn btn-success btn-lg py-3" style="margin: 0 3rem;" form="type_transaction_new_form">                    </div>
+
+                                    <i class="fas fa-save me-2"></i>Créer le type                </div>
+
+                                </button>            </div>
+
+                            </div>        </div>
+
+                        </div>    </div>
+
+                    </div></div>
+
+                </div>{% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
