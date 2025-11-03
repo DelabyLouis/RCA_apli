@@ -34,6 +34,12 @@ class PermissionService
             return true;
         }
 
+        // PROTECTION ADMIN : L'admin a TOUJOURS accès à tout pour éviter le softlock
+        $user = $this->security->getUser();
+        if ($user instanceof User && $this->hasMinimumLevel(100)) {
+            return true;
+        }
+
         // Vérifier d'abord si c'est une permission publique
         $permission = $this->permissionRepository->findOneBy(['route' => $route]);
         
