@@ -35,9 +35,10 @@ class SetupPermissionsCommand extends Command
 
         // Création des permissions principales
         $permissions = [
+            // Pages publiques
             [
                 'name' => 'Accueil',
-                'route' => 'app_home_index',
+                'route' => 'app_home',
                 'description' => 'Accès à la page d\'accueil',
                 'public' => true
             ],
@@ -47,10 +48,56 @@ class SetupPermissionsCommand extends Command
                 'description' => 'Accès à la page de connexion',
                 'public' => true
             ],
+            
+            // Fonctionnalités principales
+            [
+                'name' => 'Gestion Exercices',
+                'route' => 'app_exercice_index',
+                'description' => 'Accès à la gestion des exercices',
+                'public' => false
+            ],
+            [
+                'name' => 'Gestion Transactions',
+                'route' => 'app_transaction_index',
+                'description' => 'Accès à la gestion des transactions',
+                'public' => false
+            ],
+            [
+                'name' => 'Nouvelle Transaction',
+                'route' => 'app_transaction_new',
+                'description' => 'Créer une nouvelle transaction',
+                'public' => false
+            ],
+            [
+                'name' => 'Gestion Livret',
+                'route' => 'app_livret_index',
+                'description' => 'Accès au livret d\'épargne',
+                'public' => false
+            ],
+            [
+                'name' => 'Transfert Livret',
+                'route' => 'app_livret_transfert',
+                'description' => 'Effectuer des transferts vers/depuis le livret',
+                'public' => false
+            ],
+            [
+                'name' => 'Attestations Fiscales',
+                'route' => 'app_attestation_fiscale_index',
+                'description' => 'Accès aux attestations fiscales',
+                'public' => false
+            ],
+            
+            // Gestion des entités
             [
                 'name' => 'Gestion Personnes',
                 'route' => 'app_personne_index',
                 'description' => 'Accès à la gestion des personnes',
+                'public' => false
+            ],
+            [
+                'name' => 'Nouvelle Personne',
+                'route' => 'app_personne_new',
+                'description' => 'Créer une nouvelle personne',
                 'public' => false
             ],
             [
@@ -59,6 +106,14 @@ class SetupPermissionsCommand extends Command
                 'description' => 'Accès à la gestion des entreprises',
                 'public' => false
             ],
+            [
+                'name' => 'Nouvelle Entreprise',
+                'route' => 'app_entreprise_new',
+                'description' => 'Créer une nouvelle entreprise',
+                'public' => false
+            ],
+            
+            // Administration
             [
                 'name' => 'Gestion Utilisateurs',
                 'route' => 'app_user_index',
@@ -75,6 +130,18 @@ class SetupPermissionsCommand extends Command
                 'name' => 'Gestion Permissions',
                 'route' => 'app_permission_index',
                 'description' => 'Accès à la gestion des permissions',
+                'public' => false
+            ],
+            [
+                'name' => 'Gestion Types Transaction',
+                'route' => 'app_type_transaction_index',
+                'description' => 'Accès à la gestion des types de transaction',
+                'public' => false
+            ],
+            [
+                'name' => 'Gestion Modes Paiement',
+                'route' => 'app_mode_de_paiement_index',
+                'description' => 'Accès à la gestion des modes de paiement',
                 'public' => false
             ]
         ];
@@ -128,10 +195,58 @@ class SetupPermissionsCommand extends Command
             }
         }
 
+        // Attribuer des permissions par défaut aux rôles existants
+        foreach ($roles as $role) {
+            // Effacer les permissions existantes pour réassigner
+            $role->getPermissions()->clear();
+            
+            // Permissions communes à tous (pages publiques + accueil)
+            foreach ($permissionEntities as $permission) {
+                if (in_array($permission->getRoute(), ['app_home', 'app_login'])) {
+                    $role->addPermission($permission);
+                }
+            }
+            
+            // Permissions selon le niveau hiérarchique
+            if ($role->getHierarchyLevel() >= 100) {
+                // Admin : toutes les permissions
+                foreach ($permissionEntities as $permission) {
+                    $role->addPermission($permission);
+                }
+            } elseif ($role->getHierarchyLevel() >= 50) {
+                // Utilisateur standard : fonctionnalités principales sauf administration
+                $userRoutes = [
+                    'app_home', 'app_login', 'app_exercice_index', 'app_transaction_index', 
+                    'app_transaction_new', 'app_livret_index', 'app_livret_transfert',
+                    'app_attestation_fiscale_index', 'app_personne_index', 'app_personne_new',
+                    'app_entreprise_index', 'app_entreprise_new'
+                ];
+                
+                foreach ($permissionEntities as $permission) {
+                    if (in_array($permission->getRoute(), $userRoutes)) {
+                        $role->addPermission($permission);
+                    }
+                }
+            } else {
+                // Invité : accès très limité
+                $guestRoutes = ['app_home', 'app_login', 'app_transaction_index', 'app_livret_index'];
+                
+                foreach ($permissionEntities as $permission) {
+                    if (in_array($permission->getRoute(), $guestRoutes)) {
+                        $role->addPermission($permission);
+                    }
+                }
+            }
+        }
+
         $this->entityManager->flush();
 
         $io->success('Système de permissions et rôles configuré avec succès !');
-        $io->info('Vous pouvez maintenant aller sur /role pour gérer les permissions.');
+        $io->info('Permissions attribuées automatiquement selon les niveaux hiérarchiques :');
+        $io->info('- Admin (100+) : Toutes les permissions');
+        $io->info('- Utilisateur (50+) : Fonctionnalités principales');
+        $io->info('- Invité (10+) : Accès limité en lecture');
+        $io->info('Vous pouvez maintenant aller sur /role pour ajuster les permissions.');
 
         return Command::SUCCESS;
     }

@@ -4,9 +4,36 @@
 
 {% block body %}
 <div class="container-fluid mt-4">
+    {% if not app.user %}
+    <!-- Section d'accueil pour les utilisateurs non connectés -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="text-center">
+                <h1 class="display-4 mb-4">Bienvenue dans l'application RCA</h1>
+                <p class="lead text-muted mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Connectez-vous pour accéder aux données du site
+                </p>
+                
+                <div class="d-grid gap-3 d-md-block">
+                    <a href="{{ path('app_login') }}" class="btn btn-primary btn-lg px-5 me-md-3">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Connexion
+                    </a>
+                    <a href="{{ path('app_register') }}" class="btn btn-outline-primary btn-lg px-5">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Inscription
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
     <h1 class="mb-4">Bienvenue dans l'application RCA</h1>
+    {% endif %}
     
-    <!-- Cartes des soldes -->
+    <!-- Cartes des soldes - Affichage conditionnel selon les permissions -->
+    {% if has_access('app_transaction_index') or has_access('app_livret_index') %}
     <div class="row mb-5">
         <div class="col-md-4 mb-3">
             <div class="card bg-primary text-white h-100">
@@ -19,6 +46,7 @@
             </div>
         </div>
         
+        {% if has_access('app_transaction_index') %}
         <div class="col-md-4 mb-3">
             <div class="card bg-success text-white h-100">
                 <div class="card-body text-center">
@@ -33,7 +61,9 @@
                 </div>
             </div>
         </div>
+        {% endif %}
         
+        {% if has_access('app_livret_index') %}
         <div class="col-md-4 mb-3">
             <div class="card bg-info text-white h-100">
                 <div class="card-body text-center">
@@ -48,72 +78,107 @@
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Section principale avec boutons et actions rapides -->
+        {% endif %}
+        </div>
+    {% endif %}    <!-- Section principale avec boutons et actions rapides -->
     <div class="row">
-        <!-- Boutons de gestion des entités -->
+        <!-- Boutons de gestion des entités - Affichage conditionnel selon les permissions -->
+        {% set has_any_management_access = false %}
+        {% if has_access('app_entreprise_index') or has_access('app_exercice_index') or has_access('app_personne_index') or has_access('app_role_index') or has_access('app_transaction_index') or has_access('app_type_transaction_index') or has_access('app_mode_de_paiement_index') or has_access('app_user_index') %}
+            {% set has_any_management_access = true %}
+        {% endif %}
+        
+        {% if has_any_management_access %}
         <div class="col-md-6">
             <h3 class="mb-3"><i class="fas fa-cogs me-2"></i>Gestion des entités</h3>
             
             <!-- Première ligne -->
             <div class="row mb-2">
+                {% if has_access('app_entreprise_index') %}
                 <div class="col-md-3 col-6 mb-2">
                     <a href="{{ path('app_entreprise_index') }}" class="btn btn-outline-primary btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
                         <i class="fas fa-building mb-1"></i>
                         <small>Entreprises</small>
                     </a>
                 </div>
+                {% endif %}
+                
+                {% if has_access('app_exercice_index') %}
                 <div class="col-md-3 col-6 mb-2">
                     <a href="{{ path('app_exercice_index') }}" class="btn btn-outline-success btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
                         <i class="fas fa-calendar-alt mb-1"></i>
                         <small>Exercices</small>
                     </a>
                 </div>
+                {% endif %}
+                
+                {% if has_access('app_personne_index') %}
                 <div class="col-md-3 col-6 mb-2">
                     <a href="{{ path('app_personne_index') }}" class="btn btn-outline-info btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
                         <i class="fas fa-users mb-1"></i>
                         <small>Personnes</small>
                     </a>
                 </div>
+                {% endif %}
+                
+                {% if has_access('app_role_index') %}
                 <div class="col-md-3 col-6 mb-2">
                     <a href="{{ path('app_role_index') }}" class="btn btn-outline-warning btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
                         <i class="fas fa-user-tag mb-1"></i>
                         <small>Rôles</small>
                     </a>
                 </div>
+                {% endif %}
             </div>
             
             <!-- Deuxième ligne -->
             <div class="row mb-2">
+                {% if has_access('app_transaction_index') %}
                 <div class="col-md-3 col-6 mb-2">
                     <a href="{{ path('app_transaction_index') }}" class="btn btn-outline-primary btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
                         <i class="fas fa-exchange-alt mb-1"></i>
                         <small>Transactions</small>
                     </a>
                 </div>
+                {% endif %}
+                
+                {% if has_access('app_type_transaction_index') %}
                 <div class="col-md-3 col-6 mb-2">
                     <a href="{{ path('app_type_transaction_index') }}" class="btn btn-outline-success btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
                         <i class="fas fa-tags mb-1"></i>
                         <small>Types Transaction</small>
                     </a>
                 </div>
+                {% endif %}
+                
+                {% if has_access('app_mode_de_paiement_index') %}
                 <div class="col-md-3 col-6 mb-2">
                     <a href="{{ path('app_mode_de_paiement_index') }}" class="btn btn-outline-info btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
                         <i class="fas fa-credit-card mb-1"></i>
                         <small>Modes Paiement</small>
                     </a>
                 </div>
+                {% endif %}
+                
+                {% if has_access('app_user_index') %}
                 <div class="col-md-3 col-6 mb-2">
                     <a href="{{ path('app_user_index') }}" class="btn btn-outline-warning btn-sm w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 55px;">
                         <i class="fas fa-user-cog mb-1"></i>
                         <small>Utilisateurs</small>
                     </a>
                 </div>
+                {% endif %}
             </div>
         </div>
+        {% endif %}
         
-        <!-- Actions rapides à droite -->
+        <!-- Actions rapides à droite - Affichage conditionnel selon les permissions -->
+        {% set has_quick_actions = false %}
+        {% if has_access('app_transaction_new') or has_access('app_livret_transfert') or has_access('app_entreprise_new') or has_access('app_personne_new') %}
+            {% set has_quick_actions = true %}
+        {% endif %}
+        
+        {% if has_quick_actions %}
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
@@ -121,22 +186,34 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
+                        {% if has_access('app_transaction_new') %}
                         <a href="{{ path('app_transaction_new') }}" class="btn btn-primary">
                             <i class="fas fa-plus me-2"></i>Nouvelle transaction
                         </a>
+                        {% endif %}
+                        
+                        {% if has_access('app_livret_transfert') %}
                         <a href="{{ path('app_livret_transfert') }}" class="btn btn-success">
                             <i class="fas fa-exchange-alt me-2"></i>Transfert livret
                         </a>
+                        {% endif %}
+                        
+                        {% if has_access('app_entreprise_new') %}
                         <a href="{{ path('app_entreprise_new') }}" class="btn btn-outline-primary">
                             <i class="fas fa-building me-2"></i>Nouvelle entreprise
                         </a>
+                        {% endif %}
+                        
+                        {% if has_access('app_personne_new') %}
                         <a href="{{ path('app_personne_new') }}" class="btn btn-outline-info">
                             <i class="fas fa-user-plus me-2"></i>Nouvelle personne
                         </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

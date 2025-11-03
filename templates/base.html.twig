@@ -28,68 +28,115 @@
                 
                 <div class="collapse navbar-collapse" id="navbarNav" style="overflow: visible !important;">
                     <ul class="navbar-nav me-auto" style="overflow: visible !important;">
+                        {% if has_access('app_exercice_index') %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('app_exercice_index') }}">
                                 <i class="fas fa-calendar-alt me-1"></i>Exercices
                             </a>
                         </li>
+                        {% endif %}
+                        
+                        {% if has_access('app_transaction_index') %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('app_transaction_index') }}">
                                 <i class="fas fa-exchange-alt me-1"></i>Transactions
                             </a>
                         </li>
+                        {% endif %}
+                        
+                        {% if has_access('app_livret_index') %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('app_livret_index') }}">
                                 <i class="fas fa-piggy-bank me-1"></i>Livret
                             </a>
                         </li>
+                        {% endif %}
+                        
+                        {% if has_access('app_attestation_fiscale_index') %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('app_attestation_fiscale_index') }}">
                                 <i class="fas fa-file-invoice me-1"></i>Attestations Fiscales
                             </a>
                         </li>
+                        {% endif %}
+                        
+                        {# Menu Gestion - Ne s'affiche que si l'utilisateur a accès à au moins une section #}
+                        {% set has_gestion_access = false %}
+                        {% if has_access('app_personne_index') or has_access('app_entreprise_index') or has_access('app_user_index') or has_access('app_role_index') or has_access('app_type_transaction_index') or has_access('app_mode_de_paiement_index') %}
+                            {% set has_gestion_access = true %}
+                        {% endif %}
+                        
+                        {% if has_gestion_access %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="gestionDropdown">
                                 <i class="fas fa-cogs me-1"></i>Gestion
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="gestionDropdown">
+                                {% if has_access('app_personne_index') %}
                                 <li><a class="dropdown-item" href="{{ path('app_personne_index') }}">
                                     <i class="fas fa-users me-1"></i>Personnes
                                 </a></li>
+                                {% endif %}
+                                
+                                {% if has_access('app_entreprise_index') %}
                                 <li><a class="dropdown-item" href="{{ path('app_entreprise_index') }}">
                                     <i class="fas fa-building me-1"></i>Entreprises
                                 </a></li>
-                                <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                
+                                {% if has_access('app_user_index') or has_access('app_role_index') %}
+                                    {% if has_access('app_personne_index') or has_access('app_entreprise_index') %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                {% if has_access('app_user_index') %}
                                 <li><a class="dropdown-item" href="{{ path('app_user_index') }}">
                                     <i class="fas fa-user-cog me-1"></i>Utilisateurs
                                 </a></li>
+                                {% endif %}
+                                
+                                {% if has_access('app_role_index') %}
                                 <li><a class="dropdown-item" href="{{ path('app_role_index') }}">
                                     <i class="fas fa-user-tag me-1"></i>Rôles
                                 </a></li>
-                                <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                
+                                {% if has_access('app_type_transaction_index') or has_access('app_mode_de_paiement_index') %}
+                                    {% if has_access('app_user_index') or has_access('app_role_index') or has_access('app_personne_index') or has_access('app_entreprise_index') %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                {% if has_access('app_type_transaction_index') %}
                                 <li><a class="dropdown-item" href="{{ path('app_type_transaction_index') }}">
                                     <i class="fas fa-tags me-1"></i>Types de Transaction
                                 </a></li>
+                                {% endif %}
+                                
+                                {% if has_access('app_mode_de_paiement_index') %}
                                 <li><a class="dropdown-item" href="{{ path('app_mode_de_paiement_index') }}">
                                     <i class="fas fa-credit-card me-1"></i>Modes de Paiement
                                 </a></li>
+                                {% endif %}
                             </ul>
                         </li>
+                        {% endif %}
 
                     </ul>
                     
                     <!-- User menu -->
                     <ul class="navbar-nav">
                         {% if app.user %}
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <li class="nav-item">
+                                <span class="nav-link text-light">
                                     <i class="fas fa-user-circle me-1"></i>{{ app.user.userIdentifier }}
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-danger" href="{{ path('app_logout') }}" title="Se déconnecter">
+                                    <i class="fas fa-sign-out-alt"></i>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="{{ path('app_logout') }}">
-                                        <i class="fas fa-sign-out-alt me-1"></i>Se déconnecter
-                                    </a></li>
-                                </ul>
                             </li>
                         {% else %}
                             <li class="nav-item">
