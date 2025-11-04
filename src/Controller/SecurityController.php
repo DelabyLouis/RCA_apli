@@ -7,6 +7,7 @@ use App\Entity\Role;
 use App\Entity\Personne;
 use App\Form\RegistrationFormType;
 use App\Repository\RoleRepository;
+use App\Service\ConsentementRgpdService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,6 +46,7 @@ class SecurityController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher, 
         EntityManagerInterface $entityManager, 
         RoleRepository $roleRepository,
+        ConsentementRgpdService $consentementService,
         Security $security
     ): Response {
         $user = new User();
@@ -87,6 +89,25 @@ class SecurityController extends AbstractController
 
             $entityManager->persist($user);
             $entityManager->flush();
+
+            // Enregistrer les consentements RGPD
+            // Consentement obligatoire à la politique de confidentialité
+            $consentementService->enregistrerConsentement(
+                $user, 
+                ConsentementRgpdService::CONSENTEMENT_PRIVACY_POLICY, 
+                true, 
+                'Inscription - Acceptation obligatoire de la politique de confidentialité'
+            );
+
+            // Consentement optionnel pour les communications
+            if ($form->get('consentCommunication')->getData()) {
+                $consentementService->enregistrerConsentement(
+                    $user, 
+                    ConsentementRgpdService::CONSENTEMENT_COMMUNICATION, 
+                    true, 
+                    'Inscription - Consentement volontaire aux communications du club'
+                );
+            }
 
             // Connecter automatiquement l'utilisateur après l'inscription
             $security->login($user, 'form_login');

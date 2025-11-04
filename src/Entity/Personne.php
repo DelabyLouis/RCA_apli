@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PersonneRepository;
+use App\Trait\SoftDeletableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -11,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: PersonneRepository::class)]
 class Personne
 {
+    use SoftDeletableTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id_personne')]

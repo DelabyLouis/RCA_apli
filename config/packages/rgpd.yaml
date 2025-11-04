@@ -1,0 +1,44 @@
+# Configuration des durées de conservation RGPD
+# Toutes les durées sont en jours
+
+parameters:
+    rgpd:
+    retention:
+        # Données d'audit et logs
+        audit_logs: 365 # 1 an - logs d'accès et d'actions
+        security_logs: 2190 # 6 ans - logs de sécurité critiques
+
+        # Données personnelles
+        active_members: 1095 # 3 ans après fin d'adhésion
+        inactive_members: 2190 # 6 ans sans activité avant archivage
+
+        # Données comptables et fiscales
+        accounting_data: 3650 # 10 ans - obligation légale
+        tax_certificates: 2190 # 6 ans - contrôle fiscal
+
+        # Données de consentement
+        consent_history: 2190 # 6 ans - preuve de consentement
+
+        # Données techniques
+        session_data: 30 # 30 jours - données de session
+        temporary_files: 7 # 7 jours - fichiers temporaires
+
+        # Soft delete avant suppression définitive
+        soft_delete_grace: 1095 # 3 ans avant suppression définitive
+
+    # Actions automatiques
+    auto_cleanup:
+        enabled: true
+        # Fréquence de nettoyage automatique (cron format)
+        schedule: "0 2 * * 0" # Tous les dimanches à 2h du matin
+
+    # Notifications avant suppression
+    notifications:
+        enabled: true
+        advance_notice_days: 30 # Prévenir 30 jours avant suppression
+
+    # Exclusions (entités à ne jamais supprimer automatiquement)
+    exclude_from_cleanup:
+        - "App\\Entity\\TypeTransaction"
+        - "App\\Entity\\ModeDePaiement"
+        - "App\\Entity\\Role"

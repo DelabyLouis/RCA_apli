@@ -1,0 +1,330 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Données Personnelles - RCA Application{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="mb-4">
+                <i class="fas fa-user-shield me-2 text-primary"></i>
+                Mes Données Personnelles
+            </h1>
+
+            <!-- Navigation -->
+            <nav class="mb-4">
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <button class="nav-link active" id="nav-view-tab" data-bs-toggle="tab" 
+                            data-bs-target="#nav-view" type="button" role="tab">
+                        <i class="fas fa-eye me-1"></i>Consulter mes données
+                    </button>
+                    <button class="nav-link" id="nav-rights-tab" data-bs-toggle="tab" 
+                            data-bs-target="#nav-rights" type="button" role="tab">
+                        <i class="fas fa-gavel me-1"></i>Exercer mes droits
+                    </button>
+                    <button class="nav-link" id="nav-export-tab" data-bs-toggle="tab" 
+                            data-bs-target="#nav-export" type="button" role="tab">
+                        <i class="fas fa-download me-1"></i>Exporter mes données
+                    </button>
+                </div>
+            </nav>
+
+            <div class="tab-content" id="nav-tabContent">
+                <!-- Onglet : Consulter mes données -->
+                <div class="tab-pane fade show active" id="nav-view" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Informations personnelles</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if personne %}
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <th width="30%">Civilité :</th>
+                                                <td>{{ personne.civilite ?? '-' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Nom :</th>
+                                                <td>{{ personne.nom ?? '-' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Prénom :</th>
+                                                <td>{{ personne.prenom ?? '-' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Email :</th>
+                                                <td>{{ personne.email ?? '-' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Téléphone :</th>
+                                                <td>{{ personne.telephone ?? '-' }}</td>
+                                            </tr>
+                                        </table>
+                                    {% else %}
+                                        <p class="text-muted">Aucune information personnelle associée.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Adresse</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if personne %}
+                                        <address>
+                                            {% if personne.numeroVoie or personne.rue %}
+                                                {{ personne.numeroVoie }} {{ personne.rue }}<br>
+                                            {% endif %}
+                                            {% if personne.complementAdresse %}
+                                                {{ personne.complementAdresse }}<br>
+                                            {% endif %}
+                                            {% if personne.codePostal or personne.ville %}
+                                                {{ personne.codePostal }} {{ personne.ville }}<br>
+                                            {% endif %}
+                                            {{ personne.pays ?? 'France' }}
+                                        </address>
+                                    {% else %}
+                                        <p class="text-muted">Aucune adresse renseignée.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0"><i class="fas fa-key me-2"></i>Informations de compte</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <th width="20%">Nom d'utilisateur :</th>
+                                            <td>{{ user.username }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Rôles :</th>
+                                            <td>
+                                                {% for role in user.userRoles %}
+                                                    <span class="badge bg-primary me-1">{{ role.libelle }}</span>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Dernière connexion :</th>
+                                            <td class="text-muted">Information non disponible</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet : Exercer mes droits -->
+                <div class="tab-pane fade" id="nav-rights" role="tabpanel">
+                    <div class="row">
+                        <div class="col-lg-8 mx-auto">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Information :</strong> Pour exercer vos droits, veuillez nous contacter via les moyens ci-dessous. 
+                                Votre demande sera traitée dans un délai maximum d'un mois.
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Formulaire de demande</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="rightsForm">
+                                        <div class="mb-3">
+                                            <label class="form-label">Type de demande *</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="requestType" value="access" id="access">
+                                                <label class="form-check-label" for="access">
+                                                    <i class="fas fa-eye me-1 text-info"></i>
+                                                    <strong>Droit d'accès</strong> - Obtenir une copie de mes données
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="requestType" value="rectification" id="rectification">
+                                                <label class="form-check-label" for="rectification">
+                                                    <i class="fas fa-edit me-1 text-warning"></i>
+                                                    <strong>Droit de rectification</strong> - Corriger des informations inexactes
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="requestType" value="deletion" id="deletion">
+                                                <label class="form-check-label" for="deletion">
+                                                    <i class="fas fa-trash me-1 text-danger"></i>
+                                                    <strong>Droit à l'effacement</strong> - Supprimer mes données personnelles
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="requestType" value="portability" id="portability">
+                                                <label class="form-check-label" for="portability">
+                                                    <i class="fas fa-download me-1 text-success"></i>
+                                                    <strong>Droit de portabilité</strong> - Récupérer mes données dans un format structuré
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="requestType" value="opposition" id="opposition">
+                                                <label class="form-check-label" for="opposition">
+                                                    <i class="fas fa-hand-paper me-1 text-primary"></i>
+                                                    <strong>Droit d'opposition</strong> - M'opposer au traitement de mes données
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="requestDescription" class="form-label">Description de votre demande *</label>
+                                            <textarea class="form-control" id="requestDescription" name="description" 
+                                                      rows="4" required placeholder="Décrivez précisément votre demande..."></textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="confirmIdentity" required>
+                                                <label class="form-check-label" for="confirmIdentity">
+                                                    Je confirme être {{ user.username }} et demande l'exercice du droit sélectionné ci-dessus *
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane me-2"></i>Envoyer ma demande
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Autres moyens de contact</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-6">
+                                            <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                                            <h6>Par email</h6>
+                                            <p class="small">[rgpd@rca-club.fr]</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <i class="fas fa-phone fa-2x text-success mb-2"></i>
+                                            <h6>Par téléphone</h6>
+                                            <p class="small">[Numéro à configurer]</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet : Export des données -->
+                <div class="tab-pane fade" id="nav-export" role="tabpanel">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-download me-2"></i>Télécharger mes données
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Conformément à votre droit de portabilité, vous pouvez télécharger l'ensemble de vos données 
+                                    personnelles dans un format structuré et lisible par machine.</p>
+
+                                    <div class="row text-center mb-4">
+                                        <div class="col-md-4">
+                                            <div class="card border-primary">
+                                                <div class="card-body">
+                                                    <i class="fas fa-file-code fa-3x text-primary mb-2"></i>
+                                                    <h6>Format JSON</h6>
+                                                    <p class="small">Données structurées lisibles par machine</p>
+                                                    <a href="{{ path('app_export_data', {'format': 'json'}) }}" class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-download me-1"></i>Télécharger
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card border-success">
+                                                <div class="card-body">
+                                                    <i class="fas fa-file-excel fa-3x text-success mb-2"></i>
+                                                    <h6>Format CSV</h6>
+                                                    <p class="small">Compatible avec Excel et autres tableurs</p>
+                                                    <a href="{{ path('app_export_data', {'format': 'csv'}) }}" class="btn btn-success btn-sm">
+                                                        <i class="fas fa-download me-1"></i>Télécharger
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card border-info">
+                                                <div class="card-body">
+                                                    <i class="fas fa-file-pdf fa-3x text-info mb-2"></i>
+                                                    <h6>Format PDF</h6>
+                                                    <p class="small">Document lisible et imprimable</p>
+                                                    <button class="btn btn-info btn-sm" disabled title="Fonctionnalité en cours de développement">
+                                                        <i class="fas fa-download me-1"></i>Télécharger
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Important :</strong> Le fichier téléchargé contiendra toutes vos données personnelles. 
+                                        Veillez à le stocker en lieu sûr et à le supprimer après usage si nécessaire.
+                                    </div>
+
+                                    <div class="text-center">
+                                        <small class="text-muted">
+                                            Dernière mise à jour de vos données : {{ "now"|date("d/m/Y à H:i") }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion du formulaire de demande de droits
+    document.getElementById('rightsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const requestType = formData.get('requestType');
+        const description = formData.get('description');
+        
+        if (!requestType) {
+            alert('Veuillez sélectionner un type de demande.');
+            return;
+        }
+        
+        if (!description.trim()) {
+            alert('Veuillez décrire votre demande.');
+            return;
+        }
+        
+        // Simulation d'envoi (à implémenter côté serveur)
+        alert('Votre demande a été enregistrée. Vous recevrez une réponse dans un délai d\'un mois maximum.');
+        this.reset();
+    });
+});
+
+// Exports gérés par les liens directs vers le serveur
+</script>
+{% endblock %}

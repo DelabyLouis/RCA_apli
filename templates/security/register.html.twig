@@ -155,9 +155,14 @@
                         </div>
                     </div>
 
-                    <!-- ========== CONDITIONS ========== -->
-                    <div class="border rounded p-3 mb-4 bg-warning bg-opacity-10">
-                        <div class="form-check">
+                    <!-- ========== CONDITIONS ET RGPD ========== -->
+                    <div class="border rounded p-3 mb-4 bg-primary bg-opacity-10">
+                        <h6 class="text-primary mb-3">
+                            <i class="fas fa-shield-alt me-2"></i>Conditions et Protection des Données
+                        </h6>
+                        
+                        <!-- Conditions d'utilisation -->
+                        <div class="form-check mb-3">
                             {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input' ~ (registrationForm.agreeTerms.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
                             {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'form-check-label fw-bold'}}) }}
                             {% if registrationForm.agreeTerms.vars.errors|length > 0 %}
@@ -168,10 +173,48 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Les champs marqués d'un astérisque (*) sont obligatoires.
-                        </small>
+
+                        <!-- Politique de confidentialité -->
+                        <div class="form-check mb-3">
+                            {{ form_widget(registrationForm.agreePrivacy, {'attr': {'class': 'form-check-input' ~ (registrationForm.agreePrivacy.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                            <label class="form-check-label fw-bold" for="{{ registrationForm.agreePrivacy.vars.id }}">
+                                J'accepte la 
+                                <a href="{{ path('app_privacy_policy') }}" target="_blank" class="text-decoration-none">
+                                    politique de confidentialité
+                                    <i class="fas fa-external-link-alt fa-xs"></i>
+                                </a>
+                                et le traitement de mes données personnelles *
+                            </label>
+                            {% if registrationForm.agreePrivacy.vars.errors|length > 0 %}
+                                <div class="invalid-feedback">
+                                    {% for error in registrationForm.agreePrivacy.vars.errors %}
+                                        {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Consentement communication (optionnel) -->
+                        <div class="form-check mb-3">
+                            {{ form_widget(registrationForm.consentCommunication, {'attr': {'class': 'form-check-input'}}) }}
+                            {{ form_label(registrationForm.consentCommunication, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                            <small class="form-text text-muted d-block mt-1">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Vous pouvez retirer ce consentement à tout moment dans votre espace personnel.
+                            </small>
+                        </div>
+
+                        <div class="alert alert-info mb-0">
+                            <small>
+                                <i class="fas fa-info-circle me-1"></i>
+                                <strong>Information RGPD :</strong> Vos données personnelles sont collectées pour la gestion 
+                                de votre adhésion au club. Vous disposez d'un droit d'accès, de rectification, de suppression 
+                                et de portabilité sur vos données. 
+                                <a href="{{ path('app_privacy_policy') }}" target="_blank" class="text-decoration-none">
+                                    En savoir plus
+                                </a>
+                            </small>
+                        </div>
                     </div>
 
                     <div class="d-grid gap-2">

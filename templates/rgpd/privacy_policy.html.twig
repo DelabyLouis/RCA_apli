@@ -1,0 +1,323 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Politique de Confidentialité - RCA Application{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="card-title mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Politique de Confidentialité et Protection des Données
+                    </h1>
+                    <p class="card-text mb-0"><small>Dernière mise à jour : {{ "now"|date("d/m/Y") }}</small></p>
+                </div>
+                <div class="card-body">
+                    <!-- 1. Responsable du traitement -->
+                    <section class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-user-tie me-2 text-primary"></i>
+                            1. Responsable du Traitement
+                        </h2>
+                        <div class="bg-light p-3 rounded">
+                            <p><strong>Rugby Club de l'Ariège (RCA)</strong></p>
+                            <p class="mb-1"><i class="fas fa-map-marker-alt me-2"></i>[Adresse du club à compléter]</p>
+                            <p class="mb-1"><i class="fas fa-phone me-2"></i>[Téléphone à compléter]</p>
+                            <p class="mb-0"><i class="fas fa-envelope me-2"></i>[Email de contact à compléter]</p>
+                        </div>
+                    </section>
+
+                    <!-- 2. Finalités du traitement -->
+                    <section class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-bullseye me-2 text-primary"></i>
+                            2. Finalités du Traitement des Données
+                        </h2>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Gestion des Membres</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="mb-0">
+                                            <li>Inscription et suivi des adhésions</li>
+                                            <li>Communication avec les membres</li>
+                                            <li>Organisation des activités</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Gestion Comptable</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="mb-0">
+                                            <li>Suivi des transactions financières</li>
+                                            <li>Émission d'attestations fiscales</li>
+                                            <li>Gestion des cotisations</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Base légale :</strong> Intérêt légitime pour la gestion associative (art. 6.1.f RGPD) 
+                            et consentement pour les communications marketing.
+                        </div>
+                    </section>
+
+                    <!-- 3. Données collectées -->
+                    <section class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-database me-2 text-primary"></i>
+                            3. Données Collectées
+                        </h2>
+                        <div class="accordion" id="dataAccordion">
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#personalData" aria-expanded="true">
+                                        <i class="fas fa-user me-2"></i>Données d'Identification
+                                    </button>
+                                </h3>
+                                <div id="personalData" class="accordion-collapse collapse show" data-bs-parent="#dataAccordion">
+                                    <div class="accordion-body">
+                                        <ul>
+                                            <li>Nom, prénom, civilité</li>
+                                            <li>Adresse postale complète</li>
+                                            <li>Numéro de téléphone</li>
+                                            <li>Adresse email</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#financialData">
+                                        <i class="fas fa-euro-sign me-2"></i>Données Financières
+                                    </button>
+                                </h3>
+                                <div id="financialData" class="accordion-collapse collapse" data-bs-parent="#dataAccordion">
+                                    <div class="accordion-body">
+                                        <ul>
+                                            <li>Historique des cotisations</li>
+                                            <li>Dons et versements effectués</li>
+                                            <li>Modes de paiement (sans données bancaires)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#technicalData">
+                                        <i class="fas fa-cogs me-2"></i>Données Techniques
+                                    </button>
+                                </h3>
+                                <div id="technicalData" class="accordion-collapse collapse" data-bs-parent="#dataAccordion">
+                                    <div class="accordion-body">
+                                        <ul>
+                                            <li>Logs de connexion</li>
+                                            <li>Adresse IP (temporairement)</li>
+                                            <li>Données de navigation (cookies techniques)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 4. Durées de conservation -->
+                    <section class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-clock me-2 text-primary"></i>
+                            4. Durées de Conservation
+                        </h2>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Type de données</th>
+                                        <th>Durée de conservation</th>
+                                        <th>Justification</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><i class="fas fa-user me-2"></i>Données des membres actifs</td>
+                                        <td>Durée d'adhésion + 3 ans</td>
+                                        <td>Suivi de l'activité associative</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fas fa-calculator me-2"></i>Données comptables</td>
+                                        <td>10 ans</td>
+                                        <td>Obligation légale comptable</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fas fa-file-alt me-2"></i>Attestations fiscales</td>
+                                        <td>6 ans</td>
+                                        <td>Contrôle fiscal potentiel</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fas fa-history me-2"></i>Logs de connexion</td>
+                                        <td>1 an</td>
+                                        <td>Sécurité informatique</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- 5. Vos droits -->
+                    <section class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-balance-scale me-2 text-primary"></i>
+                            5. Vos Droits RGPD
+                        </h2>
+                        <div class="row">
+                            <div class="col-lg-6 mb-3">
+                                <div class="list-group">
+                                    <div class="list-group-item">
+                                        <h5 class="mb-1"><i class="fas fa-eye text-info me-2"></i>Droit d'accès</h5>
+                                        <p class="mb-0">Connaître quelles données nous détenons sur vous</p>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <h5 class="mb-1"><i class="fas fa-edit text-warning me-2"></i>Droit de rectification</h5>
+                                        <p class="mb-0">Corriger des données inexactes ou incomplètes</p>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <h5 class="mb-1"><i class="fas fa-trash text-danger me-2"></i>Droit à l'effacement</h5>
+                                        <p class="mb-0">Demander la suppression de vos données</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="list-group">
+                                    <div class="list-group-item">
+                                        <h5 class="mb-1"><i class="fas fa-pause text-secondary me-2"></i>Droit de limitation</h5>
+                                        <p class="mb-0">Limiter le traitement de vos données</p>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <h5 class="mb-1"><i class="fas fa-download text-success me-2"></i>Droit de portabilité</h5>
+                                        <p class="mb-0">Récupérer vos données dans un format structuré</p>
+                                    </div>
+                                    <div class="list-group-item">
+                                        <h5 class="mb-1"><i class="fas fa-hand-paper text-primary me-2"></i>Droit d'opposition</h5>
+                                        <p class="mb-0">Vous opposer au traitement de vos données</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-success">
+                            <i class="fas fa-user-cog me-2"></i>
+                            <strong>Exercer vos droits :</strong> 
+                            <a href="{{ path('app_exercise_rights') }}" class="btn btn-success btn-sm ms-2">
+                                <i class="fas fa-external-link-alt me-1"></i>Gérer mes données
+                            </a>
+                        </div>
+                    </section>
+
+                    <!-- 6. Sécurité -->
+                    <section class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-shield-alt me-2 text-primary"></i>
+                            6. Sécurité des Données
+                        </h2>
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <i class="fas fa-lock fa-3x text-success mb-2"></i>
+                                <h5>Chiffrement</h5>
+                                <p class="small">Vos mots de passe sont chiffrés et les connexions sécurisées</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <i class="fas fa-user-shield fa-3x text-info mb-2"></i>
+                                <h5>Accès contrôlé</h5>
+                                <p class="small">Seules les personnes autorisées accèdent à vos données</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <i class="fas fa-history fa-3x text-warning mb-2"></i>
+                                <h5>Traçabilité</h5>
+                                <p class="small">Tous les accès et modifications sont enregistrés</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 7. Cookies -->
+                    <section class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-cookie-bite me-2 text-primary"></i>
+                            7. Utilisation des Cookies
+                        </h2>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Type de cookie</th>
+                                        <th>Finalité</th>
+                                        <th>Durée</th>
+                                        <th>Consentement</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="table-success">
+                                        <td><strong>Techniques</strong></td>
+                                        <td>Fonctionnement du site, session utilisateur</td>
+                                        <td>Session</td>
+                                        <td><span class="badge bg-success">Exemptés</span></td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <td><strong>Sécurité</strong></td>
+                                        <td>Protection CSRF, authentification</td>
+                                        <td>1 semaine</td>
+                                        <td><span class="badge bg-info">Nécessaires</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- 8. Contact -->
+                    <section class="mb-4">
+                        <h2 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            8. Nous Contacter
+                        </h2>
+                        <div class="bg-light p-4 rounded">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-question-circle me-2"></i>Questions sur vos données</h5>
+                                    <p class="mb-1"><i class="fas fa-envelope me-2"></i><strong>Email :</strong> [rgpd@rca-club.fr à configurer]</p>
+                                    <p class="mb-1"><i class="fas fa-phone me-2"></i><strong>Téléphone :</strong> [Numéro à configurer]</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-balance-scale me-2"></i>Réclamation</h5>
+                                    <p class="small">
+                                        En cas de problème non résolu, vous pouvez saisir la 
+                                        <strong>Commission Nationale de l'Informatique et des Libertés (CNIL)</strong>
+                                    </p>
+                                    <a href="https://www.cnil.fr/fr/plaintes" target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-external-link-alt me-1"></i>Saisir la CNIL
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div class="card-footer text-muted text-center">
+                    <small>
+                        Cette politique de confidentialité est conforme au Règlement Général sur la Protection des Données (RGPD) 
+                        et à la loi Informatique et Libertés modifiée.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -226,7 +226,7 @@ class RegistrationFormType extends AbstractType
                 ],
             ])
             
-            // ========== CONDITIONS ==========
+            // ========== CONDITIONS ET RGPD ==========
             ->add('agreeTerms', CheckboxType::class, [
                 'label' => 'J\'accepte les conditions d\'utilisation *',
                 'mapped' => false,
@@ -236,6 +236,22 @@ class RegistrationFormType extends AbstractType
                         'message' => 'Vous devez accepter les conditions d\'utilisation.',
                     ]),
                 ],
+            ])
+            ->add('agreePrivacy', CheckboxType::class, [
+                'label' => 'J\'accepte la politique de confidentialité et le traitement de mes données personnelles *',
+                'mapped' => false,
+                'attr' => ['class' => 'form-check-input'],
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'Vous devez accepter la politique de confidentialité.',
+                    ]),
+                ],
+            ])
+            ->add('consentCommunication', CheckboxType::class, [
+                'label' => 'J\'accepte de recevoir des communications relatives à la vie du club (facultatif)',
+                'mapped' => false,
+                'attr' => ['class' => 'form-check-input'],
+                'required' => false,
             ])
         ;
     }
