@@ -1,51 +1,110 @@
-@startuml ApliRCA_Database_Diagram
+@startuml ApliRCA_Database_Diagram_V2
 
-title Base de données ApliRCA
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FEFEFE
+skinparam entity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+}
 
-' Tables de référence
+title Base de données ApliRCA - Version 2.0\n(Mise à jour: 2025-11-04)
+
+' =============================================================================
+' TABLES DE RÉFÉRENCE ET CONFIGURATION
+' =============================================================================
+
 entity "Role" as Role {
-  **id_role** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  **id_role** : INT <<PK>> AUTO_INCREMENT
   --
   libelle : VARCHAR(50) NOT NULL UNIQUE
-  description : TEXT NULL
+  description : VARCHAR(255) NULL
+  --
+  <<indexes>>
+  idx_role_libelle (libelle)
+}
+
+entity "Permission" as Permission {
+  **id** : INT <<PK>> AUTO_INCREMENT
+  --
+  name : VARCHAR(100) NOT NULL UNIQUE
+  route : VARCHAR(100) NOT NULL UNIQUE
+  description : VARCHAR(255) NULL
+  public_access : BOOLEAN DEFAULT FALSE
+  --
+  <<indexes>>
+  idx_permission_name (name)
+  idx_permission_route (route)
 }
 
 entity "TypeTransaction" as TypeTransaction {
-  **id_type** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  **id_type** : INT <<PK>> AUTO_INCREMENT
   --
   libelle : VARCHAR(100) NOT NULL UNIQUE
-  description : TEXT NULL
+  description : VARCHAR(255) NULL
+  --
+  <<indexes>>
+  idx_type_libelle (libelle)
+}
+
+entity "ModeDePaiement" as ModeDePaiement {
+  **id** : INT <<PK>> AUTO_INCREMENT
+  --
+  libelle : VARCHAR(255) NOT NULL
+  --
+  <<indexes>>
+  idx_mode_paiement_libelle (libelle)
 }
 
 entity "Exercice" as Exercice {
-  **id_exercice** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  **id_exercice** : INT <<PK>> AUTO_INCREMENT
   --
   libelle : VARCHAR(100) NOT NULL
-  numero_ordre : INT NOT NULL
+  numero_ordre : INT NOT NULL UNIQUE
   date_debut : DATE NOT NULL
   date_fin : DATE NULL
-  clos : BOOLEAN NOT NULL DEFAULT FALSE
+  clos : BOOLEAN DEFAULT FALSE
+  --
+  <<constraints>>
+  chk_exercice_dates
+  --
+  <<indexes>>
+  idx_exercice_dates (date_debut, date_fin)
+  idx_exercice_numero (numero_ordre)
 }
 
-' Tables principales
+' =============================================================================
+' TABLES PRINCIPALES
+' =============================================================================
+
 entity "Personne" as Personne {
-  **id_personne** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  **id_personne** : INT <<PK>> AUTO_INCREMENT
   --
-  civilite : VARCHAR(10) NULL
   nom : VARCHAR(100) NOT NULL
   prenom : VARCHAR(100) NOT NULL
+  civilite : VARCHAR(10) NULL
   numero_voie : VARCHAR(10) NULL
   rue : VARCHAR(200) NULL
   complement_adresse : VARCHAR(100) NULL
   ville : VARCHAR(100) NULL
   code_postal : INT NULL
-  pays : VARCHAR(50) NULL DEFAULT 'France'
+  pays : VARCHAR(50) DEFAULT 'France'
   telephone : INT NULL
   email : VARCHAR(255) NULL
+  deleted_at : DATETIME NULL
+  --
+  <<constraints>>
+  chk_personne_civilite
+  chk_personne_email
+  --
+  <<indexes>>
+  idx_personne_nom_prenom (nom, prenom)
+  idx_personne_email (email)
+  idx_personne_deleted (deleted_at)
 }
 
 entity "Entreprise" as Entreprise {
-  **id_entreprise** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  **id_entreprise** : INT <<PK>> AUTO_INCREMENT
   --
   nom_entreprise : VARCHAR(255) NOT NULL
   siret : VARCHAR(14) NULL UNIQUE
@@ -55,24 +114,48 @@ entity "Entreprise" as Entreprise {
   complement_adresse : VARCHAR(100) NULL
   ville : VARCHAR(100) NULL
   code_postal : INT NULL
-  pays : VARCHAR(50) NULL DEFAULT 'France'
+  pays : VARCHAR(50) DEFAULT 'France'
   telephone : INT NULL
   email : VARCHAR(255) NULL
+  --
+  <<constraints>>
+  chk_entreprise_siret
+  chk_entreprise_siren
+  chk_entreprise_email
+  --
+  <<indexes>>
+  idx_entreprise_nom (nom_entreprise)
+  idx_entreprise_siret (siret)
+  idx_entreprise_email (email)
 }
 
 entity "User" as User {
-  **id_user** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  **id_user** : INT <<PK>> AUTO_INCREMENT
   --
   username : VARCHAR(50) NOT NULL UNIQUE
   password : VARCHAR(255) NOT NULL
   //id_personne// : INT <<FK>> NOT NULL UNIQUE
+  --
+  <<indexes>>
+  idx_user_username (username)
 }
 
+' =============================================================================
+' TABLES DE LIAISON
+' =============================================================================
+
 entity "UserRole" as UserRole {
-  //id_user// : INT <<FK>> NOT NULL
-  //id_role// : INT <<FK>> NOT NULL
+  //user_id// : INT <<FK>> NOT NULL
+  //role_id// : INT <<FK>> NOT NULL
   --
-  PRIMARY KEY (id_user, id_role)
+  PRIMARY KEY (user_id, role_id)
+}
+
+entity "RolePermission" as RolePermission {
+  //role_id// : INT <<FK>> NOT NULL
+  //permission_id// : INT <<FK>> NOT NULL
+  --
+  PRIMARY KEY (role_id, permission_id)
 }
 
 entity "PersonneEntreprise" as PersonneEntreprise {
@@ -82,52 +165,219 @@ entity "PersonneEntreprise" as PersonneEntreprise {
   PRIMARY KEY (id_personne, id_entreprise)
 }
 
+' =============================================================================
+' TABLES TRANSACTIONNELLES
+' =============================================================================
+
 entity "Transaction" as Transaction {
-  **id_transaction** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  **id_transaction** : INT <<PK>> AUTO_INCREMENT
   --
   libelle : VARCHAR(255) NOT NULL UNIQUE
   numero_ordre : INT NOT NULL
   date_transaction : DATE NOT NULL
   montant : DECIMAL(15,2) NOT NULL
+  type_compte : VARCHAR(50) DEFAULT 'compte_courant'
   //id_exercice// : INT <<FK>> NOT NULL
   //id_type// : INT <<FK>> NOT NULL
-  //id_personne// : INT <<FK>> NULL (XOR)
-  //id_entreprise// : INT <<FK>> NULL (XOR)
+  //id_personne// : INT <<FK>> NULL
+  //id_entreprise// : INT <<FK>> NULL
+  //mode_de_paiement_id// : INT <<FK>> NULL
   --
-  UNIQUE (numero_ordre, id_exercice)
+  <<constraints>>
+  chk_transaction_montant (montant != 0)
+  chk_transaction_xor (XOR personne/entreprise)
+  chk_transaction_type_compte
+  unique_numero_ordre_exercice
+  --
+  <<indexes>>
+  idx_transaction_date (date_transaction)
+  idx_transaction_exercice (id_exercice)
+  idx_transaction_personne (id_personne)
+  idx_transaction_entreprise (id_entreprise)
 }
+
+' =============================================================================
+' TABLES D'AUDIT ET HISTORIQUE
+' =============================================================================
 
 entity "HistoriqueCloture" as HistoriqueCloture {
-  **id_historique** : INT <<PK>> NOT NULL AUTO_INCREMENT
+  **id_historique** : INT <<PK>> AUTO_INCREMENT
   --
+  //id_exercice// : INT <<FK>> NOT NULL
   date_action : DATETIME NOT NULL
   type_action : VARCHAR(50) NOT NULL
-  commentaire : TEXT NULL
-  //id_exercice// : INT <<FK>> NOT NULL
   //id_user// : INT <<FK>> NULL
+  commentaire : TEXT NULL
+  --
+  <<constraints>>
+  chk_historique_type_action ('CLOTURE'/'DECLOTURE')
+  --
+  <<indexes>>
+  idx_historique_exercice (id_exercice)
+  idx_historique_date (date_action)
+  idx_historique_user (id_user)
 }
 
-' Relations
-User ||--|| Personne : "1,1" "1,0"
+entity "AuditTrail" as AuditTrail {
+  **id** : INT <<PK>> AUTO_INCREMENT
+  --
+  //user_id// : INT <<FK>> NULL
+  action : VARCHAR(100) NOT NULL
+  entity_type : VARCHAR(100) NOT NULL
+  entity_id : INT NULL
+  details : LONGTEXT NULL
+  created_at : DATETIME NOT NULL
+  ip_address : VARCHAR(45) NULL
+  user_agent : VARCHAR(255) NULL
+  session_id : VARCHAR(100) NULL
+  route_name : VARCHAR(255) NULL
+  severity : VARCHAR(20) DEFAULT 'info'
+  --
+  <<constraints>>
+  chk_audit_severity
+  --
+  <<indexes>>
+  idx_audit_user (user_id)
+  idx_audit_entity (entity_type, entity_id)
+  idx_audit_date (created_at)
+  idx_audit_action (action)
+}
+
+entity "AuditSuppression" as AuditSuppression {
+  **id** : INT <<PK>> AUTO_INCREMENT
+  --
+  entity_type : VARCHAR(100) NOT NULL
+  entity_id : INT NOT NULL
+  entity_data : LONGTEXT NOT NULL
+  //user_id// : INT <<FK>> NULL
+  deleted_at : DATETIME NOT NULL
+  deletion_reason : VARCHAR(255) NULL
+  ip_address : VARCHAR(45) NULL
+  deletion_type : VARCHAR(20) DEFAULT 'soft'
+  scheduled_hard_delete : DATETIME NULL
+  --
+  <<constraints>>
+  chk_audit_suppression_type
+  --
+  <<indexes>>
+  idx_audit_suppression_entity (entity_type, entity_id)
+  idx_audit_suppression_date (deleted_at)
+  idx_audit_suppression_user (user_id)
+  idx_audit_suppression_scheduled (scheduled_hard_delete)
+}
+
+' =============================================================================
+' TABLES RGPD ET CONSENTEMENT
+' =============================================================================
+
+entity "ConsentementRgpd" as ConsentementRgpd {
+  **id** : INT <<PK>> AUTO_INCREMENT
+  --
+  //user_id// : INT <<FK>> NOT NULL
+  type_consentement : VARCHAR(50) NOT NULL
+  accepte : BOOLEAN NOT NULL
+  date_consentement : DATETIME NOT NULL
+  version_politique : VARCHAR(20) NULL
+  ip_address : VARCHAR(45) NULL
+  --
+  <<constraints>>
+  chk_consentement_type
+  --
+  <<indexes>>
+  idx_consentement_user (user_id)
+  idx_consentement_type (type_consentement)
+  idx_consentement_date (date_consentement)
+}
+
+' =============================================================================
+' RELATIONS
+' =============================================================================
+
+' Relations User
+User ||--|| Personne : "1,1"
 User }o--o{ Role : "0,n" "0,n" (UserRole)
 
+' Relations Role et Permission
+Role }o--o{ Permission : "0,n" "0,n" (RolePermission)
+
+' Relations Personne et Entreprise
 PersonneEntreprise }o--|| Personne : "0,n" "1,1"
 PersonneEntreprise }o--|| Entreprise : "0,n" "1,1"
 
+' Relations Transaction
 Transaction }o--|| Exercice : "0,n" "1,1"
 Transaction }o--|| TypeTransaction : "0,n" "1,1"
 Transaction }o--o| Personne : "0,n" "0,1"
 Transaction }o--o| Entreprise : "0,n" "0,1"
+Transaction }o--o| ModeDePaiement : "0,n" "0,1"
 
+' Relations Historique
 HistoriqueCloture }o--|| Exercice : "0,n" "1,1"
 HistoriqueCloture }o--o| User : "0,n" "0,1"
 
-@enduml
+' Relations Audit
+AuditTrail }o--o| User : "0,n" "0,1"
+AuditSuppression }o--o| User : "0,n" "0,1"
 
-HistoriqueCloture }o--|| Exercice : "0,n" "1,1"
-HistoriqueCloture }o--o| User : "0,n" "0,1"
+' Relations RGPD
+ConsentementRgpd }o--|| User : "0,n" "1,1"
 
-note right of Transaction : XOR: soit Personne\nsoit Entreprise
-note right of HistoriqueCloture : Historique des clôtures\net déclôtures d'exercices
+' =============================================================================
+' NOTES ET ANNOTATIONS
+' =============================================================================
+
+note right of Transaction : **Contraintes métier**\n• XOR: soit Personne soit Entreprise\n• Montant != 0\n• Numéro d'ordre unique par exercice\n• Types de compte: compte_courant, livret
+
+note right of Personne : **Soft Delete**\nLa colonne deleted_at permet\nla suppression logique\npour la conformité RGPD
+
+note right of AuditTrail : **Audit complet**\n• Toutes les actions utilisateurs\n• Détails techniques (IP, User-Agent)\n• Niveaux de sévérité\n• Traçabilité des routes
+
+note right of ConsentementRgpd : **Conformité RGPD**\n• Gestion des consentements\n• Historisation des acceptations\n• Versioning des politiques\n• Traçabilité IP
+
+note right of HistoriqueCloture : **Gestion des exercices**\n• Historique des clôtures/déclôtures\n• Traçabilité des actions\n• Commentaires obligatoires
+
+note right of Permission : **Système d'autorisations**\n• Permissions granulaires\n• Mapping avec les routes Symfony\n• Accès publics configurables\n• Système de rôles flexible
+
+' =============================================================================
+' VUES MÉTIER (Représentation conceptuelle)
+' =============================================================================
+
+package "Vues Métier" {
+    class "vue_transactions_completes" as VueTransactions {
+        + Détails complets des transactions
+        + Jointures avec exercices, types, bénéficiaires
+        + Exclusion des personnes supprimées (soft delete)
+    }
+    
+    class "vue_soldes_exercice" as VueSoldes {
+        + Calculs des soldes par exercice
+        + Distinction compte courant / livret
+        + Statistiques par exercice
+    }
+}
+
+note bottom of VueTransactions : Les vues facilitent l'accès\naux données agrégées\npour les rapports et statistiques
+
+' =============================================================================
+' LÉGENDE
+' =============================================================================
+
+legend bottom left
+|= Symbole |= Signification |
+| **PK** | Clé primaire |
+| **FK** | Clé étrangère |
+| //italique// | Clé étrangère |
+| **gras** | Clé primaire |
+| <<indexes>> | Index de performance |
+| <<constraints>> | Contraintes métier |
+
+**Particularités de l'application:**
+• Soft delete sur les personnes (RGPD)
+• Audit complet des actions utilisateurs
+• Système de permissions granulaires
+• Gestion des exercices comptables
+• Conformité RGPD intégrée
+• Support multi-comptes (courant/livret)
+end legend
 
 @enduml
