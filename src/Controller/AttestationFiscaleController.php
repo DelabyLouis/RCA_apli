@@ -337,10 +337,10 @@ final class AttestationFiscaleController extends AbstractController
             $signatureBase64 = 'data:image/jpeg;base64,' . base64_encode($signatureData);
         }
         
-        $logoPath = $publicDir . '/assets/images/Logo_Cerfa.svg';
+        $logoPath = $publicDir . '/assets/images/Logo_Cerfa.png';
         if (file_exists($logoPath)) {
             $logoData = file_get_contents($logoPath);
-            $logoBase64 = 'data:image/svg+xml;base64,' . base64_encode($logoData);
+            $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
         }
         
         // Générer le HTML de l'attestation
