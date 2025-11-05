@@ -327,17 +327,18 @@ final class AttestationFiscaleController extends AbstractController
         $dompdf = new Dompdf($options);
         
         // Encoder les images en base64
-        $publicDir = $this->getParameter('kernel.project_dir') . '/public';
+        $projectDir = $this->getParameter('kernel.project_dir');
         $signatureBase64 = '';
         $logoBase64 = '';
         
-        $signaturePath = $publicDir . '/assets/images/Signature.jpg';
+        // Utiliser les fichiers source dans assets/ pour éviter les problèmes de hash
+        $signaturePath = $projectDir . '/assets/images/Signature.jpg';
         if (file_exists($signaturePath)) {
             $signatureData = file_get_contents($signaturePath);
             $signatureBase64 = 'data:image/jpeg;base64,' . base64_encode($signatureData);
         }
         
-        $logoPath = $publicDir . '/assets/images/Logo_Cerfa.png';
+        $logoPath = $projectDir . '/assets/images/Logo_Cerfa.svg.png';
         if (file_exists($logoPath)) {
             $logoData = file_get_contents($logoPath);
             $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
