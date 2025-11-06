@@ -18,6 +18,10 @@
                             data-bs-target="#nav-view" type="button" role="tab">
                         <i class="fas fa-eye me-1"></i>Consulter mes données
                     </button>
+                    <button class="nav-link" id="nav-edit-tab" data-bs-toggle="tab" 
+                            data-bs-target="#nav-edit" type="button" role="tab">
+                        <i class="fas fa-edit me-1"></i>Modifier mes données
+                    </button>
                     <button class="nav-link" id="nav-rights-tab" data-bs-toggle="tab" 
                             data-bs-target="#nav-rights" type="button" role="tab">
                         <i class="fas fa-gavel me-1"></i>Exercer mes droits
@@ -122,6 +126,137 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Onglet : Modifier mes données -->
+                <div class="tab-pane fade" id="nav-edit" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Modifier mes informations personnelles</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if personne %}
+                                        <form id="editPersonalInfoForm">
+                                            <div class="mb-3">
+                                                <label for="edit_civilite" class="form-label">Civilité</label>
+                                                <select class="form-select" id="edit_civilite" name="civilite" data-field="civilite">
+                                                    <option value="">Sélectionner...</option>
+                                                    <option value="M." {{ personne.civilite == 'M.' ? 'selected' : '' }}>M.</option>
+                                                    <option value="Mme" {{ personne.civilite == 'Mme' ? 'selected' : '' }}>Mme</option>
+                                                    <option value="Mlle" {{ personne.civilite == 'Mlle' ? 'selected' : '' }}>Mlle</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="edit_nom" class="form-label">Nom *</label>
+                                                <input type="text" class="form-control" id="edit_nom" name="nom" 
+                                                       value="{{ personne.nom ?? '' }}" data-field="nom" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="edit_prenom" class="form-label">Prénom *</label>
+                                                <input type="text" class="form-control" id="edit_prenom" name="prenom" 
+                                                       value="{{ personne.prenom ?? '' }}" data-field="prenom" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="edit_email" class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="edit_email" name="email" 
+                                                       value="{{ personne.email ?? '' }}" data-field="email">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="edit_telephone" class="form-label">Téléphone</label>
+                                                <input type="tel" class="form-control" id="edit_telephone" name="telephone" 
+                                                       value="{{ personne.telephone ?? '' }}" data-field="telephone">
+                                            </div>
+                                        </form>
+                                    {% else %}
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Aucune information personnelle associée à votre compte.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Modifier mon adresse</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if personne %}
+                                        <form id="editAddressForm">
+                                            <div class="mb-3">
+                                                <label for="edit_numero_voie" class="form-label">N° de voie</label>
+                                                <input type="text" class="form-control" id="edit_numero_voie" name="numero_voie" 
+                                                       value="{{ personne.numeroVoie ?? '' }}" data-field="numero_voie">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="edit_rue" class="form-label">Rue</label>
+                                                <input type="text" class="form-control" id="edit_rue" name="rue" 
+                                                       value="{{ personne.rue ?? '' }}" data-field="rue">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="edit_complement_adresse" class="form-label">Complément d'adresse</label>
+                                                <input type="text" class="form-control" id="edit_complement_adresse" name="complement_adresse" 
+                                                       value="{{ personne.complementAdresse ?? '' }}" data-field="complement_adresse">
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="mb-3">
+                                                        <label for="edit_code_postal" class="form-label">Code postal</label>
+                                                        <input type="text" class="form-control" id="edit_code_postal" name="code_postal" 
+                                                               value="{{ personne.codePostal ?? '' }}" data-field="code_postal" pattern="[0-9]{5}">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="mb-3">
+                                                        <label for="edit_ville" class="form-label">Ville</label>
+                                                        <input type="text" class="form-control" id="edit_ville" name="ville" 
+                                                               value="{{ personne.ville ?? '' }}" data-field="ville">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="edit_pays" class="form-label">Pays</label>
+                                                <input type="text" class="form-control" id="edit_pays" name="pays" 
+                                                       value="{{ personne.pays ?? 'France' }}" data-field="pays">
+                                            </div>
+                                        </form>
+                                    {% else %}
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Aucune adresse associée à votre compte.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if personne %}
+                        <div class="col-12 mb-4">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Information :</strong> Modifiez vos informations personnelles ci-dessus, puis cliquez sur "Sauvegarder toutes les modifications" pour enregistrer vos changements.
+                                Les champs marqués d'un astérisque (*) sont obligatoires.
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <button type="button" class="btn btn-success me-2" id="saveAllChanges">
+                                        <i class="fas fa-save me-1"></i>Sauvegarder toutes les modifications
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="cancelAllChanges">
+                                        <i class="fas fa-times me-1"></i>Annuler les modifications
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -301,28 +436,206 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Gestion du formulaire de demande de droits
-    document.getElementById('rightsForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        const requestType = formData.get('requestType');
-        const description = formData.get('description');
-        
-        if (!requestType) {
-            alert('Veuillez sélectionner un type de demande.');
-            return;
-        }
-        
-        if (!description.trim()) {
-            alert('Veuillez décrire votre demande.');
-            return;
-        }
-        
-        // Simulation d'envoi (à implémenter côté serveur)
-        alert('Votre demande a été enregistrée. Vous recevrez une réponse dans un délai d\'un mois maximum.');
-        this.reset();
+    // Stockage des valeurs originales pour pouvoir annuler
+    const originalValues = {};
+    
+    // Stocker les valeurs originales
+    document.querySelectorAll('[data-field]').forEach(field => {
+        originalValues[field.dataset.field] = field.value;
     });
+    
+    // Fonction pour afficher les messages
+    function showMessage(message, type = 'success') {
+        // Supprimer les anciens messages
+        const oldMessages = document.querySelectorAll('.alert-message');
+        oldMessages.forEach(msg => msg.remove());
+        
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `alert ${alertClass} alert-dismissible fade show alert-message`;
+        messageDiv.innerHTML = `
+            <i class="${icon} me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const container = document.querySelector('#nav-edit .row');
+        container.insertBefore(messageDiv, container.firstChild);
+        
+        // Auto-hide après 5 secondes
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    // Fonction pour mettre à jour un champ
+    function updateField(field, value) {
+        return fetch('{{ path("app_my_data_update") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                field: field,
+                value: value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.message || 'Erreur lors de la mise à jour');
+            }
+            return data;
+        });
+    }
+    
+    // Gestion du bouton "Sauvegarder toutes les modifications"
+    document.getElementById('saveAllChanges').addEventListener('click', function() {
+        const button = this;
+        const originalText = button.innerHTML;
+        
+        // Désactiver le bouton et afficher le loading
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sauvegarde en cours...';
+        
+        // Collecter tous les champs modifiés
+        const changedFields = [];
+        document.querySelectorAll('[data-field]').forEach(field => {
+            if (field.value !== originalValues[field.dataset.field]) {
+                changedFields.push({
+                    field: field.dataset.field,
+                    value: field.value,
+                    element: field
+                });
+            }
+        });
+        
+        if (changedFields.length === 0) {
+            showMessage('Aucune modification à sauvegarder.', 'warning');
+            button.disabled = false;
+            button.innerHTML = originalText;
+            return;
+        }
+        
+        // Sauvegarder chaque champ modifié
+        const promises = changedFields.map(item => updateField(item.field, item.value));
+        
+        Promise.all(promises)
+            .then(() => {
+                // Mettre à jour les valeurs originales
+                changedFields.forEach(item => {
+                    originalValues[item.field] = item.value;
+                });
+                
+                showMessage(`${changedFields.length} modification(s) sauvegardée(s) avec succès !`);
+                
+                // Actualiser l'onglet "Consulter mes données"
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showMessage(error.message || 'Erreur lors de la sauvegarde', 'error');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+    });
+    
+    // Gestion du bouton "Annuler les modifications"
+    document.getElementById('cancelAllChanges').addEventListener('click', function() {
+        // Restaurer toutes les valeurs originales
+        document.querySelectorAll('[data-field]').forEach(field => {
+            field.value = originalValues[field.dataset.field];
+        });
+        
+        showMessage('Modifications annulées.');
+    });
+    
+    // Validation en temps réel et marquage des champs modifiés
+    document.querySelectorAll('[data-field]').forEach(field => {
+        field.addEventListener('input', function() {
+            // Marquer le champ comme modifié
+            if (this.value !== originalValues[this.dataset.field]) {
+                this.classList.add('modified');
+            } else {
+                this.classList.remove('modified');
+            }
+        });
+        
+        field.addEventListener('blur', function() {
+            const value = this.value.trim();
+            const fieldType = this.dataset.field;
+            
+            // Validation basique
+            switch (fieldType) {
+                case 'nom':
+                case 'prenom':
+                    if (!value && this.hasAttribute('required')) {
+                        this.classList.add('is-invalid');
+                        return;
+                    }
+                    break;
+                case 'email':
+                    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                        this.classList.add('is-invalid');
+                        return;
+                    }
+                    break;
+                case 'telephone':
+                    if (value && !/^\d+$/.test(value)) {
+                        this.classList.add('is-invalid');
+                        return;
+                    }
+                    break;
+                case 'code_postal':
+                    if (value && !/^\d{5}$/.test(value)) {
+                        this.classList.add('is-invalid');
+                        return;
+                    }
+                    break;
+            }
+            
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        });
+        
+        // Supprimer la validation au focus
+        field.addEventListener('focus', function() {
+            this.classList.remove('is-invalid', 'is-valid');
+        });
+    });
+    
+    // Gestion du formulaire de demande de droits
+    const rightsForm = document.getElementById('rightsForm');
+    if (rightsForm) {
+        rightsForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const requestType = formData.get('requestType');
+            const description = formData.get('description');
+            
+            if (!requestType) {
+                alert('Veuillez sélectionner un type de demande.');
+                return;
+            }
+            
+            if (!description.trim()) {
+                alert('Veuillez décrire votre demande.');
+                return;
+            }
+            
+            // Simulation d'envoi (à implémenter côté serveur)
+            alert('Votre demande a été enregistrée. Vous recevrez une réponse dans un délai d\'un mois maximum.');
+            this.reset();
+        });
+    }
 });
 
 // Exports gérés par les liens directs vers le serveur

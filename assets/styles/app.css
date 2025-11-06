@@ -1464,3 +1464,104 @@ footer {
 .checkbox-container::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
+/* ===============================================
+   STYLES SPÉCIFIQUES POUR LA PAGE "MES DONNÉES"
+   =============================================== */
+
+#nav-edit .card {
+    border: 1px solid var(--gris-moyen);
+    box-shadow: var(--ombre);
+    transition: var(--transition);
+}
+
+#nav-edit .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ombre-large);
+}
+
+#nav-edit .form-control,
+#nav-edit .form-select {
+    border: 2px solid #dee2e6;
+    border-radius: var(--bordure-radius);
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+#nav-edit .form-control:focus,
+#nav-edit .form-select:focus {
+    border-color: var(--or);
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
+}
+
+#nav-edit .form-control.is-valid {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+#nav-edit .form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+#nav-edit .form-label {
+    font-weight: 600;
+    color: var(--gris-fonce);
+    margin-bottom: 0.5rem;
+}
+
+#nav-edit .card-header {
+    border-radius: var(--bordure-radius) var(--bordure-radius) 0 0 !important;
+    font-weight: 600;
+}
+
+#nav-edit .alert-message {
+    border-radius: var(--bordure-radius);
+    border: none;
+    box-shadow: var(--ombre);
+}
+
+#nav-edit .btn {
+    border-radius: var(--bordure-radius);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: var(--transition);
+}
+
+#nav-edit .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--ombre);
+}
+
+#nav-edit .btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+}
+
+#nav-edit .btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    border: none;
+}
+
+/* Animation pour les champs modifiés */
+#nav-edit .form-control:not(:focus):not(.is-invalid):not(.is-valid) {
+    animation: none;
+}
+
+#nav-edit .form-control.modified {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+}
+
+/* Responsive pour la page mes données */
+@media (max-width: 768px) {
+    #nav-edit .row > .col-md-6 {
+        margin-bottom: 1rem;
+    }
+
+    #nav-edit .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}

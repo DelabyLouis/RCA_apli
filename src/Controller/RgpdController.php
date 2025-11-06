@@ -3,8 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\PersonneRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 class RgpdController extends AbstractController
@@ -120,6 +124,86 @@ class RgpdController extends AbstractController
         }
 
         return $response;
+    }
+
+    #[Route('/mes-donnees/update', name: 'app_my_data_update', methods: ['POST'])]
+    public function updateMyData(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        /** @var User|null $user */
+        $user = $this->getUser();
+        
+        if (!$user) {
+            return new JsonResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
+        }
+
+        $personne = $user->getPersonne();
+        if (!$personne) {
+            return new JsonResponse(['success' => false, 'message' => 'Aucune personne associée à ce compte'], 404);
+        }
+
+        $field = $request->request->get('field');
+        $value = $request->request->get('value');
+
+        try {
+            switch ($field) {
+                case 'nom':
+                    if (empty(trim($value))) {
+                        return new JsonResponse(['success' => false, 'message' => 'Le nom ne peut pas être vide'], 400);
+                    }
+                    $personne->setNom(trim($value));
+                    break;
+                case 'prenom':
+                    if (empty(trim($value))) {
+                        return new JsonResponse(['success' => false, 'message' => 'Le prénom ne peut pas être vide'], 400);
+                    }
+                    $personne->setPrenom(trim($value));
+                    break;
+                case 'civilite':
+                    $personne->setCivilite($value ? trim($value) : null);
+                    break;
+                case 'email':
+                    if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        return new JsonResponse(['success' => false, 'message' => 'Email invalide'], 400);
+                    }
+                    $personne->setEmail($value ? trim($value) : null);
+                    break;
+                case 'telephone':
+                    if (!empty($value) && !is_numeric($value)) {
+                        return new JsonResponse(['success' => false, 'message' => 'Le téléphone doit être numérique'], 400);
+                    }
+                    $personne->setTelephone($value ? (int)$value : null);
+                    break;
+                case 'numero_voie':
+                    $personne->setNumeroVoie($value ? trim($value) : null);
+                    break;
+                case 'rue':
+                    $personne->setRue($value ? trim($value) : null);
+                    break;
+                case 'complement_adresse':
+                    $personne->setComplementAdresse($value ? trim($value) : null);
+                    break;
+                case 'code_postal':
+                    if (!empty($value) && !preg_match('/^\d{5}$/', $value)) {
+                        return new JsonResponse(['success' => false, 'message' => 'Le code postal doit contenir 5 chiffres'], 400);
+                    }
+                    $personne->setCodePostal($value ? (int)$value : null);
+                    break;
+                case 'ville':
+                    $personne->setVille($value ? trim($value) : null);
+                    break;
+                case 'pays':
+                    $personne->setPays($value ? trim($value) : 'France');
+                    break;
+                default:
+                    return new JsonResponse(['success' => false, 'message' => 'Champ non autorisé'], 400);
+            }
+
+            $entityManager->flush();
+            
+            return new JsonResponse(['success' => true, 'message' => 'Données mises à jour avec succès']);
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la sauvegarde: ' . $e->getMessage()], 500);
+        }
     }
 
     private function arrayToCsv(array $data, string &$csv, string $prefix = ''): void
