@@ -10,9 +10,9 @@
                 <div class="card-header bg-primary text-white">
                     <h1 class="card-title mb-0">
                         <i class="fas fa-shield-alt me-2"></i>
-                        Politique de Confidentialité et Protection des Données
+                        Politique de Confidentialité - Application RCA
                     </h1>
-                    <p class="card-text mb-0"><small>Dernière mise à jour : {{ "now"|date("d/m/Y") }}</small></p>
+                    <p class="card-text mb-0"><small>Dernière mise à jour : {{ "now"|date("d/m/Y") }} - Version simplifiée pour usage interne</small></p>
                 </div>
                 <div class="card-body">
                     <!-- 1. Responsable du traitement -->
@@ -23,9 +23,19 @@
                         </h2>
                         <div class="bg-light p-3 rounded">
                             <p><strong>Rugby Club Audomarois (RCA)</strong></p>
-                            <p class="mb-1"><i class="fas fa-map-marker-alt me-2"></i>[Adresse du club à compléter]</p>
-                            <p class="mb-1"><i class="fas fa-phone me-2"></i>[Téléphone à compléter]</p>
-                            <p class="mb-0"><i class="fas fa-envelope me-2"></i>[Email de contact à compléter]</p>
+                            <p class="mb-1"><i class="fas fa-info-circle me-2"></i>Cette application est destinée à l'usage interne des bénévoles et employés du club</p>
+                            <p class="mb-1"><i class="fas fa-envelope me-2"></i>contact@rca-club.fr</p>
+                            <p class="mb-0"><i class="fas fa-user-tie me-2"></i>Pour toute question : contactez directement l'administration du club</p>
+                        </div>
+                    </section>
+
+                    <!-- Information usage interne -->
+                    <section class="mb-5">
+                        <div class="alert alert-warning">
+                            <h5 class="mb-2"><i class="fas fa-users me-2"></i>Application à usage interne</h5>
+                            <p class="mb-2">Cette application est exclusivement destinée aux bénévoles et employés du Rugby Club Audomarois. 
+                            Elle permet la gestion interne des membres, de la comptabilité et des activités du club.</p>
+                            <p class="mb-0"><strong>Vos données ne sont pas partagées avec des tiers externes</strong> et restent dans le cadre stricte de l'association.</p>
                         </div>
                     </section>
 
@@ -67,8 +77,8 @@
                         </div>
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            <strong>Base légale :</strong> Intérêt légitime pour la gestion associative (art. 6.1.f RGPD) 
-                            et consentement pour les communications marketing.
+                            <strong>Base légale :</strong> Gestion associative nécessaire au fonctionnement du club (intérêt légitime).
+                            Les données restent dans le cadre exclusif de l'association.
                         </div>
                     </section>
 
@@ -179,47 +189,40 @@
                     <section class="mb-5">
                         <h2 class="border-bottom pb-2 mb-3">
                             <i class="fas fa-balance-scale me-2 text-primary"></i>
-                            5. Vos Droits RGPD
+                            5. Vos Droits sur vos Données
                         </h2>
-                        <div class="row">
-                            <div class="col-lg-6 mb-3">
-                                <div class="list-group">
-                                    <div class="list-group-item">
-                                        <h5 class="mb-1"><i class="fas fa-eye text-info me-2"></i>Droit d'accès</h5>
-                                        <p class="mb-0">Connaître quelles données nous détenons sur vous</p>
-                                    </div>
-                                    <div class="list-group-item">
-                                        <h5 class="mb-1"><i class="fas fa-edit text-warning me-2"></i>Droit de rectification</h5>
-                                        <p class="mb-0">Corriger des données inexactes ou incomplètes</p>
-                                    </div>
-                                    <div class="list-group-item">
-                                        <h5 class="mb-1"><i class="fas fa-trash text-danger me-2"></i>Droit à l'effacement</h5>
-                                        <p class="mb-0">Demander la suppression de vos données</p>
+                        <div class="alert alert-light">
+                            <p class="mb-3"><strong>En tant qu'utilisateur interne, vous avez accès simplifié à vos droits :</strong></p>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <i class="fas fa-eye fa-2x text-info mb-2"></i>
+                                        <h6>Consulter</h6>
+                                        <p class="small">Voir toutes vos données dans votre profil</p>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <div class="list-group">
-                                    <div class="list-group-item">
-                                        <h5 class="mb-1"><i class="fas fa-pause text-secondary me-2"></i>Droit de limitation</h5>
-                                        <p class="mb-0">Limiter le traitement de vos données</p>
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <i class="fas fa-edit fa-2x text-warning mb-2"></i>
+                                        <h6>Modifier</h6>
+                                        <p class="small">Corriger directement vos informations</p>
                                     </div>
-                                    <div class="list-group-item">
-                                        <h5 class="mb-1"><i class="fas fa-download text-success me-2"></i>Droit de portabilité</h5>
-                                        <p class="mb-0">Récupérer vos données dans un format structuré</p>
-                                    </div>
-                                    <div class="list-group-item">
-                                        <h5 class="mb-1"><i class="fas fa-hand-paper text-primary me-2"></i>Droit d'opposition</h5>
-                                        <p class="mb-0">Vous opposer au traitement de vos données</p>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <i class="fas fa-phone fa-2x text-success mb-2"></i>
+                                        <h6>Contacter</h6>
+                                        <p class="small">Pour toute demande particulière</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="alert alert-success">
-                            <i class="fas fa-user-cog me-2"></i>
-                            <strong>Exercer vos droits :</strong> 
-                            <a href="{{ path('app_exercise_rights') }}" class="btn btn-success btn-sm ms-2">
-                                <i class="fas fa-external-link-alt me-1"></i>Gérer mes données
+                        <div class="text-center">
+                            <a href="{{ path('app_my_data') }}" class="btn btn-primary me-2">
+                                <i class="fas fa-user-shield me-1"></i>Accéder à mes données
+                            </a>
+                            <a href="{{ path('app_exercise_rights') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-gavel me-1"></i>Faire une demande
                             </a>
                         </div>
                     </section>

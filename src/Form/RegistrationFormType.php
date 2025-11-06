@@ -247,12 +247,7 @@ class RegistrationFormType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('consentCommunication', CheckboxType::class, [
-                'label' => 'J\'accepte de recevoir des communications relatives à la vie du club (facultatif)',
-                'mapped' => false,
-                'attr' => ['class' => 'form-check-input'],
-                'required' => false,
-            ])
+
         ;
     }
 

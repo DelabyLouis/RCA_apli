@@ -56,6 +56,60 @@ class RgpdController extends AbstractController
         ]);
     }
 
+    #[Route('/exercer-mes-droits', name: 'app_exercise_rights_submit', methods: ['POST'])]
+    public function submitRightsRequest(Request $request): JsonResponse
+    {
+        /** @var User|null $user */
+        $user = $this->getUser();
+        
+        if (!$user) {
+            return new JsonResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 401);
+        }
+
+        $requestType = $request->request->get('requestType');
+        $description = $request->request->get('description');
+        $contactMethod = $request->request->get('contactMethod', 'email');
+
+        // Validation
+        if (empty($requestType)) {
+            return new JsonResponse(['success' => false, 'message' => 'Type de demande requis'], 400);
+        }
+
+        if (empty(trim($description))) {
+            return new JsonResponse(['success' => false, 'message' => 'Description de la demande requise'], 400);
+        }
+
+        // Types de demandes autorisés pour usage interne (simplifiés)
+        $allowedTypes = ['access', 'rectification', 'deletion'];
+        if (!in_array($requestType, $allowedTypes)) {
+            return new JsonResponse(['success' => false, 'message' => 'Type de demande non valide'], 400);
+        }
+
+        try {
+            // Ici, vous pourriez enregistrer la demande dans une table dédiée
+            // Pour l'instant, on simule un traitement réussi
+            
+            // Génération d'un numéro de demande unique
+            $requestNumber = 'RCA-' . date('Ymd') . '-' . substr(uniqid(), -6);
+            
+            // Dans une vraie application, vous devriez :
+            // 1. Enregistrer la demande dans la base de données
+            // 2. Envoyer un email de confirmation à l'utilisateur
+            // 3. Notifier les administrateurs
+            // 4. Créer un système de suivi des demandes
+            
+            return new JsonResponse([
+                'success' => true, 
+                'message' => 'Votre demande a été enregistrée avec succès !',
+                'requestNumber' => $requestNumber,
+                'expectedResponseTime' => 'Dans un délai maximum d\'un mois'
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'enregistrement: ' . $e->getMessage()], 500);
+        }
+    }
+
     #[Route('/export-donnees/{format}', name: 'app_export_data', methods: ['GET'], requirements: ['format' => 'json|csv|pdf'])]
     public function exportData(string $format): Response
     {

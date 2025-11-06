@@ -155,16 +155,18 @@
                         </div>
                     </div>
 
-                    <!-- ========== CONDITIONS ET RGPD ========== -->
-                    <div class="border rounded p-3 mb-4 bg-primary bg-opacity-10">
-                        <h6 class="text-primary mb-3">
-                            <i class="fas fa-shield-alt me-2"></i>Conditions et Protection des Données
+                    <!-- ========== VALIDATION ========== -->
+                    <div class="border rounded p-3 mb-4 bg-success bg-opacity-10">
+                        <h6 class="text-success mb-3">
+                            <i class="fas fa-check-circle me-2"></i>Validation de l'inscription
                         </h6>
                         
-                        <!-- Conditions d'utilisation -->
+                        <!-- Acceptation des conditions -->
                         <div class="form-check mb-3">
                             {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input' ~ (registrationForm.agreeTerms.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                            {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'form-check-label fw-bold'}}) }}
+                            <label class="form-check-label fw-bold" for="{{ registrationForm.agreeTerms.vars.id }}">
+                                J'accepte les conditions d'utilisation de l'application RCA *
+                            </label>
                             {% if registrationForm.agreeTerms.vars.errors|length > 0 %}
                                 <div class="invalid-feedback">
                                     {% for error in registrationForm.agreeTerms.vars.errors %}
@@ -174,16 +176,14 @@
                             {% endif %}
                         </div>
 
-                        <!-- Politique de confidentialité -->
+                        <!-- Traitement des données -->
                         <div class="form-check mb-3">
                             {{ form_widget(registrationForm.agreePrivacy, {'attr': {'class': 'form-check-input' ~ (registrationForm.agreePrivacy.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
                             <label class="form-check-label fw-bold" for="{{ registrationForm.agreePrivacy.vars.id }}">
-                                J'accepte la 
-                                <a href="{{ path('app_privacy_policy') }}" target="_blank" class="text-decoration-none">
-                                    politique de confidentialité
-                                    <i class="fas fa-external-link-alt fa-xs"></i>
+                                J'accepte que mes données soient traitées dans le cadre de la gestion du club *
+                                <a href="{{ path('app_privacy_policy') }}" target="_blank" class="text-decoration-none ms-2">
+                                    <i class="fas fa-info-circle"></i> En savoir plus
                                 </a>
-                                et le traitement de mes données personnelles *
                             </label>
                             {% if registrationForm.agreePrivacy.vars.errors|length > 0 %}
                                 <div class="invalid-feedback">
@@ -194,25 +194,11 @@
                             {% endif %}
                         </div>
 
-                        <!-- Consentement communication (optionnel) -->
-                        <div class="form-check mb-3">
-                            {{ form_widget(registrationForm.consentCommunication, {'attr': {'class': 'form-check-input'}}) }}
-                            {{ form_label(registrationForm.consentCommunication, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                            <small class="form-text text-muted d-block mt-1">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Vous pouvez retirer ce consentement à tout moment dans votre espace personnel.
-                            </small>
-                        </div>
-
-                        <div class="alert alert-info mb-0">
+                        <div class="alert alert-light mb-0">
                             <small>
-                                <i class="fas fa-info-circle me-1"></i>
-                                <strong>Information RGPD :</strong> Vos données personnelles sont collectées pour la gestion 
-                                de votre adhésion au club. Vous disposez d'un droit d'accès, de rectification, de suppression 
-                                et de portabilité sur vos données. 
-                                <a href="{{ path('app_privacy_policy') }}" target="_blank" class="text-decoration-none">
-                                    En savoir plus
-                                </a>
+                                <i class="fas fa-users me-1"></i>
+                                <strong>Application interne :</strong> Cette application est réservée aux bénévoles et employés du RCA. 
+                                Vos données restent confidentielles et ne sont partagées qu'avec les personnes autorisées du club.
                             </small>
                         </div>
                     </div>

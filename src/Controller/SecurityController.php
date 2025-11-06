@@ -99,15 +99,7 @@ class SecurityController extends AbstractController
                 'Inscription - Acceptation obligatoire de la politique de confidentialité'
             );
 
-            // Consentement optionnel pour les communications
-            if ($form->get('consentCommunication')->getData()) {
-                $consentementService->enregistrerConsentement(
-                    $user, 
-                    ConsentementRgpdService::CONSENTEMENT_COMMUNICATION, 
-                    true, 
-                    'Inscription - Consentement volontaire aux communications du club'
-                );
-            }
+            // Pour un usage interne, la communication est considérée comme nécessaire au fonctionnement
 
             // Connecter automatiquement l'utilisateur après l'inscription
             $security->login($user, 'form_login');

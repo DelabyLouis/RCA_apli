@@ -1,0 +1,246 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Exercer mes droits - RCA Application{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="mb-4">
+                <i class="fas fa-gavel me-2 text-primary"></i>
+                Exercer mes droits RGPD
+            </h1>
+
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Information :</strong> En tant qu'utilisateur de l'application RCA, vous disposez de droits concernant vos données personnelles. 
+                Pour toute demande, vous pouvez utiliser ce formulaire ou contacter directement l'administration du club.
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>Formulaire de demande d'exercice de droits
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="rightsForm" method="POST">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Type de demande *</label>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="requestType" value="access" id="access" required>
+                                        <label class="form-check-label" for="access">
+                                            <i class="fas fa-eye me-2 text-info"></i>
+                                            <strong>Consulter mes données</strong>
+                                            <div class="small text-muted">Obtenir un récapitulatif de mes informations enregistrées</div>
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="requestType" value="rectification" id="rectification" required>
+                                        <label class="form-check-label" for="rectification">
+                                            <i class="fas fa-edit me-2 text-warning"></i>
+                                            <strong>Corriger mes données</strong>
+                                            <div class="small text-muted">Signaler et corriger des informations incorrectes</div>
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="requestType" value="deletion" id="deletion" required>
+                                        <label class="form-check-label" for="deletion">
+                                            <i class="fas fa-trash me-2 text-danger"></i>
+                                            <strong>Supprimer mes données</strong>
+                                            <div class="small text-muted">Demander la suppression de mon compte et de mes données</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="requestDescription" class="form-label fw-bold">Description de votre demande *</label>
+                            <textarea class="form-control" id="requestDescription" name="description" 
+                                      rows="4" required placeholder="Décrivez votre demande ou le problème rencontré..."></textarea>
+                            <div class="form-text">
+                                Décrivez simplement votre demande. Nous vous recontacterons rapidement.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="contactMethod" class="form-label fw-bold">Comment souhaitez-vous être recontacté ?</label>
+                            <select class="form-select" id="contactMethod" name="contactMethod">
+                                <option value="email">Par email</option>
+                                <option value="telephone">Par téléphone</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirmIdentity" required>
+                                <label class="form-check-label" for="confirmIdentity">
+                                    <strong>Je confirme ma demande et comprends qu'elle sera traitée dans les meilleurs délais. *</strong>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Envoyer ma demande
+                            </button>
+                            <a href="{{ path('app_my_data') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à mes données
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Contact direct -->
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="fas fa-phone me-2"></i>Besoin d'aide ? Contactez-nous directement</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                            <h6>Par email</h6>
+                            <p class="small">contact@rca-club.fr</p>
+                        </div>
+                        <div class="col-md-6">
+                            <i class="fas fa-user-tie fa-2x text-success mb-2"></i>
+                            <h6>Administration du club</h6>
+                            <p class="small">Pour toute question sur vos données</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-light mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <small><strong>Conseil :</strong> Pour les modifications simples (nom, email, téléphone), 
+                        vous pouvez aussi utiliser directement la section "Modifier mes données" dans votre profil.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('rightsForm');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const requestType = formData.get('requestType');
+        const description = formData.get('description');
+        const confirmIdentity = document.getElementById('confirmIdentity').checked;
+        
+        // Validation
+        if (!requestType) {
+            alert('Veuillez sélectionner un type de demande.');
+            return;
+        }
+        
+        if (!description.trim()) {
+            alert('Veuillez décrire votre demande.');
+            return;
+        }
+        
+        if (!confirmIdentity) {
+            alert('Veuillez confirmer votre identité en cochant la case.');
+            return;
+        }
+        
+        // Désactiver le bouton et afficher le chargement
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Envoi en cours...';
+        
+        // Envoi de la demande au serveur
+        fetch('{{ path("app_exercise_rights_submit") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`✅ ${data.message}\n\n📋 Numéro de demande : ${data.requestNumber}\n⏰ ${data.expectedResponseTime}\n\nVous allez être redirigé vers vos données personnelles.`);
+                
+                // Rediriger vers la page mes-données après 3 secondes
+                setTimeout(() => {
+                    window.location.href = '{{ path("app_my_data") }}';
+                }, 3000);
+            } else {
+                alert('❌ Erreur : ' + data.message);
+                // Réactiver le bouton en cas d'erreur
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('❌ Erreur de connexion. Veuillez réessayer.');
+            
+            // Réactiver le bouton en cas d'erreur
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    });
+    
+    // Validation en temps réel du textarea
+    const textarea = document.getElementById('requestDescription');
+    textarea.addEventListener('input', function() {
+        const words = this.value.trim().split(/\s+/).filter(word => word.length > 0);
+        if (words.length < 10) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        }
+    });
+});
+</script>
+
+<style>
+.form-check-label {
+    cursor: pointer;
+}
+
+.form-check-input:checked + .form-check-label {
+    color: var(--bs-primary);
+    font-weight: 600;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.is-valid {
+    border-color: #198754;
+}
+</style>
+{% endblock %}
