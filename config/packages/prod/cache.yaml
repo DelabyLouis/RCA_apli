@@ -1,0 +1,45 @@
+# Configuration de cache optimisée pour la production
+framework:
+    cache:
+        # Cache d'application Filesystem pour la compatibilité
+        app: cache.adapter.filesystem
+
+        # Cache système
+        system: cache.adapter.system
+
+        # Pools de cache spécialisés
+        pools:
+            # Cache pour les requêtes Doctrine
+            doctrine.result_cache_pool:
+                adapter: cache.adapter.filesystem
+
+            # Cache pour les métadatas Doctrine
+            doctrine.system_cache_pool:
+                adapter: cache.adapter.system
+
+            # Cache pour les assets
+            assets.cache_pool:
+                adapter: cache.adapter.filesystem
+
+    # Configuration de la sérialisation
+    serializer:
+        default_context:
+            enable_max_depth: true
+
+# Configuration Doctrine optimisée
+doctrine:
+    orm:
+        # Cache des métadatas
+        metadata_cache_driver:
+            type: pool
+            pool: doctrine.system_cache_pool
+
+        # Cache des requêtes
+        query_cache_driver:
+            type: pool
+            pool: doctrine.result_cache_pool
+
+        # Cache des résultats
+        result_cache_driver:
+            type: pool
+            pool: doctrine.result_cache_pool

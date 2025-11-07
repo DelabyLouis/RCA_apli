@@ -1,0 +1,22 @@
+# Configuration de sécurité renforcée pour la production
+framework:
+    # Configuration HTTPS
+    default_locale: fr
+    trusted_hosts: ['^yourdomain\.com$', '^www\.yourdomain\.com$']
+
+    # Configuration des sessions sécurisées
+    session:
+        cookie_secure: true
+        cookie_httponly: true
+        cookie_samesite: "strict"
+        cookie_lifetime: 3600 # 1 heure
+
+# Configuration des en-têtes de sécurité
+services:
+    App\EventListener\SecurityHeadersListener:
+        tags:
+            - {
+                  name: kernel.event_listener,
+                  event: kernel.response,
+                  method: onKernelResponse,
+              }

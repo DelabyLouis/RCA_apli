@@ -1,0 +1,13 @@
+# Configuration de sécurité renforcée pour la production
+security:
+    # Renforcer la configuration des mots de passe
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+            algorithm: "bcrypt"
+            cost: 13 # Plus élevé pour la production
+
+
+    # Configuration du firewall de production - héritage du firewall principal
+    # La configuration HTTPS sera gérée au niveau du serveur web
+
+    # Le contrôle d'accès est défini dans le fichier security.yaml principal

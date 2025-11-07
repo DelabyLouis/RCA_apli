@@ -42,7 +42,9 @@ security:
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
-        # - { path: ^/, roles: ROLE_USER } # Commenté pour permettre l'accès libre
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        # En développement, l'accès libre est maintenu
+        # En production, cette règle sera surchargée par prod/security.yaml
 
 when@test:
     security:

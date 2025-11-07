@@ -1,0 +1,31 @@
+# Configuration Doctrine optimisée pour la production
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                # Configuration de connexion optimisée
+                options:
+                    # Pool de connexions
+                    1002: 'SET sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""))'
+                # Configuration de cache des requêtes
+                result_cache: doctrine.result_cache_pool
+    orm:
+        # Optimisations ORM pour la production
+        auto_generate_proxy_classes: false
+        enable_lazy_ghost_objects: true
+        proxy_namespace: Proxies
+        proxy_dir: "%kernel.project_dir%/var/cache/prod/doctrine/orm/Proxies"
+
+        # Configuration des entités
+        default_entity_manager: default
+        entity_managers:
+            default:
+                connection: default
+                auto_mapping: true
+                mappings:
+                    App:
+                        is_bundle: false
+                        dir: "%kernel.project_dir%/src/Entity"
+                        prefix: 'App\Entity'
+                        alias: App

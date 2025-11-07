@@ -1,0 +1,15 @@
+# Configuration Twig optimisée pour la production
+twig:
+    # Optimisations de performance
+    cache: "%kernel.project_dir%/var/cache/prod/twig"
+    auto_reload: false
+    optimizations: -1 # Toutes les optimisations
+
+    # Compression de sortie
+    globals:
+        # Variables globales si nécessaire
+
+when@prod:
+    twig:
+        # Configuration spécifique à la production
+        strict_variables: true
