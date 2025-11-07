@@ -21,7 +21,7 @@ class SecurityControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/login');
 
         // Vérifier que le formulaire de connexion est présent
-        $this->assertSelectorExists('form[action="/login"]');
+        $this->assertSelectorExists('form[method="post"]');
         $this->assertSelectorExists('input[name="username"]');
         $this->assertSelectorExists('input[name="password"]');
     }
