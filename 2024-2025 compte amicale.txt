@@ -1,0 +1,668 @@
+AMICALE DES ANCIENS DU RUGBY CLUB AUDOMAROIS
+ALLEE DES SPORTS
+62500 SAINT OMER
+
+exercice 01/10/nn au 30/09/n+1 
+Nom	montant	banque et n° de chéque
+Mr ou Mme Didier Gautherot	30	Banque populaire n° 214279
+Mr ou Mme Clay Jacques	30	CE n°4559748
+Mr HERBST David	100	CA n°6225702
+Mme DELABY Fabienne	30	CE n°3589
+Mr ou Mme Pierre BEGUET	150	SG n°2273
+Mr ou Mme CHOUCHANA Hervé	40	Banque populaire n° 0251347
+Mr Desmaretz Paul	30	CA n°3983305
+Mr IDZIK Bernard	50	BNP n°9640412
+Mr IDKIK Bertrand	60	BNP n°9785774
+total remise du 31/01/2024	520	
+nombre de chéques	9	
+
+			AMICALE DES ANCIENS DU RUGBY CLUB AUDOMAROIS      EXERCICE COMPTABLE DU 01/09/2022 au 31/08/2023			édité le 	27/092023							
+
+
+	DATE	TYPE D’OPERATION	N“ D'ORDRE	EMETTEURS  / BENEFICIAIRES  / TIERS / CATEGORIES  / NOTES	numéro de pièce 	DEBIT	CREDIT	SOLDE	rue	code postal	ville	chéque n°	date	somme en toutes lettres
+512	31/08/2022	création exercice 2022-2023	1		report à nouveau	#REF!		#REF!						
+	10/17/2022	relevé de compte	2					#REF!						
+	10/30/2022	relevé de compte	3					#REF!						
+7	12/1/2022	cotisation 22/23	4	Mr GAUTHEROT Didier		30		#REF!				chèque  Bq Populaire n°214273		
+	12/31/2022	relevé de compte	5					1961.40						
+7	12/21/2022	cotisation 22/23	6	Mr TOUTAIN Nicolas		100		#REF!				chèque CA n°8123456		
+7	1/5/2023	cotisation 22/23	7	Mr ou Mme Isaert St André Pierre		30		#REF!				chèque CA n°5656746		
+7	1/7/2023	cotisation 22/23	8	Mr ou Mme BEGUET Pierre		60		#REF!				chèque SG n°2230		
+7	1/7/2023	cotisation 22/23	9	Mr ou Mme BEGUET Pierre		150		#REF!				chèque SG n°2232		
+7	1/18/2023	cotisation 22/23	10	Mr FARDOUX Gilles		30		#REF!				Chèque Macif n°5551636		
+7	1/18/2023	cotisation 22/23	11	Mr ou Mme BRUGES Walter		30		#REF!				chèque CIC n°8248262		
+7	1/27/2023	cotisation 22/23	12	Mr ou Mme BRUGES Jean-Marie		100		#REF!				chèque SG n°2175		
+7	1/27/2023	repas amicale 2023	13	Mr ou Mme BRUGES Jean-Marie		56		#REF!				chèque SG n°2176		
+7	2/1/2023	cotisation 22/23	14	polo EN LIQUIDE chéque deDavis Herbst CA n°6225677		30		#REF!						
+6	2/1/2023	cadeaux 	15	RCA achat cadeaux banquet			20	#REF!						
+7	2/2/2023	cotisation 22/23	16	Mr MARCELIN Laurent		50		#REF!				chéque CIC n°3211037		
+7	2/8/2023	cotisation 22/23	17	Mr VERBRUGGHE Max		50		#REF!				chéque Bq Postale n°2726005		
+7	2/10/2023	cotisation 22/23	18	Mr IDZIK Bertrand		50		#REF!				chéque BNP n°8878989		
+7	2/23/2023	cotisation 22/23	19	Mr DEBOFLE Paul		30		#REF!				chèque BNP n°8898322		
+7	3/1/2023	cotisation 22/23	20	Mr D'HULSTER Christopher		100		#REF!				chéque CM n°1329825		
+7	3/4/2023	cotisation 22/23	21	Mr DELABY Pierre		50		#REF!				chéque axa n°460717		
+7	3/4/2023	repas amicale 2023	22	Mr DELABY Pierre		56		#REF!				chéque axa n°460715		
+7	3/5/2023	repas amicale 2023	23	Mr ou Mme Isaert St André Pierre		56		#REF!				chéque CA n°5656756		
+7	3/5/2023	repas amicale 2023	24	Mr ou Mme Baudelle Philippe		56		#REF!				chéque SG n°2335		
+7	3/5/2023	repas amicale 2023	25	Mr et Mme Mantel Cyril		56		#REF!				chéque CE n°6112945		
+7	3/5/2023	repas amicale 2023	26	Mr CAYRE Serge		28		#REF!				chéque CN n°6000855		
+7	3/5/2023	repas amicale 2023	27	Mr Hollander Patrick		56		#REF!				chéque CA n°5077349		
+7	3/5/2023	repas amicale 2023	28	Mr ou Mme GAUTEROT Didier		56		#REF!				chéque BP n°214274		
+7	3/5/2023	repas amicale 2023	29	Mr ou Mme IDZIK Bernard		28		#REF!				chéque BNP n°4573608		
+7	3/5/2023	repas amicale 2023	30	Mr ou Mme DUCASSE Michel		56		#REF!				chéque BPn°1749027		
+7	3/5/2023	repas amicale 2023	31	Mr FASQUELLE Yves		28		#REF!				chéque boursorama n°8403246		
+7	3/5/2023	repas amicale 2023	32	Mr Ou Mme Chevalier José		28		#REF!				chéque SG n°4330		
+7	3/5/2023	repas amicale 2023	33	Mr ou Mme MARCELLIN Laurent		56		#REF!				chéque CIC n°3211047		
+7	3/5/2023	repas amicale 2023	34	Mr GAMOT Yves		56		#REF!				chéque BP n°2718001		
+7	3/5/2023	repas amicale 2023	35	Mr FARDOUX Gilles		28		#REF!				chéque macif n°5551638		
+7	3/5/2023	repas amicale 2023	36	Mr Herbst David 		56		#REF!				chéque CA n°6225678		
+7	3/5/2023	cotisation 22/23	37	Mr CAYRE Serge		30		#REF!				chéque CN n°6000854		
+7	12/26/2022	cotisation 22/23	38	Mr Herbst David 		100		#REF!				chéque CA n°6225679		
+7	3/5/2023	cotisation 22/23	39	Mr GAMOT Yves		60		#REF!				chéque BPn°2718002		
+7	3/5/2023	cotisation 22/23	40	Mr ou Mme DESMARETZ Paul		80		#REF!				chéque CA n°3799463		
+7	3/5/2023	cotisation 22/23	41	Mr TOUTAIN Nicolas		150		#REF!				chéque CA n°8123464		
+7	3/5/2023	cotisation 22/23	42	Mr Guy BLONDET		30		#REF!				liquide		
+7	3/5/2023	repas amicale 2023	43	Mr Jacques Clay		28		#REF!				liquide		
+7	3/5/2023	repas amicale 2023	44	Mr Walter Bruges		28		#REF!				liquide		
+7	3/5/2023	repas amicale 2023	45	jean claude	devait 28 a donné 30 et n'a pas voulu des 2€	30		#REF!				liquide		
+7	3/5/2023	repas amicale 2023	46	Mr Rifflart Jocelyn		56		#REF!				liquide		
+7	3/5/2023	repas amicale 2023	47	Mr Demaretz Paul		56		#REF!				liquide		
+7	3/5/2023	repas amicale 2023	48	Mr IDZIK Bernard		28		#REF!				liquide		
+6	3/5/2023	repas amicale remboursé à deuss	50	deuss			56	#REF!				liquide		
+6	3/5/2023	achat repas	51	Chez Marco 	chéque SG n°204		646	#REF!						
+6	3/5/2023	achat repas	52	la miche d'or	chéque SG n°205		61.75	#REF!						
+6	3/4/2023	achat fleurs	53	marché floral	chéque sg n°206 remboursement David 75,74€		28	#REF!						
+6	3/4/2023	achat repas	54	carrefour			47.74	#REF!						
+6	3/8/2023	achat repas	55	La cave saint arnoult			244.02	#REF!						
+7	3/7/2023	cotisation 22/23	56	Mr IDZIK Bernard		40		#REF!				chéque BNP n°4573609		
+7	3/3/2023	cotisation 22/23	57	Mr Martin Garin Louis		100		#REF!			virement 			
+6	4/12/2023	tenu compte CA	58				2	#REF!						
+6	5/11/2023	tenu compte CA	59				2	#REF!						
+6	6/13/2023	tenu compte CA	60				2	#REF!						
+7	6/2/2023	ristourne tenue compte CA	61			6		#REF!			 			
+7	6/15/2023	cotisation 22/23	62	Mr Obert Armand	remise de chéque N°2027229	60		#REF!						
+6	7/11/2023	tenu compte CA	63				2	#REF!						
+6	8/11/2023	tenu compte CA	64				2	#REF!						
+6	6/30/2023	tenu compte SG	65				150	#REF!						
+		relevé de compte SG						#REF!	763.89					
+		relevé de compte CA 						#REF!	2462					
+		CLOTURE EXERCICE						#REF!	3225.89					
+									#REF!					
+
+
+
+
+		 												
+remise de chèques amicale des anciens du RCA compte n°53988627727		
+Nom	montant	banque et n° de chéque
+Mr Verbrugghe Max	80	CE n°10
+total remise du 07/02/2024	80	
+nombre de chéques	1	
+
+			AMICALE DES ANCIENS DU RUGBY CLUB AUDOMAROIS      EXERCICE COMPTABLE DU 01/09/2023 au 31/08/2024			édité le 										
+
+
+n°compte	DATE	TYPE D’OPERATION	N“ D'ORDRE	EMETTEURS  / BENEFICIAIRES  / TIERS / CATEGORIES  / NOTES	numéro de pièce 	DEBIT	CREDIT	SOLDE	rue		code postal	ville	chéque n°	date	somme en toutes lettres	
+512	01/10/2024	création exercice 2023-2024	1		report à nouveau	3225.89		3,225.89								
+6	10/1/2024	achats assemblée générale	2	relai du marais 	 ticket n°40		37	3188.89								
+6	10/4/2023	achats assemblée générale	3	marco 	facture n°F22603009		55.55	3133.34								
+6	9/11/2023	tenue de compte CA 	4	crédit agricole	fact 232400207092		2	3131.34								
+6	10/10/2023	tenue de compte CA 	5	crédit agricole	fact 2327300095471		2	3129.34								
+6	11/10/2023	tenue de compte CA 	6	crédit agricole	fact 2330400224683		2	3127.34								
+6	11/24/2023	achat fleurs	7	à l'état sauvage	facture n°50		50	3077.34								
+7	11/24/2023	ristourne tenue de compte SG	8		mouvement n°8	75		3152.34								
+6	12/6/2023	achat fleurs	9	à l'état sauvage	facture n°?		50	3102.34								
+6	12/11/2023	tenue de compte CA 	10		fact 2333400204078		2	3100.34								
+7	12/6/2023	cotisation 23-24	11	Mr ou Mme Didier Gautherot	cotisation 23-24	30		3130.34	188, rue de Dunkerque		62500	St Omer	Banque populaire n° 214279	12/6/2023	trente euros	
+7	12/20/2023	cotisation 23-24	12	Mr ou Mme Clay Jacques	cotisation 23-24	30		3160.34	83C, route de St Momelin		59143	Nieurlet	CE n°4559748	12/20/2023	trente euros	
+7	12/28/2023	cotisation 23-24	24	Mr HERBST David	cotisation 23-24	100		3260.34	9 rue de la Chapelle		62500	Tilques	CA n°6225702	12/28/2023	cent euros	
+7	12/20/2023	cotisation 23-24	13	paulo	cotisation 23-24	30		3290.34					liquide	12/21/2023	trente euros	
+7	1/3/2024	cotisation 23-24	14	Mr ou Mme Pierre BEGUET	cotisation 23-24	150		3440.34	29, route de Sermoise		58000	Sermoise sur loire 	SG n°2273	1/3/2024	cent cinquante euros	
+7	1/3/2024	cotisation 23-24	15	Mr ou Mme CHOUCHANA Hervé	cotisation 23-24	40		3480.34	43, Avenue du Val saint André		13100	Aix en Provence	Banque populaire n° 0251347	1/3/2024	quarante euros	
+6	1/10/2024	tenue de compte CA 	16	crédit agricole	fact 2336500090543		2	3478.34								
+7	1/8/2024	cotisation 23-24	17	Mr Martin Garin 	cotisation 23-24	100		3578.34					virement	1/8/2024	cent euros	
+7	1/8/2024	cotisation 23-24	18	Mr Canler Marc Antoine	cotisation 23-24	100		3678.34					virement	1/8/2024	cent euros	
+7	1/8/2024	cotisation 23-24	19	Pierre DELABY	cotisation 23-24	60		3738.34		 			virement	1/8/2024	soixante euros	
+7	1/8/2024	cotisation 23-24	20	Mr VERDRU JC	cotisation 23-24	50		3788.34					virement	1/8/2024	cinquante euros	
+7	1/10/2024	cotisation 23-24	21	Mr Brugges Walter	cotisation 23-24	30		3818.34					virement	1/10/2024	trente euros	
+7	1/15/2024	cotisation 23-24	22	Mr Fardoux Gilles	cotisation 23-24	30		3848.34					virement	1/15/2024	trente euros	
+7	1/21/2024	cotisation 23-24	23	Mr Wallois Jérôme	cotisation 23-24	100		3948.34					virement	1/21/2024	cent euros	
+7	1/2/2024	cotisation 23-24	25	Mr Desmaretz Paul	cotisation 23-24	30		3978.34	20 rue Pasteur, St martin au L		62500	St Martine lez tatinghem	CA n°3983305	1/2/2024	trente euros	
+7	1/3/2024	cotisation 23-24	26	Mr IDZIK Bernard	cotisation 23-24	50		4028.34	34 rue de la pierre		62120	Racquinghem	BNP n°9640412	1/3/2024	cinquante euros	
+7	1/12/2024	cotisation 23-24	27	Mr IDKIK Bertrand	cotisation 23-24	60		4088.34	6 rue de leuline		62500	LEULINGHEM	BNP n°9785774	1/12/2024	soixante euros	 
+7	1/31/2024	cotisation 23-24	28	Mr Verbrugghe MAX	cotisation 23-24	80		4168.34	2, rue Roger salengro		62290	Noeux les Mines	CE n°10	1/31/2024	quatre vingt euros	
+6	2/13/2024	tenue de compte CA 	29	crédit agricole	fact 2403100492868		3	4165.34								
+7	3/20/2024	cotisation 23-24	30	Mr Fasquel Yves	cotisation 23-24	30		4195.34	163 A, Bd Georges Pompidou 	Appartement 65 	59123	Bray-Dunes	Boursorama n°8403267	3/20/2024	trente euros	yves.fasquelle@neuf.fr
+7	2/15/2024	cotisation 23-24	31	Mr Obert Armand	cotisation 23-24	80		4275.34	1, rue des prés fleuris		62120	Wittes	CE n°3482117	2/15/2024	quatre vingt euros	
+6	3/11/2024	tenue de compte CA 	32	crédit agricole	Facture N°2406000587229		3	4272.34								
+6	4/10/2024	tenue de compte CA 	33	crédit agricole	Facture N°2409100089770		3	4269.34								
+7	5/2/2024	cotisation 23-24	34	Mr & Mme Brugge Jean-Marie virement	cotisation 23-24	100		4369.34	570, rue de l'Argilière		62570	Helfaut	virement	5/2/2024	cent euros	
+6	5/10/2024	tenue de compte CA 	35	crédit agricole	Facture N°2412100597689		3	4366.34								
+6	6/10/2024	tenue de compte CA 	36	crédit agricole	Facture N°2415200617348		3	4363.34								
+6	7/10/2024	tenue de compte CA 	37	crédit agricole	Facture N°2418200096751		3	4360.34								
+6	8/12/2024	tenue de compte CA 	38	crédit agricole	Facture N°2421300570664		3	4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+								4357.34								
+	8/31/2024	CLOTURE EXERCICE						4357.34								
+
+
+
+
+
+		 														
+
+
+
+
+	 															
+	banque	512				charges	607				produits	707					10			
+10/1/2024	report à nouveau	3225.89	0.00		1/10/2024	achats assemblée générale	37.00	0.00		11/24/2023	ristourne tenue de compte SG		75		9/1/2023	reserve		3,225.89		
+10/1/2024	 ticket n°40	0.00	37.00		4/10/2023	achats assemblée générale	55.55	0.00		12/6/2023	cotisation 23-24		30		8/31/2024	résultat ex mis en réserve		1,131.45		
+10/4/2023	facture n°F22603009	0.00	55.55		11/09/2023	tenue de compte CA 	2.00	0.00		12/20/2023	cotisation 23-24		30							
+9/11/2023	fact 2327300095471	0.00	2.00		10/10/2023	tenue de compte CA 	2.00	0.00		12/28/2023	cotisation 23-24		100							
+10/10/2023	fact 2333400204078	0.00	2.00		10/11/2023	tenue de compte CA 	2.00	0.00		12/20/2023	cotisation 23-24		30							
+11/10/2023	fact 2330400224683	0.00	2.00		24/11/2023	achat fleurs	50.00	0.00		1/3/2024	cotisation 23-24		150							
+11/24/2023	facture n°50	0.00	50.00		6/12/2023	achat fleurs	50.00	0.00		1/3/2024	cotisation 23-24		40							
+11/24/2023	mouvement n°8	75.00	0.00		11/12/2023	tenue de compte CA 	2.00	0.00		1/8/2024	cotisation 23-24		100							
+12/6/2023	facture n°?	0.00	50.00		10/01/2024	tenue de compte CA 	2.00	0.00		1/8/2024	cotisation 23-24		100							
+12/11/2023	fact 2333400204078	0.00	2.00		13/02/2024	tenue de compte CA 	3.00	0.00		1/8/2024	cotisation 23-24		60							
+12/6/2023	cotisation 23-24	30.00	0.00		11/03/2024	tenue de compte CA 	3.00	0.00		1/8/2024	cotisation 23-24		50							
+12/20/2023	cotisation 23-24	30.00	0.00		10/04/2024	tenue de compte CA 	3.00	0.00		1/10/2024	cotisation 23-24		30							
+12/28/2023	cotisation 23-24	100.00	0.00		10/05/2024	tenue de compte CA 	3.00	0.00		1/15/2024	cotisation 23-24		30							
+12/20/2023	cotisation 23-24	30.00	0.00		10/06/2024	tenue de compte CA 	3.00	0.00		1/21/2024	cotisation 23-24		100							
+1/3/2024	cotisation 23-24	150.00	0.00		10/07/2024	tenue de compte CA 	3.00	0.00		1/2/2024	cotisation 23-24		30							
+1/3/2024	cotisation 23-24	40.00	0.00		12/08/2024	tenue de compte CA 	3.00	0.00		1/3/2024	cotisation 23-24		50							
+1/10/2024	fact 2336500090543	0.00	2.00							1/12/2024	cotisation 23-24		60							
+1/8/2024	cotisation 23-24	100.00	0.00							1/31/2024	cotisation 23-24		80							
+1/8/2024	cotisation 23-24	100.00	0.00							3/20/2024	cotisation 23-24		30							
+1/8/2024	cotisation 23-24	60.00	0.00							2/15/2024	cotisation 23-24		80							
+1/8/2024	cotisation 23-24	50.00	0.00							5/2/2024	cotisation 23-24		100							
+1/10/2024	cotisation 23-24	30.00	0.00																	
+1/15/2024	cotisation 23-24	30.00	0.00																	
+1/21/2024	cotisation 23-24	100.00	0.00																	
+1/2/2024	cotisation 23-24	30.00	0.00																	
+1/3/2024	cotisation 23-24	50.00	0.00																	
+1/12/2024	cotisation 23-24	60.00	0.00																	
+1/31/2024	cotisation 23-24	80.00	0.00																	
+2/13/2024	fact 2403100492868	0.00	3.00																	
+3/20/2024	cotisation 23-24	30.00	0.00																	
+2/15/2024	cotisation 23-24	80.00	0.00																	
+3/11/2024	Facture N°2406000587229	0.00	3.00																	
+4/10/2024	Facture N°2409100089770	0.00	3.00																	
+5/2/2024	cotisation 23-24	100.00	0.00																	
+5/10/2024	Facture N°2412100597689	0.00	3.00																	
+6/10/2024	Facture N°2415200617348	0.00	3.00																	
+7/10/2024	Facture N°2418200096751	0.00	3.00																	
+8/12/2024	Facture N°2421300570664	0.00	3.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+1/0/1900	0.00	0.00	0.00																	
+																				
+	total	4580.89	223.55			total	223.55	0			total	0	1355			total	0	4357.34		
+	solde	4357.34				solde	223.55				solde		1355			solde		4357.34		
+
+
+	balance 2023-2024																			
+compte	solde D	solde C															 			
+10		3,225.89																		
+512	4357.34																			
+607	223.55																			
+707	0	1355																		
+
+total	4580.89	4,580.89	0.00																	
+
+compte de résultat 2023-2024						 														
+compte	Débit	compte	Crédit																	
+607	223.55	707	1355																	
+total charges	223.55	total produits	1355.00																	
+résultat	1131.45																			
+
+bilan saison 2023-2024																				
+	actif		passif																	
+banque	4357.34	réserve	3,225.89																	
+		report résultat	1131.45																	
+total actif	4357.34	total passif	4357.34																	
+
+		2023-2024	N-1	N-2																
+total cotisations 		1280	1540	1430																
+nombre de cotisants		20	24	23																
+cotisation moyenne		64	64	62																
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			AMICALE DES ANCIENS DU RUGBY CLUB AUDOMAROIS      EXERCICE COMPTABLE DU 01/09/2024 au 31/08/2025			édité le 										
+
+
+n°compte	DATE	TYPE D’OPERATION	N“ D'ORDRE	EMETTEURS  / BENEFICIAIRES  / TIERS / CATEGORIES  / NOTES	numéro de pièce 	DEBIT	CREDIT	SOLDE	rue		code postal	ville	chéque n°	date	somme en toutes lettres	mail
+512	01/09/2024	création exercice2024-2025	1		report à nouveau	4357.34		4,357.34								
+6	9/10/2024	tenue de compte CA 	2	crédit agricole	Facture N°2424400092485		3	4,354.34								
+6	9/12/2024	achats école de rugby	3	rembouresement RCA Defit sport	FA2403266		607.6	3,746.74								
+7	9/18/2024	cotisation 2024/2025	4	Mr BOULINGUIEZ Jean-Paul	espèces (virement Pierre)	30		3776.74					espèces (virement Pierre)		trente euros	Jeanpaul.boulinguiez@nordnet.fr
+6	10/10/2024	tenue de compte CA 	5	crédit agricole	Facture N°2427400674057		3	3773.74								
+6	11/10/2024	tenue de compte CA 	79	crédit agricole	Facture N°2430500470782		3	3770.74								
+6	11/12/2024	tenue de compte CA 	6	crédit agricole	Facture N°2433500095358		3	3767.74								
+7	11/14/2024	cotisation 2024/2025	7	Mr Fasquelle Yves	virement	35		3802.74	163 A, Bd Georges Pompidou 	Appartement 65 	59123	Bray-Dunes	virement	11/14/2024	trente cinq euros	yves.fasquelle@neuf.fr
+7	11/22/2024	ristourne tenue de compte	8	crédit agricole	avoir/fact 2415200617348	3		3805.74								
+7	11/22/2024	ristourne tenue de compte	9	crédit agricole	avoir/fact 224400092485	3		3808.74								
+7	11/22/2024	ristourne tenue de compte	10	crédit agricole	avoir/fact 2418200096751	3		3811.74								
+7	11/22/2024	ristourne tenue de compte	11	crédit agricole	avoir/fact 2430500470782	3		3814.74								
+7	11/22/2024	ristourne tenue de compte	12	crédit agricole	avoir/fact 2427400674057	3		3817.74								
+7	11/22/2024	ristourne tenue de compte	13	crédit agricole	avoir/fact 2421300570664	3		3820.74								
+6	10/25/2024	achat vaiselle	15	arc outlet (rbst David)	facture 32013 & 31995		239	3581.74								
+6	10/24/2024	achat vaiselle	16	arc outlet (rbst Stépahnie Mantel))	facture 31903		135	3446.74								
+6	11/5/2024	bac pour vaiselle	17	centrakor (rbst david)	facture 40501241100011P1		29.99	3416.75								
+6	11/2/2024	bac pour vaiselle & couverts	18	centrakor (rbst david)	facture 40501241100002P1		187.45	3229.30								
+7	11/25/2024	cotisation 2024/2025	19	Toutain Nicolas	virement	100		3329.30	7, Impasse la Belle Etoile		44620	La Montagne	virement	11/25/2024	cent euros	nicolas.toutain1@free.fr
+6	11/24/2024	pain tarte repas 	20	la miche d'or	facture 5		145.1	3184.20								
+6	11/22/2024	fromage & quincaillerie repas	21	carrefour	ticket 314706113102		115.91	3068.29								
+6	11/16/2024	couvert	22	centrakor (rbst david)	facture 40506241100019		28.28	3040.01								
+6	11/23/2024	biscuit apéritif repas	23	carrefour	ticket 314704009113		37.38	3002.63								
+6	11/23/2024	fleurs repas	24	marche floral audomarois	facture 000001000002816		56	2946.63								
+6	11/16/2024	achat vaiselle	25	arc outlet (rbst David)	facture 35135		55.2	2891.43								
+7	11/25/2024	paiement repas	26	Mr David Rensy	chéque 5833532	60		2951.43								
+7	11/25/2024	paiement repas	27	Mr Pierre DELABY	chq 6811055	60		3011.43								
+7	11/25/2024	paiement repas	28	Mr Michel Ducasse	chq 1749074	60		3071.43								
+7	11/25/2024	paiement repas	29	Mr Yves Gamot	chq 4527009	60		3131.43								
+7	11/25/2024	paiement repas	30	Mr mathieu Escare	chq 1438	60		3191.43								
+7	11/25/2024	paiement repas	31	Mr Martial Lejeune	chq 4415811	60		3251.43								
+7	11/25/2024	paiement repas	32	Mr Paul Deùaretz	chq 4966285	60		3311.43								
+7	11/25/2024	paiement repas	33	Mr Vincent Hollander	chq 62554951	60		3371.43								
+7	11/25/2024	paiement repas	34	Mr J M Bruges	Chq 4463756	60		3431.43								
+7	11/25/2024	paiement repas	35	Mr Laurent Marcelin	chq 3381446	60		3491.43								
+7	11/25/2024	paiement repas	36	Mr Pierre Isaert 	chq 9570618	90		3581.43								
+7	11/25/2024	paiement repas	37	Mr Fasquelle Yves	chq 6026437	30		3611.43								
+7	11/25/2024	paiement repas	38	Mr Dominique Boutin	chq 2646116	30		3641.43								
+7	11/25/2024	paiement repas	39	Mr Armand obert	chq 3482120	30		3671.43								
+7	11/25/2024	paiement repas	40	Mr Ludovic Lamourette	chq 8469197	30		3701.43								
+7	11/25/2024	cotisation 2024/2025	41	Mr Paul Demaretz	chq CA n° 4966284	50		3751.43	20, rue Pasteur 		62500	St Martin lez Tatinghem	chq CA n° 4966284	11/25/2024	cinquante euros	paul.demaretz@wanadoo.fr
+7	11/25/2024	cotisation 2024/2025	42	Mr Pierre Breguet	chq SG 0002322	150		3901.43	29, route de Sermoise		58000	Sermoise sur loire 	chq SG 0002322	11/25/2024	cent cinquante euros	
+7	11/25/2024	cotisation 2024/2025	43	Mr Guy Blonde	chq CM 8646100	30		3931.43	7, rue du marais		62910	Moulle	chq CM 8646100	11/25/2024	trente euros	guy.blonde@free.fr  
+7	11/25/2024	cotisation 2024/2025	44	Mr Armand obert	espèces	40		3971.43	1, rue des prés fleuris		62120	WITTES	espèces	11/25/2024	quarante euros	armand.obert@yahoo.fr
+7	11/25/2024	cotisation 2024/2025	45	Mr David Herbst	espèces	100		4071.43	9 rue de la Chapelle		62500	Tilques	espèces	11/25/2024	cent euros	david-herbst@orange.fr 
+7	11/25/2024	paiement repas	46	loic hazelart	liquide	30		4101.43								
+7	11/25/2024	paiement repas	47	kevin guilbert	liquide	30		4131.43								
+7	11/25/2024	paiement repas	48	m hollander	liquide	60		4191.43								
+7	11/25/2024	paiement repas	49	gero	liquide	30		4221.43								
+7	11/25/2024	paiement repas	50	hughes maquin	liquide	30		4251.43								
+7	11/25/2024	paiement repas	51	jean claude	liquide	30		4281.43								
+7	11/25/2024	paiement repas	52	florent mache	liquide	60		4341.43								
+7	11/25/2024	paiement repas	53	paulo 	liquide	30		4371.43								
+7	11/25/2024	paiement repas	54	cédric stenkeste	liquide	60		4431.43								
+7	11/25/2024	paiement repas	55	eddy brugge	liquide	60		4491.43								
+7	11/25/2024	paiement repas	56	bertrand idzick	liquide	30		4521.43								
+7	11/25/2024	paiement repas	57	gio garruli	liquide	30		4551.43								
+7	11/25/2024	paiement repas	58	yohan caron	liquide	30		4581.43								
+7	11/25/2024	paiement repas	59	michael vaseur	liquide	30		4611.43								
+7	11/25/2024	paiement repas	60	thaillez yves	liquide	30		4641.43								
+7	11/25/2024	paiement repas	61	ellie talleux	liquide	30		4671.43								
+7	11/25/2024	paiement repas	62	simon alcade	liquide	30		4701.43								
+7	11/25/2024	paiement repas	63	quentin ternois	liquide	30		4731.43								
+7	11/25/2024	paiement repas	64	guillaume gaiffe	liquide	30		4761.43								
+7	11/25/2024	paiement repas	65	cyril mantel	liquide	60		4821.43								
+7	11/25/2024	paiement repas	66	guy hollander	liquide	30		4851.43								
+7	11/25/2024	paiement repas	67	clement ras	liquide	30		4881.43								
+7	11/25/2024	paiement repas	68	bernard idzik	liquide	30		4911.43								
+7	11/25/2024	paiement repas	69	nounours	liquide	30		4941.43								
+7	11/25/2024	paiement repas	70	raf carter	liquide	30		4971.43								
+7	11/25/2024	paiement repas	71	david herbst	liquide	60		5031.43								
+6	11/25/2024	cadeau mis à l'honneur	72	rca	facture 33 cheque 2338336		24	5007.43								
+6	11/25/2024	boisson	73	cave de st arnoult	facture 2016169 chéque 2338334		303.59	4703.84								
+6	11/25/2024	repas	74	marco traiteur	facture f22602411 cheque 2338335		1233.69	3470.15								
+7	11/25/2024	paiement repas	75	guy blonde	chq 8646099	30		3500.15								
+7	11/25/2024	paiement repas	76	françois canler	chq 3141	30		3530.15								
+7	11/25/2024	paiement repas	77	nicolas lalliot	chq 3713552	60		3590.15								
+7	11/25/2024	paiement repas	78	philippe baudelle	chq 2439	60		3650.15	ok relevé 31/12/024							
+7	12/31/2024	cotisation 2024/2025	80	Steenkeste Cédric	virement	300		3950.15	23, rue Louis Flamant		02430	 Gauchy	virement	12/31/2024	trois cents euros	Cedric Steenkeste <cedric.steenkeste@tereos.com>
+6	1/10/2025	tenue de compte CA 	81	crédit agricole	facture 2433600634658		3	3947.15								
+7	1/3/2023	cotisation 2024/2025	82	Guilbert Kévin	virement	20		3967.15					virement	1/3/2023	vingt euros	kevinguilbert62@gmail.com
+7	1/6/2025	cotisation 2024/2025	83	Canler Marc-Antoine	virement	400		4367.15	430 rue de Bailleul		59270	MERRIS	virement	1/6/2025	quatre cents euros	 CANLER MARC-ANTOINE <marcantoine@filrouge-expertscomptables.com>
+7	1/8/2025	cotisation 2024/2025	84	Bruges Jean-Marie	virement	100		4467.15	570, rue de l'Argilière		62570	Helfaut	virement	1/8/2025	cent euros	jmbruges@nordnet.fr 
+7	1/16/2025	cotisation 2024/2025	85	Bruges Walter	virement	40		4507.15	60, route de Thérouanne 		62570	PIHEM	virement	1/16/2025	quatre cents euros	walter.bruges@orange.fr
+7	1/10/2025	cotisation 2024/2025	86	Roussel Etienne	chéque SG  n°0001864	30		4537.15	2 domaine des Genets		62219	LONGUENESSE	chéque SG  n°0001864	1/10/2025	trente euros	ROUSSEL ETIENNE <monique.etienne-roussel@wanadoo.fr>,
+7	1/19/2025	cotisation 2024/2025	87	DELABY Pierre	virement	60		4597.15	15, rue du 11 novembre		62330	GUARBECQUE	virement	1/19/2025	soixante euros	pierre,delaby62@gmail.com
+6	1/23/2025	achat fleurs décès 	88	david herbst	chéque CA2338337		60	4537.15								
+5122	1/31/2025	virement livret	89	CA	virement		10	4527.15	ok relevé 31/01/2025							
+7	2/3/2025	cotisation 2024/2025	90	Toutain Nicolas	virement	150		4677.15	7, Impasse la Belle Etoile		44620	La Montagne	virement	2/3/2025	cent cinquante euros	nicolas.toutain1@free.fr
+7	2/4/2025	cotisation 2024/2025	91	Berguet Pierre	chéque sg n°0002341	150		4827.15	29, route de Sermoise 		58000	SERMOISE sur Loire	chéque sg n°0002341	2/4/2025	cent cinquante euros	
+6	2/10/2025	tenue de compte CA 	92	CA	facture n°2503100618425		4	4823.15								
+5122	2/14/2025	virement livret	93	CA	virement		3000	1823.15								
+7	2/19/2025	cotisation 2024/2025	94	Verbrugghe Max	chéque Bq postale 4737006	80		1903.15	2, rue roger salengro		62290	Noeux les Mines	chéque Bq postale 4737006	2/19/2025	quatre vingt euros	VERBRUGGHE MAX <maxverbrugghe@gmail.com>,
+7	2/19/2025	cotisation 2024/2025	95	Mr BOULINGUIEZ Jean-Paul	espèces (virement Pierre)	40		1943.15					espèces (virement Pierre)	2/19/2025	quarante euros	
+6	3/10/2025	tenue de compte CA 	96	CA	facture n°2505900665181		4	1939.15								
+6	4/10/2025	tenue de compte CA 	97	CA	facture n°2509000551003		4	1935.15	ok relevé 31 mars 2025							
+6	5/10/2025	tenue de compte CA 	98	CA	facture n°2512000645710		4	1931.15								
+5122	5/13/2025	virement livret	99	CA	virement	500		2431.15								
+6	5/14/2025	participation école de rugby	100	RCA	facture n°13052425		1968	463.15								
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+								2431.15								
+	9/30/2025	CLOTURE EXERCICE						2431.15								
+
+				 												
+														 		
+
+
+		 				 								 		
+
+			AMICALE DES ANCIENS DU RUGBY CLUB AUDOMAROIS      EXERCICE COMPTABLE DU 01/09/2024 au 31/08/2025			édité le 										
+
+
+n°compte	DATE	TYPE D’OPERATION	N“ D'ORDRE	EMETTEURS  / BENEFICIAIRES  / TIERS / CATEGORIES  / NOTES	numéro de pièce 	DEBIT	CREDIT	SOLDE	rue		code postal	ville	chéque n°	date	somme en toutes lettres	
+5122	1/31/2025	virement livret	89	CA	virement	10	0	10								
+5122	2/14/2024	virement livret	3	CA	virement	3000	0	3010								
+5122	5/13/2025	virement livret	98	CA	virement		500	2510								
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+								0.00								
+	9/30/2025	CLOTURE EXERCICE						0.00								
+
+
+
+
+
+		 														
+	banque	512				livret	5122				charges	607				produits	707					10			
+9/1/2024	report à nouveau	4357.34	0.00		1/31/2025	virement livret	10.00	0.00		10/09/2024	tenue de compte CA 	3.00	0.00		9/18/2024	cotisation 2024/2025		30		9/1/2024	reserve		4,357.34		
+9/10/2024	Facture N°2424400092485	0.00	3.00		2/14/2024	virement livret	3000.00	0.00		12/09/2024	achats école de rugby	607.60	0.00		11/14/2024	cotisation 2024/2025		35		8/31/2025	résultat ex mis en réserve		-1,384.19		
+9/12/2024	FA2403266	0.00	607.60		5/13/2025	virement livret	0.00	500.00		10/10/2024	tenue de compte CA 	3.00	0.00		11/22/2024	ristourne tenue de compte		3							
+9/18/2024	espèces (virement Pierre)	30.00	0.00							10/11/2024	tenue de compte CA 	3.00	0.00		11/22/2024	ristourne tenue de compte		3							
+10/10/2024	Facture N°2427400674057	0.00	3.00							12/11/2024	tenue de compte CA 	3.00	0.00		11/22/2024	ristourne tenue de compte		3							
+11/10/2024	Facture N°2430500470782	0.00	3.00							25/10/2024	achat vaiselle	239.00	0.00		11/22/2024	ristourne tenue de compte		3							
+11/12/2024	Facture N°2433500095358	0.00	3.00							24/10/2024	achat vaiselle	135.00	0.00		11/22/2024	ristourne tenue de compte		3							
+11/14/2024	virement	35.00	0.00							5/11/2024	bac pour vaiselle	29.99	0.00		11/22/2024	ristourne tenue de compte		3							
+11/22/2024	avoir/fact 2415200617348	3.00	0.00							2/11/2024	bac pour vaiselle & couverts	187.45	0.00		11/25/2024	cotisation 2024/2025		100							
+11/22/2024	avoir/fact 224400092485	3.00	0.00							24/11/2024	pain tarte repas 	145.10	0.00		11/25/2024	paiement repas		60							
+11/22/2024	avoir/fact 2418200096751	3.00	0.00							22/11/2024	fromage & quincaillerie repas	115.91	0.00		11/25/2024	paiement repas		60							
+11/22/2024	avoir/fact 2430500470782	3.00	0.00							16/11/2024	couvert	28.28	0.00		11/25/2024	paiement repas		60							
+11/22/2024	avoir/fact 2427400674057	3.00	0.00							23/11/2024	biscuit apéritif repas	37.38	0.00		11/25/2024	paiement repas		60							
+11/22/2024	avoir/fact 2421300570664	3.00	0.00							23/11/2024	fleurs repas	56.00	0.00		11/25/2024	paiement repas		60							
+10/25/2024	facture 32013 & 31995	0.00	239.00							16/11/2024	achat vaiselle	55.20	0.00		11/25/2024	paiement repas		60							
+10/24/2024	facture 31903	0.00	135.00							25/11/2024	cadeau mis à l'honneur	24.00	0.00		11/25/2024	paiement repas		60							
+11/5/2024	facture 40501241100011P1	0.00	29.99							25/11/2024	boisson	303.59	0.00		11/25/2024	paiement repas		60							
+11/2/2024	facture 40501241100002P1	0.00	187.45							25/11/2024	repas	1233.69	0.00		11/25/2024	paiement repas		60							
+11/25/2024	virement	100.00	0.00							10/01/2025	tenue de compte CA 	3.00	0.00		11/25/2024	paiement repas		60							
+11/24/2024	facture 5	0.00	145.10							23/01/2025	achat fleurs décès 	60.00	0.00		11/25/2024	paiement repas		90							
+11/22/2024	ticket 314706113102	0.00	115.91							10/02/2025	tenue de compte CA 	4.00	0.00		11/25/2024	paiement repas		30							
+11/16/2024	facture 40506241100019	0.00	28.28							10/03/2025	tenue de compte CA 	4.00	0.00		11/25/2024	paiement repas		30							
+11/23/2024	ticket 314704009113	0.00	37.38							10/04/2025	tenue de compte CA 	4.00	0.00		11/25/2024	paiement repas		30							
+11/23/2024	facture 000001000002816	0.00	56.00							10/05/2025	tenue de compte CA 	4.00	0.00		11/25/2024	paiement repas		30							
+11/16/2024	facture 35135	0.00	55.20							14/05/2025	participation école de rugby	1968.00	0.00		11/25/2024	cotisation 2024/2025		50							
+11/25/2024	chéque 5833532	60.00	0.00												11/25/2024	cotisation 2024/2025		150							
+11/25/2024	chq 6811055	60.00	0.00												11/25/2024	cotisation 2024/2025		30							
+11/25/2024	chq 1749074	60.00	0.00												11/25/2024	cotisation 2024/2025		40							
+11/25/2024	chq 4527009	60.00	0.00												11/25/2024	cotisation 2024/2025		100							
+11/25/2024	chq 1438	60.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	chq 4415811	60.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	chq 4966285	60.00	0.00												11/25/2024	paiement repas		60							
+11/25/2024	chq 62554951	60.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	Chq 4463756	60.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	chq 3381446	60.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	chq 9570618	90.00	0.00												11/25/2024	paiement repas		60							
+11/25/2024	chq 6026437	30.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	chq 2646116	30.00	0.00												11/25/2024	paiement repas		60							
+11/25/2024	chq 3482120	30.00	0.00												11/25/2024	paiement repas		60							
+11/25/2024	chq 8469197	30.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	chq CA n° 4966284	50.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	chq SG 0002322	150.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	chq CM 8646100	30.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	espèces	40.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	espèces	100.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	30.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	30.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	60.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	30.00	0.00												11/25/2024	paiement repas		60							
+11/25/2024	liquide	30.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	30.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	60.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	30.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	60.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	60.00	0.00												11/25/2024	paiement repas		60							
+11/25/2024	liquide	30.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	30.00	0.00												11/25/2024	paiement repas		30							
+11/25/2024	liquide	30.00	0.00												11/25/2024	paiement repas		60							
+11/25/2024	liquide	30.00	0.00												11/25/2024	paiement repas		60							
+11/25/2024	liquide	30.00	0.00												12/31/2024	cotisation 2024/2025		300							
+11/25/2024	liquide	30.00	0.00												1/3/2023	cotisation 2024/2025		20							
+11/25/2024	liquide	30.00	0.00												1/6/2025	cotisation 2024/2025		400							
+11/25/2024	liquide	30.00	0.00												1/8/2025	cotisation 2024/2025		100							
+11/25/2024	liquide	30.00	0.00												1/16/2025	cotisation 2024/2025		40							
+11/25/2024	liquide	60.00	0.00												1/10/2025	cotisation 2024/2025		30							
+11/25/2024	liquide	30.00	0.00												1/19/2025	cotisation 2024/2025		60							
+11/25/2024	liquide	30.00	0.00												2/3/2025	cotisation 2024/2025		150							
+11/25/2024	liquide	30.00	0.00												2/4/2025	cotisation 2024/2025		150							
+11/25/2024	liquide	30.00	0.00												2/19/2025	cotisation 2024/2025		80							
+11/25/2024	liquide	30.00	0.00												2/19/2025	cotisation 2024/2025		40							
+11/25/2024	liquide	60.00	0.00																						
+11/25/2024	facture 33 cheque 2338336	0.00	24.00																						
+11/25/2024	facture 2016169 chéque 2338334	0.00	303.59																						
+11/25/2024	facture f22602411 cheque 2338335	0.00	1233.69																						
+11/25/2024	chq 8646099	30.00	0.00																						
+11/25/2024	chq 3141	30.00	0.00																						
+11/25/2024	chq 3713552	60.00	0.00																						
+11/25/2024	chq 2439	60.00	0.00																						
+12/31/2024	virement	300.00	0.00																						
+1/10/2025	facture 2433600634658	0.00	3.00																						
+1/3/2023	virement	20.00	0.00																						
+1/6/2025	virement	400.00	0.00																						
+1/8/2025	virement	100.00	0.00																						
+1/16/2025	virement	40.00	0.00																						
+1/10/2025	chéque SG  n°0001864	30.00	0.00																						
+1/19/2025	virement	60.00	0.00																						
+1/23/2025	chéque CA2338337	0.00	60.00																						
+1/31/2025	virement	0.00	10.00																						
+2/3/2025	virement	150.00	0.00																						
+2/4/2025	chéque sg n°0002341	150.00	0.00																						
+2/10/2025	facture n°2503100618425	0.00	4.00																						
+2/14/2025	virement	0.00	3000.00																						
+2/19/2025	chéque Bq postale 4737006	80.00	0.00																						
+2/19/2025	espèces (virement Pierre)	40.00	0.00																						
+3/10/2025	facture n°2505900665181	0.00	4.00																						
+4/10/2025	facture n°2509000551003	0.00	4.00																						
+5/10/2025	facture n°2512000645710	0.00	4.00																						
+5/13/2025	virement	500.00	0.00																						
+5/14/2025	facture n°13052425	0.00	1968.00																						
+
+
+
+
+																									
+																									
+	total	8730.34	8267.19			total	3010.00	500.00			total	5257.19	0.00		total		0	3873			total	0	2973.15		
+	solde	463.15				solde	2510.00				solde	5257.19			solde						solde		2973.15		
+
+
+	balance 2024-2025			 	consolidation compte courant + livret								 												
+compte	solde D	solde C			solde	Débit	crédit															 			
+10	0.00	4,357.34			total	11740.34	8767.19																		
+512	463.15	0.00			solde	2973.15																			
+5122	2510.00	0.00																							
+607	5257.19	0.00																							
+707	0	3873																							
+
+total	8230.34	8,230.34	0.00																						
+
+compte de résultat 2024-2025											 														
+compte	Débit	compte	Crédit																						
+607	5257.19	707	3873																						
+total charges	5257.19	total produits	3873.00																						
+résultat	-1384.19																								
+
+bilan saison 2024-2025																									
+	actif		passif																						
+banque	2973.15	réserve	4,357.34																						
+		report résultat	-1384.19																						
+total actif	2973.15	total passif	2973.15																						
+
+		2024-2025	N-1	N-2																					
+total cotisations 		1905	1540	1430																					
+nombre de cotisants		19	24	23																					
+cotisation moyenne		100	64	62																					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
