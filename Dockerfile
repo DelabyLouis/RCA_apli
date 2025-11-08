@@ -1,4 +1,4 @@
-# Dockerfile optimisé pour Symfony 7.3 sur Render
+# Dockerfile optimisé pour Symfony 7.3 sur Render - v2
 FROM php:8.3-apache
 
 # Variables d'environnement
