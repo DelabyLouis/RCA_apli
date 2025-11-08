@@ -15,11 +15,17 @@ timeout 30 bash -c 'until php bin/console doctrine:query:sql "SELECT 1" > /dev/n
 # Créer la base si elle n'existe pas
 php bin/console doctrine:database:create --if-not-exists --no-interaction || echo "Base déjà existante"
 
+# Régénérer le schéma pour PostgreSQL (si pas de tables)
+php bin/console doctrine:schema:update --force --no-interaction || echo "Schéma déjà à jour"
+
 # Exécuter les migrations
 php bin/console doctrine:migrations:migrate --no-interaction || echo "Aucune migration à exécuter"
 
-# Vider le cache pour être sûr
+# Corriger les permissions et vider le cache
+chown -R www-data:www-data /var/www/html/var/cache
+chmod -R 755 /var/www/html/var/cache
 php bin/console cache:clear --no-warmup || true
+php bin/console cache:warmup || true
 
 echo "✅ Application prête ! Démarrage d'Apache..."
 
