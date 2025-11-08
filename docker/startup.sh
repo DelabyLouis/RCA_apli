@@ -36,23 +36,23 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     
     # 1. Créer le rôle
     echo "1/4 Creating role..."
-    php bin/console doctrine:query:sql "INSERT INTO role (id, name) VALUES (1, 'ROLE_SUPER_ADMIN') ON CONFLICT (id) DO NOTHING;" 2>/dev/null || true
+    php bin/console doctrine:query:sql "INSERT INTO role (id_role, libelle) VALUES (1, 'ROLE_SUPER_ADMIN') ON CONFLICT (id_role) DO NOTHING;" 2>/dev/null || true
     
     # 2. Créer la personne
     echo "2/4 Creating person..."
-    php bin/console doctrine:query:sql "INSERT INTO personne (id, civilite, nom, prenom, email) VALUES (1, 'Mr', 'ADMIN', 'Admin', 'admin@rca-amicale.fr') ON CONFLICT (id) DO NOTHING;" 2>/dev/null || true
+    php bin/console doctrine:query:sql "INSERT INTO personne (id_personne, civilite, nom, prenom, email) VALUES (1, 'Mr', 'ADMIN', 'Admin', 'admin@rca-amicale.fr') ON CONFLICT (id_personne) DO NOTHING;" 2>/dev/null || true
     
     # 3. Créer l'utilisateur - Hash correct pour 'admin123'
     echo "3/4 Creating user..."
     ADMIN_HASH='$2y$10$wJC0w3ZAXIovWafBY7zHf.fTIQpE5CazyfykR2Ho11QshqfezMux6'
     echo "Attempting to create user with hash: $ADMIN_HASH"
-    php bin/console doctrine:query:sql "INSERT INTO \"user\" (id, username, password, personne_id) VALUES (1, 'admin', '$ADMIN_HASH', 1) ON CONFLICT (id) DO NOTHING;" || echo "User creation query failed"
+    php bin/console doctrine:query:sql "INSERT INTO \"user\" (id_user, username, password, id_personne) VALUES (1, 'admin', '$ADMIN_HASH', 1) ON CONFLICT (id_user) DO NOTHING;" || echo "User creation query failed"
     
     # 4. Vérifier si l'utilisateur existe et lier le rôle
     USER_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
     if [ "${USER_EXISTS:-0}" -gt "0" ]; then
         echo "4/4 Linking role to user..."
-        php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) SELECT 1, 1 WHERE EXISTS (SELECT 1 FROM \"user\" WHERE id = 1) ON CONFLICT (user_id, role_id) DO NOTHING;" 2>/dev/null || true
+        php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) SELECT 1, 1 WHERE EXISTS (SELECT 1 FROM \"user\" WHERE id_user = 1) ON CONFLICT (user_id, role_id) DO NOTHING;" 2>/dev/null || true
     else
         echo "⚠️ User creation failed, skipping role assignment"
     fi
