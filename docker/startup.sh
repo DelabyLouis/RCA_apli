@@ -34,9 +34,9 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     # Créer l'utilisateur admin avec gestion d'erreurs
     echo "Creating admin user step by step..."
     
-    # 1. Créer le rôle
-    echo "1/4 Creating role..."
-    php bin/console doctrine:query:sql "INSERT INTO role (id_role, libelle) VALUES (1, 'ROLE_SUPER_ADMIN') ON CONFLICT (id_role) DO NOTHING;" 2>/dev/null || true
+    # 1. Vérifier que le rôle Administrateur existe (normalement créé par les fixtures)
+    echo "1/4 Checking admin role..."
+    php bin/console doctrine:query:sql "SELECT COUNT(*) FROM role WHERE libelle = 'Administrateur';" --quiet >/dev/null || echo "Admin role check completed"
     
     # 2. Créer la personne
     echo "2/4 Creating person..."
@@ -52,15 +52,20 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     USER_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
     if [ "${USER_EXISTS:-0}" -gt "0" ]; then
         echo "4/4 Linking role to user..."
-        php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) SELECT 1, 1 WHERE EXISTS (SELECT 1 FROM \"user\" WHERE id_user = 1) ON CONFLICT (user_id, role_id) DO NOTHING;" 2>/dev/null || true
+        # Lier au rôle Administrateur (hierarchy_level 100)
+        ADMIN_ROLE_ID=$(php bin/console doctrine:query:sql "SELECT id_role FROM role WHERE libelle = 'Administrateur' LIMIT 1;" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "9")
+        php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) SELECT 1, ${ADMIN_ROLE_ID:-9} WHERE EXISTS (SELECT 1 FROM \"user\" WHERE id_user = 1) ON CONFLICT (user_id, role_id) DO NOTHING;" 2>/dev/null || true
     else
         echo "⚠️ User creation failed, skipping role assignment"
     fi
     
-    # Vérification finale
+    # Vérification finale avec détails
     FINAL_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
     if [ "${FINAL_COUNT:-0}" -gt "0" ]; then
         echo "✅ Utilisateur admin créé avec succès - Login: admin / Password: admin123"
+        # Afficher les rôles de l'utilisateur admin
+        echo "📋 Rôles de l'utilisateur admin:"
+        php bin/console doctrine:query:sql "SELECT r.libelle, r.hierarchy_level FROM \"user\" u JOIN user_role ur ON u.id_user = ur.user_id JOIN role r ON ur.role_id = r.id_role WHERE u.username = 'admin';" 2>/dev/null || echo "Impossible d'afficher les rôles"
     else
         echo "❌ Échec de la création de l'utilisateur admin"
         echo "💡 Utilisez la page d'inscription: https://amicale-rca.onrender.com/register"
