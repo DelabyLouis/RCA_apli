@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Configuration Apache
-RUN a2enmod rewrite headers
+RUN a2enmod rewrite headers expires
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 
 # Copie du code source
