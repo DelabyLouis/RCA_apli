@@ -49,7 +49,9 @@ RUN chown -R www-data:www-data /var/www/html \
 # Port d'exposition
 EXPOSE 80
 
+# Script de démarrage avec migrations automatiques
+COPY docker/startup.sh /usr/local/bin/startup.sh
+RUN chmod +x /usr/local/bin/startup.sh
+
 # Configuration pour Render (utilise le port dynamique)
-CMD sed -i "s/80/$PORT/g" /etc/apache2/sites-available/000-default.conf && \
-    sed -i "s/80/$PORT/g" /etc/apache2/ports.conf && \
-    apache2-foreground
+CMD ["/usr/local/bin/startup.sh"]
