@@ -15,7 +15,7 @@ class AdminFixController extends AbstractController
         private EntityManagerInterface $entityManager
     ) {}
 
-    #[Route('/admin/fix-roles', name: 'app_admin_fix_roles')]
+    #[Route('/public/fix-admin-roles', name: 'app_public_fix_admin_roles')]
     public function fixAdminRoles(): Response
     {
         $result = [];
