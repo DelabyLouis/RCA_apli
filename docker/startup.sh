@@ -52,9 +52,25 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     USER_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
     if [ "${USER_EXISTS:-0}" -gt "0" ]; then
         echo "4/4 Linking role to user..."
-        # Lier au rôle Administrateur (hierarchy_level 100)
-        ADMIN_ROLE_ID=$(php bin/console doctrine:query:sql "SELECT id_role FROM role WHERE libelle = 'Administrateur' LIMIT 1;" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "9")
-        php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) SELECT 1, ${ADMIN_ROLE_ID:-9} WHERE EXISTS (SELECT 1 FROM \"user\" WHERE id_user = 1) ON CONFLICT (user_id, role_id) DO NOTHING;" 2>/dev/null || true
+        
+        # Trouver l'ID réel de l'utilisateur admin
+        ADMIN_USER_ID=$(php bin/console doctrine:query:sql "SELECT id_user FROM \"user\" WHERE username='admin' LIMIT 1;" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "1")
+        echo "Admin user ID: ${ADMIN_USER_ID}"
+        
+        # Trouver l'ID réel du rôle Administrateur
+        ADMIN_ROLE_ID=$(php bin/console doctrine:query:sql "SELECT id_role FROM role WHERE libelle = 'Administrateur' LIMIT 1;" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
+        echo "Admin role ID: ${ADMIN_ROLE_ID}"
+        
+        if [ "${ADMIN_ROLE_ID:-0}" -gt "0" ]; then
+            echo "Linking user ${ADMIN_USER_ID} to role ${ADMIN_ROLE_ID}..."
+            php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) VALUES (${ADMIN_USER_ID}, ${ADMIN_ROLE_ID}) ON CONFLICT (user_id, role_id) DO NOTHING;" 2>/dev/null || echo "Role linking failed"
+            
+            # Vérifier que la liaison a fonctionné
+            ROLE_LINK_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM user_role WHERE user_id = ${ADMIN_USER_ID};" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
+            echo "User has ${ROLE_LINK_COUNT} role(s) linked"
+        else
+            echo "⚠️ Administrateur role not found!"
+        fi
     else
         echo "⚠️ User creation failed, skipping role assignment"
     fi
