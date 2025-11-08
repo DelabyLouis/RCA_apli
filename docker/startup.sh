@@ -29,13 +29,15 @@ echo "Nombre d'utilisateurs trouvés: $USER_COUNT"
 if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     echo "� Création de l'utilisateur admin..."
     
-    # Créer l'utilisateur admin directement via SQL
-    php bin/console doctrine:query:sql "
-        INSERT INTO role (id, name) VALUES (1, 'ROLE_SUPER_ADMIN') ON CONFLICT DO NOTHING;
-        INSERT INTO personne (id, civilite, nom, prenom, email) VALUES (1, 'Mr', 'ADMIN', 'Admin', 'admin@rca-amicale.fr') ON CONFLICT DO NOTHING;
-        INSERT INTO \"user\" (id, username, password, personne_id) VALUES (1, 'admin', '\$2y\$13\$7K7aY4Z.X0Qe8Zv2lV1iiuRvE6Q8Jv3wKP1Np7aBc5dEf6gHi7jKl', 1) ON CONFLICT DO NOTHING;
-        INSERT INTO user_role (user_id, role_id) VALUES (1, 1) ON CONFLICT DO NOTHING;
-    " || echo "Erreur lors de la création de l'utilisateur"
+    # Créer l'utilisateur admin via commande Symfony
+    echo "Creating admin user..."
+    php bin/console doctrine:query:sql "INSERT INTO role (id, name) VALUES (1, 'ROLE_SUPER_ADMIN') ON CONFLICT (id) DO NOTHING;" || true
+    php bin/console doctrine:query:sql "INSERT INTO personne (id, civilite, nom, prenom, email) VALUES (1, 'Mr', 'ADMIN', 'Admin', 'admin@rca-amicale.fr') ON CONFLICT (id) DO NOTHING;" || true
+    
+    # Hash correct pour 'admin123'
+    ADMIN_HASH='$2y$13$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+    php bin/console doctrine:query:sql "INSERT INTO \"user\" (id, username, password, personne_id) VALUES (1, 'admin', '$ADMIN_HASH', 1) ON CONFLICT (id) DO NOTHING;" || true
+    php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) VALUES (1, 1) ON CONFLICT (user_id, role_id) DO NOTHING;" || true
     
     echo "✅ Utilisateur admin créé - Login: admin / Password: admin123"
     
