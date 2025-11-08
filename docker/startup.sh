@@ -21,6 +21,9 @@ php bin/console doctrine:schema:update --force --no-interaction || echo "Schéma
 # Exécuter les migrations
 php bin/console doctrine:migrations:migrate --no-interaction || echo "Aucune migration à exécuter"
 
+# Charger les données de test (fixtures) si la base est vide
+php bin/console doctrine:fixtures:load --no-interaction --env=prod || echo "Fixtures déjà chargées"
+
 # Corriger les permissions et vider le cache
 chown -R www-data:www-data /var/www/html/var/cache
 chmod -R 755 /var/www/html/var/cache
