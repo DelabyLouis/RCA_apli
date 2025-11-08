@@ -6,13 +6,13 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
+    #esi: true
+    #fragments: true
+
 when@prod:
     framework:
         router:
             default_uri: "https://amicale-rca.onrender.com"
-
-    #esi: true
-    #fragments: true
 
 when@test:
     framework:
