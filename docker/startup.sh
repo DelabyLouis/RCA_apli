@@ -68,6 +68,12 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
             # Vérifier que la liaison a fonctionné
             ROLE_LINK_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM user_role WHERE user_id = ${ADMIN_USER_ID};" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
             echo "User has ${ROLE_LINK_COUNT} role(s) linked"
+            
+            # Si la liaison SQL échoue, utiliser la commande Symfony
+            if [ "${ROLE_LINK_COUNT:-0}" -eq "0" ]; then
+                echo "SQL linking failed, trying Symfony command..."
+                php bin/console app:fix-admin-roles || echo "Symfony command also failed"
+            fi
         else
             echo "⚠️ Administrateur role not found!"
         fi
