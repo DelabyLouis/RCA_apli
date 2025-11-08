@@ -4,6 +4,7 @@ FROM php:8.3-apache
 # Variables d'environnement
 ENV APP_ENV=prod
 ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV HTTPS=on
 
 # Installation des dépendances système
 RUN apt-get update && apt-get install -y \

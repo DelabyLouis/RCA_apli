@@ -10,9 +10,6 @@ when@prod:
     framework:
         router:
             default_uri: "https://amicale-rca.onrender.com"
-            strict_requirements: true
-        request:
-            force_https: true
 
     #esi: true
     #fragments: true
