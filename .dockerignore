@@ -1,0 +1,39 @@
+# Fichiers à exclure du build Docker
+.git
+.gitignore
+README.md
+.env.local
+.env.*.local
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Cache et logs
+var/cache/*
+var/log/*
+!var/cache/.gitkeep
+!var/log/.gitkeep
+
+# Tests
+tests/
+phpunit.xml.dist
+
+# Fichiers temporaires
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# NPM (si utilisé)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Backup
+backup_templates/
+*.backup
+*.sql
