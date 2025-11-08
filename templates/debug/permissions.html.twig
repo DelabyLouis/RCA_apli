@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Debug Permissions{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Debug des Permissions</h1>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Informations Utilisateur</h3>
+            <table class="table table-striped">
+                <tr><th>Connecté</th><td>{{ debug.user_connected ? 'OUI' : 'NON' }}</td></tr>
+                <tr><th>Classe</th><td>{{ debug.user_class }}</td></tr>
+                <tr><th>ID</th><td>{{ debug.user_id }}</td></tr>
+                <tr><th>Username</th><td>{{ debug.user_username }}</td></tr>
+                {% if debug.user_roles_count is defined %}
+                <tr><th>Nombre de rôles</th><td>{{ debug.user_roles_count }}</td></tr>
+                <tr><th>Niveau max</th><td>{{ debug.user_max_level }}</td></tr>
+                <tr><th>A niveau 100+</th><td>{{ debug.has_minimum_level_100 ? 'OUI' : 'NON' }}</td></tr>
+                {% endif %}
+            </table>
+        </div>
+        
+        {% if debug.user_roles is defined %}
+        <div class="col-md-6">
+            <h3>Rôles de l'utilisateur</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Libellé</th>
+                        <th>Niveau</th>
+                        <th>Permissions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for role in debug.user_roles %}
+                    <tr>
+                        <td>{{ role.id }}</td>
+                        <td>{{ role.libelle }}</td>
+                        <td>{{ role.hierarchy_level }}</td>
+                        <td>{{ role.permissions_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if debug.route_access is defined %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3>Test d'accès aux routes</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Route</th>
+                        <th>Accès autorisé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for route, access in debug.route_access %}
+                    <tr class="{{ access ? 'table-success' : 'table-danger' }}">
+                        <td>{{ route }}</td>
+                        <td>{{ access ? 'OUI' : 'NON' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{{ path('app_home') }}" class="btn btn-primary">Retour à l'accueil</a>
+    </div>
+</div>
+{% endblock %}
