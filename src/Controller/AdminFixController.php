@@ -57,8 +57,38 @@ class AdminFixController extends AbstractController
                         'hierarchy_level' => $role->getHierarchyLevel()
                     ];
                 }
-                $result['error'] = 'Rôle Administrateur non trouvé !';
-                return $this->json($result);
+                
+                // Si aucun rôle n'existe, créer les rôles de base
+                if (count($allRoles) === 0) {
+                    $result['action'] = 'Creating missing roles...';
+                    
+                    // Créer les rôles de base
+                    $rolesData = [
+                        ['libelle' => 'Utilisateur', 'description' => 'Accès standard aux fonctionnalités de base', 'hierarchy_level' => 50],
+                        ['libelle' => 'Administrateur', 'description' => 'Accès complet à toutes les fonctionnalités', 'hierarchy_level' => 100],
+                    ];
+                    
+                    $createdRoles = [];
+                    foreach ($rolesData as $data) {
+                        $role = new Role();
+                        $role->setLibelle($data['libelle']);
+                        $role->setDescription($data['description']);
+                        $role->setHierarchyLevel($data['hierarchy_level']);
+                        $this->entityManager->persist($role);
+                        $createdRoles[] = $data['libelle'];
+                    }
+                    
+                    $this->entityManager->flush();
+                    $result['created_roles'] = $createdRoles;
+                    
+                    // Maintenant récupérer le rôle Administrateur
+                    $adminRole = $roleRepo->findOneBy(['libelle' => 'Administrateur']);
+                }
+                
+                if (!$adminRole) {
+                    $result['error'] = 'Rôle Administrateur non trouvé même après création !';
+                    return $this->json($result);
+                }
             }
             
             $result['admin_role_id'] = $adminRole->getIdRole();
