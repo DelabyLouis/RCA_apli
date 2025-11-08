@@ -21,8 +21,17 @@ php bin/console doctrine:schema:update --force --no-interaction || echo "Schéma
 # Exécuter les migrations
 php bin/console doctrine:migrations:migrate --no-interaction || echo "Aucune migration à exécuter"
 
-# Charger les données de test (fixtures) si la base est vide
-php bin/console doctrine:fixtures:load --no-interaction --env=prod || echo "Fixtures déjà chargées"
+# Charger les données de test (fixtures) - forcer le rechargement
+echo "📋 Vérification et chargement des fixtures..."
+USER_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) as count FROM \"user\"" --quiet 2>/dev/null | tail -1 | tr -d ' ' || echo "0")
+echo "Nombre d'utilisateurs trouvés: $USER_COUNT"
+
+if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
+    echo "🔄 Chargement des fixtures (base vide)..."
+    php bin/console doctrine:fixtures:load --no-interaction --env=prod
+else
+    echo "👥 Utilisateurs déjà présents, pas de rechargement"
+fi
 
 # Corriger les permissions et vider le cache
 chown -R www-data:www-data /var/www/html/var/cache
