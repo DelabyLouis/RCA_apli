@@ -23,6 +23,7 @@ security:
                 password_parameter: password
                 default_target_path: app_exercice_index
                 always_use_default_target_path: true
+                require_https: "%env(bool:APP_ENV='prod')%"
             logout:
                 path: app_logout
                 target: app_login

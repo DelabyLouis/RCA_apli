@@ -1,10 +1,18 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
-    secret: '%env(APP_SECRET)%'
-    trusted_hosts: ['amicale-rca.onrender.com', 'localhost', '127.0.0.1']
+    secret: "%env(APP_SECRET)%"
+    trusted_hosts: ["amicale-rca.onrender.com", "localhost", "127.0.0.1"]
 
     # Note that the session will be started ONLY if you read or write from it.
     session: true
+
+when@prod:
+    framework:
+        router:
+            default_uri: "https://amicale-rca.onrender.com"
+            strict_requirements: true
+        request:
+            force_https: true
 
     #esi: true
     #fragments: true
