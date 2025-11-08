@@ -29,17 +29,38 @@ echo "Nombre d'utilisateurs trouvés: $USER_COUNT"
 if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     echo "� Création de l'utilisateur admin..."
     
-    # Créer l'utilisateur admin via commande Symfony
-    echo "Creating admin user..."
-    php bin/console doctrine:query:sql "INSERT INTO role (id, name) VALUES (1, 'ROLE_SUPER_ADMIN') ON CONFLICT (id) DO NOTHING;" || true
-    php bin/console doctrine:query:sql "INSERT INTO personne (id, civilite, nom, prenom, email) VALUES (1, 'Mr', 'ADMIN', 'Admin', 'admin@rca-amicale.fr') ON CONFLICT (id) DO NOTHING;" || true
+    # Créer l'utilisateur admin avec gestion d'erreurs
+    echo "Creating admin user step by step..."
     
-    # Hash correct pour 'admin123'
-    ADMIN_HASH='$2y$13$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
-    php bin/console doctrine:query:sql "INSERT INTO \"user\" (id, username, password, personne_id) VALUES (1, 'admin', '$ADMIN_HASH', 1) ON CONFLICT (id) DO NOTHING;" || true
-    php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) VALUES (1, 1) ON CONFLICT (user_id, role_id) DO NOTHING;" || true
+    # 1. Créer le rôle
+    echo "1/4 Creating role..."
+    php bin/console doctrine:query:sql "INSERT INTO role (id, name) VALUES (1, 'ROLE_SUPER_ADMIN') ON CONFLICT (id) DO NOTHING;" 2>/dev/null || true
     
-    echo "✅ Utilisateur admin créé - Login: admin / Password: admin123"
+    # 2. Créer la personne
+    echo "2/4 Creating person..."
+    php bin/console doctrine:query:sql "INSERT INTO personne (id, civilite, nom, prenom, email) VALUES (1, 'Mr', 'ADMIN', 'Admin', 'admin@rca-amicale.fr') ON CONFLICT (id) DO NOTHING;" 2>/dev/null || true
+    
+    # 3. Créer l'utilisateur - Hash correct pour 'admin123'
+    echo "3/4 Creating user..."
+    ADMIN_HASH='$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+    USER_CREATED=$(php bin/console doctrine:query:sql "INSERT INTO \"user\" (id, username, password, personne_id) VALUES (1, 'admin', '$ADMIN_HASH', 1) ON CONFLICT (id) DO NOTHING RETURNING id;" 2>/dev/null || echo "")
+    
+    # 4. Lier le rôle seulement si l'utilisateur existe
+    if [ ! -z "$USER_CREATED" ] || [ "$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ')" -gt "0" ]; then
+        echo "4/4 Linking role to user..."
+        php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) SELECT 1, 1 WHERE EXISTS (SELECT 1 FROM \"user\" WHERE id = 1) ON CONFLICT (user_id, role_id) DO NOTHING;" 2>/dev/null || true
+    else
+        echo "⚠️ User creation failed, skipping role assignment"
+    fi
+    
+    # Vérification finale
+    FINAL_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' || echo "0")
+    if [ "$FINAL_COUNT" -gt "0" ]; then
+        echo "✅ Utilisateur admin créé avec succès - Login: admin / Password: admin123"
+    else
+        echo "❌ Échec de la création de l'utilisateur admin"
+        echo "💡 Utilisez la page d'inscription: https://amicale-rca.onrender.com/register"
+    fi
     
     # Essayer les fixtures si disponibles
     php bin/console doctrine:fixtures:load --no-interaction --env=prod 2>/dev/null || echo "Fixtures non disponibles en production"
