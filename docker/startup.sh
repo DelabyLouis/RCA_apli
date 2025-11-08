@@ -15,8 +15,10 @@ timeout 30 bash -c 'until php bin/console doctrine:query:sql "SELECT 1" > /dev/n
 # Créer la base si elle n'existe pas
 php bin/console doctrine:database:create --if-not-exists --no-interaction || echo "Base déjà existante"
 
-# Régénérer le schéma pour PostgreSQL (si pas de tables)
-php bin/console doctrine:schema:update --force --no-interaction || echo "Schéma déjà à jour"
+# Forcer la recréation du schéma (pour debug)
+echo "🔄 Recréation complète du schéma..."
+php bin/console doctrine:schema:drop --force --full-database --no-interaction 2>/dev/null || true
+php bin/console doctrine:schema:create --no-interaction || echo "Erreur création schéma"
 
 # Exécuter les migrations
 php bin/console doctrine:migrations:migrate --no-interaction || echo "Aucune migration à exécuter"
@@ -42,11 +44,13 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     
     # 3. Créer l'utilisateur - Hash correct pour 'admin123'
     echo "3/4 Creating user..."
-    ADMIN_HASH='$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
-    USER_CREATED=$(php bin/console doctrine:query:sql "INSERT INTO \"user\" (id, username, password, personne_id) VALUES (1, 'admin', '$ADMIN_HASH', 1) ON CONFLICT (id) DO NOTHING RETURNING id;" 2>/dev/null || echo "")
+    ADMIN_HASH='$2y$10$wJC0w3ZAXIovWafBY7zHf.fTIQpE5CazyfykR2Ho11QshqfezMux6'
+    echo "Attempting to create user with hash: $ADMIN_HASH"
+    php bin/console doctrine:query:sql "INSERT INTO \"user\" (id, username, password, personne_id) VALUES (1, 'admin', '$ADMIN_HASH', 1) ON CONFLICT (id) DO NOTHING;" || echo "User creation query failed"
     
-    # 4. Lier le rôle seulement si l'utilisateur existe
-    if [ ! -z "$USER_CREATED" ] || [ "$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ')" -gt "0" ]; then
+    # 4. Vérifier si l'utilisateur existe et lier le rôle
+    USER_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
+    if [ "${USER_EXISTS:-0}" -gt "0" ]; then
         echo "4/4 Linking role to user..."
         php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) SELECT 1, 1 WHERE EXISTS (SELECT 1 FROM \"user\" WHERE id = 1) ON CONFLICT (user_id, role_id) DO NOTHING;" 2>/dev/null || true
     else
@@ -54,8 +58,8 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     fi
     
     # Vérification finale
-    FINAL_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' || echo "0")
-    if [ "$FINAL_COUNT" -gt "0" ]; then
+    FINAL_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
+    if [ "${FINAL_COUNT:-0}" -gt "0" ]; then
         echo "✅ Utilisateur admin créé avec succès - Login: admin / Password: admin123"
     else
         echo "❌ Échec de la création de l'utilisateur admin"
