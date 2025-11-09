@@ -7,28 +7,42 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class DebugAuthController extends AbstractController
 {
     #[Route('/debug-auth', name: 'debug_auth')]
     public function debugAuth(
+        Request $request,
         UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher
     ): Response {
-        $users = $userRepository->findAll();
-        
-        $html = '<h1>Debug Authentification</h1>';
-        $html .= '<style>table{border-collapse:collapse;width:100%;} th,td{border:1px solid #ddd;padding:8px;text-align:left;} th{background-color:#f2f2f2;}</style>';
-        
-        $html .= '<h2>Liste des utilisateurs</h2>';
-        $html .= '<table>';
-        $html .= '<tr><th>ID</th><th>Username</th><th>Email</th><th>Rôles</th><th>Password Hash</th><th>Personne</th><th>Actif</th></tr>';
-        
-        foreach ($users as $user) {
-            $html .= '<tr>';
-            $html .= '<td>' . $user->getIdUser() . '</td>';
-            $html .= '<td><strong>' . htmlspecialchars($user->getUsername()) . '</strong></td>';
-            $html .= '<td>' . htmlspecialchars($user->getEmail() ?? 'N/A') . '</td>';
+        try {
+            $users = $userRepository->findAll();
+            
+            $html = '<h1>Debug Authentification</h1>';
+            $html .= '<style>table{border-collapse:collapse;width:100%;} th,td{border:1px solid #ddd;padding:8px;text-align:left;} th{background-color:#f2f2f2;}</style>';
+            
+            $html .= '<h2>Liste des utilisateurs (' . count($users) . ')</h2>';
+            $html .= '<table>';
+            $html .= '<tr><th>ID</th><th>Username</th><th>Rôles</th><th>Password Hash</th><th>Personne</th></tr>';
+            
+            foreach ($users as $user) {
+                try {
+                    $html .= '<tr>';
+                    $html .= '<td>' . $user->getIdUser() . '</td>';
+                    $html .= '<td><strong>' . htmlspecialchars($user->getUsername()) . '</strong></td>';
+                    
+                    // Rôles avec protection d'erreur
+                    try {
+                        $roles = [];
+                        foreach ($user->getUserRoles() as $role) {
+                            $roles[] = $role->getLibelle();
+                        }
+                        $html .= '<td>' . implode(', ', $roles) . '</td>';
+                    } catch (\Exception $e) {
+                        $html .= '<td>Erreur rôles: ' . $e->getMessage() . '</td>';
+                    }
             
             // Rôles
             $roles = [];
