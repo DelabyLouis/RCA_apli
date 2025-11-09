@@ -17,8 +17,8 @@ class UserEditType extends AbstractType
         $builder
             ->add('username', null, [
                 'label' => 'Nom d\'utilisateur',
-                'help' => 'Le nom d\'utilisateur ne peut pas être modifié',
-                'attr' => ['readonly' => true]
+                'help' => 'Attention : modifier le nom d\'utilisateur peut affecter la connexion',
+                'attr' => ['class' => 'form-control']
             ])
             ->add('personne', EntityType::class, [
                 'class' => Personne::class,
@@ -41,6 +41,12 @@ class UserEditType extends AbstractType
                     'class' => 'checkbox-list-container'
                 ],
                 'help' => 'Cochez les rôles à attribuer à cet utilisateur'
+            ])
+            ->add('enabled', null, [
+                'label' => 'Compte activé',
+                'help' => 'Désactiver empêche l\'utilisateur de se connecter',
+                'required' => false,
+                'attr' => ['class' => 'form-check-input']
             ])
         ;
     }
