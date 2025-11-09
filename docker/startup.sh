@@ -25,14 +25,17 @@ php bin/console doctrine:migrations:migrate --no-interaction || echo "Aucune mig
 
 # Créer un utilisateur admin si nécessaire
 echo "=========================================" >&2
-echo "� DEMARRAGE DU SCRIPT D'INITIALISATION" >&2
+echo "🔧 DEMARRAGE DU SCRIPT D'INITIALISATION" >&2
 echo "=========================================" >&2
-echo "�📋 Vérification des utilisateurs..." >&2
-USER_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) as count FROM \"user\"" --quiet 2>/dev/null | tail -1 | tr -d ' ' || echo "0")
-echo "Nombre d'utilisateurs trouvés: $USER_COUNT" >&2
+echo " Vérification de l'utilisateur admin..." >&2
 
-if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
-    echo "🔧 Création de l'utilisateur admin..." >&2
+# Vérifier si l'utilisateur admin existe et combien de rôles il a
+ADMIN_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' || echo "0")
+ADMIN_ROLES_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" u JOIN user_role ur ON u.id_user = ur.user_id WHERE u.username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' || echo "0")
+echo "Admin existe: $ADMIN_EXISTS, Nombre de rôles: $ADMIN_ROLES_COUNT" >&2
+
+if [ "$ADMIN_EXISTS" = "0" ] || [ "$ADMIN_ROLES_COUNT" = "0" ]; then
+    echo "🔧 Configuration de l'utilisateur admin..." >&2
     
     # Créer l'utilisateur admin avec gestion d'erreurs
     echo "Creating admin user step by step..." >&2
@@ -52,8 +55,8 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     php bin/console doctrine:query:sql "INSERT INTO \"user\" (id_user, username, password, id_personne) VALUES (1, 'admin', '$ADMIN_HASH', 1) ON CONFLICT (id_user) DO NOTHING;" || echo "User creation query failed"
     
     # 4. S'assurer que l'utilisateur admin a toujours ses rôles
-    USER_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
-    if [ "${USER_EXISTS:-0}" -gt "0" ]; then
+    USER_EXISTS_NOW=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
+    if [ "${USER_EXISTS_NOW:-0}" -gt "0" ]; then
         echo "4/4 Ensuring admin user has roles..." >&2
         
         # Trouver l'ID réel de l'utilisateur admin
@@ -95,7 +98,7 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
             echo "✅ Admin already has roles"
         fi
     else
-        echo "⚠️ User creation failed, skipping role assignment"
+        echo "⚠️ Admin user verification failed, skipping role assignment"
     fi
     
     # Vérification finale avec détails
@@ -113,7 +116,7 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     # Essayer les fixtures si disponibles
     php bin/console doctrine:fixtures:load --no-interaction --env=prod 2>/dev/null || echo "Fixtures non disponibles en production"
 else
-    echo "👥 Utilisateurs déjà présents" >&2
+    echo "✅ Utilisateur admin déjà configuré avec des rôles" >&2
 fi
 
 echo "=========================================" >&2
