@@ -39,6 +39,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private bool $enabled = true;
+
     #[ORM\OneToOne(inversedBy: 'user', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(name: 'id_personne', referencedColumnName: 'id_personne', nullable: false)]
     private ?Personne $personne = null;
@@ -95,6 +98,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
+        // Si l'utilisateur est désactivé, ne retourner aucun rôle
+        if (!$this->enabled) {
+            return [];
+        }
+        
         // Utiliser la collection de rôles
         $roles = ['ROLE_USER']; // rôle par défaut
         foreach ($this->roles as $role) {
@@ -179,5 +187,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function hasRole(Role $role): bool
     {
         return $this->roles->contains($role);
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    public function setEnabled(bool $enabled): static
+    {
+        $this->enabled = $enabled;
+        return $this;
     }
 }

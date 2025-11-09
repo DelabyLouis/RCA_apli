@@ -133,9 +133,21 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check me-1"></i>Actif
-                                    </span>
+                                    {% if user.enabled is defined %}
+                                        {% if user.enabled %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Actif
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times me-1"></i>Désactivé
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Actif
+                                        </span>
+                                    {% endif %}
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
@@ -149,6 +161,30 @@
                                            title="Modifier">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        {% if user.enabled is defined %}
+                                            {% if user.enabled %}
+                                                <button type="button" 
+                                                        class="btn btn-outline-warning btn-sm toggle-enabled-btn" 
+                                                        data-user-id="{{ user.idUser }}"
+                                                        title="Désactiver l'utilisateur">
+                                                    <i class="fas fa-user-slash"></i>
+                                                </button>
+                                            {% else %}
+                                                <button type="button" 
+                                                        class="btn btn-outline-success btn-sm toggle-enabled-btn" 
+                                                        data-user-id="{{ user.idUser }}"
+                                                        title="Réactiver l'utilisateur">
+                                                    <i class="fas fa-user-check"></i>
+                                                </button>
+                                            {% endif %}
+                                        {% else %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-warning btn-sm toggle-enabled-btn" 
+                                                    data-user-id="{{ user.idUser }}"
+                                                    title="Désactiver l'utilisateur">
+                                                <i class="fas fa-user-slash"></i>
+                                            </button>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>
@@ -230,6 +266,59 @@
             
             document.getElementById('filtered-count').textContent = document.querySelectorAll('.user-row').length;
             document.getElementById('no-results-row').style.display = 'none';
+        }
+
+        // Gestion de l'activation/désactivation des utilisateurs
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.toggle-enabled-btn')) {
+                e.preventDefault();
+                const btn = e.target.closest('.toggle-enabled-btn');
+                const userId = btn.dataset.userId;
+                
+                if (confirm('Êtes-vous sûr de vouloir changer le statut de cet utilisateur ?')) {
+                    fetch(`/user/${userId}/toggle-enabled`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            // Recharger la page pour mettre à jour l'affichage
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showNotification(data.message || 'Erreur lors de la modification', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur:', error);
+                        showNotification('Erreur lors de la modification du statut', 'error');
+                    });
+                }
+            }
+        });
+
+        // Fonction pour afficher les notifications
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; max-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
         }
     </script>
 {% endblock %}

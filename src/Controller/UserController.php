@@ -137,8 +137,8 @@ final class UserController extends AbstractController
         }
     }
 
-    #[Route('/{id_user}/delete-ajax', name: 'app_user_delete_ajax', methods: ['DELETE'])]
-    public function deleteAjax(int $id_user, UserRepository $userRepository, EntityManagerInterface $entityManager): JsonResponse
+    #[Route('/{id_user}/toggle-enabled', name: 'app_user_toggle_enabled', methods: ['POST'])]
+    public function toggleEnabled(int $id_user, UserRepository $userRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         $user = $userRepository->findOneBy(['id_user' => $id_user]);
         
@@ -147,13 +147,18 @@ final class UserController extends AbstractController
         }
 
         try {
-            $entityManager->remove($user);
+            $user->setEnabled(!$user->isEnabled());
             $entityManager->flush();
             
-            return new JsonResponse(['success' => true, 'message' => 'Utilisateur supprimé avec succès']);
+            $status = $user->isEnabled() ? 'activé' : 'désactivé';
+            return new JsonResponse([
+                'success' => true, 
+                'message' => "Utilisateur $status avec succès",
+                'enabled' => $user->isEnabled()
+            ]);
             
         } catch (\Exception $e) {
-            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la modification: ' . $e->getMessage()], 500);
         }
     }
 }
