@@ -44,13 +44,9 @@ class GenerateSimplePermissionsController extends AbstractController
                     'view' => 'Voir la liste des rôles',
                     'modify' => 'Créer, modifier et supprimer des rôles'
                 ],
-                'exercice' => [
-                    'view' => 'Voir la liste des exercices',
-                    'modify' => 'Créer, modifier, supprimer et clôturer des exercices'
-                ],
-                'transactions' => [
-                    'view' => 'Voir les transactions, types et modes de paiement',
-                    'modify' => 'Gérer les transactions, types et modes de paiement'
+                'finance_management' => [
+                    'view' => 'Voir exercices, transactions, types et modes de paiement',
+                    'modify' => 'Gérer exercices, transactions, types et modes de paiement'
                 ],
                 'personne' => [
                     'view' => 'Voir la liste des personnes',
@@ -76,9 +72,9 @@ class GenerateSimplePermissionsController extends AbstractController
                     'view' => 'Voir les rapports financiers',
                     'modify' => 'Générer et personnaliser les rapports'
                 ],
-                'admin' => [
-                    'view' => 'Accéder aux outils d\'administration',
-                    'modify' => 'Configuration système complète'
+                'admin_system' => [
+                    'view' => 'Accéder administration, permissions et RGPD',
+                    'modify' => 'Gérer système, permissions et RGPD'
                 ]
             ];
             
