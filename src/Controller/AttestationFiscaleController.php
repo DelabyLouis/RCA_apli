@@ -28,10 +28,10 @@ final class AttestationFiscaleController extends AbstractController
         TypeTransactionRepository $typeTransactionRepository
     ): Response {
         // Récupérer le type de transaction "cotisation"
-        $typeCotisation = $typeTransactionRepository->findOneBy(['libelle' => 'cotisation']);
+        $typeCotisation = $typeTransactionRepository->findOneBy(['libelle' => 'Cotisation']);
         
         if (!$typeCotisation) {
-            $this->addFlash('error', 'Le type de transaction "cotisation" n\'existe pas. Veuillez le créer d\'abord.');
+            $this->addFlash('error', 'Le type de transaction "Cotisation" n\'existe pas. Veuillez le créer d\'abord.');
             return $this->redirectToRoute('app_type_transaction_index');
         }
         
@@ -108,10 +108,10 @@ final class AttestationFiscaleController extends AbstractController
         }
         
         // Récupérer le type de transaction "cotisation"
-        $typeCotisation = $typeTransactionRepository->findOneBy(['libelle' => 'cotisation']);
+        $typeCotisation = $typeTransactionRepository->findOneBy(['libelle' => 'Cotisation']);
         
         if (!$typeCotisation) {
-            $this->addFlash('error', 'Le type de transaction "cotisation" n\'existe pas.');
+            $this->addFlash('error', 'Le type de transaction "Cotisation" n\'existe pas.');
             return $this->redirectToRoute('app_attestation_fiscale_index');
         }
         
