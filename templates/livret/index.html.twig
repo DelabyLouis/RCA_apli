@@ -8,6 +8,9 @@
     <div class="container-fluid mt-4">
         <h1 class="mb-4">Gestion du Livret d'épargne</h1>
         
+        <!-- Zone de notifications pour les suppressions -->
+        <div id="notifications" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;"></div>
+        
         {% if exercice_filter %}
             <div class="alert alert-info">
                 <i class="fas fa-filter me-2"></i>Transactions du livret filtrées pour l'exercice : 
@@ -239,6 +242,27 @@
     </div>
 
     <script>
+        // Fonction pour afficher une notification
+        function showNotification(message, type = 'danger') {
+            const notificationsContainer = document.getElementById('notifications');
+            
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show`;
+            notification.innerHTML = `
+                <strong>${type === 'success' ? '✅ Succès:' : '❌ Erreur:'}</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            notificationsContainer.appendChild(notification);
+            
+            // Supprimer automatiquement après 5 secondes
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Initialisation de la page livret');
             
@@ -412,15 +436,16 @@
                     })
                     .then(response => {
                         if (response.ok) {
+                            showNotification('Transaction du livret supprimée avec succès !', 'success');
                             row.remove();
                             location.reload(); // Recharger pour mettre à jour les soldes
                         } else {
-                            alert('Erreur lors de la suppression');
+                            showNotification('Erreur lors de la suppression de la transaction du livret', 'danger');
                         }
                     })
                     .catch(error => {
                         console.error('Erreur:', error);
-                        alert('Erreur de connexion');
+                        showNotification('Erreur de connexion ou serveur indisponible', 'danger');
                     });
                 });
             });
