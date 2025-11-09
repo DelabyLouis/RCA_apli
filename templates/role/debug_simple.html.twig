@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Debug Formulaire Rôle{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Debug Formulaire Rôle</h1>
+    
+    <div class="alert alert-info">
+        {{ debug_info|raw }}
+    </div>
+    
+    <h2>Test Template Simple</h2>
+    {{ form_start(form) }}
+    
+    <div class="mb-3">
+        {{ form_label(form.libelle) }}
+        {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
+    </div>
+    
+    <div class="mb-3">
+        {{ form_label(form.description) }}
+        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+    </div>
+    
+    <div class="mb-3">
+        {{ form_label(form.hierarchy_level) }}
+        {{ form_widget(form.hierarchy_level, {'attr': {'class': 'form-select'}}) }}
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Permissions (rendu par défaut)</label>
+        {{ form_widget(form.permissions) }}
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Permissions (test boucle)</label>
+        <div class="border p-3">
+            {% if form.permissions.children is defined %}
+                <p>Nombre d'éléments: {{ form.permissions.children|length }}</p>
+                {% for permission in form.permissions.children %}
+                    <div class="form-check">
+                        {{ form_widget(permission, {'attr': {'class': 'form-check-input'}}) }}
+                        {{ form_label(permission, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Pas de children trouvés</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
+</div>
+{% endblock %}
