@@ -426,21 +426,20 @@
                     const transactionId = this.dataset.id;
                     const row = this.closest('tr');
                     
-                    fetch(`/livret/${transactionId}`, {
-                        method: 'POST',
+                    fetch(`/livret/${transactionId}/delete-ajax`, {
+                        method: 'DELETE',
                         headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
                             'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: '_method=DELETE'
+                        }
                     })
-                    .then(response => {
-                        if (response.ok) {
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
                             showNotification('Transaction du livret supprimée avec succès !', 'success');
                             row.remove();
                             location.reload(); // Recharger pour mettre à jour les soldes
                         } else {
-                            showNotification('Erreur lors de la suppression de la transaction du livret', 'danger');
+                            showNotification(data.error || 'Erreur lors de la suppression de la transaction du livret', 'danger');
                         }
                     })
                     .catch(error => {
