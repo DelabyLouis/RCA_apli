@@ -76,13 +76,14 @@ class ImportHistoricalDataCommand extends Command
             ['libelle' => 'Exercice 2024-2025', 'date_debut' => '2024-09-01', 'date_fin' => '2025-08-31', 'clos' => false],
         ];
 
+        $numeroOrdre = 1;
         foreach ($exercices as $data) {
             $exercice = new Exercice();
             $exercice->setLibelle($data['libelle']);
             $exercice->setDateDebut(new \DateTime($data['date_debut']));
             $exercice->setDateFin(new \DateTime($data['date_fin']));
             $exercice->setClos($data['clos']);
-            $exercice->setNumeroOrdre(1); // Valeur par défaut
+            $exercice->setNumeroOrdre($numeroOrdre++);
 
             $this->entityManager->persist($exercice);
             $io->text("Exercice créé : {$data['libelle']}");
