@@ -453,28 +453,6 @@
                     });
                 });
             });
-                        const debitCell = row.querySelector('td:nth-child(6)');
-                        const creditCell = row.querySelector('td:nth-child(7)');
-                        const hasDebit = !debitCell.textContent.includes('-');
-                        const hasCredit = !creditCell.textContent.includes('-');
-                        
-                        if (type === 'depot' && !hasCredit) {
-                            visible = false;
-                        } else if (type === 'retrait' && !hasDebit) {
-                            visible = false;
-                        }
-                    }
-                    
-                    // Filtre date
-                    if (dateMin || dateMax) {
-                        const dateCell = row.querySelector('td:nth-child(4)').textContent;
-                        if (dateMin && dateCell < dateMin) visible = false;
-                        if (dateMax && dateCell > dateMax) visible = false;
-                    }
-                    
-                    row.style.display = visible ? '' : 'none';
-                });
-            });
             
             document.getElementById('clear-filters')?.addEventListener('click', function() {
                 document.getElementById('filter-libelle').value = '';
