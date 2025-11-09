@@ -30,9 +30,19 @@ echo "=========================================" >&2
 echo " Vérification de l'utilisateur admin..." >&2
 
 # Vérifier si l'utilisateur admin existe et combien de rôles il a
-ADMIN_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' || echo "0")
-ADMIN_ROLES_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" u JOIN user_role ur ON u.id_user = ur.user_id WHERE u.username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' || echo "0")
-echo "Admin existe: $ADMIN_EXISTS, Nombre de rôles: $ADMIN_ROLES_COUNT" >&2
+echo "🔍 Executing SQL queries to check admin status..." >&2
+ADMIN_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>&1 | tail -1 | tr -d ' \n\r' || echo "0")
+ADMIN_ROLES_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" u JOIN user_role ur ON u.id_user = ur.user_id WHERE u.username='admin';" --quiet 2>&1 | tail -1 | tr -d ' \n\r' || echo "0")
+
+# Debug output
+echo "🔍 Raw admin exists result: '$ADMIN_EXISTS'" >&2
+echo "🔍 Raw admin roles count result: '$ADMIN_ROLES_COUNT'" >&2
+
+# Ensure we have valid numbers
+[ -z "$ADMIN_EXISTS" ] && ADMIN_EXISTS="0"
+[ -z "$ADMIN_ROLES_COUNT" ] && ADMIN_ROLES_COUNT="0"
+
+echo "📊 Admin existe: '$ADMIN_EXISTS', Nombre de rôles: '$ADMIN_ROLES_COUNT'" >&2
 
 if [ "$ADMIN_EXISTS" = "0" ] || [ "$ADMIN_ROLES_COUNT" = "0" ]; then
     echo "🔧 Configuration de l'utilisateur admin..." >&2
