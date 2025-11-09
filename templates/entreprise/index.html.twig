@@ -34,6 +34,9 @@
     <div class="container-fluid mt-4">
         <h1 class="mb-4">Gestion des Entreprises</h1>
         
+        <!-- Zone de notifications pour les suppressions -->
+        <div id="notifications" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;"></div>
+        
         <div class="row mb-3">
             <div class="col">
                 <a href="{{ path('app_entreprise_new') }}" class="btn btn-success">
@@ -151,6 +154,11 @@
                                            title="Modifier">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        <button class="btn btn-outline-danger btn-sm delete-btn" 
+                                                data-id="{{ entreprise.idEntreprise }}" 
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -232,5 +240,66 @@
             document.getElementById('filtered-count').textContent = document.querySelectorAll('.entreprise-row').length;
             document.getElementById('no-results-row').style.display = 'none';
         }
+        
+        // Fonction pour afficher une notification
+        function showNotification(message, type = 'danger') {
+            const notificationsContainer = document.getElementById('notifications');
+            
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show`;
+            notification.innerHTML = `
+                <strong>${type === 'success' ? '✅ Succès:' : '❌ Erreur:'}</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            notificationsContainer.appendChild(notification);
+            
+            // Supprimer automatiquement après 5 secondes
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // Gestion de la suppression des entreprises
+        document.querySelectorAll('.delete-btn').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (!confirm('Êtes-vous sûr de vouloir supprimer cette entreprise ?')) {
+                    return;
+                }
+                
+                const entrepriseId = this.dataset.id;
+                const row = this.closest('tr');
+                
+                fetch(`/entreprise/${entrepriseId}/delete-ajax`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Entreprise supprimée avec succès !', 'success');
+                        row.remove();
+                        // Mettre à jour le compteur
+                        const count = document.querySelectorAll('.entreprise-row').length;
+                        document.getElementById('filtered-count').textContent = count;
+                        if (count === 0) {
+                            document.getElementById('no-results-row').style.display = '';
+                        }
+                    } else {
+                        showNotification(data.error || 'Impossible de supprimer l\'entreprise', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showNotification('Erreur de connexion ou serveur indisponible', 'danger');
+                });
+            });
+        });
     </script>
 {% endblock %}

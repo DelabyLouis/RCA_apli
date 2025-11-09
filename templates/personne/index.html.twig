@@ -35,6 +35,9 @@
     <div class="container-fluid mt-4">
         <h1 class="mb-4">Gestion des Personnes</h1>
         
+        <!-- Zone de notifications pour les suppressions -->
+        <div id="notifications" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;"></div>
+        
         <div class="row mb-3">
             <div class="col">
                 <a href="{{ path('app_personne_new') }}" class="btn btn-success">
@@ -160,6 +163,11 @@
                                            title="Modifier">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        <button class="btn btn-outline-danger btn-sm delete-btn" 
+                                                data-id="{{ personne.idPersonne }}" 
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -248,5 +256,66 @@
             document.getElementById('filtered-count').textContent = document.querySelectorAll('.personne-row').length;
             document.getElementById('no-results-row').style.display = 'none';
         }
+        
+        // Fonction pour afficher une notification
+        function showNotification(message, type = 'danger') {
+            const notificationsContainer = document.getElementById('notifications');
+            
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show`;
+            notification.innerHTML = `
+                <strong>${type === 'success' ? '✅ Succès:' : '❌ Erreur:'}</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            notificationsContainer.appendChild(notification);
+            
+            // Supprimer automatiquement après 5 secondes
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // Gestion de la suppression des personnes
+        document.querySelectorAll('.delete-btn').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (!confirm('Êtes-vous sûr de vouloir supprimer cette personne ?')) {
+                    return;
+                }
+                
+                const personneId = this.dataset.id;
+                const row = this.closest('tr');
+                
+                fetch(`/personne/${personneId}/delete-ajax`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Personne supprimée avec succès !', 'success');
+                        row.remove();
+                        // Mettre à jour le compteur
+                        const count = document.querySelectorAll('.personne-row').length;
+                        document.getElementById('filtered-count').textContent = count;
+                        if (count === 0) {
+                            document.getElementById('no-results-row').style.display = '';
+                        }
+                    } else {
+                        showNotification(data.error || 'Impossible de supprimer la personne', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showNotification('Erreur de connexion ou serveur indisponible', 'danger');
+                });
+            });
+        });
     </script>
 {% endblock %}
