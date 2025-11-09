@@ -8,6 +8,7 @@ use App\Entity\ModeDePaiement;
 use App\Entity\Personne;
 use App\Entity\Transaction;
 use App\Entity\User;
+use App\Entity\ConsentementRgpd;
 use App\Command\ImportHistoricalDataCommand;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -58,6 +59,14 @@ class CleanImportController extends AbstractController
                 $entityManager->remove($mode);
             }
             $html .= '<p>✅ Modes de paiement supprimés: ' . count($modes) . '</p>';
+            
+            // Supprimer les consentements RGPD avant les utilisateurs
+            $consentementRepo = $entityManager->getRepository(ConsentementRgpd::class);
+            $consentements = $consentementRepo->findAll();
+            foreach ($consentements as $consentement) {
+                $entityManager->remove($consentement);
+            }
+            $html .= '<p>✅ Consentements RGPD supprimés: ' . count($consentements) . '</p>';
             
             // Supprimer les utilisateurs (sauf admin) AVANT les personnes
             $userRepo = $entityManager->getRepository(User::class);
