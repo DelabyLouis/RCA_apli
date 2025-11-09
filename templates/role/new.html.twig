@@ -60,13 +60,13 @@
                                 
                                 <div class="checkbox-container border rounded p-3" style="max-height: 400px; overflow-y: auto;">
                                     <div class="row">
-                                        {% for permission in form.permissions %}
+                                        {% for permission in form.permissions.children %}
                                             <div class="col-md-6 col-lg-4 mb-2">
                                                 <div class="form-check p-2 border rounded bg-light">
                                                     {{ form_widget(permission, {'attr': {'class': 'form-check-input me-2'}}) }}
                                                     {{ form_label(permission, null, {'label_attr': {'class': 'form-check-label small'}}) }}
-                                                    {% if permission.vars.value.description %}
-                                                        <div class="text-muted small mt-1">{{ permission.vars.value.description }}</div>
+                                                    {% if permission.vars.data and permission.vars.data.description %}
+                                                        <div class="text-muted small mt-1">{{ permission.vars.data.description }}</div>
                                                     {% endif %}
                                                 </div>
                                             </div>
