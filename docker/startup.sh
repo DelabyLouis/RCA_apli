@@ -38,12 +38,19 @@ if [ "${ADMIN_ROLES:-0}" -eq "0" ]; then
     php bin/console dbal:run-sql "INSERT INTO user_role (user_id, role_id) VALUES (1, (SELECT id_role FROM role WHERE libelle = 'Administrateur' LIMIT 1)) ON CONFLICT (user_id, role_id) DO NOTHING;" >/dev/null 2>&1 || true
     
     echo "✅ Utilisateur admin créé - Login: admin / Password: admin123" >&2
-    
-    # Importer les données historiques si la base est vide
-    echo "🔧 Import des données historiques si nécessaire..." >&2
-    php bin/console app:import-historical-data >/dev/null 2>&1 || echo "Données historiques déjà importées ou erreur d'import" >&2
 else
     echo "✅ Utilisateur admin déjà configuré" >&2
+fi
+
+# Vérifier si les données historiques doivent être importées (indépendamment de l'admin)
+echo "🔧 Vérification de l'import des données historiques..." >&2
+EXERCICE_COUNT=$(php bin/console dbal:run-sql "SELECT COUNT(*) FROM exercice;" 2>/dev/null | grep -E '^[0-9]+$' || echo "0")
+
+if [ "${EXERCICE_COUNT:-0}" -eq "0" ]; then
+    echo "🔧 Import des données historiques..." >&2
+    php bin/console app:import-historical-data 2>&1 || echo "Erreur lors de l'import des données historiques" >&2
+else
+    echo "✅ Données historiques déjà présentes (${EXERCICE_COUNT} exercices)" >&2
 fi
 
 # Corriger les permissions et vider le cache
