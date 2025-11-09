@@ -415,9 +415,14 @@
             });
             
             // Gestion de la suppression
-            document.querySelectorAll('.delete-btn').forEach(function(button) {
+            console.log('🔍 Recherche des boutons de suppression dans le livret...');
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            console.log('📊 Nombre de boutons de suppression trouvés:', deleteButtons.length);
+            
+            deleteButtons.forEach(function(button) {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
+                    console.log('🚀 Bouton suppression livret cliqué !', this.dataset.id);
                     
                     if (!confirm('Êtes-vous sûr de vouloir supprimer cette transaction du livret ?')) {
                         return;
