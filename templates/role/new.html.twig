@@ -59,97 +59,14 @@
                                 </div>
                                 
                                 <div class="border rounded p-3" style="max-height: 400px; overflow-y: auto;">
-                                    {% if form.permissions.children is defined and form.permissions.children|length > 0 %}
-                                        {% set entityLabels = {
-                                            'user': 'Utilisateurs',
-                                            'role': 'Rôles',
-                                            'exercice': 'Exercices',
-                                            'transaction': 'Transactions',
-                                            'type_transaction': 'Types de transaction',
-                                            'mode_paiement': 'Modes de paiement',
-                                            'personne': 'Personnes',
-                                            'entreprise': 'Entreprises',
-                                            'livret': 'Livret',
-                                            'attestation': 'Attestations',
-                                            'import_export': 'Import/Export',
-                                            'reports': 'Rapports',
-                                            'admin': 'Administration',
-                                            'permission': 'Permissions',
-                                            'rgpd': 'RGPD'
-                                        } %}
-                                        
-                                        {% set permissionLabels = {
-                                            'view': 'Voir',
-                                            'modify': 'Modifier',
-                                            'create': 'Créer',
-                                            'edit': 'Éditer',
-                                            'delete': 'Supprimer',
-                                            'activate': 'Activer',
-                                            'manage': 'Gérer',
-                                            'close': 'Clôturer',
-                                            'validate': 'Valider',
-                                            'generate': 'Générer',
-                                            'import': 'Importer',
-                                            'export': 'Exporter',
-                                            'clean': 'Nettoyer',
-                                            'access': 'Accès',
-                                            'system': 'Système',
-                                            'logs': 'Journaux',
-                                            'backup': 'Sauvegarde'
-                                        } %}
-                                        
-                                        {% set permissionsByEntity = {} %}
-                                        {% for permission in form.permissions.children %}
-                                            {% set parts = permission.vars.name|split('_') %}
-                                            {% set entity = parts[0] %}
-                                            {% if parts|length > 2 and parts[1] in ['transaction', 'paiement', 'export'] %}
-                                                {% set entity = parts[0] ~ '_' ~ parts[1] %}
-                                            {% endif %}
-                                            {% set action = parts|last %}
-                                            
-                                            {% if permissionsByEntity[entity] is not defined %}
-                                                {% set permissionsByEntity = permissionsByEntity|merge({(entity): {}}) %}
-                                            {% endif %}
-                                            {% set permissionsByEntity = permissionsByEntity|merge({(entity): permissionsByEntity[entity]|merge({(action): permission})}) %}
+                                    <div class="permissions-container">
+                                        {% for permission in form.permissions %}
+                                            <div class="permission-item">
+                                                {{ form_widget(permission, {'attr': {'class': 'form-check-input'}}) }}
+                                                {{ form_label(permission, null, {'label_attr': {'class': 'permission-label'}}) }}
+                                            </div>
                                         {% endfor %}
-                                        
-                                        <div class="permissions-entities">
-                                            {% for entity, permissions in permissionsByEntity %}
-                                                <div class="entity-group mb-4">
-                                                    <h6 class="entity-title">{{ entityLabels[entity] ?? (entity|title) }}</h6>
-                                                    <div class="entity-permissions">
-                                                        {% if permissions.view is defined and permissions.modify is defined %}
-                                                            <div class="permission-pair">
-                                                                <div class="permission-item view">
-                                                                    {{ form_widget(permissions.view) }}
-                                                                    <label for="{{ permissions.view.vars.id }}">Voir</label>
-                                                                </div>
-                                                                <div class="permission-item modify">
-                                                                    {{ form_widget(permissions.modify) }}
-                                                                    <label for="{{ permissions.modify.vars.id }}">Modifier</label>
-                                                                </div>
-                                                            </div>
-                                                        {% else %}
-                                                            <div class="other-permissions">
-                                                                {% for action, permission in permissions %}
-                                                                    <div class="permission-item">
-                                                                        {{ form_widget(permission) }}
-                                                                        <label for="{{ permission.vars.id }}">{{ permissionLabels[action] ?? (action|title) }}</label>
-                                                                    </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        <div class="alert alert-warning">
-                                            <i class="fas fa-exclamation-triangle me-2"></i>
-                                            Aucune permission disponible. 
-                                            <a href="/generate-simple-permissions" class="alert-link">Générer les permissions</a>.
-                                        </div>
-                                    {% endif %}
+                                    </div>
                                 </div>
                                 {{ form_errors(form.permissions) }}
                             </div>
@@ -187,50 +104,19 @@ function toggleAllPermissions(selectAll) {
 </script>
 
 <style>
-.permissions-entities {
+.permissions-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-.entity-group {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    background-color: #f8f9fa;
-}
-
-.entity-title {
-    font-weight: bold;
-    color: #007bff;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 5px;
-}
-
-.permission-pair {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
 }
 
 .permission-item {
     display: flex;
     align-items: center;
-    padding: 8px;
+    padding: 10px;
+    border: 1px solid #ddd;
     border-radius: 5px;
-    background-color: white;
-    border: 1px solid #ccc;
-}
-
-.permission-item.view {
-    background-color: #d4edda;
-    border-color: #28a745;
-}
-
-.permission-item.modify {
-    background-color: #fff3cd;
-    border-color: #ffc107;
+    background-color: #f8f9fa;
 }
 
 .permission-item input[type="checkbox"] {
@@ -240,30 +126,13 @@ function toggleAllPermissions(selectAll) {
     cursor: pointer;
 }
 
-.permission-item label {
+.permission-label {
     font-weight: 600;
     color: white;
     font-size: 14px;
     margin: 0;
     cursor: pointer;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-}
-
-.other-permissions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.other-permissions .permission-item {
-    background-color: #e9ecef;
-    border-color: #6c757d;
-    flex: 1 1 calc(50% - 5px);
-}
-
-.other-permissions .permission-item label {
-    color: #495057;
-    text-shadow: none;
 }
 </style>
 {% endblock %}
