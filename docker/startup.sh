@@ -95,8 +95,11 @@ if [ "$ADMIN_EXISTS" = "0" ] || [ "$ADMIN_ROLES_COUNT" = "0" ]; then
                 # Vérifier que ça a fonctionné
                 FINAL_ROLES=$(php bin/console dbal:run-sql "SELECT COUNT(*) FROM user_role WHERE user_id = ${ADMIN_USER_ID};" 2>/dev/null | grep -E '^[0-9]+$' || echo "0")
                 echo "✅ Admin now has ${FINAL_ROLES} role(s)" >&2
+            else
+                echo "❌ Could not find or create Administrateur role" >&2
+            fi
     else
-        echo "⚠️ Admin user verification failed, skipping role assignment"
+        echo "⚠️ Admin user verification failed, skipping role assignment" >&2
     fi
     
     # Vérification finale avec détails
