@@ -6,13 +6,10 @@ set -e
 # Configuration du port Apache pour Render
 echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Démarrer les services
-apache2ctl start
-
 # Configurer la base de données
 echo "🔧 Configuration de la base de données..." >&2
 php bin/console doctrine:database:create --if-not-exists || true
-php bin/console doctrine:schema:create --complete || echo "Schema already exists" >&2
+php bin/console doctrine:schema:create || echo "Schema already exists" >&2
 
 # Vérifier les migrations restantes
 echo "🔧 Exécution des migrations..." >&2
@@ -53,5 +50,5 @@ php bin/console cache:warmup || true
 
 echo "✅ Application prête ! Démarrage d'Apache..."
 
-# Démarrer Apache
-apache2-foreground
+# Démarrer Apache en foreground (pas besoin de apache2ctl start avant)
+exec apache2-foreground
