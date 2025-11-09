@@ -48,34 +48,29 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     echo "Attempting to create user with hash: $ADMIN_HASH"
     php bin/console doctrine:query:sql "INSERT INTO \"user\" (id_user, username, password, id_personne) VALUES (1, 'admin', '$ADMIN_HASH', 1) ON CONFLICT (id_user) DO NOTHING;" || echo "User creation query failed"
     
-    # 4. Vérifier si l'utilisateur existe et lier le rôle
+    # 4. S'assurer que l'utilisateur admin a toujours ses rôles
     USER_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
     if [ "${USER_EXISTS:-0}" -gt "0" ]; then
-        echo "4/4 Linking role to user..."
+        echo "4/4 Ensuring admin user has roles..."
         
         # Trouver l'ID réel de l'utilisateur admin
         ADMIN_USER_ID=$(php bin/console doctrine:query:sql "SELECT id_user FROM \"user\" WHERE username='admin' LIMIT 1;" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "1")
         echo "Admin user ID: ${ADMIN_USER_ID}"
         
-        # Trouver l'ID réel du rôle Administrateur
-        ADMIN_ROLE_ID=$(php bin/console doctrine:query:sql "SELECT id_role FROM role WHERE libelle = 'Administrateur' LIMIT 1;" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
-        echo "Admin role ID: ${ADMIN_ROLE_ID}"
+        # Vérifier combien de rôles l'admin a actuellement
+        CURRENT_ROLES=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM user_role WHERE user_id = ${ADMIN_USER_ID};" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
+        echo "Admin currently has ${CURRENT_ROLES} role(s)"
         
-        if [ "${ADMIN_ROLE_ID:-0}" -gt "0" ]; then
-            echo "Linking user ${ADMIN_USER_ID} to role ${ADMIN_ROLE_ID}..."
-            php bin/console doctrine:query:sql "INSERT INTO user_role (user_id, role_id) VALUES (${ADMIN_USER_ID}, ${ADMIN_ROLE_ID}) ON CONFLICT (user_id, role_id) DO NOTHING;" 2>/dev/null || echo "Role linking failed"
+        # Si l'admin n'a aucun rôle, utiliser la commande Symfony pour les restaurer
+        if [ "${CURRENT_ROLES:-0}" -eq "0" ]; then
+            echo "⚠️ Admin has no roles, fixing with Symfony command..."
+            php bin/console app:fix-admin-roles && echo "✅ Admin roles restored" || echo "❌ Failed to restore admin roles"
             
-            # Vérifier que la liaison a fonctionné
-            ROLE_LINK_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM user_role WHERE user_id = ${ADMIN_USER_ID};" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
-            echo "User has ${ROLE_LINK_COUNT} role(s) linked"
-            
-            # Si la liaison SQL échoue, utiliser la commande Symfony
-            if [ "${ROLE_LINK_COUNT:-0}" -eq "0" ]; then
-                echo "SQL linking failed, trying Symfony command..."
-                php bin/console app:fix-admin-roles || echo "Symfony command also failed"
-            fi
+            # Vérifier à nouveau
+            FINAL_ROLES=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM user_role WHERE user_id = ${ADMIN_USER_ID};" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
+            echo "Admin now has ${FINAL_ROLES} role(s)"
         else
-            echo "⚠️ Administrateur role not found!"
+            echo "✅ Admin already has roles"
         fi
     else
         echo "⚠️ User creation failed, skipping role assignment"
