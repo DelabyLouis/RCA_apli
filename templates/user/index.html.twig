@@ -30,12 +30,11 @@
     <div class="container-fluid mt-4">
         <h1 class="mb-4">Gestion des Utilisateurs</h1>
         
-        <div class="row mb-3">
-            <div class="col">
-                <a href="{{ path('app_user_new') }}" class="btn btn-success">
-                    <i class="fas fa-plus me-2"></i>Nouvel Utilisateur
-                </a>
-            </div>
+        <!-- Information sur la gestion des utilisateurs -->
+        <div class="alert alert-info mb-4">
+            <h5><i class="fas fa-info-circle me-2"></i>Gestion des comptes utilisateurs</h5>
+            <p class="mb-2"><strong>Création de comptes :</strong> Les utilisateurs doivent s'inscrire eux-mêmes via le <a href="{{ path('app_register') }}" class="alert-link">formulaire d'inscription</a>.</p>
+            <p class="mb-0"><strong>Attribution des rôles :</strong> Les administrateurs peuvent ensuite modifier les utilisateurs pour leur attribuer des rôles et permissions.</p>
         </div>
         
         <!-- Filtres personnalisés -->

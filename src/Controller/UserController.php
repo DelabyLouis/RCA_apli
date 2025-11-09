@@ -25,24 +25,11 @@ final class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/new', name: 'app_user_new', methods: ['GET'])]
+    public function new(): Response
     {
-        $user = new User();
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('user/new.html.twig', [
-            'user' => $user,
-            'form' => $form,
-        ]);
+        $this->addFlash('info', 'Les utilisateurs doivent s\'inscrire via le formulaire d\'inscription. Un administrateur pourra ensuite leur attribuer des rôles.');
+        return $this->redirectToRoute('app_register');
     }
 
     #[Route('/{id_user}', name: 'app_user_show', methods: ['GET'])]
@@ -68,7 +55,7 @@ final class UserController extends AbstractController
             throw $this->createNotFoundException('Utilisateur non trouvé');
         }
 
-        $form = $this->createForm(UserType::class, $user);
+        $form = $this->createForm(\App\Form\UserEditType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
