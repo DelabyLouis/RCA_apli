@@ -166,10 +166,10 @@ final class AttestationFiscaleController extends AbstractController
         }
         
         // Récupérer le type de transaction "cotisation"
-        $typeCotisation = $typeTransactionRepository->findOneBy(['libelle' => 'cotisation']);
+        $typeCotisation = $typeTransactionRepository->findOneBy(['libelle' => 'Cotisation']);
         
         if (!$typeCotisation) {
-            throw $this->createNotFoundException('Le type de transaction "cotisation" n\'existe pas.');
+            throw $this->createNotFoundException('Le type de transaction "Cotisation" n\'existe pas.');
         }
         
         // Récupérer les cotisations sélectionnées
