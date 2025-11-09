@@ -56,6 +56,17 @@ class ExerciceRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Récupère tous les exercices triés par numéro d'ordre
+     */
+    public function findAllOrderedByNumeroOrdre(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->orderBy('e.numero_ordre', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Exercice[] Returns an array of Exercice objects
     //     */

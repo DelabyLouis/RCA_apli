@@ -22,7 +22,7 @@ final class ExerciceController extends AbstractController
     public function index(ExerciceRepository $exerciceRepository): Response
     {
         return $this->render('exercice/index.html.twig', [
-            'exercices' => $exerciceRepository->findAll(),
+            'exercices' => $exerciceRepository->findAllOrderedByNumeroOrdre(),
         ]);
     }
 
