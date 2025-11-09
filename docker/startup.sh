@@ -24,26 +24,29 @@ php bin/console doctrine:schema:create --no-interaction || echo "Erreur créatio
 php bin/console doctrine:migrations:migrate --no-interaction || echo "Aucune migration à exécuter"
 
 # Créer un utilisateur admin si nécessaire
-echo "📋 Vérification des utilisateurs..."
+echo "=========================================" >&2
+echo "� DEMARRAGE DU SCRIPT D'INITIALISATION" >&2
+echo "=========================================" >&2
+echo "�📋 Vérification des utilisateurs..." >&2
 USER_COUNT=$(php bin/console doctrine:query:sql "SELECT COUNT(*) as count FROM \"user\"" --quiet 2>/dev/null | tail -1 | tr -d ' ' || echo "0")
-echo "Nombre d'utilisateurs trouvés: $USER_COUNT"
+echo "Nombre d'utilisateurs trouvés: $USER_COUNT" >&2
 
 if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
-    echo "� Création de l'utilisateur admin..."
+    echo "🔧 Création de l'utilisateur admin..." >&2
     
     # Créer l'utilisateur admin avec gestion d'erreurs
-    echo "Creating admin user step by step..."
+    echo "Creating admin user step by step..." >&2
     
     # 1. Vérifier que le rôle Administrateur existe (normalement créé par les fixtures)
-    echo "1/4 Checking admin role..."
-    php bin/console doctrine:query:sql "SELECT COUNT(*) FROM role WHERE libelle = 'Administrateur';" --quiet >/dev/null || echo "Admin role check completed"
+    echo "1/4 Checking admin role..." >&2
+    php bin/console doctrine:query:sql "SELECT COUNT(*) FROM role WHERE libelle = 'Administrateur';" --quiet >/dev/null || echo "Admin role check completed" >&2
     
     # 2. Créer la personne
-    echo "2/4 Creating person..."
+    echo "2/4 Creating person..." >&2
     php bin/console doctrine:query:sql "INSERT INTO personne (id_personne, civilite, nom, prenom, email) VALUES (1, 'Mr', 'ADMIN', 'Admin', 'admin@rca-amicale.fr') ON CONFLICT (id_personne) DO NOTHING;" 2>/dev/null || true
     
     # 3. Créer l'utilisateur - Hash correct pour 'admin123'
-    echo "3/4 Creating user..."
+    echo "3/4 Creating user..." >&2
     ADMIN_HASH='$2y$10$wJC0w3ZAXIovWafBY7zHf.fTIQpE5CazyfykR2Ho11QshqfezMux6'
     echo "Attempting to create user with hash: $ADMIN_HASH"
     php bin/console doctrine:query:sql "INSERT INTO \"user\" (id_user, username, password, id_personne) VALUES (1, 'admin', '$ADMIN_HASH', 1) ON CONFLICT (id_user) DO NOTHING;" || echo "User creation query failed"
@@ -51,19 +54,19 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     # 4. S'assurer que l'utilisateur admin a toujours ses rôles
     USER_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM \"user\" WHERE username='admin';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
     if [ "${USER_EXISTS:-0}" -gt "0" ]; then
-        echo "4/4 Ensuring admin user has roles..."
+        echo "4/4 Ensuring admin user has roles..." >&2
         
         # Trouver l'ID réel de l'utilisateur admin
         ADMIN_USER_ID=$(php bin/console doctrine:query:sql "SELECT id_user FROM \"user\" WHERE username='admin' LIMIT 1;" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "1")
-        echo "Admin user ID: ${ADMIN_USER_ID}"
+        echo "Admin user ID: ${ADMIN_USER_ID}" >&2
         
         # Vérifier combien de rôles l'admin a actuellement
         CURRENT_ROLES=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM user_role WHERE user_id = ${ADMIN_USER_ID};" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
-        echo "Admin currently has ${CURRENT_ROLES} role(s)"
+        echo "Admin currently has ${CURRENT_ROLES} role(s)" >&2
         
         # Si l'admin n'a aucun rôle, les restaurer directement
         if [ "${CURRENT_ROLES:-0}" -eq "0" ]; then
-            echo "⚠️ Admin has no roles, restoring them..."
+            echo "⚠️ Admin has no roles, restoring them..." >&2
             
             # S'assurer que les rôles existent
             ADMIN_ROLE_EXISTS=$(php bin/console doctrine:query:sql "SELECT COUNT(*) FROM role WHERE libelle = 'Administrateur';" --quiet 2>/dev/null | tail -1 | tr -d ' ' 2>/dev/null || echo "0")
@@ -110,8 +113,12 @@ if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     # Essayer les fixtures si disponibles
     php bin/console doctrine:fixtures:load --no-interaction --env=prod 2>/dev/null || echo "Fixtures non disponibles en production"
 else
-    echo "👥 Utilisateurs déjà présents"
+    echo "👥 Utilisateurs déjà présents" >&2
 fi
+
+echo "=========================================" >&2
+echo "🔧 FIN DU SCRIPT D'INITIALISATION" >&2
+echo "=========================================" >&2
 
 # Corriger les permissions et vider le cache
 chown -R www-data:www-data /var/www/html/var/cache
