@@ -44,12 +44,36 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="mb-3">
-                                {{ form_label(form.permissions) }}
-                                <div class="checkbox-container border rounded p-3" style="max-height: 300px; overflow-y: auto;">
-                                    {{ form_widget(form.permissions) }}
+                                {{ form_label(form.permissions, 'Permissions accordées', {'label_attr': {'class': 'form-label'}}) }}
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted">{{ form.permissions.vars.help }}</small>
+                                    <div>
+                                        <button type="button" class="btn btn-sm btn-outline-success" onclick="toggleAllPermissions(true)">
+                                            Tout sélectionner
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="toggleAllPermissions(false)">
+                                            Tout désélectionner
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="checkbox-container border rounded p-3" style="max-height: 400px; overflow-y: auto;">
+                                    <div class="row">
+                                        {% for permission in form.permissions %}
+                                            <div class="col-md-6 col-lg-4 mb-2">
+                                                <div class="form-check p-2 border rounded bg-light">
+                                                    {{ form_widget(permission, {'attr': {'class': 'form-check-input me-2'}}) }}
+                                                    {{ form_label(permission, null, {'label_attr': {'class': 'form-check-label small'}}) }}
+                                                    {% if permission.vars.value.description %}
+                                                        <div class="text-muted small mt-1">{{ permission.vars.value.description }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                                 {{ form_errors(form.permissions) }}
-                                {{ form_help(form.permissions) }}
                             </div>
                         </div>
                     </div>
@@ -74,4 +98,13 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleAllPermissions(selectAll) {
+    const checkboxes = document.querySelectorAll('.checkbox-container input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll;
+    });
+}
+</script>
 {% endblock %}
