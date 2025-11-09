@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel exercice{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-plus me-2"></i>Créer un nouvel exercice</h1>
+                <a href="{{ path('app_exercice_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                </a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-4">
+                                {{ form_label(form.libelle, 'Libellé de l\'exercice', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control', 'placeholder': 'Exemple: Exercice 2025'}}) }}
+                                {{ form_errors(form.libelle) }}
+                                <div class="form-text">Nom descriptif de l'exercice comptable</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                {{ form_label(form.date_debut, 'Date de début', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.date_debut, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.date_debut) }}
+                                <div class="form-text">Première date de l'exercice</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                {{ form_label(form.date_fin, 'Date de fin', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.date_fin, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.date_fin) }}
+                                <div class="form-text">Dernière date de l'exercice</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if form.numero_ordre is defined %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                {{ form_label(form.numero_ordre, 'Numéro d\'ordre', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.numero_ordre, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                                {{ form_errors(form.numero_ordre) }}
+                                <div class="form-text">Numéro séquentiel automatique</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Les dates par défaut sont calculées automatiquement
+                        </div>
+                        <div>
+                            <a href="{{ path('app_exercice_index') }}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-times me-1"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i>Créer l'exercice
+                            </button>
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-lightbulb me-1 text-warning"></i>
+                            Informations utiles
+                        </h6>
+                        <ul class="mb-0">
+                            <li>Un exercice comptable représente généralement une année fiscale</li>
+                            <li>Les dates sont calculées automatiquement en fonction du dernier exercice</li>
+                            <li>Le numéro d'ordre permet d'organiser les exercices chronologiquement</li>
+                            <li>Vous pourrez ajouter des transactions une fois l'exercice créé</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation du formulaire
+    const form = document.querySelector('.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    }
+    
+    // Validation des dates
+    const dateDebut = document.getElementById('exercice_date_debut');
+    const dateFin = document.getElementById('exercice_date_fin');
+    
+    if (dateDebut && dateFin) {
+        function validateDates() {
+            if (dateDebut.value && dateFin.value) {
+                const debut = new Date(dateDebut.value);
+                const fin = new Date(dateFin.value);
+                
+                if (fin <= debut) {
+                    dateFin.setCustomValidity('La date de fin doit être postérieure à la date de début');
+                } else {
+                    dateFin.setCustomValidity('');
+                }
+            }
+        }
+        
+        dateDebut.addEventListener('change', validateDates);
+        dateFin.addEventListener('change', validateDates);
+    }
+});
+</script>
+
+{% endblock %}
