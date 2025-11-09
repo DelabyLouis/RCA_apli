@@ -48,17 +48,9 @@ class GenerateSimplePermissionsController extends AbstractController
                     'view' => 'Voir la liste des exercices',
                     'modify' => 'Créer, modifier, supprimer et clôturer des exercices'
                 ],
-                'transaction' => [
-                    'view' => 'Voir la liste des transactions',
-                    'modify' => 'Créer, modifier et supprimer des transactions'
-                ],
-                'type_transaction' => [
-                    'view' => 'Voir les types de transactions',
-                    'modify' => 'Créer, modifier et supprimer des types'
-                ],
-                'mode_paiement' => [
-                    'view' => 'Voir les modes de paiement',
-                    'modify' => 'Créer, modifier et supprimer des modes'
+                'transactions' => [
+                    'view' => 'Voir les transactions, types et modes de paiement',
+                    'modify' => 'Gérer les transactions, types et modes de paiement'
                 ],
                 'personne' => [
                     'view' => 'Voir la liste des personnes',
