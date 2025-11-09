@@ -43,6 +43,39 @@ final class RoleController extends AbstractController
         ]);
     }
 
+    #[Route('/debug-new', name: 'app_role_debug_new', methods: ['GET', 'POST'])]
+    public function debugNew(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $role = new Role();
+        $form = $this->createForm(RoleType::class, $role);
+        $form->handleRequest($request);
+
+        return $this->render('role/debug_new.html.twig', [
+            'role' => $role,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/safe-new', name: 'app_role_safe_new', methods: ['GET', 'POST'])]
+    public function safeNew(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $role = new Role();
+        $form = $this->createForm(RoleType::class, $role);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($role);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_role_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('role/new_safe.html.twig', [
+            'role' => $role,
+            'form' => $form,
+        ]);
+    }
+
     #[Route('/{id_role}', name: 'app_role_show', methods: ['GET'])]
     public function show(int $id_role, RoleRepository $roleRepository): Response
     {

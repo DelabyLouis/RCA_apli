@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Rôle{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <h1 class="mb-4">
+        <i class="fas fa-user-tag me-2 text-success"></i>Nouveau Rôle
+    </h1>
+
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Créer un nouveau rôle</h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form_label(form.libelle, 'Libellé') }}
+                                {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.libelle) }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form_label(form.hierarchy_level, 'Niveau hiérarchique') }}
+                                {{ form_widget(form.hierarchy_level) }}
+                                {{ form_errors(form.hierarchy_level) }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form_label(form.description, 'Description') }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                {{ form_label(form.permissions, 'Permissions accordées', {'label_attr': {'class': 'form-label'}}) }}
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted">{{ form.permissions.vars.help }}</small>
+                                    <div>
+                                        <button type="button" class="btn btn-sm btn-outline-success" onclick="toggleAllPermissions(true)">
+                                            Tout sélectionner
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="toggleAllPermissions(false)">
+                                            Tout désélectionner
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="checkbox-container border rounded p-3" style="max-height: 500px; overflow-y: auto;">
+                                    {% if form.permissions.children is defined and form.permissions.children|length > 0 %}
+                                        {% set entityLabels = {
+                                            'user': 'Gestion des utilisateurs',
+                                            'role': 'Gestion des rôles',
+                                            'exercice': 'Gestion des exercices',
+                                            'transactions': 'Gestion des transactions',
+                                            'personne': 'Gestion des personnes',
+                                            'entreprise': 'Gestion des entreprises',
+                                            'livret': 'Gestion du livret',
+                                            'attestation': 'Attestations fiscales',
+                                            'import_export': 'Import/Export de données',
+                                            'reports': 'Rapports et statistiques',
+                                            'admin': 'Administration système'
+                                        } %}
+                                        
+                                        {% set permissionsByEntity = {} %}
+                                        {% for permission in form.permissions.children %}
+                                            {% if permission.vars.name is defined %}
+                                                {% set parts = permission.vars.name|split('_') %}
+                                                {% if parts|length >= 2 %}
+                                                    {% set entity = parts[0] %}
+                                                    {% if parts|length > 2 %}
+                                                        {% set entity = parts[0] ~ '_' ~ parts[1] %}
+                                                    {% endif %}
+                                                    {% set action = parts|last %}
+                                                    
+                                                    {% if permissionsByEntity[entity] is not defined %}
+                                                        {% set permissionsByEntity = permissionsByEntity|merge({(entity): {}}) %}
+                                                    {% endif %}
+                                                    {% set permissionsByEntity = permissionsByEntity|merge({(entity): permissionsByEntity[entity]|merge({(action): permission})}) %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        <div class="row">
+                                            {% for entity, permissions in permissionsByEntity %}
+                                                <div class="col-md-6 mb-4">
+                                                    <div class="card">
+                                                        <div class="card-header bg-primary text-white py-2">
+                                                            <h6 class="mb-0">
+                                                                <i class="fas fa-cog me-2"></i>
+                                                                {{ entityLabels[entity] ?? (entity|title) }}
+                                                            </h6>
+                                                        </div>
+                                                        <div class="card-body p-2">
+                                                            {% if permissions.view is defined and permissions.modify is defined %}
+                                                                <div class="row">
+                                                                    <div class="col-6">
+                                                                        <div class="form-check p-2 border-2 border-dark rounded bg-light">
+                                                                            {{ form_widget(permissions.view, {'attr': {'class': 'form-check-input me-2', 'style': 'border: 2px solid #000 !important;'}}) }}
+                                                                            <label class="form-check-label small text-success fw-bold">
+                                                                                <i class="fas fa-eye me-1"></i>Voir
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <div class="form-check p-2 border-2 border-dark rounded bg-light">
+                                                                            {{ form_widget(permissions.modify, {'attr': {'class': 'form-check-input me-2', 'style': 'border: 2px solid #000 !important;'}}) }}
+                                                                            <label class="form-check-label small text-warning fw-bold">
+                                                                                <i class="fas fa-edit me-1"></i>Modifier
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% else %}
+                                                                {% for action, permission in permissions %}
+                                                                    <div class="form-check p-2 border-2 border-dark rounded bg-light mb-1">
+                                                                        {{ form_widget(permission, {'attr': {'class': 'form-check-input me-2', 'style': 'border: 2px solid #000 !important;'}}) }}
+                                                                        {{ form_label(permission, null, {'label_attr': {'class': 'form-check-label small'}}) }}
+                                                                    </div>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Aucune permission disponible. 
+                                            <a href="/generate-simple-permissions" class="alert-link">Générer les permissions</a>.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {{ form_errors(form.permissions) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <a href="{{ path('app_role_index') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-list me-2"></i>Liste
+                            </a>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save me-2"></i>Créer le rôle
+                            </button>
+                        </div>
+                    </div>
+
+                    {{ form_rest(form) }}
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleAllPermissions(selectAll) {
+    const checkboxes = document.querySelectorAll('.checkbox-container input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll;
+    });
+}
+
+// Fonction pour vérifier les dépendances au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    const modifyCheckboxes = document.querySelectorAll('input[name*="_modify"]');
+    modifyCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                const name = this.name.replace('_modify', '_view');
+                const viewCheckbox = document.querySelector(`input[name="${name}"]`);
+                if (viewCheckbox) {
+                    viewCheckbox.checked = true;
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

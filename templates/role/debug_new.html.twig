@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Debug Rôle Simple{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Debug Rôle - Template Simple</h1>
+    
+    {{ form_start(form) }}
+    
+    <div class="mb-3">
+        {{ form_label(form.libelle) }}
+        {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
+    </div>
+    
+    <div class="mb-3">
+        {{ form_label(form.description) }}
+        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+    </div>
+    
+    <div class="mb-3">
+        {{ form_label(form.hierarchy_level) }}
+        {{ form_widget(form.hierarchy_level, {'attr': {'class': 'form-select'}}) }}
+    </div>
+    
+    <div class="mb-3">
+        <h4>Debug Permissions</h4>
+        <div class="alert alert-info">
+            <p>Type de form.permissions: {{ form.permissions.vars.block_prefixes|join(', ') }}</p>
+            <p>Nombre de children: {{ form.permissions.children is defined ? form.permissions.children|length : 'Non défini' }}</p>
+        </div>
+        
+        <h5>Rendu par défaut:</h5>
+        {{ form_widget(form.permissions) }}
+        
+        {% if form.permissions.children is defined %}
+            <h5>Test boucle children:</h5>
+            {% for permission in form.permissions.children %}
+                <div class="border p-2 mb-1">
+                    <strong>{{ permission.vars.name }}</strong><br>
+                    Value: {{ permission.vars.value ? permission.vars.value.name : 'N/A' }}<br>
+                    Label: {{ permission.vars.label }}<br>
+                    {{ form_widget(permission) }} {{ form_label(permission) }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
+</div>
+{% endblock %}
