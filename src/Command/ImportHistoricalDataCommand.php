@@ -35,23 +35,27 @@ class ImportHistoricalDataCommand extends Command
         try {
             // Créer les exercices
             $this->createExercices($io);
+            $this->entityManager->flush(); // Flush pour avoir les IDs
             
             // Créer les types de transactions
             $this->createTypeTransactions($io);
+            $this->entityManager->flush(); // Flush pour avoir les IDs
             
             // Créer les modes de paiement
             $this->createModesDePayement($io);
+            $this->entityManager->flush(); // Flush pour avoir les IDs
             
             // Créer les personnes
             $this->createPersonnes($io);
+            $this->entityManager->flush(); // Flush pour avoir les IDs
             
             // Créer les transactions 2022-2023
             $this->createTransactions2022_2023($io);
+            $this->entityManager->flush(); // Flush pour avoir les IDs
             
             // Créer les transactions 2023-2024
             $this->createTransactions2023_2024($io);
-
-            $this->entityManager->flush();
+            $this->entityManager->flush(); // Flush final
 
             $io->success('Import des données historiques terminé avec succès !');
 
