@@ -7,6 +7,7 @@ use App\Entity\TypeTransaction;
 use App\Entity\ModeDePaiement;
 use App\Entity\Personne;
 use App\Entity\Transaction;
+use App\Entity\User;
 use App\Command\ImportHistoricalDataCommand;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -58,7 +59,20 @@ class CleanImportController extends AbstractController
             }
             $html .= '<p>✅ Modes de paiement supprimés: ' . count($modes) . '</p>';
             
-            // Supprimer les personnes (sauf admin)
+            // Supprimer les utilisateurs (sauf admin) AVANT les personnes
+            $userRepo = $entityManager->getRepository(User::class);
+            $users = $userRepo->findAll();
+            $deletedUsers = 0;
+            foreach ($users as $user) {
+                // Ne pas supprimer l'utilisateur admin
+                if ($user->getUsername() !== 'admin1' && $user->getUsername() !== 'admin') {
+                    $entityManager->remove($user);
+                    $deletedUsers++;
+                }
+            }
+            $html .= '<p>✅ Utilisateurs supprimés: ' . $deletedUsers . ' (admin préservé)</p>';
+            
+            // Supprimer les personnes (sauf admin) APRÈS les utilisateurs
             $personneRepo = $entityManager->getRepository(Personne::class);
             $personnes = $personneRepo->findAll();
             $deleted = 0;
