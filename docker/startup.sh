@@ -9,11 +9,14 @@ echo "ServerName localhost" >> /etc/apache2/apache2.conf
 # Configurer la base de données
 echo "🔧 Configuration de la base de données..." >&2
 php bin/console doctrine:database:create --if-not-exists || true
-php bin/console doctrine:schema:create || echo "Schema already exists" >&2
 
-# Vérifier les migrations restantes
+# Exécuter les migrations (remplace doctrine:schema:create)
 echo "🔧 Exécution des migrations..." >&2
-php bin/console doctrine:migrations:migrate --no-interaction || echo "Aucune migration à exécuter" >&2
+php bin/console doctrine:migrations:migrate --no-interaction || {
+    echo "Erreur migrations, création du schéma de base..." >&2
+    php bin/console doctrine:schema:create || echo "Schema déjà créé" >&2
+    php bin/console doctrine:migrations:migrate --no-interaction || echo "Migrations échouées" >&2
+}
 
 # Créer utilisateur admin si nécessaire
 echo "🔧 Vérification de l'utilisateur admin..." >&2
