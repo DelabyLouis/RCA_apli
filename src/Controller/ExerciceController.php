@@ -24,10 +24,23 @@ final class ExerciceController extends AbstractController
         $exercices = $exerciceRepository->findAllOrderedByNumeroOrdre();
         
         // Debug temporaire pour identifier le problème
-        error_log('DEBUG: Nombre d\'exercices récupérés: ' . count($exercices));
-        foreach ($exercices as $exercice) {
-            error_log('DEBUG: Exercice ID=' . $exercice->getIdExercice() . ', Libelle=' . $exercice->getLibelle());
+        error_log('=== DEBUG EXERCICES ===');
+        error_log('Nombre total d\'exercices récupérés: ' . count($exercices));
+        
+        $ids = [];
+        foreach ($exercices as $index => $exercice) {
+            $id = $exercice->getIdExercice();
+            $libelle = $exercice->getLibelle();
+            $numeroOrdre = $exercice->getNumeroOrdre();
+            
+            error_log("Exercice #{$index}: ID={$id}, NumeroOrdre={$numeroOrdre}, Libelle={$libelle}");
+            
+            if (in_array($id, $ids)) {
+                error_log("⚠️  DOUBLON DETECTE: ID {$id} déjà vu !");
+            }
+            $ids[] = $id;
         }
+        error_log('=== FIN DEBUG ===');
         
         return $this->render('exercice/index.html.twig', [
             'exercices' => $exercices,
