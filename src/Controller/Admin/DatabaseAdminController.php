@@ -523,7 +523,7 @@ class DatabaseAdminController extends AbstractController
             
             if ($adminUserId && $adminRoleId) {
                 $this->connection->executeStatement("
-                    INSERT INTO user_role (user_id_user, role_id_role) 
+                    INSERT INTO user_role (user_id, role_id) 
                     VALUES (?, ?)
                 ", [$adminUserId, $adminRoleId]);
                 error_log('✅ Rôle admin assigné');
@@ -533,7 +533,7 @@ class DatabaseAdminController extends AbstractController
             $permissions = $this->connection->executeQuery('SELECT id FROM permission')->fetchAllAssociative();
             foreach ($permissions as $permission) {
                 $this->connection->executeStatement("
-                    INSERT INTO role_permission (role_id_role, permission_id) 
+                    INSERT INTO role_permission (role_id, permission_id) 
                     VALUES (?, ?)
                 ", [$adminRoleId, $permission['id']]);
             }
