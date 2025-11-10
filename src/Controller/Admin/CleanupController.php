@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/admin')]
+#[Route('/maintenance')]
 class CleanupController extends AbstractController
 {
     public function __construct(
@@ -19,7 +19,7 @@ class CleanupController extends AbstractController
         private Connection $connection
     ) {}
 
-    #[Route('/clean-duplicates', name: 'admin_clean_duplicates')]
+    #[Route('/clean-duplicates', name: 'maintenance_clean_duplicates')]
     public function cleanDuplicates(Request $request): Response
     {
         // Token de sécurité simple
