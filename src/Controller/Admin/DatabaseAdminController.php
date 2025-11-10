@@ -433,18 +433,19 @@ class DatabaseAdminController extends AbstractController
     private function createBasicData(): array
     {
         try {
-            // 0. Nettoyer les données existantes (PostgreSQL compatible)
-            $this->connection->executeStatement('DELETE FROM "transaction"');
-            $this->connection->executeStatement('DELETE FROM user_role');
-            $this->connection->executeStatement('DELETE FROM role_permission');
-            $this->connection->executeStatement('DELETE FROM "user"');
-            $this->connection->executeStatement('DELETE FROM personne');
-            $this->connection->executeStatement('DELETE FROM exercice');
-            $this->connection->executeStatement('DELETE FROM type_transaction');
-            $this->connection->executeStatement('DELETE FROM mode_de_paiement');
-            $this->connection->executeStatement('DELETE FROM role');
-            $this->connection->executeStatement('DELETE FROM permission');
-            $this->connection->executeStatement('DELETE FROM entreprise');
+            // 0. Nettoyer les données existantes (PostgreSQL compatible - ordre important pour les clés étrangères)
+            try { $this->connection->executeStatement('DELETE FROM audit_trail'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM "transaction"'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM user_role'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM role_permission'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM "user"'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM personne'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM exercice'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM type_transaction'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM mode_de_paiement'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM role'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM permission'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
+            try { $this->connection->executeStatement('DELETE FROM entreprise'); } catch (\Exception $e) { /* Ignore si table n'existe pas */ }
             
             // 1. Créer l'entreprise
             $this->connection->executeStatement("
