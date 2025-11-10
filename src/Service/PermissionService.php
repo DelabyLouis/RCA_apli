@@ -34,17 +34,30 @@ class PermissionService
             return true;
         }
 
+        // TOUJOURS autoriser l'accueil et la connexion (pas de vérification de permissions)
+        if (in_array($route, ['app_home', 'app_login'])) {
+            return true;
+        }
+
         // PROTECTION ADMIN : L'admin a TOUJOURS accès à tout pour éviter le softlock
         $user = $this->security->getUser();
         if ($user instanceof User && $this->hasMinimumLevel(100)) {
             return true;
         }
 
-        // Vérifier d'abord si c'est une permission publique
+        // Vérifier d'abord si c'est une permission publique OU mapper vers une permission regroupée
         $permission = $this->permissionRepository->findOneBy(['route' => $route]);
         
+        // Si pas de permission exacte, essayer le mapping vers permissions regroupées
         if (!$permission) {
-            // Si la permission n'existe pas, on autorise seulement aux admins
+            $mappedPermissionName = $this->mapRouteToPermissionGroup($route);
+            if ($mappedPermissionName) {
+                $permission = $this->permissionRepository->findOneBy(['name' => $mappedPermissionName]);
+            }
+        }
+        
+        if (!$permission) {
+            // Si aucune permission trouvée, on autorise seulement aux admins
             $user = $this->security->getUser();
             if (!$user instanceof User) {
                 return false;
@@ -153,5 +166,80 @@ class PermissionService
         }
         
         return $maxLevel;
+    }
+
+    /**
+     * Mappe une route vers une permission regroupée
+     */
+    private function mapRouteToPermissionGroup(string $route): ?string
+    {
+        // Mapping des routes vers les permissions regroupées
+        $routeMapping = [
+            // 👥 GESTION DES PERSONNES ET ENTREPRISES
+            'app_entreprise_index' => 'Consulter Entreprises',
+            'app_entreprise_show' => 'Consulter Entreprises',
+            'app_entreprise_new' => 'Gérer Entreprises',
+            'app_entreprise_create' => 'Gérer Entreprises',
+            'app_entreprise_edit' => 'Gérer Entreprises',
+            'app_entreprise_update' => 'Gérer Entreprises',
+            'app_entreprise_delete' => 'Gérer Entreprises',
+            
+            'app_personne_index' => 'Consulter Personnes',
+            'app_personne_show' => 'Consulter Personnes', 
+            'app_personne_new' => 'Gérer Personnes',
+            'app_personne_create' => 'Gérer Personnes',
+            'app_personne_edit' => 'Gérer Personnes',
+            'app_personne_update' => 'Gérer Personnes',
+            'app_personne_delete' => 'Gérer Personnes',
+            
+            // 💰 GESTION FINANCIÈRE
+            'app_exercice_index' => 'Consulter Finances',
+            'app_exercice_show' => 'Consulter Finances',
+            'app_transaction_index' => 'Consulter Finances',
+            'app_transaction_show' => 'Consulter Finances',
+            'app_type_transaction_index' => 'Consulter Finances',
+            'app_mode_de_paiement_index' => 'Consulter Finances',
+            
+            'app_exercice_new' => 'Gérer Finances',
+            'app_exercice_create' => 'Gérer Finances',
+            'app_exercice_edit' => 'Gérer Finances',
+            'app_exercice_update' => 'Gérer Finances',
+            'app_exercice_delete' => 'Gérer Finances',
+            'app_transaction_new' => 'Gérer Finances',
+            'app_transaction_create' => 'Gérer Finances',
+            'app_transaction_edit' => 'Gérer Finances',
+            'app_transaction_update' => 'Gérer Finances',
+            'app_transaction_delete' => 'Gérer Finances',
+            'app_type_transaction_new' => 'Gérer Finances',
+            'app_type_transaction_edit' => 'Gérer Finances',
+            'app_type_transaction_delete' => 'Gérer Finances',
+            'app_mode_de_paiement_new' => 'Gérer Finances',
+            'app_mode_de_paiement_edit' => 'Gérer Finances',
+            'app_mode_de_paiement_delete' => 'Gérer Finances',
+            
+            // 👤 ADMINISTRATION SYSTÈME
+            'app_user_index' => 'Consulter Utilisateurs',
+            'app_user_show' => 'Consulter Utilisateurs',
+            'app_role_index' => 'Consulter Permissions',
+            'app_role_show' => 'Consulter Permissions',
+            'app_permission_index' => 'Consulter Permissions',
+            
+            'app_user_new' => 'Gérer Utilisateurs',
+            'app_user_create' => 'Gérer Utilisateurs', 
+            'app_user_edit' => 'Gérer Utilisateurs',
+            'app_user_update' => 'Gérer Utilisateurs',
+            'app_user_delete' => 'Gérer Utilisateurs',
+            'app_role_new' => 'Gérer Permissions',
+            'app_role_create' => 'Gérer Permissions',
+            'app_role_edit' => 'Gérer Permissions',
+            'app_role_update' => 'Gérer Permissions',
+            'app_role_delete' => 'Gérer Permissions',
+            'app_permission_manage' => 'Gérer Permissions',
+            
+            // 🔧 ADMINISTRATION TECHNIQUE
+            'maintenance_database_admin' => 'Administration Système',
+        ];
+
+        return $routeMapping[$route] ?? null;
     }
 }

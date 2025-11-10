@@ -463,73 +463,31 @@ class DatabaseAdminController extends AbstractController
                 ('Martin', 'Marie', 'marie.martin@email.fr', 789012345, 'Lyon')
             ");
 
-            // 3. Créer TOUTES les permissions pour toutes les entités
+            // 3. Créer les permissions en français avec regroupements logiques
             $this->connection->executeStatement("
                 INSERT INTO permission (name, route, description, public_access) VALUES
-                -- Permissions générales
-                ('HOME_ACCESS', 'app_home', 'Accès à l''accueil', true),
-                ('LOGIN_ACCESS', 'app_login', 'Accès à la connexion', true),
                 
-                -- Entreprises
-                ('ENTREPRISE_VIEW', 'app_entreprise_index', 'Voir les entreprises', false),
-                ('ENTREPRISE_CREATE', 'app_entreprise_new', 'Créer une entreprise', false),
-                ('ENTREPRISE_EDIT', 'app_entreprise_edit', 'Modifier une entreprise', false),
-                ('ENTREPRISE_DELETE', 'app_entreprise_delete', 'Supprimer une entreprise', false),
-                ('ENTREPRISE_SHOW', 'app_entreprise_show', 'Voir le détail d''une entreprise', false),
+                -- 👥 GESTION DES PERSONNES ET ENTREPRISES
+                ('Consulter Entreprises', 'app_entreprise_index', 'Consulter la liste des entreprises', false),
+                ('Gérer Entreprises', 'app_entreprise_new', 'Créer, modifier et supprimer des entreprises', false),
                 
-                -- Exercices  
-                ('EXERCICE_VIEW', 'app_exercice_index', 'Voir les exercices', false),
-                ('EXERCICE_CREATE', 'app_exercice_new', 'Créer un exercice', false),
-                ('EXERCICE_EDIT', 'app_exercice_edit', 'Modifier un exercice', false),
-                ('EXERCICE_DELETE', 'app_exercice_delete', 'Supprimer un exercice', false),
-                ('EXERCICE_SHOW', 'app_exercice_show', 'Voir le détail d''un exercice', false),
+                ('Consulter Personnes', 'app_personne_index', 'Consulter la liste des personnes', false),
+                ('Gérer Personnes', 'app_personne_new', 'Créer, modifier et supprimer des personnes', false),
                 
-                -- Transactions
-                ('TRANSACTION_VIEW', 'app_transaction_index', 'Voir les transactions', false),
-                ('TRANSACTION_CREATE', 'app_transaction_new', 'Créer une transaction', false),
-                ('TRANSACTION_EDIT', 'app_transaction_edit', 'Modifier une transaction', false),
-                ('TRANSACTION_DELETE', 'app_transaction_delete', 'Supprimer une transaction', false),
-                ('TRANSACTION_SHOW', 'app_transaction_show', 'Voir le détail d''une transaction', false),
+                -- 💰 GESTION FINANCIÈRE
+                ('Consulter Finances', 'app_exercice_index', 'Consulter exercices, transactions, types et modes de paiement', false),
+                ('Gérer Finances', 'app_exercice_new', 'Créer, modifier et supprimer les éléments financiers', false),
                 
-                -- Personnes
-                ('PERSONNE_VIEW', 'app_personne_index', 'Voir les personnes', false),
-                ('PERSONNE_CREATE', 'app_personne_new', 'Créer une personne', false),
-                ('PERSONNE_EDIT', 'app_personne_edit', 'Modifier une personne', false),
-                ('PERSONNE_DELETE', 'app_personne_delete', 'Supprimer une personne', false),
-                ('PERSONNE_SHOW', 'app_personne_show', 'Voir le détail d''une personne', false),
                 
-                -- Utilisateurs
-                ('USER_VIEW', 'app_user_index', 'Voir les utilisateurs', false),
-                ('USER_CREATE', 'app_user_new', 'Créer un utilisateur', false),
-                ('USER_EDIT', 'app_user_edit', 'Modifier un utilisateur', false),
-                ('USER_DELETE', 'app_user_delete', 'Supprimer un utilisateur', false),
-                ('USER_SHOW', 'app_user_show', 'Voir le détail d''un utilisateur', false),
+                -- 👤 ADMINISTRATION SYSTÈME
+                ('Consulter Utilisateurs', 'app_user_index', 'Consulter la liste des utilisateurs et rôles', false),
+                ('Gérer Utilisateurs', 'app_user_new', 'Créer, modifier et supprimer des utilisateurs', false),
                 
-                -- Rôles
-                ('ROLE_VIEW', 'app_role_index', 'Voir les rôles', false),
-                ('ROLE_CREATE', 'app_role_new', 'Créer un rôle', false),
-                ('ROLE_EDIT', 'app_role_edit', 'Modifier un rôle', false),
-                ('ROLE_DELETE', 'app_role_delete', 'Supprimer un rôle', false),
-                ('ROLE_SHOW', 'app_role_show', 'Voir le détail d''un rôle', false),
+                ('Consulter Permissions', 'app_role_index', 'Consulter les rôles et permissions', false),
+                ('Gérer Permissions', 'app_role_new', 'Créer et modifier les rôles et permissions', false),
                 
-                -- Permissions
-                ('PERMISSION_VIEW', 'app_permission_index', 'Voir les permissions', false),
-                ('PERMISSION_MANAGE', 'app_permission_manage', 'Gérer les permissions', false),
-                
-                -- Types de transaction
-                ('TYPE_TRANSACTION_VIEW', 'app_type_transaction_index', 'Voir les types de transaction', false),
-                ('TYPE_TRANSACTION_CREATE', 'app_type_transaction_new', 'Créer un type de transaction', false),
-                ('TYPE_TRANSACTION_EDIT', 'app_type_transaction_edit', 'Modifier un type de transaction', false),
-                ('TYPE_TRANSACTION_DELETE', 'app_type_transaction_delete', 'Supprimer un type de transaction', false),
-                
-                -- Modes de paiement
-                ('MODE_PAIEMENT_VIEW', 'app_mode_de_paiement_index', 'Voir les modes de paiement', false),
-                ('MODE_PAIEMENT_CREATE', 'app_mode_de_paiement_new', 'Créer un mode de paiement', false),
-                ('MODE_PAIEMENT_EDIT', 'app_mode_de_paiement_edit', 'Modifier un mode de paiement', false),
-                ('MODE_PAIEMENT_DELETE', 'app_mode_de_paiement_delete', 'Supprimer un mode de paiement', false),
-                
-                -- Administration
-                ('ADMIN_ACCESS', 'maintenance_database_admin', 'Accès à l''administration', false)
+                -- 🔧 ADMINISTRATION TECHNIQUE
+                ('Administration Système', 'maintenance_database_admin', 'Accès complet à l''administration technique', false)
             ");
 
             $this->connection->executeStatement("
