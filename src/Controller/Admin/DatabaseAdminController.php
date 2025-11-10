@@ -459,9 +459,9 @@ class DatabaseAdminController extends AbstractController
             ");
 
             $this->connection->executeStatement("
-                INSERT INTO role (libelle, description) VALUES
-                ('Administrateur', 'Accès complet au système'),
-                ('Utilisateur', 'Accès limité aux fonctionnalités')
+                INSERT INTO role (libelle, description, hierarchy_level) VALUES
+                ('Administrateur', 'Accès complet au système', 1),
+                ('Utilisateur', 'Accès limité aux fonctionnalités', 0)
             ");
 
             // 4. Créer les modes de paiement
