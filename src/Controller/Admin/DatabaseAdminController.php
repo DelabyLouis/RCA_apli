@@ -309,7 +309,7 @@ class DatabaseAdminController extends AbstractController
             // Pour PostgreSQL, on utilise TRUNCATE CASCADE pour supprimer les données
             // tout en respectant les contraintes de clés étrangères
             
-            // Ordre de suppression pour éviter les contraintes de clés étrangères
+            // Pour PostgreSQL géré (sans privilèges SUPERUSER), on utilise DELETE avec ordre correct
             $tablesToDelete = [
                 'transaction',
                 'user_role', 
@@ -326,24 +326,21 @@ class DatabaseAdminController extends AbstractController
                 'entreprise'
             ];
             
-            // Pour PostgreSQL : désactiver temporairement les triggers
-            $this->connection->executeStatement('SET session_replication_role = replica');
-            
+            // Supprimer dans l'ordre inverse des dépendances (sans privilèges SUPERUSER requis)
             foreach ($tablesToDelete as $tableName) {
                 try {
+                    // Essayer TRUNCATE CASCADE d'abord (plus efficace)
                     $this->connection->executeStatement("TRUNCATE TABLE $tableName CASCADE");
                 } catch (\Exception $e) {
-                    // Fallback avec DELETE si TRUNCATE échoue
+                    // Fallback avec DELETE si TRUNCATE échoue ou permissions insuffisantes
                     try {
                         $this->connection->executeStatement("DELETE FROM $tableName");
                     } catch (\Exception $e2) {
-                        // Ignorer les erreurs pour les tables qui n'existent pas
+                        // Ignorer les erreurs pour les tables qui n'existent pas ou contraintes
+                        error_log("Erreur suppression $tableName: " . $e2->getMessage());
                     }
                 }
             }
-            
-            // Remettre les triggers PostgreSQL
-            $this->connection->executeStatement('SET session_replication_role = DEFAULT');
             
             // Exécuter les fixtures
             $process = Process::fromShellCommandline('php bin/console doctrine:fixtures:load --no-interaction', getcwd());
