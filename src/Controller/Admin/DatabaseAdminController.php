@@ -319,15 +319,17 @@ class DatabaseAdminController extends AbstractController
             $migrateProcess->run();
             
             // 3. Créer les données de base manuellement (plus fiable qu'un Process)
-            $dataCreated = $this->createBasicData();
+            $dataResult = $this->createBasicData();
+            $dataStatus = $dataResult['success'] ? '✅ Données créées' : '❌ Erreur: ' . $dataResult['error'];
             
             // 4. Essayer les fixtures en plus si possible
             $process = Process::fromShellCommandline('php bin/console doctrine:fixtures:load --no-interaction', $projectRoot);
             $process->setTimeout(60);
             $process->run();
             
-            $fixturesResult = $process->isSuccessful() ? 'avec fixtures complètes' : 'avec données de base';
-            $errorInfo = $process->isSuccessful() ? '' : '<br><small>Détail: ' . $process->getErrorOutput() . '</small>';
+            $fixturesResult = $process->isSuccessful() ? 'avec fixtures en plus' : 'données de base uniquement';
+            $errorInfo = $process->isSuccessful() ? '' : '<br><small>Détail fixtures: ' . $process->getErrorOutput() . '</small>';
+            $errorInfo .= '<br><small>Données: ' . $dataStatus . '</small>';
             
             // 4. Vérifier si l'admin existe réellement (peu importe qui l'a créé)
             $adminExists = false;
@@ -428,7 +430,7 @@ class DatabaseAdminController extends AbstractController
         return $this->connection->executeQuery($sql)->fetchAllAssociative();
     }
 
-    private function createBasicData(): bool
+    private function createBasicData(): array
     {
         try {
             // 1. Créer l'entreprise
@@ -436,7 +438,7 @@ class DatabaseAdminController extends AbstractController
                 INSERT INTO entreprise (nom, email, telephone, adresse) 
                 VALUES ('Amicale RCA', 'contact@amicale-rca.fr', '01.02.03.04.05', '123 Rue de la Paix, 75001 Paris')
             ");
-            $entrepriseId = $this->connection->lastInsertId();
+            error_log('✅ Entreprise créée');
 
             // 2. Créer des personnes
             $this->connection->executeStatement("
@@ -492,16 +494,22 @@ class DatabaseAdminController extends AbstractController
             $adminPersonneId = $this->connection->executeQuery("SELECT id_personne FROM personne WHERE email = 'admin@amicale-rca.fr'")->fetchOne();
             $hashedPassword = password_hash('admin123', PASSWORD_DEFAULT);
             
+            // Supprimer l'ancien admin s'il existe
+            $this->connection->executeStatement('DELETE FROM "user" WHERE username = ?', ['admin']);
+            
+            // Créer le nouvel admin
             $this->connection->executeStatement("
                 INSERT INTO \"user\" (id_personne, username, password, enabled) 
                 VALUES (?, 'admin', ?, true)
-                ON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password
             ", [$adminPersonneId, $hashedPassword]);
+            error_log('✅ Utilisateur admin créé');
 
-            return true;
+            error_log('✅ Toutes les données créées avec succès');
+            return ['success' => true, 'error' => ''];
         } catch (\Exception $e) {
-            error_log('Erreur création données de base: ' . $e->getMessage());
-            return false;
+            $errorMsg = 'Erreur création données de base: ' . $e->getMessage();
+            error_log($errorMsg);
+            return ['success' => false, 'error' => $errorMsg];
         }
     }
 }
