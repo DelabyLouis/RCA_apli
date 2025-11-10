@@ -342,24 +342,64 @@ class DatabaseAdminController extends AbstractController
                 }
             }
             
-            // Exécuter les fixtures
-            $process = Process::fromShellCommandline('php bin/console doctrine:fixtures:load --no-interaction', getcwd());
+            // Créer un utilisateur admin de secours manuellement
+            $this->createEmergencyAdmin();
+            
+            // Essayer d'exécuter les fixtures depuis le bon répertoire
+            $projectRoot = dirname(__DIR__, 2); // Remonte de 2 niveaux depuis src/Controller
+            $process = Process::fromShellCommandline('php bin/console doctrine:fixtures:load --no-interaction', $projectRoot);
+            $process->setTimeout(60); // 60 secondes de timeout
             $process->run();
             
-            if ($process->isSuccessful()) {
-                return new Response('
-                    <h1>✅ Reset complet réussi !</h1>
-                    <p>La base de données a été complètement réinitialisée avec les données par défaut.</p>
-                    <p><strong>Login:</strong> admin</p>
-                    <p><strong>Password:</strong> admin123</p>
-                    <a href="/login" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">🔑 Se connecter</a>
-                ');
-            } else {
-                return new Response('Erreur lors du reset: ' . $process->getErrorOutput(), 500);
-            }
+            $fixturesResult = $process->isSuccessful() ? 'avec fixtures complètes' : 'avec admin de base seulement';
+            $errorInfo = $process->isSuccessful() ? '' : '<br><small>Détail: ' . $process->getErrorOutput() . '</small>';
+            
+            return new Response('
+                <h1>✅ Reset complet réussi !</h1>
+                <p>La base de données a été réinitialisée ' . $fixturesResult . '.</p>
+                <p><strong>Login:</strong> admin</p>
+                <p><strong>Password:</strong> admin123</p>
+                <a href="/login" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">🔑 Se connecter</a>
+                ' . $errorInfo . '
+            ');
             
         } catch (\Exception $e) {
             return new Response('Erreur: ' . $e->getMessage(), 500);
+        }
+    }
+
+    private function createEmergencyAdmin(): void
+    {
+        try {
+            // Créer une entreprise de base si elle n'existe pas
+            $this->connection->executeStatement("
+                INSERT INTO entreprise (nom, email, telephone, adresse) 
+                VALUES ('Amicale RCA', 'contact@amicale-rca.fr', '', '') 
+                ON CONFLICT DO NOTHING
+            ");
+            
+            // Créer une personne pour l'admin
+            $this->connection->executeStatement("
+                INSERT INTO personne (nom, prenom, email, telephone, adresse) 
+                VALUES ('Admin', 'Système', 'admin@amicale-rca.fr', '', '') 
+                ON CONFLICT (email) DO NOTHING
+            ");
+            
+            // Récupérer l'ID de la personne
+            $personneId = $this->connection->executeQuery("
+                SELECT id_personne FROM personne WHERE email = 'admin@amicale-rca.fr'
+            ")->fetchOne();
+            
+            // Créer l'utilisateur admin
+            $hashedPassword = password_hash('admin123', PASSWORD_DEFAULT);
+            $this->connection->executeStatement("
+                INSERT INTO \"user\" (id_personne, username, password, enabled) 
+                VALUES (?, 'admin', ?, true) 
+                ON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password
+            ", [$personneId, $hashedPassword]);
+            
+        } catch (\Exception $e) {
+            error_log('Erreur création admin de secours: ' . $e->getMessage());
         }
     }
 
