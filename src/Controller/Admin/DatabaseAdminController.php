@@ -343,7 +343,15 @@ class DatabaseAdminController extends AbstractController
             }
             
             // Créer un utilisateur admin de secours manuellement
-            $this->createEmergencyAdmin();
+            $adminCreated = false;
+            $adminError = '';
+            try {
+                $this->createEmergencyAdmin();
+                $adminCreated = true;
+            } catch (\Exception $e) {
+                $adminError = $e->getMessage();
+                error_log('❌ Échec création admin: ' . $adminError);
+            }
             
             // Essayer d'exécuter les fixtures depuis le bon répertoire
             $projectRoot = dirname(__DIR__, 2); // Remonte de 2 niveaux depuis src/Controller
@@ -352,11 +360,14 @@ class DatabaseAdminController extends AbstractController
             $process->run();
             
             $fixturesResult = $process->isSuccessful() ? 'avec fixtures complètes' : 'avec admin de base seulement';
-            $errorInfo = $process->isSuccessful() ? '' : '<br><small>Détail: ' . $process->getErrorOutput() . '</small>';
+            $errorInfo = $process->isSuccessful() ? '' : '<br><small>Détail fixtures: ' . $process->getErrorOutput() . '</small>';
+            
+            $adminStatus = $adminCreated ? '✅ Admin créé' : '❌ Erreur admin: ' . $adminError;
             
             return new Response('
                 <h1>✅ Reset complet réussi !</h1>
                 <p>La base de données a été réinitialisée ' . $fixturesResult . '.</p>
+                <p>' . $adminStatus . '</p>
                 <p><strong>Login:</strong> admin</p>
                 <p><strong>Password:</strong> admin123</p>
                 <a href="/login" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">🔑 Se connecter</a>
@@ -371,35 +382,50 @@ class DatabaseAdminController extends AbstractController
     private function createEmergencyAdmin(): void
     {
         try {
-            // Créer une entreprise de base si elle n'existe pas
-            $this->connection->executeStatement("
-                INSERT INTO entreprise (nom, email, telephone, adresse) 
-                VALUES ('Amicale RCA', 'contact@amicale-rca.fr', '', '') 
-                ON CONFLICT DO NOTHING
-            ");
+            // 1. Créer une entreprise de base
+            try {
+                $this->connection->executeStatement("
+                    INSERT INTO entreprise (nom, email, telephone, adresse) 
+                    VALUES ('Amicale RCA', 'contact@amicale-rca.fr', '', '')
+                ");
+            } catch (\Exception $e) {
+                // L'entreprise existe déjà, on continue
+            }
             
-            // Créer une personne pour l'admin
-            $this->connection->executeStatement("
-                INSERT INTO personne (nom, prenom, email, telephone, adresse) 
-                VALUES ('Admin', 'Système', 'admin@amicale-rca.fr', '', '') 
-                ON CONFLICT (email) DO NOTHING
-            ");
+            // 2. Créer une personne pour l'admin  
+            try {
+                $this->connection->executeStatement("
+                    INSERT INTO personne (nom, prenom, email, telephone, adresse) 
+                    VALUES ('Admin', 'Système', 'admin@amicale-rca.fr', '', '')
+                ");
+            } catch (\Exception $e) {
+                // La personne existe déjà, on continue
+            }
             
-            // Récupérer l'ID de la personne
+            // 3. Récupérer l'ID de la personne
             $personneId = $this->connection->executeQuery("
-                SELECT id_personne FROM personne WHERE email = 'admin@amicale-rca.fr'
+                SELECT id_personne FROM personne WHERE email = 'admin@amicale-rca.fr' LIMIT 1
             ")->fetchOne();
             
-            // Créer l'utilisateur admin
+            if (!$personneId) {
+                throw new \Exception('Impossible de créer/trouver la personne admin');
+            }
+            
+            // 4. Supprimer l'ancien admin s'il existe
+            $this->connection->executeStatement('DELETE FROM \"user\" WHERE username = ?', ['admin']);
+            
+            // 5. Créer le nouvel utilisateur admin
             $hashedPassword = password_hash('admin123', PASSWORD_DEFAULT);
             $this->connection->executeStatement("
                 INSERT INTO \"user\" (id_personne, username, password, enabled) 
-                VALUES (?, 'admin', ?, true) 
-                ON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password
+                VALUES (?, 'admin', ?, true)
             ", [$personneId, $hashedPassword]);
             
+            error_log('✅ Admin de secours créé avec succès');
+            
         } catch (\Exception $e) {
-            error_log('Erreur création admin de secours: ' . $e->getMessage());
+            error_log('❌ Erreur création admin de secours: ' . $e->getMessage());
+            throw $e; // Re-lancer pour debugging
         }
     }
 
