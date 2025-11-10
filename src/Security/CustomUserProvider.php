@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Security;
+
+use App\Entity\User;
+use App\Repository\UserRepository;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+
+class CustomUserProvider implements UserProviderInterface
+{
+    public function __construct(private UserRepository $userRepository)
+    {
+    }
+
+    public function loadUserByIdentifier(string $identifier): UserInterface
+    {
+        // Essayer d'abord par username
+        $user = $this->userRepository->findOneBy(['username' => $identifier]);
+        
+        // Si pas trouvé par username, essayer par email de la personne
+        if (!$user) {
+            $user = $this->userRepository->createQueryBuilder('u')
+                ->join('u.personne', 'p')
+                ->where('p.email = :email')
+                ->setParameter('email', $identifier)
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+
+        if (!$user) {
+            throw new UserNotFoundException(sprintf('User "%s" not found.', $identifier));
+        }
+
+        return $user;
+    }
+
+    public function refreshUser(UserInterface $user): UserInterface
+    {
+        if (!$user instanceof User) {
+            throw new UserNotFoundException('Invalid user class.');
+        }
+
+        return $this->loadUserByIdentifier($user->getUserIdentifier());
+    }
+
+    public function supportsClass(string $class): bool
+    {
+        return User::class === $class;
+    }
+}
