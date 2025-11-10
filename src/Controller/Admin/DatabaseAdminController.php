@@ -433,6 +433,19 @@ class DatabaseAdminController extends AbstractController
     private function createBasicData(): array
     {
         try {
+            // 0. Nettoyer les données existantes (au cas où)
+            $this->connection->executeStatement('TRUNCATE TABLE transaction CASCADE');
+            $this->connection->executeStatement('TRUNCATE TABLE user_role CASCADE');
+            $this->connection->executeStatement('TRUNCATE TABLE role_permission CASCADE');
+            $this->connection->executeStatement('TRUNCATE TABLE "user" CASCADE');
+            $this->connection->executeStatement('TRUNCATE TABLE personne CASCADE');
+            $this->connection->executeStatement('TRUNCATE TABLE exercice CASCADE');
+            $this->connection->executeStatement('TRUNCATE TABLE type_transaction CASCADE');
+            $this->connection->executeStatement('TRUNCATE TABLE mode_de_paiement CASCADE');
+            $this->connection->executeStatement('TRUNCATE TABLE role CASCADE');
+            $this->connection->executeStatement('TRUNCATE TABLE permission CASCADE');
+            $this->connection->executeStatement('TRUNCATE TABLE entreprise CASCADE');
+            
             // 1. Créer l'entreprise
             $this->connection->executeStatement("
                 INSERT INTO entreprise (nom_entreprise, email, telephone, ville, code_postal) 
