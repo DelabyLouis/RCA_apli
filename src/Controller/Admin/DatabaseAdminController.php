@@ -306,43 +306,19 @@ class DatabaseAdminController extends AbstractController
     private function executeResetDatabase(string $token): Response
     {
         try {
-            // Pour PostgreSQL, on utilise TRUNCATE CASCADE pour supprimer les données
-            // tout en respectant les contraintes de clés étrangères
+            // 1. D'abord, récréer le schéma complet
+            $projectRoot = dirname(__DIR__, 2);
+            $schemaProcess = Process::fromShellCommandline('php bin/console doctrine:schema:drop --force --full-database', $projectRoot);
+            $schemaProcess->run();
             
-            // Pour PostgreSQL géré (sans privilèges SUPERUSER), on utilise DELETE avec ordre correct
-            $tablesToDelete = [
-                'transaction',
-                'user_role', 
-                'role_permission',
-                'attestation_fiscale',
-                'historique_cloture',
-                'exercice',
-                'type_transaction',
-                'mode_de_paiement',
-                'personne',
-                '"user"', // Quotes car "user" est un mot réservé PostgreSQL
-                'role',
-                'permission',
-                'entreprise'
-            ];
+            $recreateProcess = Process::fromShellCommandline('php bin/console doctrine:schema:create', $projectRoot);
+            $recreateProcess->run();
             
-            // Supprimer dans l'ordre inverse des dépendances (sans privilèges SUPERUSER requis)
-            foreach ($tablesToDelete as $tableName) {
-                try {
-                    // Essayer TRUNCATE CASCADE d'abord (plus efficace)
-                    $this->connection->executeStatement("TRUNCATE TABLE $tableName CASCADE");
-                } catch (\Exception $e) {
-                    // Fallback avec DELETE si TRUNCATE échoue ou permissions insuffisantes
-                    try {
-                        $this->connection->executeStatement("DELETE FROM $tableName");
-                    } catch (\Exception $e2) {
-                        // Ignorer les erreurs pour les tables qui n'existent pas ou contraintes
-                        error_log("Erreur suppression $tableName: " . $e2->getMessage());
-                    }
-                }
-            }
+            // 2. Exécuter les migrations pour s'assurer que tout est à jour
+            $migrateProcess = Process::fromShellCommandline('php bin/console doctrine:migrations:migrate --no-interaction', $projectRoot);
+            $migrateProcess->run();
             
-            // Créer un utilisateur admin de secours manuellement
+            // 3. Maintenant créer un utilisateur admin de secours (les tables existent)
             $adminCreated = false;
             $adminError = '';
             try {
@@ -353,8 +329,7 @@ class DatabaseAdminController extends AbstractController
                 error_log('❌ Échec création admin: ' . $adminError);
             }
             
-            // Essayer d'exécuter les fixtures depuis le bon répertoire
-            $projectRoot = dirname(__DIR__, 2); // Remonte de 2 niveaux depuis src/Controller
+            // 4. Essayer d'exécuter les fixtures pour avoir des données complètes
             $process = Process::fromShellCommandline('php bin/console doctrine:fixtures:load --no-interaction', $projectRoot);
             $process->setTimeout(60); // 60 secondes de timeout
             $process->run();
@@ -366,7 +341,7 @@ class DatabaseAdminController extends AbstractController
             
             return new Response('
                 <h1>✅ Reset complet réussi !</h1>
-                <p>La base de données a été réinitialisée ' . $fixturesResult . '.</p>
+                <p>La base de données a été complètement recréée ' . $fixturesResult . '.</p>
                 <p>' . $adminStatus . '</p>
                 <p><strong>Login:</strong> admin</p>
                 <p><strong>Password:</strong> admin123</p>
