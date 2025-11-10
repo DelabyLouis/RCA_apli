@@ -517,6 +517,28 @@ class DatabaseAdminController extends AbstractController
             ", [$adminPersonneId, $hashedPassword]);
             error_log('✅ Utilisateur admin créé');
 
+            // 8. Assigner le rôle Administrateur à l'admin
+            $adminUserId = $this->connection->executeQuery('SELECT id_user FROM "user" WHERE username = ?', ['admin'])->fetchOne();
+            $adminRoleId = $this->connection->executeQuery('SELECT id_role FROM role WHERE libelle = ?', ['Administrateur'])->fetchOne();
+            
+            if ($adminUserId && $adminRoleId) {
+                $this->connection->executeStatement("
+                    INSERT INTO user_role (user_id_user, role_id_role) 
+                    VALUES (?, ?)
+                ", [$adminUserId, $adminRoleId]);
+                error_log('✅ Rôle admin assigné');
+            }
+
+            // 9. Assigner toutes les permissions au rôle Administrateur
+            $permissions = $this->connection->executeQuery('SELECT id FROM permission')->fetchAllAssociative();
+            foreach ($permissions as $permission) {
+                $this->connection->executeStatement("
+                    INSERT INTO role_permission (role_id_role, permission_id) 
+                    VALUES (?, ?)
+                ", [$adminRoleId, $permission['id']]);
+            }
+            error_log('✅ Permissions assignées');
+
             error_log('✅ Toutes les données créées avec succès');
             return ['success' => true, 'error' => ''];
         } catch (\Exception $e) {
