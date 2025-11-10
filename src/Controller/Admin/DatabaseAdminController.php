@@ -435,18 +435,18 @@ class DatabaseAdminController extends AbstractController
         try {
             // 1. Créer l'entreprise
             $this->connection->executeStatement("
-                INSERT INTO entreprise (nom, email, telephone, adresse) 
-                VALUES ('Amicale RCA', 'contact@amicale-rca.fr', '01.02.03.04.05', '123 Rue de la Paix, 75001 Paris')
+                INSERT INTO entreprise (nom_entreprise, email, telephone, ville, code_postal) 
+                VALUES ('Amicale RCA', 'contact@amicale-rca.fr', 123456789, 'Paris', 75001)
             ");
             error_log('✅ Entreprise créée');
 
             // 2. Créer des personnes
             $this->connection->executeStatement("
-                INSERT INTO personne (nom, prenom, email, telephone, adresse) 
+                INSERT INTO personne (nom, prenom, email, telephone, ville) 
                 VALUES 
-                ('Admin', 'Système', 'admin@amicale-rca.fr', '', ''),
-                ('Dupont', 'Jean', 'jean.dupont@email.fr', '06.12.34.56.78', '456 Avenue des Champs'),
-                ('Martin', 'Marie', 'marie.martin@email.fr', '07.89.01.23.45', '789 Boulevard Saint-Michel')
+                ('Admin', 'Système', 'admin@amicale-rca.fr', NULL, NULL),
+                ('Dupont', 'Jean', 'jean.dupont@email.fr', 612345678, 'Paris'),
+                ('Martin', 'Marie', 'marie.martin@email.fr', 789012345, 'Lyon')
             ");
 
             // 3. Créer les rôles et permissions de base
