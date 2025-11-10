@@ -497,10 +497,10 @@ class DatabaseAdminController extends AbstractController
 
             // 6. Créer des exercices
             $this->connection->executeStatement("
-                INSERT INTO exercice (numero_ordre, libelle, date_debut, date_fin, statut) VALUES
-                (2022, 'Exercice 2022-2023', '2022-09-01', '2023-08-31', 'clos'),
-                (2023, 'Exercice 2023-2024', '2023-09-01', '2024-08-31', 'clos'),
-                (2024, 'Exercice 2024-2025', '2024-09-01', '2025-08-31', 'ouvert')
+                INSERT INTO exercice (numero_ordre, libelle, date_debut, date_fin, clos) VALUES
+                (2022, 'Exercice 2022-2023', '2022-09-01', '2023-08-31', true),
+                (2023, 'Exercice 2023-2024', '2023-09-01', '2024-08-31', true),
+                (2024, 'Exercice 2024-2025', '2024-09-01', '2025-08-31', false)
             ");
 
             // 7. Créer l'utilisateur admin avec mot de passe
