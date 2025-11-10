@@ -306,20 +306,38 @@ class DatabaseAdminController extends AbstractController
     private function executeResetDatabase(string $token): Response
     {
         try {
-            // Désactiver les contraintes de clés étrangères
-            $this->connection->executeStatement('PRAGMA foreign_keys = OFF');
+            // Supprimer toutes les données dans l'ordre correct (PostgreSQL/MySQL compatible)
+            $this->connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0'); // MySQL
+            $this->connection->executeStatement('SET session_replication_role = replica'); // PostgreSQL
             
-            // Lister toutes les tables
-            $tables = $this->connection->executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'doctrine_%'")->fetchAllAssociative();
+            // Ordre de suppression pour éviter les contraintes de clés étrangères
+            $tablesToDelete = [
+                'transaction',
+                'user_role', 
+                'role_permission',
+                'attestation_fiscale',
+                'historique_cloture',
+                'exercice',
+                'type_transaction',
+                'mode_de_paiement',
+                'personne',
+                '"user"', // Quotes car "user" est un mot réservé
+                'role',
+                'permission',
+                'entreprise'
+            ];
             
-            // Supprimer toutes les données
-            foreach ($tables as $table) {
-                $tableName = $table['name'];
-                $this->connection->executeStatement("DELETE FROM $tableName");
+            foreach ($tablesToDelete as $tableName) {
+                try {
+                    $this->connection->executeStatement("DELETE FROM $tableName");
+                } catch (\Exception $e) {
+                    // Ignorer les erreurs pour les tables qui n'existent pas
+                }
             }
             
             // Remettre les contraintes
-            $this->connection->executeStatement('PRAGMA foreign_keys = ON');
+            $this->connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1'); // MySQL  
+            $this->connection->executeStatement('SET session_replication_role = DEFAULT'); // PostgreSQL
             
             // Exécuter les fixtures
             $process = Process::fromShellCommandline('php bin/console doctrine:fixtures:load --no-interaction', getcwd());
