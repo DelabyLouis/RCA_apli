@@ -21,7 +21,11 @@ final class Version20251109180908 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         // PostgreSQL requires quotes around "user" since it's a reserved word
-        $this->addSql('ALTER TABLE "user" ADD COLUMN enabled BOOLEAN DEFAULT true NOT NULL');
+        
+        // Vérifier si la colonne enabled existe déjà avant de l'ajouter
+        if (!$schema->getTable('user')->hasColumn('enabled')) {
+            $this->addSql('ALTER TABLE "user" ADD COLUMN enabled BOOLEAN DEFAULT true NOT NULL');
+        }
     }
 
     public function down(Schema $schema): void
