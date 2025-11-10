@@ -451,15 +451,15 @@ class DatabaseAdminController extends AbstractController
 
             // 3. Créer les rôles et permissions de base
             $this->connection->executeStatement("
-                INSERT INTO permission (nom, description) VALUES
-                ('ROLE_ADMIN', 'Administration complète'),
-                ('ROLE_USER', 'Utilisateur standard'),
-                ('EXERCICE_VIEW', 'Voir les exercices'),
-                ('TRANSACTION_MANAGE', 'Gérer les transactions')
+                INSERT INTO permission (name, route, description) VALUES
+                ('ROLE_ADMIN', 'app_admin', 'Administration complète'),
+                ('ROLE_USER', 'app_user', 'Utilisateur standard'),
+                ('EXERCICE_VIEW', 'app_exercice_index', 'Voir les exercices'),
+                ('TRANSACTION_MANAGE', 'app_transaction_index', 'Gérer les transactions')
             ");
 
             $this->connection->executeStatement("
-                INSERT INTO role (nom, description) VALUES
+                INSERT INTO role (libelle, description) VALUES
                 ('Administrateur', 'Accès complet au système'),
                 ('Utilisateur', 'Accès limité aux fonctionnalités')
             ");
@@ -475,7 +475,7 @@ class DatabaseAdminController extends AbstractController
 
             // 5. Créer les types de transaction
             $this->connection->executeStatement("
-                INSERT INTO type_transaction (libelle, type_credit_debit) VALUES
+                INSERT INTO type_transaction (libelle, type_montant_autorise) VALUES
                 ('Cotisation', 'credit'),
                 ('Repas amicale', 'credit'),
                 ('Achats matériel', 'debit'),
