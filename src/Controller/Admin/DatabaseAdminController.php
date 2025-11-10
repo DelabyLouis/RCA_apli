@@ -318,18 +318,7 @@ class DatabaseAdminController extends AbstractController
             $migrateProcess = Process::fromShellCommandline('php bin/console doctrine:migrations:migrate --no-interaction', $projectRoot);
             $migrateProcess->run();
             
-            // 3. Maintenant créer un utilisateur admin de secours (les tables existent)
-            $adminCreated = false;
-            $adminError = '';
-            try {
-                $this->createEmergencyAdmin();
-                $adminCreated = true;
-            } catch (\Exception $e) {
-                $adminError = $e->getMessage();
-                error_log('❌ Échec création admin: ' . $adminError);
-            }
-            
-            // 4. Essayer d'exécuter les fixtures pour avoir des données complètes
+            // 3. Essayer d'exécuter les fixtures pour avoir des données complètes
             $process = Process::fromShellCommandline('php bin/console doctrine:fixtures:load --no-interaction', $projectRoot);
             $process->setTimeout(60); // 60 secondes de timeout
             $process->run();
@@ -337,7 +326,22 @@ class DatabaseAdminController extends AbstractController
             $fixturesResult = $process->isSuccessful() ? 'avec fixtures complètes' : 'avec admin de base seulement';
             $errorInfo = $process->isSuccessful() ? '' : '<br><small>Détail fixtures: ' . $process->getErrorOutput() . '</small>';
             
-            $adminStatus = $adminCreated ? '✅ Admin créé' : '❌ Erreur admin: ' . $adminError;
+            // 4. Vérifier si l'admin existe réellement (peu importe qui l'a créé)
+            $adminExists = false;
+            try {
+                $adminCount = $this->connection->executeQuery('SELECT COUNT(*) FROM "user" WHERE username = ?', ['admin'])->fetchOne();
+                $adminExists = $adminCount > 0;
+            } catch (\Exception $e) {
+                // Si erreur, essayer de créer un admin de secours
+                try {
+                    $this->createEmergencyAdmin();
+                    $adminExists = true;
+                } catch (\Exception $e2) {
+                    error_log('Échec création admin de secours: ' . $e2->getMessage());
+                }
+            }
+            
+            $adminStatus = $adminExists ? '✅ Admin disponible' : '❌ Pas d\'admin trouvé';
             
             return new Response('
                 <h1>✅ Reset complet réussi !</h1>
