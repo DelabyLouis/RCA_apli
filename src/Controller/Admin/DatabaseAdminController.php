@@ -334,7 +334,7 @@ class DatabaseAdminController extends AbstractController
             // 4. Vérifier si l'admin existe réellement (peu importe qui l'a créé)
             $adminExists = false;
             try {
-                $adminCount = $this->connection->executeQuery('SELECT COUNT(*) FROM "user" WHERE username = ?', ['admin'])->fetchOne();
+                $adminCount = $this->connection->executeQuery('SELECT COUNT(*) FROM `user` WHERE username = ?', ['admin'])->fetchOne();
                 $adminExists = $adminCount > 0;
             } catch (\Exception $e) {
                 // Si erreur, essayer de créer un admin de secours
@@ -433,18 +433,18 @@ class DatabaseAdminController extends AbstractController
     private function createBasicData(): array
     {
         try {
-            // 0. Nettoyer les données existantes (au cas où)
-            $this->connection->executeStatement('TRUNCATE TABLE transaction CASCADE');
-            $this->connection->executeStatement('TRUNCATE TABLE user_role CASCADE');
-            $this->connection->executeStatement('TRUNCATE TABLE role_permission CASCADE');
-            $this->connection->executeStatement('TRUNCATE TABLE "user" CASCADE');
-            $this->connection->executeStatement('TRUNCATE TABLE personne CASCADE');
-            $this->connection->executeStatement('TRUNCATE TABLE exercice CASCADE');
-            $this->connection->executeStatement('TRUNCATE TABLE type_transaction CASCADE');
-            $this->connection->executeStatement('TRUNCATE TABLE mode_de_paiement CASCADE');
-            $this->connection->executeStatement('TRUNCATE TABLE role CASCADE');
-            $this->connection->executeStatement('TRUNCATE TABLE permission CASCADE');
-            $this->connection->executeStatement('TRUNCATE TABLE entreprise CASCADE');
+            // 0. Nettoyer les données existantes (SQLite compatible)
+            $this->connection->executeStatement('DELETE FROM `transaction`');
+            $this->connection->executeStatement('DELETE FROM user_role');
+            $this->connection->executeStatement('DELETE FROM role_permission');
+            $this->connection->executeStatement('DELETE FROM `user`');
+            $this->connection->executeStatement('DELETE FROM personne');
+            $this->connection->executeStatement('DELETE FROM exercice');
+            $this->connection->executeStatement('DELETE FROM type_transaction');
+            $this->connection->executeStatement('DELETE FROM mode_de_paiement');
+            $this->connection->executeStatement('DELETE FROM role');
+            $this->connection->executeStatement('DELETE FROM permission');
+            $this->connection->executeStatement('DELETE FROM entreprise');
             
             // 1. Créer l'entreprise
             $this->connection->executeStatement("
@@ -462,19 +462,79 @@ class DatabaseAdminController extends AbstractController
                 ('Martin', 'Marie', 'marie.martin@email.fr', 789012345, 'Lyon')
             ");
 
-            // 3. Créer les rôles et permissions de base
+            // 3. Créer TOUTES les permissions pour toutes les entités
             $this->connection->executeStatement("
                 INSERT INTO permission (name, route, description, public_access) VALUES
-                ('ROLE_ADMIN', 'app_admin', 'Administration complète', false),
-                ('ROLE_USER', 'app_user', 'Utilisateur standard', false),
-                ('EXERCICE_VIEW', 'app_exercice_index', 'Voir les exercices', false),
-                ('TRANSACTION_MANAGE', 'app_transaction_index', 'Gérer les transactions', false)
+                -- Permissions générales
+                ('HOME_ACCESS', 'app_home', 'Accès à l''accueil', 1),
+                ('LOGIN_ACCESS', 'app_login', 'Accès à la connexion', 1),
+                
+                -- Entreprises
+                ('ENTREPRISE_VIEW', 'app_entreprise_index', 'Voir les entreprises', 0),
+                ('ENTREPRISE_CREATE', 'app_entreprise_new', 'Créer une entreprise', 0),
+                ('ENTREPRISE_EDIT', 'app_entreprise_edit', 'Modifier une entreprise', 0),
+                ('ENTREPRISE_DELETE', 'app_entreprise_delete', 'Supprimer une entreprise', 0),
+                ('ENTREPRISE_SHOW', 'app_entreprise_show', 'Voir le détail d''une entreprise', 0),
+                
+                -- Exercices  
+                ('EXERCICE_VIEW', 'app_exercice_index', 'Voir les exercices', 0),
+                ('EXERCICE_CREATE', 'app_exercice_new', 'Créer un exercice', 0),
+                ('EXERCICE_EDIT', 'app_exercice_edit', 'Modifier un exercice', 0),
+                ('EXERCICE_DELETE', 'app_exercice_delete', 'Supprimer un exercice', 0),
+                ('EXERCICE_SHOW', 'app_exercice_show', 'Voir le détail d''un exercice', 0),
+                
+                -- Transactions
+                ('TRANSACTION_VIEW', 'app_transaction_index', 'Voir les transactions', 0),
+                ('TRANSACTION_CREATE', 'app_transaction_new', 'Créer une transaction', 0),
+                ('TRANSACTION_EDIT', 'app_transaction_edit', 'Modifier une transaction', 0),
+                ('TRANSACTION_DELETE', 'app_transaction_delete', 'Supprimer une transaction', 0),
+                ('TRANSACTION_SHOW', 'app_transaction_show', 'Voir le détail d''une transaction', 0),
+                
+                -- Personnes
+                ('PERSONNE_VIEW', 'app_personne_index', 'Voir les personnes', 0),
+                ('PERSONNE_CREATE', 'app_personne_new', 'Créer une personne', 0),
+                ('PERSONNE_EDIT', 'app_personne_edit', 'Modifier une personne', 0),
+                ('PERSONNE_DELETE', 'app_personne_delete', 'Supprimer une personne', 0),
+                ('PERSONNE_SHOW', 'app_personne_show', 'Voir le détail d''une personne', 0),
+                
+                -- Utilisateurs
+                ('USER_VIEW', 'app_user_index', 'Voir les utilisateurs', 0),
+                ('USER_CREATE', 'app_user_new', 'Créer un utilisateur', 0),
+                ('USER_EDIT', 'app_user_edit', 'Modifier un utilisateur', 0),
+                ('USER_DELETE', 'app_user_delete', 'Supprimer un utilisateur', 0),
+                ('USER_SHOW', 'app_user_show', 'Voir le détail d''un utilisateur', 0),
+                
+                -- Rôles
+                ('ROLE_VIEW', 'app_role_index', 'Voir les rôles', 0),
+                ('ROLE_CREATE', 'app_role_new', 'Créer un rôle', 0),
+                ('ROLE_EDIT', 'app_role_edit', 'Modifier un rôle', 0),
+                ('ROLE_DELETE', 'app_role_delete', 'Supprimer un rôle', 0),
+                ('ROLE_SHOW', 'app_role_show', 'Voir le détail d''un rôle', 0),
+                
+                -- Permissions
+                ('PERMISSION_VIEW', 'app_permission_index', 'Voir les permissions', 0),
+                ('PERMISSION_MANAGE', 'app_permission_manage', 'Gérer les permissions', 0),
+                
+                -- Types de transaction
+                ('TYPE_TRANSACTION_VIEW', 'app_type_transaction_index', 'Voir les types de transaction', 0),
+                ('TYPE_TRANSACTION_CREATE', 'app_type_transaction_new', 'Créer un type de transaction', 0),
+                ('TYPE_TRANSACTION_EDIT', 'app_type_transaction_edit', 'Modifier un type de transaction', 0),
+                ('TYPE_TRANSACTION_DELETE', 'app_type_transaction_delete', 'Supprimer un type de transaction', 0),
+                
+                -- Modes de paiement
+                ('MODE_PAIEMENT_VIEW', 'app_mode_de_paiement_index', 'Voir les modes de paiement', 0),
+                ('MODE_PAIEMENT_CREATE', 'app_mode_de_paiement_new', 'Créer un mode de paiement', 0),
+                ('MODE_PAIEMENT_EDIT', 'app_mode_de_paiement_edit', 'Modifier un mode de paiement', 0),
+                ('MODE_PAIEMENT_DELETE', 'app_mode_de_paiement_delete', 'Supprimer un mode de paiement', 0),
+                
+                -- Administration
+                ('ADMIN_ACCESS', 'maintenance_database_admin', 'Accès à l''administration', 0)
             ");
 
             $this->connection->executeStatement("
                 INSERT INTO role (libelle, description, hierarchy_level) VALUES
-                ('Administrateur', 'Accès complet au système', 1),
-                ('Utilisateur', 'Accès limité aux fonctionnalités', 0)
+                ('Administrateur', 'Accès complet au système', 100),
+                ('Utilisateur', 'Accès limité aux fonctionnalités', 50)
             ");
 
             // 4. Créer les modes de paiement
@@ -508,17 +568,17 @@ class DatabaseAdminController extends AbstractController
             $hashedPassword = password_hash('admin123', PASSWORD_DEFAULT);
             
             // Supprimer l'ancien admin s'il existe
-            $this->connection->executeStatement('DELETE FROM "user" WHERE username = ?', ['admin']);
+            $this->connection->executeStatement('DELETE FROM `user` WHERE username = ?', ['admin']);
             
             // Créer le nouvel admin
             $this->connection->executeStatement("
-                INSERT INTO \"user\" (id_personne, username, password, enabled) 
-                VALUES (?, 'admin', ?, true)
+                INSERT INTO `user` (id_personne, username, password, enabled) 
+                VALUES (?, 'admin', ?, 1)
             ", [$adminPersonneId, $hashedPassword]);
             error_log('✅ Utilisateur admin créé');
 
             // 8. Assigner le rôle Administrateur à l'admin
-            $adminUserId = $this->connection->executeQuery('SELECT id_user FROM "user" WHERE username = ?', ['admin'])->fetchOne();
+            $adminUserId = $this->connection->executeQuery('SELECT id_user FROM `user` WHERE username = ?', ['admin'])->fetchOne();
             $adminRoleId = $this->connection->executeQuery('SELECT id_role FROM role WHERE libelle = ?', ['Administrateur'])->fetchOne();
             
             if ($adminUserId && $adminRoleId) {
