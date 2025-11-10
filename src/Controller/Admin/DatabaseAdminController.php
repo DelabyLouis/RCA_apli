@@ -306,9 +306,8 @@ class DatabaseAdminController extends AbstractController
     private function executeResetDatabase(string $token): Response
     {
         try {
-            // Supprimer toutes les données dans l'ordre correct (PostgreSQL/MySQL compatible)
-            $this->connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0'); // MySQL
-            $this->connection->executeStatement('SET session_replication_role = replica'); // PostgreSQL
+            // Pour PostgreSQL, on utilise TRUNCATE CASCADE pour supprimer les données
+            // tout en respectant les contraintes de clés étrangères
             
             // Ordre de suppression pour éviter les contraintes de clés étrangères
             $tablesToDelete = [
@@ -321,23 +320,30 @@ class DatabaseAdminController extends AbstractController
                 'type_transaction',
                 'mode_de_paiement',
                 'personne',
-                '"user"', // Quotes car "user" est un mot réservé
+                '"user"', // Quotes car "user" est un mot réservé PostgreSQL
                 'role',
                 'permission',
                 'entreprise'
             ];
             
+            // Pour PostgreSQL : désactiver temporairement les triggers
+            $this->connection->executeStatement('SET session_replication_role = replica');
+            
             foreach ($tablesToDelete as $tableName) {
                 try {
-                    $this->connection->executeStatement("DELETE FROM $tableName");
+                    $this->connection->executeStatement("TRUNCATE TABLE $tableName CASCADE");
                 } catch (\Exception $e) {
-                    // Ignorer les erreurs pour les tables qui n'existent pas
+                    // Fallback avec DELETE si TRUNCATE échoue
+                    try {
+                        $this->connection->executeStatement("DELETE FROM $tableName");
+                    } catch (\Exception $e2) {
+                        // Ignorer les erreurs pour les tables qui n'existent pas
+                    }
                 }
             }
             
-            // Remettre les contraintes
-            $this->connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1'); // MySQL  
-            $this->connection->executeStatement('SET session_replication_role = DEFAULT'); // PostgreSQL
+            // Remettre les triggers PostgreSQL
+            $this->connection->executeStatement('SET session_replication_role = DEFAULT');
             
             // Exécuter les fixtures
             $process = Process::fromShellCommandline('php bin/console doctrine:fixtures:load --no-interaction', getcwd());
