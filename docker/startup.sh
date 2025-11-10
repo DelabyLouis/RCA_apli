@@ -45,16 +45,8 @@ else
     echo "✅ Utilisateur admin déjà configuré" >&2
 fi
 
-# Vérifier si les données historiques doivent être importées (indépendamment de l'admin)
-echo "🔧 Vérification de l'import des données historiques..." >&2
-EXERCICE_COUNT=$(php bin/console dbal:run-sql "SELECT COUNT(*) FROM exercice;" 2>/dev/null | grep -E '^[0-9]+$' || echo "0")
-
-if [ "${EXERCICE_COUNT:-0}" -eq "0" ]; then
-    echo "🔧 Import des données historiques..." >&2
-    php bin/console app:import-historical-data 2>&1 || echo "Erreur lors de l'import des données historiques" >&2
-else
-    echo "✅ Données historiques déjà présentes (${EXERCICE_COUNT} exercices)" >&2
-fi
+# Import automatique désactivé - utiliser la page d'administration pour gérer les données
+echo "✅ Import automatique désactivé - données existantes conservées" >&2
 
 # Corriger les permissions et vider le cache
 chown -R www-data:www-data /var/www/html/var/cache

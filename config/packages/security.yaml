@@ -42,10 +42,6 @@ security:
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^/public/fix-admin-roles, roles: PUBLIC_ACCESS }
-        - { path: ^/public/debug-exercice, roles: PUBLIC_ACCESS }
-        - { path: ^/public/refresh-user-session, roles: PUBLIC_ACCESS }
-        - { path: ^/debug/permissions, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         # En développement, l'accès libre est maintenu
         # En production, cette règle sera surchargée par prod/security.yaml

@@ -76,8 +76,18 @@ class ImportHistoricalDataCommand extends Command
             ['libelle' => 'Exercice 2024-2025', 'date_debut' => '2024-09-01', 'date_fin' => '2025-08-31', 'clos' => false],
         ];
 
+        $exerciceRepo = $this->entityManager->getRepository(Exercice::class);
         $numeroOrdre = 1;
+        
         foreach ($exercices as $data) {
+            // Vérifier si l'exercice existe déjà
+            $existing = $exerciceRepo->findOneBy(['libelle' => $data['libelle']]);
+            if ($existing) {
+                $io->text("Exercice déjà existant (ignoré) : {$data['libelle']}");
+                $numeroOrdre++;
+                continue;
+            }
+
             $exercice = new Exercice();
             $exercice->setLibelle($data['libelle']);
             $exercice->setDateDebut(new \DateTime($data['date_debut']));
