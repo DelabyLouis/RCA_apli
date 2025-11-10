@@ -334,7 +334,7 @@ class DatabaseAdminController extends AbstractController
             // 4. Vérifier si l'admin existe réellement (peu importe qui l'a créé)
             $adminExists = false;
             try {
-                $adminCount = $this->connection->executeQuery('SELECT COUNT(*) FROM `user` WHERE username = ?', ['admin'])->fetchOne();
+                $adminCount = $this->connection->executeQuery('SELECT COUNT(*) FROM "user" WHERE username = ?', ['admin'])->fetchOne();
                 $adminExists = $adminCount > 0;
             } catch (\Exception $e) {
                 // Si erreur, essayer de créer un admin de secours
@@ -433,11 +433,11 @@ class DatabaseAdminController extends AbstractController
     private function createBasicData(): array
     {
         try {
-            // 0. Nettoyer les données existantes (SQLite compatible)
-            $this->connection->executeStatement('DELETE FROM `transaction`');
+            // 0. Nettoyer les données existantes (PostgreSQL compatible)
+            $this->connection->executeStatement('DELETE FROM "transaction"');
             $this->connection->executeStatement('DELETE FROM user_role');
             $this->connection->executeStatement('DELETE FROM role_permission');
-            $this->connection->executeStatement('DELETE FROM `user`');
+            $this->connection->executeStatement('DELETE FROM "user"');
             $this->connection->executeStatement('DELETE FROM personne');
             $this->connection->executeStatement('DELETE FROM exercice');
             $this->connection->executeStatement('DELETE FROM type_transaction');
@@ -466,69 +466,69 @@ class DatabaseAdminController extends AbstractController
             $this->connection->executeStatement("
                 INSERT INTO permission (name, route, description, public_access) VALUES
                 -- Permissions générales
-                ('HOME_ACCESS', 'app_home', 'Accès à l''accueil', 1),
-                ('LOGIN_ACCESS', 'app_login', 'Accès à la connexion', 1),
+                ('HOME_ACCESS', 'app_home', 'Accès à l''accueil', true),
+                ('LOGIN_ACCESS', 'app_login', 'Accès à la connexion', true),
                 
                 -- Entreprises
-                ('ENTREPRISE_VIEW', 'app_entreprise_index', 'Voir les entreprises', 0),
-                ('ENTREPRISE_CREATE', 'app_entreprise_new', 'Créer une entreprise', 0),
-                ('ENTREPRISE_EDIT', 'app_entreprise_edit', 'Modifier une entreprise', 0),
-                ('ENTREPRISE_DELETE', 'app_entreprise_delete', 'Supprimer une entreprise', 0),
-                ('ENTREPRISE_SHOW', 'app_entreprise_show', 'Voir le détail d''une entreprise', 0),
+                ('ENTREPRISE_VIEW', 'app_entreprise_index', 'Voir les entreprises', false),
+                ('ENTREPRISE_CREATE', 'app_entreprise_new', 'Créer une entreprise', false),
+                ('ENTREPRISE_EDIT', 'app_entreprise_edit', 'Modifier une entreprise', false),
+                ('ENTREPRISE_DELETE', 'app_entreprise_delete', 'Supprimer une entreprise', false),
+                ('ENTREPRISE_SHOW', 'app_entreprise_show', 'Voir le détail d''une entreprise', false),
                 
                 -- Exercices  
-                ('EXERCICE_VIEW', 'app_exercice_index', 'Voir les exercices', 0),
-                ('EXERCICE_CREATE', 'app_exercice_new', 'Créer un exercice', 0),
-                ('EXERCICE_EDIT', 'app_exercice_edit', 'Modifier un exercice', 0),
-                ('EXERCICE_DELETE', 'app_exercice_delete', 'Supprimer un exercice', 0),
-                ('EXERCICE_SHOW', 'app_exercice_show', 'Voir le détail d''un exercice', 0),
+                ('EXERCICE_VIEW', 'app_exercice_index', 'Voir les exercices', false),
+                ('EXERCICE_CREATE', 'app_exercice_new', 'Créer un exercice', false),
+                ('EXERCICE_EDIT', 'app_exercice_edit', 'Modifier un exercice', false),
+                ('EXERCICE_DELETE', 'app_exercice_delete', 'Supprimer un exercice', false),
+                ('EXERCICE_SHOW', 'app_exercice_show', 'Voir le détail d''un exercice', false),
                 
                 -- Transactions
-                ('TRANSACTION_VIEW', 'app_transaction_index', 'Voir les transactions', 0),
-                ('TRANSACTION_CREATE', 'app_transaction_new', 'Créer une transaction', 0),
-                ('TRANSACTION_EDIT', 'app_transaction_edit', 'Modifier une transaction', 0),
-                ('TRANSACTION_DELETE', 'app_transaction_delete', 'Supprimer une transaction', 0),
-                ('TRANSACTION_SHOW', 'app_transaction_show', 'Voir le détail d''une transaction', 0),
+                ('TRANSACTION_VIEW', 'app_transaction_index', 'Voir les transactions', false),
+                ('TRANSACTION_CREATE', 'app_transaction_new', 'Créer une transaction', false),
+                ('TRANSACTION_EDIT', 'app_transaction_edit', 'Modifier une transaction', false),
+                ('TRANSACTION_DELETE', 'app_transaction_delete', 'Supprimer une transaction', false),
+                ('TRANSACTION_SHOW', 'app_transaction_show', 'Voir le détail d''une transaction', false),
                 
                 -- Personnes
-                ('PERSONNE_VIEW', 'app_personne_index', 'Voir les personnes', 0),
-                ('PERSONNE_CREATE', 'app_personne_new', 'Créer une personne', 0),
-                ('PERSONNE_EDIT', 'app_personne_edit', 'Modifier une personne', 0),
-                ('PERSONNE_DELETE', 'app_personne_delete', 'Supprimer une personne', 0),
-                ('PERSONNE_SHOW', 'app_personne_show', 'Voir le détail d''une personne', 0),
+                ('PERSONNE_VIEW', 'app_personne_index', 'Voir les personnes', false),
+                ('PERSONNE_CREATE', 'app_personne_new', 'Créer une personne', false),
+                ('PERSONNE_EDIT', 'app_personne_edit', 'Modifier une personne', false),
+                ('PERSONNE_DELETE', 'app_personne_delete', 'Supprimer une personne', false),
+                ('PERSONNE_SHOW', 'app_personne_show', 'Voir le détail d''une personne', false),
                 
                 -- Utilisateurs
-                ('USER_VIEW', 'app_user_index', 'Voir les utilisateurs', 0),
-                ('USER_CREATE', 'app_user_new', 'Créer un utilisateur', 0),
-                ('USER_EDIT', 'app_user_edit', 'Modifier un utilisateur', 0),
-                ('USER_DELETE', 'app_user_delete', 'Supprimer un utilisateur', 0),
-                ('USER_SHOW', 'app_user_show', 'Voir le détail d''un utilisateur', 0),
+                ('USER_VIEW', 'app_user_index', 'Voir les utilisateurs', false),
+                ('USER_CREATE', 'app_user_new', 'Créer un utilisateur', false),
+                ('USER_EDIT', 'app_user_edit', 'Modifier un utilisateur', false),
+                ('USER_DELETE', 'app_user_delete', 'Supprimer un utilisateur', false),
+                ('USER_SHOW', 'app_user_show', 'Voir le détail d''un utilisateur', false),
                 
                 -- Rôles
-                ('ROLE_VIEW', 'app_role_index', 'Voir les rôles', 0),
-                ('ROLE_CREATE', 'app_role_new', 'Créer un rôle', 0),
-                ('ROLE_EDIT', 'app_role_edit', 'Modifier un rôle', 0),
-                ('ROLE_DELETE', 'app_role_delete', 'Supprimer un rôle', 0),
-                ('ROLE_SHOW', 'app_role_show', 'Voir le détail d''un rôle', 0),
+                ('ROLE_VIEW', 'app_role_index', 'Voir les rôles', false),
+                ('ROLE_CREATE', 'app_role_new', 'Créer un rôle', false),
+                ('ROLE_EDIT', 'app_role_edit', 'Modifier un rôle', false),
+                ('ROLE_DELETE', 'app_role_delete', 'Supprimer un rôle', false),
+                ('ROLE_SHOW', 'app_role_show', 'Voir le détail d''un rôle', false),
                 
                 -- Permissions
-                ('PERMISSION_VIEW', 'app_permission_index', 'Voir les permissions', 0),
-                ('PERMISSION_MANAGE', 'app_permission_manage', 'Gérer les permissions', 0),
+                ('PERMISSION_VIEW', 'app_permission_index', 'Voir les permissions', false),
+                ('PERMISSION_MANAGE', 'app_permission_manage', 'Gérer les permissions', false),
                 
                 -- Types de transaction
-                ('TYPE_TRANSACTION_VIEW', 'app_type_transaction_index', 'Voir les types de transaction', 0),
-                ('TYPE_TRANSACTION_CREATE', 'app_type_transaction_new', 'Créer un type de transaction', 0),
-                ('TYPE_TRANSACTION_EDIT', 'app_type_transaction_edit', 'Modifier un type de transaction', 0),
-                ('TYPE_TRANSACTION_DELETE', 'app_type_transaction_delete', 'Supprimer un type de transaction', 0),
+                ('TYPE_TRANSACTION_VIEW', 'app_type_transaction_index', 'Voir les types de transaction', false),
+                ('TYPE_TRANSACTION_CREATE', 'app_type_transaction_new', 'Créer un type de transaction', false),
+                ('TYPE_TRANSACTION_EDIT', 'app_type_transaction_edit', 'Modifier un type de transaction', false),
+                ('TYPE_TRANSACTION_DELETE', 'app_type_transaction_delete', 'Supprimer un type de transaction', false),
                 
                 -- Modes de paiement
-                ('MODE_PAIEMENT_VIEW', 'app_mode_de_paiement_index', 'Voir les modes de paiement', 0),
-                ('MODE_PAIEMENT_CREATE', 'app_mode_de_paiement_new', 'Créer un mode de paiement', 0),
-                ('MODE_PAIEMENT_EDIT', 'app_mode_de_paiement_edit', 'Modifier un mode de paiement', 0),
-                ('MODE_PAIEMENT_DELETE', 'app_mode_de_paiement_delete', 'Supprimer un mode de paiement', 0),
+                ('MODE_PAIEMENT_VIEW', 'app_mode_de_paiement_index', 'Voir les modes de paiement', false),
+                ('MODE_PAIEMENT_CREATE', 'app_mode_de_paiement_new', 'Créer un mode de paiement', false),
+                ('MODE_PAIEMENT_EDIT', 'app_mode_de_paiement_edit', 'Modifier un mode de paiement', false),
+                ('MODE_PAIEMENT_DELETE', 'app_mode_de_paiement_delete', 'Supprimer un mode de paiement', false),
                 
                 -- Administration
-                ('ADMIN_ACCESS', 'maintenance_database_admin', 'Accès à l''administration', 0)
+                ('ADMIN_ACCESS', 'maintenance_database_admin', 'Accès à l''administration', false)
             ");
 
             $this->connection->executeStatement("
@@ -568,17 +568,17 @@ class DatabaseAdminController extends AbstractController
             $hashedPassword = password_hash('admin123', PASSWORD_DEFAULT);
             
             // Supprimer l'ancien admin s'il existe
-            $this->connection->executeStatement('DELETE FROM `user` WHERE username = ?', ['admin']);
+            $this->connection->executeStatement('DELETE FROM "user" WHERE username = ?', ['admin']);
             
             // Créer le nouvel admin
             $this->connection->executeStatement("
-                INSERT INTO `user` (id_personne, username, password, enabled) 
-                VALUES (?, 'admin', ?, 1)
+                INSERT INTO \"user\" (id_personne, username, password, enabled) 
+                VALUES (?, 'admin', ?, true)
             ", [$adminPersonneId, $hashedPassword]);
             error_log('✅ Utilisateur admin créé');
 
             // 8. Assigner le rôle Administrateur à l'admin
-            $adminUserId = $this->connection->executeQuery('SELECT id_user FROM `user` WHERE username = ?', ['admin'])->fetchOne();
+            $adminUserId = $this->connection->executeQuery('SELECT id_user FROM "user" WHERE username = ?', ['admin'])->fetchOne();
             $adminRoleId = $this->connection->executeQuery('SELECT id_role FROM role WHERE libelle = ?', ['Administrateur'])->fetchOne();
             
             if ($adminUserId && $adminRoleId) {
