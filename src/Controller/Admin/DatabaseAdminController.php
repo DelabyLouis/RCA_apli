@@ -318,13 +318,16 @@ class DatabaseAdminController extends AbstractController
             $migrateProcess = Process::fromShellCommandline('php bin/console doctrine:migrations:migrate --no-interaction', $projectRoot);
             $migrateProcess->run();
             
-            // 3. Essayer d'exécuter les fixtures pour avoir des données complètes
+            // 3. Créer les données de base manuellement (plus fiable qu'un Process)
+            $dataCreated = $this->createBasicData();
+            
+            // 4. Essayer les fixtures en plus si possible
             $process = Process::fromShellCommandline('php bin/console doctrine:fixtures:load --no-interaction', $projectRoot);
-            $process->setTimeout(60); // 60 secondes de timeout
+            $process->setTimeout(60);
             $process->run();
             
-            $fixturesResult = $process->isSuccessful() ? 'avec fixtures complètes' : 'avec admin de base seulement';
-            $errorInfo = $process->isSuccessful() ? '' : '<br><small>Détail fixtures: ' . $process->getErrorOutput() . '</small>';
+            $fixturesResult = $process->isSuccessful() ? 'avec fixtures complètes' : 'avec données de base';
+            $errorInfo = $process->isSuccessful() ? '' : '<br><small>Détail: ' . $process->getErrorOutput() . '</small>';
             
             // 4. Vérifier si l'admin existe réellement (peu importe qui l'a créé)
             $adminExists = false;
@@ -423,5 +426,82 @@ class DatabaseAdminController extends AbstractController
         ";
 
         return $this->connection->executeQuery($sql)->fetchAllAssociative();
+    }
+
+    private function createBasicData(): bool
+    {
+        try {
+            // 1. Créer l'entreprise
+            $this->connection->executeStatement("
+                INSERT INTO entreprise (nom, email, telephone, adresse) 
+                VALUES ('Amicale RCA', 'contact@amicale-rca.fr', '01.02.03.04.05', '123 Rue de la Paix, 75001 Paris')
+            ");
+            $entrepriseId = $this->connection->lastInsertId();
+
+            // 2. Créer des personnes
+            $this->connection->executeStatement("
+                INSERT INTO personne (nom, prenom, email, telephone, adresse) 
+                VALUES 
+                ('Admin', 'Système', 'admin@amicale-rca.fr', '', ''),
+                ('Dupont', 'Jean', 'jean.dupont@email.fr', '06.12.34.56.78', '456 Avenue des Champs'),
+                ('Martin', 'Marie', 'marie.martin@email.fr', '07.89.01.23.45', '789 Boulevard Saint-Michel')
+            ");
+
+            // 3. Créer les rôles et permissions de base
+            $this->connection->executeStatement("
+                INSERT INTO permission (nom, description) VALUES
+                ('ROLE_ADMIN', 'Administration complète'),
+                ('ROLE_USER', 'Utilisateur standard'),
+                ('EXERCICE_VIEW', 'Voir les exercices'),
+                ('TRANSACTION_MANAGE', 'Gérer les transactions')
+            ");
+
+            $this->connection->executeStatement("
+                INSERT INTO role (nom, description) VALUES
+                ('Administrateur', 'Accès complet au système'),
+                ('Utilisateur', 'Accès limité aux fonctionnalités')
+            ");
+
+            // 4. Créer les modes de paiement
+            $this->connection->executeStatement("
+                INSERT INTO mode_de_paiement (libelle) VALUES
+                ('Espèces'),
+                ('Chèque'),
+                ('Virement'),
+                ('Carte bancaire')
+            ");
+
+            // 5. Créer les types de transaction
+            $this->connection->executeStatement("
+                INSERT INTO type_transaction (libelle, type_credit_debit) VALUES
+                ('Cotisation', 'credit'),
+                ('Repas amicale', 'credit'),
+                ('Achats matériel', 'debit'),
+                ('Frais bancaires', 'debit')
+            ");
+
+            // 6. Créer des exercices
+            $this->connection->executeStatement("
+                INSERT INTO exercice (numero_ordre, libelle, date_debut, date_fin, statut) VALUES
+                (2022, 'Exercice 2022-2023', '2022-09-01', '2023-08-31', 'clos'),
+                (2023, 'Exercice 2023-2024', '2023-09-01', '2024-08-31', 'clos'),
+                (2024, 'Exercice 2024-2025', '2024-09-01', '2025-08-31', 'ouvert')
+            ");
+
+            // 7. Créer l'utilisateur admin avec mot de passe
+            $adminPersonneId = $this->connection->executeQuery("SELECT id_personne FROM personne WHERE email = 'admin@amicale-rca.fr'")->fetchOne();
+            $hashedPassword = password_hash('admin123', PASSWORD_DEFAULT);
+            
+            $this->connection->executeStatement("
+                INSERT INTO \"user\" (id_personne, username, password, enabled) 
+                VALUES (?, 'admin', ?, true)
+                ON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password
+            ", [$adminPersonneId, $hashedPassword]);
+
+            return true;
+        } catch (\Exception $e) {
+            error_log('Erreur création données de base: ' . $e->getMessage());
+            return false;
+        }
     }
 }
