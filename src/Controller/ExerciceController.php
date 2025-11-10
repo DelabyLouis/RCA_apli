@@ -21,8 +21,16 @@ final class ExerciceController extends AbstractController
     #[Route(name: 'app_exercice_index', methods: ['GET'])]
     public function index(ExerciceRepository $exerciceRepository): Response
     {
+        $exercices = $exerciceRepository->findAllOrderedByNumeroOrdre();
+        
+        // Debug temporaire pour identifier le problème
+        error_log('DEBUG: Nombre d\'exercices récupérés: ' . count($exercices));
+        foreach ($exercices as $exercice) {
+            error_log('DEBUG: Exercice ID=' . $exercice->getIdExercice() . ', Libelle=' . $exercice->getLibelle());
+        }
+        
         return $this->render('exercice/index.html.twig', [
-            'exercices' => $exerciceRepository->findAllOrderedByNumeroOrdre(),
+            'exercices' => $exercices,
         ]);
     }
 

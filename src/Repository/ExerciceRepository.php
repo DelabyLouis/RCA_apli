@@ -62,6 +62,7 @@ class ExerciceRepository extends ServiceEntityRepository
     public function findAllOrderedByNumeroOrdre(): array
     {
         return $this->createQueryBuilder('e')
+            ->select('DISTINCT e')
             ->orderBy('e.numero_ordre', 'ASC')
             ->getQuery()
             ->getResult();
