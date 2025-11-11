@@ -140,8 +140,8 @@
             <table class="table table-striped table-hover transactions-table">
                 <thead class="table-dark">
                     <tr>
-                        <th>N° Ordre</th>
-                        <th>Libellé</th>
+                        <th style="width: 15%;">N° Ordre</th>
+                        <th style="width: 10%;">Libellé</th>
                         <th>Date</th>
                         <th>Tiers</th>
                         <th>Crédit (Entrée)</th>
@@ -608,12 +608,19 @@
             }
             
             console.log('Initialisation drag pour transaction:', row.dataset.id);
+            console.log('Drag handle trouvé:', dragHandle);
             row.draggable = true;
+            row.setAttribute('draggable', 'true');
+            console.log('Draggable set to:', row.draggable);
             
             row.addEventListener('dragstart', function(e) {
-                console.log('Drag start pour transaction:', this.dataset.id);
+                console.log('=== DRAG START ===');
+                console.log('Transaction ID:', this.dataset.id);
+                console.log('Exercice ID:', this.dataset.exerciceId);
+                console.log('Element:', this);
                 this.classList.add('dragging');
                 e.dataTransfer.setData('text/plain', this.dataset.id);
+                e.dataTransfer.effectAllowed = 'move';
             });
             
             row.addEventListener('dragend', function(e) {
@@ -637,29 +644,44 @@
             });
             
             row.addEventListener('drop', function(e) {
+                console.log('=== DROP EVENT ===');
                 e.preventDefault();
                 this.classList.remove('drag-over');
                 
                 const draggingRow = tbody.querySelector('.transaction-row.dragging');
-                if (draggingRow && draggingRow !== this && 
-                    draggingRow.dataset.exerciceId === this.dataset.exerciceId) {
+                console.log('Dragging row:', draggingRow);
+                console.log('Target row:', this);
+                
+                if (draggingRow && draggingRow !== this) {
+                    console.log('Dragging exercice ID:', draggingRow.dataset.exerciceId);
+                    console.log('Target exercice ID:', this.dataset.exerciceId);
                     
-                    console.log('Drop de transaction:', draggingRow.dataset.id, 'sur', this.dataset.id);
-                    
-                    // Déterminer la position d'insertion
-                    const rect = this.getBoundingClientRect();
-                    const midpoint = rect.top + rect.height / 2;
-                    
-                    if (e.clientY < midpoint) {
-                        // Insérer avant
-                        tbody.insertBefore(draggingRow, this);
+                    if (draggingRow.dataset.exerciceId === this.dataset.exerciceId) {
+                        console.log('=== EXECUTING DROP ===');
+                        console.log('Drop de transaction:', draggingRow.dataset.id, 'sur', this.dataset.id);
+                        
+                        // Déterminer la position d'insertion
+                        const rect = this.getBoundingClientRect();
+                        const midpoint = rect.top + rect.height / 2;
+                        
+                        if (e.clientY < midpoint) {
+                            // Insérer avant
+                            console.log('Insertion avant');
+                            tbody.insertBefore(draggingRow, this);
+                        } else {
+                            // Insérer après
+                            console.log('Insertion après');
+                            tbody.insertBefore(draggingRow, this.nextSibling);
+                        }
+                        
+                        // Sauvegarder le nouvel ordre
+                        console.log('Sauvegarde ordre pour exercice:', draggingRow.dataset.exerciceId);
+                        saveTransactionOrder(draggingRow.dataset.exerciceId);
                     } else {
-                        // Insérer après
-                        tbody.insertBefore(draggingRow, this.nextSibling);
+                        console.log('Exercices différents, drop ignoré');
                     }
-                    
-                    // Sauvegarder le nouvel ordre
-                    saveTransactionOrder(draggingRow.dataset.exerciceId);
+                } else {
+                    console.log('Pas de dragging row ou même élément');
                 }
             });
         });
