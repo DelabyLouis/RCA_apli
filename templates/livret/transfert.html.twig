@@ -93,6 +93,13 @@
                             <input type="text" class="form-control" id="libelle" name="libelle" 
                                    value="" placeholder="Libellé automatique...">
                         </div>
+                        
+                        <div class="mb-3">
+                            <label for="date_transaction" class="form-label">Date de la transaction *</label>
+                            <input type="date" class="form-control" id="date_transaction" name="date_transaction" 
+                                   value="{{ "now"|date("Y-m-d") }}" required>
+                            <div class="form-text">Date à laquelle la transaction est effectuée</div>
+                        </div>
                         </div>
                         
                         <!-- Aperçu du transfert -->

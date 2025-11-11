@@ -114,6 +114,7 @@ class LivretController extends AbstractController
         $montant = (float) $request->request->get('montant');
         $libelle = $request->request->get('libelle');
         $exerciceId = $request->request->get('exercice_id');
+        $dateTransaction = $request->request->get('date_transaction');
 
         // Générer automatiquement le libellé s'il est vide
         if (empty($libelle) || trim($libelle) === '') {
@@ -159,7 +160,7 @@ class LivretController extends AbstractController
             $transactionLivret = new Transaction();
             $transactionLivret->setLibelle($libelle) // Libellé simple sans suffixe
                 ->setNumeroOrdre($numeroOrdre)
-                ->setDateTransaction(new \DateTime())
+                ->setDateTransaction($dateTransaction ? new \DateTime($dateTransaction) : new \DateTime())
                 ->setMontant($type === 'depot' ? (string) $montant : '-' . $montant)
                 ->setTypeCompte('livret')
                 ->setExercice($exercice)

@@ -83,18 +83,28 @@ class TransactionRepository extends ServiceEntityRepository
 
     /**
      * Calcule le solde du compte courant
-     * Le compte courant = toutes les transactions sauf celles du livret
+     * Inclut toutes les transactions, avec les transactions livret inversées
+     * (même logique que la colonne "montant" de la page transaction)
      */
     public function calculerSoldeCompteCourant(): float
     {
-        $result = $this->createQueryBuilder('t')
+        // Transactions normales (compte courant)
+        $resultNormal = $this->createQueryBuilder('t')
             ->select('SUM(t.montant)')
             ->where('t.type_compte != :livret OR t.type_compte IS NULL')
             ->setParameter('livret', 'livret')
             ->getQuery()
             ->getSingleScalarResult();
         
-        return (float) ($result ?? 0);
+        // Transactions livret (inversées pour le point de vue du compte courant)
+        $resultLivret = $this->createQueryBuilder('t')
+            ->select('SUM(t.montant)')
+            ->where('t.type_compte = :livret')
+            ->setParameter('livret', 'livret')
+            ->getQuery()
+            ->getSingleScalarResult();
+        
+        return (float) (($resultNormal ?? 0) - ($resultLivret ?? 0));
     }
 
     /**
