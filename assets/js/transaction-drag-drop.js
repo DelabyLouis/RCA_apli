@@ -185,7 +185,14 @@ function saveAllTransactionChanges() {
         return;
     }
 
-    // Envoyer au serveur
+    // ===== SOLUTION DÉFINITIVE =====
+    // Les numéros d'ordre sont déjà mis à jour visuellement
+    // On essaie de sauvegarder sur le serveur, mais en cas d'échec,
+    // les changements visuels restent actifs
+
+    console.log("💾 Tentative de sauvegarde sur le serveur...");
+    showToast("💾 Sauvegarde en cours...", "success");
+
     fetch(TRANSACTION_REORDER_URL, {
         method: "POST",
         headers: {
@@ -197,54 +204,74 @@ function saveAllTransactionChanges() {
     })
         .then((response) => {
             if (!response.ok) {
-                // Récupérer le texte de la réponse pour debug
-                return response.text().then((text) => {
-                    console.error("Réponse serveur (non-JSON):", text);
-                    throw new Error(
-                        `HTTP ${response.status}: ${text.substring(0, 200)}...`
-                    );
-                });
+                throw new Error(`HTTP ${response.status}`);
             }
             return response.json();
         })
         .then((data) => {
             if (data.success) {
-                showToast("Ordre des transactions mis à jour", "success");
-                // Recharger la page pour voir tous les changements
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } else {
-                console.error("Erreur:", data.error);
                 showToast(
-                    "Erreur lors de la mise à jour: " + data.error,
-                    "error"
+                    "✅ Sauvegarde réussie ! Les changements sont permanents.",
+                    "success"
                 );
+                console.log("✅ Sauvegarde serveur réussie");
+            } else {
+                throw new Error(data.error || "Erreur serveur inconnue");
             }
         })
         .catch((error) => {
-            console.error("Erreur:", error);
-            showToast("Erreur de communication avec le serveur", "error");
+            console.warn("⚠️ Sauvegarde serveur échouée:", error);
+            showToast(
+                "⚠️ Changements effectués localement. La sauvegarde serveur a échoué - les changements seront perdus au rechargement.",
+                "error"
+            );
+
+            // Ajouter une indication visuelle que les changements ne sont pas sauvegardés
+            document.body.classList.add("unsaved-changes");
+
+            // Ajouter un style pour indiquer les changements non sauvegardés
+            if (!document.getElementById("unsaved-indicator")) {
+                const indicator = document.createElement("div");
+                indicator.id = "unsaved-indicator";
+                indicator.innerHTML = "⚠️ Changements non sauvegardés";
+                indicator.style.cssText =
+                    "position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: #ff6b35; color: white; padding: 8px 16px; border-radius: 4px; z-index: 10000; font-weight: bold;";
+                document.body.appendChild(indicator);
+            }
         });
 }
 
 function showToast(message, type) {
-    // Créer un toast simple
+    // Créer un toast amélioré
     const toast = document.createElement("div");
     const alertType = type === "success" ? "success" : "danger";
-    toast.className = "alert alert-" + alertType + " position-fixed";
+    toast.className =
+        "alert alert-" +
+        alertType +
+        " position-fixed alert-dismissible fade show";
     toast.style.cssText =
-        "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+        "top: 20px; right: 20px; z-index: 9999; min-width: 350px; max-width: 500px; font-size: 16px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15);";
 
-    const iconClass = type === "success" ? "check" : "exclamation-triangle";
-    toast.innerHTML = '<i class="fas fa-' + iconClass + ' me-2"></i>' + message;
+    const iconClass =
+        type === "success" ? "check-circle" : "exclamation-triangle";
+    toast.innerHTML =
+        '<i class="fas fa-' +
+        iconClass +
+        ' me-2"></i>' +
+        message +
+        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
 
     document.body.appendChild(toast);
 
-    // Supprimer après 3 secondes
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
+    // Supprimer après 5 secondes (plus long pour laisser le temps de lire)
+    setTimeout(
+        () => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        },
+        type === "success" ? 4000 : 8000
+    ); // Erreurs restent plus longtemps
 }
 
 // Version de compatibilité pour la fonction existante

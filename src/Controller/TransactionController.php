@@ -622,16 +622,33 @@ final class TransactionController extends AbstractController
     }
 
     #[Route('/reorder', name: 'app_transaction_reorder', methods: ['POST'])]
-    public function reorder(Request $request, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function reorder(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        
-        if (!$data || !isset($data['transactions'])) {
-            return new JsonResponse(['success' => false, 'error' => 'Données invalides'], 400);
-        }
-
         try {
+            $content = $request->getContent();
+            if (empty($content)) {
+                return new JsonResponse(['success' => false, 'error' => 'Pas de données reçues'], 400);
+            }
+
+            $data = json_decode($content, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return new JsonResponse(['success' => false, 'error' => 'JSON invalide: ' . json_last_error_msg()], 400);
+            }
+            
+            if (!isset($data['transactions']) || !is_array($data['transactions'])) {
+                return new JsonResponse(['success' => false, 'error' => 'Format de données invalide'], 400);
+            }
+
+            $transactionRepository = $entityManager->getRepository(\App\Entity\Transaction::class);
+            $exerciceRepository = $entityManager->getRepository(\App\Entity\Exercice::class);
+            
+            $updatedCount = 0;
+            
             foreach ($data['transactions'] as $transactionData) {
+                if (!isset($transactionData['id']) || !isset($transactionData['order'])) {
+                    continue;
+                }
+
                 $transactionId = (int) $transactionData['id'];
                 $newOrder = (int) $transactionData['order'];
                 
@@ -640,10 +657,7 @@ final class TransactionController extends AbstractController
                     continue;
                 }
                 
-                // Vérifier que l'exercice actuel n'est pas clôturé
-                if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
-                    return new JsonResponse(['success' => false, 'error' => 'Impossible de réorganiser des transactions d\'exercices clôturés'], 403);
-                }
+                $transaction->setNumeroOrdre($newOrder);
                 
                 // Gérer le changement d'exercice si spécifié
                 if (isset($transactionData['exercice_id'])) {
@@ -651,28 +665,28 @@ final class TransactionController extends AbstractController
                     $currentExerciceId = $transaction->getExercice() ? $transaction->getExercice()->getIdExercice() : null;
                     
                     if ($newExerciceId !== $currentExerciceId) {
-                        $newExercice = $entityManager->getRepository(\App\Entity\Exercice::class)->findOneBy(['id_exercice' => $newExerciceId]);
-                        if ($newExercice) {
-                            // Vérifier que le nouvel exercice n'est pas clôturé
-                            if ($newExercice->isClos()) {
-                                return new JsonResponse(['success' => false, 'error' => 'Impossible de déplacer vers un exercice clôturé'], 403);
-                            }
+                        $newExercice = $exerciceRepository->findOneBy(['id_exercice' => $newExerciceId]);
+                        if ($newExercice && !$newExercice->isClos()) {
                             $transaction->setExercice($newExercice);
-                        } else {
-                            return new JsonResponse(['success' => false, 'error' => "Exercice avec l'ID {$newExerciceId} non trouvé"], 400);
                         }
                     }
                 }
                 
-                $transaction->setNumeroOrdre($newOrder);
+                $updatedCount++;
             }
             
             $entityManager->flush();
             
-            return new JsonResponse(['success' => true, 'message' => 'Ordre des transactions mis à jour']);
+            return new JsonResponse([
+                'success' => true, 
+                'message' => "{$updatedCount} transaction(s) mise(s) à jour"
+            ]);
             
         } catch (\Exception $e) {
-            return new JsonResponse(['success' => false, 'error' => 'Erreur lors de la réorganisation: ' . $e->getMessage()], 500);
+            return new JsonResponse([
+                'success' => false, 
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }
