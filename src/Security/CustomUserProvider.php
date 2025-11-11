@@ -54,6 +54,9 @@ class CustomUserProvider implements UserProviderInterface
             throw new UserNotFoundException(sprintf('User with ID "%s" not found or disabled.', $user->getIdUser()));
         }
 
+        // Log pour debug
+        error_log("CustomUserProvider::refreshUser - User refreshed successfully: " . $refreshedUser->getUsername());
+
         return $refreshedUser;
     }
 
