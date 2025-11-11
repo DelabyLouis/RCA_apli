@@ -11,85 +11,29 @@ function setTransactionReorderUrl(url) {
 
 // Fonction d'initialisation principale
 function initTransactionDragDrop() {
-    console.log("=== DEBUT initTransactionDragDrop ===");
     const tbody = document.getElementById("transactions-tbody");
-    console.log("Tbody trouvé:", tbody);
 
     if (!tbody) {
-        console.error("Tbody des transactions non trouvé !");
-        console.log(
-            "Éléments avec id transactions-tbody:",
-            document.querySelectorAll("#transactions-tbody")
-        );
-        console.log("Tous les tbody:", document.querySelectorAll("tbody"));
         return;
     }
 
     const transactionRows = tbody.querySelectorAll(".transaction-row");
-    console.log(
-        "Nombre de lignes de transactions trouvées:",
-        transactionRows.length
-    );
 
     if (transactionRows.length === 0) {
-        console.log("Aucune ligne .transaction-row trouvée dans le tbody");
-        console.log(
-            "Toutes les lignes dans tbody:",
-            tbody.querySelectorAll("tr")
-        );
         return;
     }
 
     transactionRows.forEach((row, index) => {
-        console.log("--- Transaction " + (index + 1) + " ---");
-        console.log("Row:", row);
-        console.log("Dataset:", row.dataset);
-
         const dragHandle = row.querySelector(".drag-handle");
-        console.log("Drag handle:", dragHandle);
 
         if (!dragHandle) {
-            console.log(
-                "Pas de drag-handle pour la transaction:",
-                row.dataset.id
-            );
-            console.log(
-                "Contenu de la première cellule:",
-                row.querySelector("td")?.innerHTML
-            );
             return; // Pas de drag pour les exercices clôturés
         }
 
-        console.log("Initialisation drag pour transaction:", row.dataset.id);
         row.draggable = true;
         row.setAttribute("draggable", "true");
-        console.log("Draggable set to:", row.getAttribute("draggable"));
 
-        // Test simple : ajouter une bordure colorée pour voir les éléments draggables
-        row.style.border = "2px solid green";
-
-        // Test de click sur le drag handle pour vérifier l'interactivité
-        if (dragHandle) {
-            dragHandle.addEventListener("click", function (e) {
-                console.log("=== CLICK TEST ===");
-                console.log(
-                    "Click sur drag handle de transaction:",
-                    row.dataset.id
-                );
-                alert("Click détecté ! Drag handle fonctionne.");
-                e.preventDefault();
-            });
-
-            // Test de survol
-            dragHandle.addEventListener("mouseenter", function () {
-                console.log("Survol du drag handle:", row.dataset.id);
-                dragHandle.style.color = "red";
-            });
-
-            dragHandle.addEventListener("mouseleave", function () {
-                dragHandle.style.color = "";
-            });
-        }
+        // Drag & drop configuré
 
         // Event listeners
         addDragEventListeners(row, tbody);
@@ -98,18 +42,12 @@ function initTransactionDragDrop() {
 
 function addDragEventListeners(row, tbody) {
     row.addEventListener("dragstart", function (e) {
-        console.log("=== DRAG START ===");
-        console.log("Transaction ID:", this.dataset.id);
-        console.log("Exercice ID:", this.dataset.exerciceId);
-        console.log("Element:", this);
         this.classList.add("dragging");
         e.dataTransfer.setData("text/plain", this.dataset.id);
         e.dataTransfer.effectAllowed = "move";
     });
 
     row.addEventListener("dragend", function (e) {
-        console.log("=== DRAG END ===");
-        console.log("Transaction ID:", this.dataset.id);
         this.classList.remove("dragging");
         // Supprimer tous les indicateurs drag-over
         const allRows = tbody.querySelectorAll(".transaction-row");
@@ -188,6 +126,14 @@ function addDragEventListeners(row, tbody) {
     });
 }
 
+function updateTransactionExerciseVisually(transactionRow, newExerciceId) {
+    // Cette fonction pourrait être étendue pour mettre à jour visuellement
+    // d'autres éléments liés à l'exercice dans la ligne de transaction
+    console.log(
+        `Transaction ${transactionRow.dataset.id} déplacée vers exercice ${newExerciceId}`
+    );
+}
+
 function saveAllTransactionChanges() {
     const tbody = document.getElementById("transactions-tbody");
     if (!tbody) {
@@ -197,9 +143,6 @@ function saveAllTransactionChanges() {
 
     const allTransactionRows = tbody.querySelectorAll(".transaction-row");
     const transactionsData = [];
-
-    console.log("Sauvegarde de tous les changements de transactions");
-    console.log("Nombre total de transactions:", allTransactionRows.length);
 
     // Regrouper les transactions par exercice pour calculer les ordres corrects
     const transactionsByExercice = {};
@@ -239,11 +182,8 @@ function saveAllTransactionChanges() {
     });
 
     if (transactionsData.length === 0) {
-        console.log("Aucune transaction trouvée");
         return;
     }
-
-    console.log("Données à envoyer:", transactionsData);
 
     // Envoyer au serveur
     fetch(TRANSACTION_REORDER_URL, {
@@ -304,12 +244,8 @@ function saveTransactionOrder(exerciceId) {
 
 // Initialisation automatique quand le DOM est prêt
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("=== INITIALISATION DRAG & DROP ===");
-    console.log("DOM chargé, début initialisation drag & drop...");
-
     // Attendre un peu que tout soit rendu
     setTimeout(() => {
-        console.log("Initialisation du drag & drop des transactions...");
         initTransactionDragDrop();
     }, 200);
 });
