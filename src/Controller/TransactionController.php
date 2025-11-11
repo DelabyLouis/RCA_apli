@@ -624,9 +624,15 @@ final class TransactionController extends AbstractController
     #[Route('/reorder', name: 'app_transaction_reorder', methods: ['POST'])]
     public function reorder(Request $request, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
     {
+        // Debug: log les données reçues
+        error_log('=== TRANSACTION REORDER DEBUG ===');
+        error_log('Raw request content: ' . $request->getContent());
+        
         $data = json_decode($request->getContent(), true);
+        error_log('Decoded data: ' . print_r($data, true));
         
         if (!$data || !isset($data['transactions'])) {
+            error_log('Données invalides reçues');
             return new JsonResponse(['success' => false, 'error' => 'Données invalides'], 400);
         }
 
@@ -651,7 +657,7 @@ final class TransactionController extends AbstractController
                     $currentExerciceId = $transaction->getExercice() ? $transaction->getExercice()->getIdExercice() : null;
                     
                     if ($newExerciceId !== $currentExerciceId) {
-                        $newExercice = $exerciceRepository->find($newExerciceId);
+                        $newExercice = $exerciceRepository->findOneBy(['id_exercice' => $newExerciceId]);
                         if ($newExercice) {
                             // Vérifier que le nouvel exercice n'est pas clôturé
                             if ($newExercice->isClos()) {
