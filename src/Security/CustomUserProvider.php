@@ -47,14 +47,8 @@ class CustomUserProvider implements UserProviderInterface
             throw new UserNotFoundException('Invalid user class.');
         }
 
-        // Lors du refresh, on cherche par ID pour être sûr
-        $refreshedUser = $this->userRepository->find($user->getIdUser());
-        
-        if (!$refreshedUser || !$refreshedUser->isEnabled()) {
-            throw new UserNotFoundException(sprintf('User with ID "%s" not found or disabled.', $user->getIdUser()));
-        }
-
-        return $refreshedUser;
+        // Recharger l'utilisateur par son username (plus cohérent avec loadUserByIdentifier)
+        return $this->loadUserByIdentifier($user->getUserIdentifier());
     }
 
     public function supportsClass(string $class): bool
