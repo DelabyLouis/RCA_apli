@@ -622,7 +622,7 @@ final class TransactionController extends AbstractController
     }
 
     #[Route('/reorder', name: 'app_transaction_reorder', methods: ['POST'])]
-    public function reorder(Request $request, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function reorder(Request $request, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         
@@ -640,9 +640,21 @@ final class TransactionController extends AbstractController
                     continue;
                 }
                 
-                // Vérifier que l'exercice n'est pas clôturé
+                // Vérifier que l'exercice actuel n'est pas clôturé
                 if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
                     return new JsonResponse(['success' => false, 'error' => 'Impossible de réorganiser des transactions d\'exercices clôturés'], 403);
+                }
+                
+                // Gérer le changement d'exercice si spécifié
+                if (isset($transactionData['exercice_id']) && $transactionData['exercice_id'] != $transaction->getExercice()?->getIdExercice()) {
+                    $newExercice = $exerciceRepository->find($transactionData['exercice_id']);
+                    if ($newExercice) {
+                        // Vérifier que le nouvel exercice n'est pas clôturé
+                        if ($newExercice->isClos()) {
+                            return new JsonResponse(['success' => false, 'error' => 'Impossible de déplacer vers un exercice clôturé'], 403);
+                        }
+                        $transaction->setExercice($newExercice);
+                    }
                 }
                 
                 $transaction->setNumeroOrdre($newOrder);

@@ -140,8 +140,8 @@
             <table class="table table-striped table-hover transactions-table">
                 <thead class="table-dark">
                     <tr>
-                        <th style="width: 15%;">N° Ordre</th>
-                        <th style="width: 10%;">Libellé</th>
+                        <th style="width: 10%;">N° Ordre</th>
+                        <th style="width: 15%;">Libellé</th>
                         <th>Date</th>
                         <th>Tiers</th>
                         <th>Crédit (Entrée)</th>
@@ -633,8 +633,7 @@
             row.addEventListener('dragover', function(e) {
                 e.preventDefault();
                 const draggingRow = tbody.querySelector('.transaction-row.dragging');
-                if (draggingRow && draggingRow !== this && 
-                    draggingRow.dataset.exerciceId === this.dataset.exerciceId) {
+                if (draggingRow && draggingRow !== this) {
                     this.classList.add('drag-over');
                 }
             });
@@ -656,30 +655,34 @@
                     console.log('Dragging exercice ID:', draggingRow.dataset.exerciceId);
                     console.log('Target exercice ID:', this.dataset.exerciceId);
                     
-                    if (draggingRow.dataset.exerciceId === this.dataset.exerciceId) {
-                        console.log('=== EXECUTING DROP ===');
-                        console.log('Drop de transaction:', draggingRow.dataset.id, 'sur', this.dataset.id);
-                        
-                        // Déterminer la position d'insertion
-                        const rect = this.getBoundingClientRect();
-                        const midpoint = rect.top + rect.height / 2;
-                        
-                        if (e.clientY < midpoint) {
-                            // Insérer avant
-                            console.log('Insertion avant');
-                            tbody.insertBefore(draggingRow, this);
-                        } else {
-                            // Insérer après
-                            console.log('Insertion après');
-                            tbody.insertBefore(draggingRow, this.nextSibling);
-                        }
-                        
-                        // Sauvegarder le nouvel ordre
-                        console.log('Sauvegarde ordre pour exercice:', draggingRow.dataset.exerciceId);
-                        saveTransactionOrder(draggingRow.dataset.exerciceId);
+                    console.log('=== EXECUTING DROP ===');
+                    console.log('Drop de transaction:', draggingRow.dataset.id, 'sur', this.dataset.id);
+                    
+                    const oldExerciceId = draggingRow.dataset.exerciceId;
+                    const newExerciceId = this.dataset.exerciceId;
+                    
+                    // Déterminer la position d'insertion
+                    const rect = this.getBoundingClientRect();
+                    const midpoint = rect.top + rect.height / 2;
+                    
+                    if (e.clientY < midpoint) {
+                        // Insérer avant
+                        console.log('Insertion avant');
+                        tbody.insertBefore(draggingRow, this);
                     } else {
-                        console.log('Exercices différents, drop ignoré');
+                        // Insérer après
+                        console.log('Insertion après');
+                        tbody.insertBefore(draggingRow, this.nextSibling);
                     }
+                    
+                    // Si changement d'exercice, mettre à jour l'attribut data-exercice-id
+                    if (oldExerciceId !== newExerciceId) {
+                        console.log('Changement d\'exercice de', oldExerciceId, 'vers', newExerciceId);
+                        draggingRow.dataset.exerciceId = newExerciceId;
+                    }
+                    
+                    // Sauvegarder toutes les transactions affectées
+                    saveAllTransactionChanges();
                 } else {
                     console.log('Pas de dragging row ou même élément');
                 }
@@ -687,40 +690,93 @@
         });
     }
     
-    function saveTransactionOrder(exerciceId) {
+    function saveAllTransactionChanges() {
         const tbody = document.getElementById('transactions-tbody');
         if (!tbody) {
             console.error('Tbody des transactions non trouvé pour la sauvegarde');
             return;
         }
         
-        const transactionRows = tbody.querySelectorAll(`[data-exercice-id="${exerciceId}"].transaction-row`);
+        const allTransactionRows = tbody.querySelectorAll('.transaction-row');
         const transactionsData = [];
         
-        console.log('Sauvegarde ordre pour exercice:', exerciceId);
-        console.log('Nombre de transactions trouvées:', transactionRows.length);
+        console.log('Sauvegarde de tous les changements de transactions');
+        console.log('Nombre total de transactions:', allTransactionRows.length);
         
-        transactionRows.forEach((row, index) => {
-            const transactionId = parseInt(row.dataset.id);
-            const newOrder = index + 1;
-            
-            transactionsData.push({
-                id: transactionId,
-                order: newOrder
-            });
-            
-            // Mettre à jour visuellement le numéro d'ordre
-            const orderCell = row.querySelector('[data-field="numero_ordre"]');
-            if (orderCell) {
-                const newContent = orderCell.innerHTML.replace(/\d+$/, newOrder);
-                orderCell.innerHTML = newContent;
+        // Regrouper les transactions par exercice pour calculer les ordres corrects
+        const transactionsByExercice = {};
+        
+        allTransactionRows.forEach(row => {
+            const exerciceId = row.dataset.exerciceId;
+            if (!transactionsByExercice[exerciceId]) {
+                transactionsByExercice[exerciceId] = [];
             }
+            transactionsByExercice[exerciceId].push(row);
+        });
+        
+        // Pour chaque exercice, recalculer les ordres
+        Object.keys(transactionsByExercice).forEach(exerciceId => {
+            const exerciceRows = transactionsByExercice[exerciceId];
+            exerciceRows.forEach((row, index) => {
+                const transactionId = parseInt(row.dataset.id);
+                const newOrder = index + 1;
+                const currentExerciceId = parseInt(row.dataset.exerciceId);
+                
+                transactionsData.push({
+                    id: transactionId,
+                    order: newOrder,
+                    exercice_id: currentExerciceId
+                });
+                
+                // Mettre à jour visuellement le numéro d'ordre
+                const orderCell = row.querySelector('[data-field="numero_ordre"]');
+                if (orderCell) {
+                    const newContent = orderCell.innerHTML.replace(/\d+$/, newOrder);
+                    orderCell.innerHTML = newContent;
+                }
+            });
         });
         
         if (transactionsData.length === 0) {
-            console.log('Aucune transaction trouvée pour l\'exercice', exerciceId);
+            console.log('Aucune transaction trouvée');
             return;
         }
+        
+        console.log('Données à envoyer:', transactionsData);
+        
+        // Envoyer au serveur
+        fetch('{{ path("app_transaction_reorder") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                transactions: transactionsData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Ordre des transactions mis à jour', 'success');
+                // Recharger la page pour voir tous les changements
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                console.error('Erreur:', data.error);
+                showToast('Erreur lors de la mise à jour: ' + data.error, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showToast('Erreur de communication avec le serveur', 'error');
+        });
+    }
+    
+    function saveTransactionOrder(exerciceId) {
+        // Version simplifiée qui appelle la fonction complète
+        saveAllTransactionChanges();
+    }
         
         // Envoyer au serveur
         fetch('{{ path("app_transaction_reorder") }}', {
