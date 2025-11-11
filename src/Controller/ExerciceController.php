@@ -267,4 +267,35 @@ final class ExerciceController extends AbstractController
             return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
         }
     }
+
+    #[Route('/reorder', name: 'app_exercice_reorder', methods: ['POST'])]
+    public function reorder(Request $request, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        if (!$data || !isset($data['exercices'])) {
+            return new JsonResponse(['success' => false, 'error' => 'Données invalides'], 400);
+        }
+
+        try {
+            foreach ($data['exercices'] as $exerciceData) {
+                $exerciceId = $exerciceData['id'];
+                $newOrder = $exerciceData['order'];
+                
+                $exercice = $exerciceRepository->find($exerciceId);
+                if (!$exercice) {
+                    continue;
+                }
+                
+                $exercice->setNumeroOrdre($newOrder);
+            }
+            
+            $entityManager->flush();
+            
+            return new JsonResponse(['success' => true, 'message' => 'Ordre des exercices mis à jour']);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'error' => 'Erreur lors de la réorganisation: ' . $e->getMessage()], 500);
+        }
+    }
 }

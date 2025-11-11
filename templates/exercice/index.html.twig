@@ -84,10 +84,15 @@
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="exercices-tbody">
                                 {% for exercice in exercices %}
-                                    <tr class="{% if exercice.clos %}table-secondary{% endif %}">
-                                        <td class="text-center"><strong>{{ exercice.numeroOrdre }}</strong></td>
+                                    <tr class="{% if exercice.clos %}table-secondary{% endif %} exercice-row" 
+                                        data-exercice-id="{{ exercice.idExercice }}" 
+                                        data-order="{{ exercice.numeroOrdre }}">
+                                        <td class="text-center">
+                                            <i class="fas fa-grip-vertical drag-handle me-2" style="cursor: move; color: #ccc;" title="Glisser pour réorganiser"></i>
+                                            <strong>{{ exercice.numeroOrdre }}</strong>
+                                        </td>
                                         <td class="text-center">
                                             {% if not exercice.clos %}
                                                 <span class="editable-field" 
@@ -665,5 +670,149 @@ document.addEventListener('DOMContentLoaded', function() {
 .table-secondary {
     --bs-table-bg: #f8f9fa;
 }
+
+/* Drag & Drop Styles */
+.exercice-row.dragging {
+    opacity: 0.5;
+    background-color: #e3f2fd;
+}
+
+.exercice-row.drag-over {
+    border-top: 3px solid #2196f3;
+}
+
+.drag-handle:hover {
+    color: #2196f3 !important;
+}
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Drag & Drop pour les exercices
+    initExerciceDragDrop();
+});
+
+function initExerciceDragDrop() {
+    const tbody = document.getElementById('exercices-tbody');
+    if (!tbody) return;
+    
+    const rows = tbody.querySelectorAll('.exercice-row');
+    
+    rows.forEach(row => {
+        row.draggable = true;
+        
+        row.addEventListener('dragstart', function(e) {
+            this.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', this.dataset.exerciceId);
+        });
+        
+        row.addEventListener('dragend', function(e) {
+            this.classList.remove('dragging');
+            // Supprimer tous les indicateurs drag-over
+            rows.forEach(r => r.classList.remove('drag-over'));
+        });
+        
+        row.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const draggingRow = tbody.querySelector('.dragging');
+            if (draggingRow !== this) {
+                this.classList.add('drag-over');
+            }
+        });
+        
+        row.addEventListener('dragleave', function(e) {
+            this.classList.remove('drag-over');
+        });
+        
+        row.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            
+            const draggingRow = tbody.querySelector('.dragging');
+            if (draggingRow && draggingRow !== this) {
+                // Déterminer la position d'insertion
+                const rect = this.getBoundingClientRect();
+                const midpoint = rect.top + rect.height / 2;
+                
+                if (e.clientY < midpoint) {
+                    // Insérer avant
+                    tbody.insertBefore(draggingRow, this);
+                } else {
+                    // Insérer après
+                    tbody.insertBefore(draggingRow, this.nextSibling);
+                }
+                
+                // Sauvegarder le nouvel ordre
+                saveExerciceOrder();
+            }
+        });
+    });
+}
+
+function saveExerciceOrder() {
+    const tbody = document.getElementById('exercices-tbody');
+    const rows = tbody.querySelectorAll('.exercice-row');
+    const exercicesData = [];
+    
+    rows.forEach((row, index) => {
+        const exerciceId = parseInt(row.dataset.exerciceId);
+        const newOrder = index + 1;
+        
+        exercicesData.push({
+            id: exerciceId,
+            order: newOrder
+        });
+        
+        // Mettre à jour visuellement le numéro d'ordre
+        const orderCell = row.querySelector('td:first-child strong');
+        if (orderCell) {
+            orderCell.textContent = newOrder;
+        }
+    });
+    
+    // Envoyer au serveur
+    fetch('{{ path("app_exercice_reorder") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            exercices: exercicesData
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Afficher un message de succès subtil
+            showToast('Ordre des exercices mis à jour', 'success');
+        } else {
+            console.error('Erreur:', data.error);
+            showToast('Erreur lors de la mise à jour: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        showToast('Erreur de communication avec le serveur', 'error');
+    });
+}
+
+function showToast(message, type) {
+    // Créer un toast simple
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} me-2"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Supprimer après 3 secondes
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+</script>
+
 {% endblock %}

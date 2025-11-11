@@ -620,4 +620,40 @@ final class TransactionController extends AbstractController
             return new JsonResponse(['success' => false, 'error' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
         }
     }
+
+    #[Route('/reorder', name: 'app_transaction_reorder', methods: ['POST'])]
+    public function reorder(Request $request, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        if (!$data || !isset($data['transactions'])) {
+            return new JsonResponse(['success' => false, 'error' => 'Données invalides'], 400);
+        }
+
+        try {
+            foreach ($data['transactions'] as $transactionData) {
+                $transactionId = $transactionData['id'];
+                $newOrder = $transactionData['order'];
+                
+                $transaction = $transactionRepository->find($transactionId);
+                if (!$transaction) {
+                    continue;
+                }
+                
+                // Vérifier que l'exercice n'est pas clôturé
+                if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+                    return new JsonResponse(['success' => false, 'error' => 'Impossible de réorganiser des transactions d\'exercices clôturés'], 403);
+                }
+                
+                $transaction->setNumeroOrdre($newOrder);
+            }
+            
+            $entityManager->flush();
+            
+            return new JsonResponse(['success' => true, 'message' => 'Ordre des transactions mis à jour']);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'error' => 'Erreur lors de la réorganisation: ' . $e->getMessage()], 500);
+        }
+    }
 }

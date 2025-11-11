@@ -216,9 +216,15 @@
                         </tr>
                     {% endif %}
                     
-                    <tr data-id="{{ transaction.idTransaction }}" data-exercice-id="{{ transaction.exercice ? transaction.exercice.idExercice : '' }}" class="transaction-row">
+                    <tr data-id="{{ transaction.idTransaction }}" 
+                        data-exercice-id="{{ transaction.exercice ? transaction.exercice.idExercice : '' }}" 
+                        data-order="{{ transaction.numeroOrdre }}"
+                        class="transaction-row">
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="libelle" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.libelleComplet|raw }}</td>
-                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="numero_ordre" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.numeroOrdre }}</td>
+                        <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="numero_ordre" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>
+                            {% if not is_exercice_clos %}<i class="fas fa-grip-vertical drag-handle me-2" style="cursor: move; color: #ccc;" title="Glisser pour réorganiser"></i>{% endif %}
+                            {{ transaction.numeroOrdre }}
+                        </td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="date_transaction" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>{{ transaction.dateTransaction ? transaction.dateTransaction|date('Y-m-d') : '' }}</td>
                         <td class="{% if not is_exercice_clos %}editable-field{% endif %}" data-field="tiers" data-current-personne="{{ transaction.personne ? transaction.personne.idPersonne : '' }}" data-current-entreprise="{{ transaction.entreprise ? transaction.entreprise.idEntreprise : '' }}" {% if is_exercice_clos %}title="Exercice clôturé - Modification impossible"{% endif %}>
                             {% if transaction.personne %}
@@ -578,5 +584,149 @@
                 }
             });
         });
+        
+        // Initialiser le drag & drop pour les transactions
+        initTransactionDragDrop();
+    });
+    
+    function initTransactionDragDrop() {
+        const transactionRows = document.querySelectorAll('.transaction-row');
+        
+        transactionRows.forEach(row => {
+            const dragHandle = row.querySelector('.drag-handle');
+            if (!dragHandle) return; // Pas de drag pour les exercices clôturés
+            
+            row.draggable = true;
+            
+            row.addEventListener('dragstart', function(e) {
+                this.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', this.dataset.id);
+            });
+            
+            row.addEventListener('dragend', function(e) {
+                this.classList.remove('dragging');
+                // Supprimer tous les indicateurs drag-over
+                transactionRows.forEach(r => r.classList.remove('drag-over'));
+            });
+            
+            row.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                const draggingRow = document.querySelector('.transaction-row.dragging');
+                if (draggingRow && draggingRow !== this && 
+                    draggingRow.dataset.exerciceId === this.dataset.exerciceId) {
+                    this.classList.add('drag-over');
+                }
+            });
+            
+            row.addEventListener('dragleave', function(e) {
+                this.classList.remove('drag-over');
+            });
+            
+            row.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                
+                const draggingRow = document.querySelector('.transaction-row.dragging');
+                if (draggingRow && draggingRow !== this && 
+                    draggingRow.dataset.exerciceId === this.dataset.exerciceId) {
+                    
+                    // Déterminer la position d'insertion
+                    const rect = this.getBoundingClientRect();
+                    const midpoint = rect.top + rect.height / 2;
+                    
+                    if (e.clientY < midpoint) {
+                        // Insérer avant
+                        this.parentNode.insertBefore(draggingRow, this);
+                    } else {
+                        // Insérer après
+                        this.parentNode.insertBefore(draggingRow, this.nextSibling);
+                    }
+                    
+                    // Sauvegarder le nouvel ordre
+                    saveTransactionOrder(draggingRow.dataset.exerciceId);
+                }
+            });
+        });
+    }
+    
+    function saveTransactionOrder(exerciceId) {
+        const transactionRows = document.querySelectorAll(`[data-exercice-id="${exerciceId}"].transaction-row`);
+        const transactionsData = [];
+        
+        transactionRows.forEach((row, index) => {
+            const transactionId = parseInt(row.dataset.id);
+            const newOrder = index + 1;
+            
+            transactionsData.push({
+                id: transactionId,
+                order: newOrder
+            });
+            
+            // Mettre à jour visuellement le numéro d'ordre
+            const orderCell = row.querySelector('[data-field="numero_ordre"]');
+            if (orderCell) {
+                const newContent = orderCell.innerHTML.replace(/\d+$/, newOrder);
+                orderCell.innerHTML = newContent;
+            }
+        });
+        
+        // Envoyer au serveur
+        fetch('{{ path("app_transaction_reorder") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                transactions: transactionsData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Ordre des transactions mis à jour', 'success');
+            } else {
+                console.error('Erreur:', data.error);
+                showToast('Erreur lors de la mise à jour: ' + data.error, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showToast('Erreur de communication avec le serveur', 'error');
+        });
+    }
+    
+    function showToast(message, type) {
+        // Créer un toast simple
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} me-2"></i>
+            ${message}
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Supprimer après 3 secondes
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
     </script>
+    
+    <style>
+    /* Drag & Drop Styles pour les transactions */
+    .transaction-row.dragging {
+        opacity: 0.5;
+        background-color: #e3f2fd;
+    }
+    
+    .transaction-row.drag-over {
+        border-top: 3px solid #2196f3;
+    }
+    
+    .drag-handle:hover {
+        color: #2196f3 !important;
+    }
+    </style>
 {% endblock %}
