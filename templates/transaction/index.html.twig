@@ -305,12 +305,14 @@
         </div>
     </div>
 
+    <script src="{{ asset('js/transaction-drag-drop.js') }}"></script>
     <script>
-        // URLs pour les appels AJAX
-        const TRANSACTION_REORDER_URL = '{{ path("app_transaction_reorder") }}';
+        // Configuration de l'URL pour le fichier JavaScript externe
+        setTransactionReorderUrl('{{ path("app_transaction_reorder") }}');
         
         // Fonction pour afficher une notification
-        function showNotification(message, type = 'danger') {
+        function showNotification(message, type) {
+            if (typeof type === 'undefined') type = 'danger';
             const notificationsContainer = document.getElementById('notifications');
             
             const notification = document.createElement('div');
@@ -588,25 +590,9 @@
         });
     });
     
-    // Initialisation séparée pour le drag & drop
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('=== INITIALISATION DRAG & DROP ===');
-        console.log('DOM chargé, début initialisation drag & drop...');
-        
-        // Attendre un peu que tout soit rendu
-        setTimeout(() => {
-            console.log('Initialisation du drag & drop des transactions...');
-            initTransactionDragDrop();
-        }, 200);
-    });
-    
-    function initTransactionDragDrop() {
-        console.log('=== DEBUT initTransactionDragDrop ===');
-        const tbody = document.getElementById('transactions-tbody');
-        console.log('Tbody trouvé:', tbody);
-        
-        if (!tbody) {
-            console.error('Tbody des transactions non trouvé !');
+    // Le drag & drop est maintenant géré par le fichier externe transaction-drag-drop.js
+    </script>
+
             console.log('Éléments avec id transactions-tbody:', document.querySelectorAll('#transactions-tbody'));
             console.log('Tous les tbody:', document.querySelectorAll('tbody'));
             return;
