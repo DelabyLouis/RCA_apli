@@ -306,6 +306,9 @@
     </div>
 
     <script>
+        // URLs pour les appels AJAX
+        const TRANSACTION_REORDER_URL = '{{ path("app_transaction_reorder") }}';
+        
         // Fonction pour afficher une notification
         function showNotification(message, type = 'danger') {
             const notificationsContainer = document.getElementById('notifications');
@@ -772,7 +775,7 @@
         console.log('Données à envoyer:', transactionsData);
         
         // Envoyer au serveur
-        fetch('{{ path("app_transaction_reorder") }}', {
+        fetch(TRANSACTION_REORDER_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -803,31 +806,6 @@
     function saveTransactionOrder(exerciceId) {
         // Version simplifiée qui appelle la fonction complète
         saveAllTransactionChanges();
-    }
-        
-        // Envoyer au serveur
-        fetch('{{ path("app_transaction_reorder") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                transactions: transactionsData
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast('Ordre des transactions mis à jour', 'success');
-            } else {
-                console.error('Erreur:', data.error);
-                showToast('Erreur lors de la mise à jour: ' + data.error, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            showToast('Erreur de communication avec le serveur', 'error');
-        });
     }
     
     function showToast(message, type) {
