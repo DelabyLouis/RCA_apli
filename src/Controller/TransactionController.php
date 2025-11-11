@@ -624,15 +624,9 @@ final class TransactionController extends AbstractController
     #[Route('/reorder', name: 'app_transaction_reorder', methods: ['POST'])]
     public function reorder(Request $request, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
     {
-        // Debug: log les données reçues
-        error_log('=== TRANSACTION REORDER DEBUG ===');
-        error_log('Raw request content: ' . $request->getContent());
-        
         $data = json_decode($request->getContent(), true);
-        error_log('Decoded data: ' . print_r($data, true));
         
         if (!$data || !isset($data['transactions'])) {
-            error_log('Données invalides reçues');
             return new JsonResponse(['success' => false, 'error' => 'Données invalides'], 400);
         }
 
@@ -641,7 +635,7 @@ final class TransactionController extends AbstractController
                 $transactionId = (int) $transactionData['id'];
                 $newOrder = (int) $transactionData['order'];
                 
-                $transaction = $transactionRepository->find($transactionId);
+                $transaction = $transactionRepository->findOneBy(['id_transaction' => $transactionId]);
                 if (!$transaction) {
                     continue;
                 }
@@ -678,8 +672,6 @@ final class TransactionController extends AbstractController
             return new JsonResponse(['success' => true, 'message' => 'Ordre des transactions mis à jour']);
             
         } catch (\Exception $e) {
-            // Log l'erreur pour debug
-            error_log('Erreur dans transaction reorder: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
             return new JsonResponse(['success' => false, 'error' => 'Erreur lors de la réorganisation: ' . $e->getMessage()], 500);
         }
     }
