@@ -16,21 +16,26 @@ class CustomUserProvider implements UserProviderInterface
 
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
-        // Essayer d'abord par username
-        $user = $this->userRepository->findOneBy(['username' => $identifier]);
+        // Essayer d'abord par username (seulement si utilisateur activé)
+        $user = $this->userRepository->findOneBy([
+            'username' => $identifier, 
+            'enabled' => true
+        ]);
         
         // Si pas trouvé par username, essayer par email de la personne
         if (!$user) {
             $user = $this->userRepository->createQueryBuilder('u')
                 ->join('u.personne', 'p')
                 ->where('p.email = :email')
+                ->andWhere('u.enabled = :enabled')
                 ->setParameter('email', $identifier)
+                ->setParameter('enabled', true)
                 ->getQuery()
                 ->getOneOrNullResult();
         }
 
         if (!$user) {
-            throw new UserNotFoundException(sprintf('User "%s" not found.', $identifier));
+            throw new UserNotFoundException(sprintf('User "%s" not found or disabled.', $identifier));
         }
 
         return $user;
@@ -42,7 +47,14 @@ class CustomUserProvider implements UserProviderInterface
             throw new UserNotFoundException('Invalid user class.');
         }
 
-        return $this->loadUserByIdentifier($user->getUserIdentifier());
+        // Lors du refresh, on cherche par ID pour être sûr
+        $refreshedUser = $this->userRepository->find($user->getIdUser());
+        
+        if (!$refreshedUser || !$refreshedUser->isEnabled()) {
+            throw new UserNotFoundException(sprintf('User with ID "%s" not found or disabled.', $user->getIdUser()));
+        }
+
+        return $refreshedUser;
     }
 
     public function supportsClass(string $class): bool
