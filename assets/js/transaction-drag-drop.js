@@ -68,6 +68,29 @@ function initTransactionDragDrop() {
         // Test simple : ajouter une bordure colorée pour voir les éléments draggables
         row.style.border = "2px solid green";
 
+        // Test de click sur le drag handle pour vérifier l'interactivité
+        if (dragHandle) {
+            dragHandle.addEventListener("click", function (e) {
+                console.log("=== CLICK TEST ===");
+                console.log(
+                    "Click sur drag handle de transaction:",
+                    row.dataset.id
+                );
+                alert("Click détecté ! Drag handle fonctionne.");
+                e.preventDefault();
+            });
+
+            // Test de survol
+            dragHandle.addEventListener("mouseenter", function () {
+                console.log("Survol du drag handle:", row.dataset.id);
+                dragHandle.style.color = "red";
+            });
+
+            dragHandle.addEventListener("mouseleave", function () {
+                dragHandle.style.color = "";
+            });
+        }
+
         // Event listeners
         addDragEventListeners(row, tbody);
     });
