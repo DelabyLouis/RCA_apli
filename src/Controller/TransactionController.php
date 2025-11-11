@@ -632,8 +632,8 @@ final class TransactionController extends AbstractController
 
         try {
             foreach ($data['transactions'] as $transactionData) {
-                $transactionId = $transactionData['id'];
-                $newOrder = $transactionData['order'];
+                $transactionId = (int) $transactionData['id'];
+                $newOrder = (int) $transactionData['order'];
                 
                 $transaction = $transactionRepository->find($transactionId);
                 if (!$transaction) {
@@ -646,14 +646,21 @@ final class TransactionController extends AbstractController
                 }
                 
                 // Gérer le changement d'exercice si spécifié
-                if (isset($transactionData['exercice_id']) && $transactionData['exercice_id'] != $transaction->getExercice()?->getIdExercice()) {
-                    $newExercice = $exerciceRepository->find($transactionData['exercice_id']);
-                    if ($newExercice) {
-                        // Vérifier que le nouvel exercice n'est pas clôturé
-                        if ($newExercice->isClos()) {
-                            return new JsonResponse(['success' => false, 'error' => 'Impossible de déplacer vers un exercice clôturé'], 403);
+                if (isset($transactionData['exercice_id'])) {
+                    $newExerciceId = (int) $transactionData['exercice_id'];
+                    $currentExerciceId = $transaction->getExercice() ? $transaction->getExercice()->getIdExercice() : null;
+                    
+                    if ($newExerciceId !== $currentExerciceId) {
+                        $newExercice = $exerciceRepository->find($newExerciceId);
+                        if ($newExercice) {
+                            // Vérifier que le nouvel exercice n'est pas clôturé
+                            if ($newExercice->isClos()) {
+                                return new JsonResponse(['success' => false, 'error' => 'Impossible de déplacer vers un exercice clôturé'], 403);
+                            }
+                            $transaction->setExercice($newExercice);
+                        } else {
+                            return new JsonResponse(['success' => false, 'error' => "Exercice avec l'ID {$newExerciceId} non trouvé"], 400);
                         }
-                        $transaction->setExercice($newExercice);
                     }
                 }
                 
@@ -665,6 +672,8 @@ final class TransactionController extends AbstractController
             return new JsonResponse(['success' => true, 'message' => 'Ordre des transactions mis à jour']);
             
         } catch (\Exception $e) {
+            // Log l'erreur pour debug
+            error_log('Erreur dans transaction reorder: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
             return new JsonResponse(['success' => false, 'error' => 'Erreur lors de la réorganisation: ' . $e->getMessage()], 500);
         }
     }
