@@ -195,7 +195,18 @@ function saveAllTransactionChanges() {
             transactions: transactionsData,
         }),
     })
-        .then((response) => response.json())
+        .then((response) => {
+            if (!response.ok) {
+                // Récupérer le texte de la réponse pour debug
+                return response.text().then((text) => {
+                    console.error("Réponse serveur (non-JSON):", text);
+                    throw new Error(
+                        `HTTP ${response.status}: ${text.substring(0, 200)}...`
+                    );
+                });
+            }
+            return response.json();
+        })
         .then((data) => {
             if (data.success) {
                 showToast("Ordre des transactions mis à jour", "success");
