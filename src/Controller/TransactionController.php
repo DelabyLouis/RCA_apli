@@ -657,7 +657,7 @@ final class TransactionController extends AbstractController
                     $currentExerciceId = $transaction->getExercice() ? $transaction->getExercice()->getIdExercice() : null;
                     
                     if ($newExerciceId !== $currentExerciceId) {
-                        $newExercice = $exerciceRepository->findOneBy(['id_exercice' => $newExerciceId]);
+                        $newExercice = $entityManager->getRepository(\App\Entity\Exercice::class)->findOneBy(['id_exercice' => $newExerciceId]);
                         if ($newExercice) {
                             // Vérifier que le nouvel exercice n'est pas clôturé
                             if ($newExercice->isClos()) {
