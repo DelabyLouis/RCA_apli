@@ -584,34 +584,62 @@
                 }
             });
         });
+    });
+    
+    // Initialisation séparée pour le drag & drop
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== INITIALISATION DRAG & DROP ===');
+        console.log('DOM chargé, début initialisation drag & drop...');
         
-        // Initialiser le drag & drop pour les transactions
-        console.log('Initialisation du drag & drop des transactions...');
-        initTransactionDragDrop();
+        // Attendre un peu que tout soit rendu
+        setTimeout(() => {
+            console.log('Initialisation du drag & drop des transactions...');
+            initTransactionDragDrop();
+        }, 200);
     });
     
     function initTransactionDragDrop() {
+        console.log('=== DEBUT initTransactionDragDrop ===');
         const tbody = document.getElementById('transactions-tbody');
+        console.log('Tbody trouvé:', tbody);
+        
         if (!tbody) {
-            console.log('Tbody des transactions non trouvé');
+            console.error('Tbody des transactions non trouvé !');
+            console.log('Éléments avec id transactions-tbody:', document.querySelectorAll('#transactions-tbody'));
+            console.log('Tous les tbody:', document.querySelectorAll('tbody'));
             return;
         }
         
         const transactionRows = tbody.querySelectorAll('.transaction-row');
         console.log('Nombre de lignes de transactions trouvées:', transactionRows.length);
         
-        transactionRows.forEach(row => {
+        if (transactionRows.length === 0) {
+            console.log('Aucune ligne .transaction-row trouvée dans le tbody');
+            console.log('Toutes les lignes dans tbody:', tbody.querySelectorAll('tr'));
+            return;
+        }
+        
+        transactionRows.forEach((row, index) => {
+            console.log(`--- Transaction ${index + 1} ---`);
+            console.log('Row:', row);
+            console.log('Dataset:', row.dataset);
+            
             const dragHandle = row.querySelector('.drag-handle');
+            console.log('Drag handle:', dragHandle);
+            
             if (!dragHandle) {
                 console.log('Pas de drag-handle pour la transaction:', row.dataset.id);
+                console.log('Contenu de la première cellule:', row.querySelector('td')?.innerHTML);
                 return; // Pas de drag pour les exercices clôturés
             }
             
             console.log('Initialisation drag pour transaction:', row.dataset.id);
-            console.log('Drag handle trouvé:', dragHandle);
             row.draggable = true;
             row.setAttribute('draggable', 'true');
-            console.log('Draggable set to:', row.draggable);
+            console.log('Draggable set to:', row.getAttribute('draggable'));
+            
+            // Test simple : ajouter une bordure colorée pour voir les éléments draggables
+            row.style.border = '2px solid green';
             
             row.addEventListener('dragstart', function(e) {
                 console.log('=== DRAG START ===');
