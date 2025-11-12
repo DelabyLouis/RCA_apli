@@ -641,7 +641,9 @@ final class TransactionController extends AbstractController
 
             $updated = 0;
             $errors = [];
+            $transactionsToUpdate = [];
             
+            // ÉTAPE 1: Préparer et valider toutes les transactions
             foreach ($data['transactions'] as $item) {
                 if (!isset($item['id']) || !isset($item['order'])) {
                     $errors[] = "Élément manquant id ou order: " . print_r($item, true);
@@ -660,26 +662,59 @@ final class TransactionController extends AbstractController
                     continue;
                 }
                 
-                error_log("Mise à jour transaction " . $item['id'] . " ordre: " . $item['order']);
-                $transaction->setNumeroOrdre((int)$item['order']);
+                $transactionsToUpdate[] = [
+                    'transaction' => $transaction,
+                    'newOrder' => (int)$item['order'],
+                    'exerciceId' => isset($item['exercice_id']) ? (int)$item['exercice_id'] : null
+                ];
+            }
+            
+            if (empty($transactionsToUpdate)) {
+                return new JsonResponse(['success' => false, 'error' => 'Aucune transaction valide à mettre à jour'], 400);
+            }
+            
+            // ÉTAPE 2: Assigner des numéros d'ordre temporaires pour éviter les conflits
+            // On utilise des nombres négatifs temporaires
+            error_log("Assignation de numéros temporaires...");
+            foreach ($transactionsToUpdate as $index => $item) {
+                $transaction = $item['transaction'];
+                $tempOrder = -1000 - $index; // Numéros négatifs temporaires
+                $transaction->setNumeroOrdre($tempOrder);
+                error_log("Transaction " . $transaction->getIdTransaction() . " -> ordre temporaire: " . $tempOrder);
+            }
+            
+            // Flush intermédiaire pour libérer les anciens numéros d'ordre
+            $entityManager->flush();
+            error_log("Flush intermédiaire terminé");
+            
+            // ÉTAPE 3: Assigner les nouveaux numéros d'ordre définitifs
+            error_log("Assignation des nouveaux numéros d'ordre...");
+            foreach ($transactionsToUpdate as $item) {
+                $transaction = $item['transaction'];
+                $newOrder = $item['newOrder'];
+                $exerciceId = $item['exerciceId'];
+                
+                $transaction->setNumeroOrdre($newOrder);
+                error_log("Transaction " . $transaction->getIdTransaction() . " -> ordre final: " . $newOrder);
                 
                 // Changement d'exercice si spécifié
-                if (isset($item['exercice_id'])) {
-                    $newExercice = $exerciceRepository->findOneBy(['id_exercice' => (int)$item['exercice_id']]);
+                if ($exerciceId) {
+                    $newExercice = $exerciceRepository->findOneBy(['id_exercice' => $exerciceId]);
                     if ($newExercice && !$newExercice->isClos()) {
                         $transaction->setExercice($newExercice);
-                        error_log("Changement exercice pour transaction " . $item['id'] . " vers " . $item['exercice_id']);
+                        error_log("Changement exercice pour transaction " . $transaction->getIdTransaction() . " vers " . $exerciceId);
                     } else {
-                        $errors[] = "Exercice non trouvé ou clôturé: " . $item['exercice_id'];
+                        $errors[] = "Exercice non trouvé ou clôturé: " . $exerciceId;
                     }
                 }
                 
                 $updated++;
             }
             
-            error_log("Flush entity manager...");
+            // ÉTAPE 4: Flush final
+            error_log("Flush final...");
             $entityManager->flush();
-            error_log("Flush terminé avec succès");
+            error_log("Flush final terminé avec succès");
             
             $response = ['success' => true, 'message' => "{$updated} transactions mises à jour", 'errors' => $errors];
             error_log("Réponse: " . print_r($response, true));
