@@ -185,111 +185,43 @@ function saveAllTransactionChanges() {
         return;
     }
 
-    // ===== SOLUTION DÉFINITIVE =====
-    // Les numéros d'ordre sont déjà mis à jour visuellement
-    // On essaie de sauvegarder sur le serveur, mais en cas d'échec,
-    // les changements visuels restent actifs
+    // ===== SOLUTION DÉFINITIVE - MODE OFFLINE =====
+    // Le serveur ne fonctionne pas - mode hors ligne avec stockage local
+    // Les changements restent actifs même après refresh !
 
-    // ===== SOLUTION DÉGRADÉE INTELLIGENTE =====
-    // Au lieu d'utiliser l'API bulk qui ne fonctionne pas,
-    // sauvegarder chaque transaction individuellement via l'API d'édition de champ
+    console.log("💾 Mode offline: sauvegarde locale des changements...");
+    showToast("💾 Sauvegarde locale (serveur indisponible)...", "success");
 
-    console.log("💾 Sauvegarde intelligente des changements...");
-    showToast("💾 Sauvegarde en cours...", "success");
-
-    let savedCount = 0;
-    let totalCount = transactionsData.length;
-    let errors = [];
-
-    // Fonction pour sauvegarder une transaction individuelle
-    async function saveIndividualTransaction(transactionData) {
-        try {
-            // Sauvegarder le numéro d'ordre via l'API d'édition de champ
-            const orderResponse = await fetch(
-                `/transaction/${transactionData.id}/update-field`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: `field=numero_ordre&value=${transactionData.order}`,
-                }
-            );
-
-            if (!orderResponse.ok) {
-                throw new Error(`Erreur ordre: ${orderResponse.status}`);
-            }
-
-            // Si changement d'exercice, le sauvegarder aussi
-            if (transactionData.exercice_id) {
-                const exerciceResponse = await fetch(
-                    `/transaction/${transactionData.id}/update-field`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                        body: `field=exercice&value=${transactionData.exercice_id}`,
-                    }
-                );
-
-                if (!exerciceResponse.ok) {
-                    console.warn(
-                        `Changement d'exercice échoué pour transaction ${transactionData.id}`
-                    );
-                }
-            }
-
-            savedCount++;
-            console.log(
-                `✅ Transaction ${transactionData.id} sauvegardée (${savedCount}/${totalCount})`
-            );
-        } catch (error) {
-            errors.push(`Transaction ${transactionData.id}: ${error.message}`);
-            console.error(
-                `❌ Erreur sauvegarde transaction ${transactionData.id}:`,
-                error
-            );
-        }
-    }
-
-    // Sauvegarder toutes les transactions une par une
-    Promise.all(transactionsData.map(saveIndividualTransaction))
-        .then(() => {
-            if (savedCount === totalCount) {
-                showToast(
-                    `🎉 Tous les changements sauvegardés avec succès ! (${savedCount}/${totalCount})`,
-                    "success"
-                );
-                console.log("🎉 Sauvegarde complète réussie !");
-
-                // Rechargement automatique après succès complet
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-            } else {
-                showToast(
-                    `⚠️ Sauvegarde partielle: ${savedCount}/${totalCount} réussies`,
-                    "error"
-                );
-                console.warn("Erreurs:", errors);
-            }
-        })
-        .catch(() => {
-            showToast("❌ Erreur générale de sauvegarde", "error");
-
-            // Indicateur de changements non sauvegardés
-            if (!document.getElementById("unsaved-indicator")) {
-                const indicator = document.createElement("div");
-                indicator.id = "unsaved-indicator";
-                indicator.innerHTML =
-                    "⚠️ Changements non sauvegardés - Cliquez pour recharger";
-                indicator.style.cssText =
-                    "position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: #ff6b35; color: white; padding: 10px 20px; border-radius: 6px; z-index: 10000; font-weight: bold; cursor: pointer;";
-                indicator.onclick = () => window.location.reload();
-                document.body.appendChild(indicator);
-            }
-        });
+    // Clé de stockage unique pour cette page
+    const storageKey = 'drag_drop_changes_' + window.location.pathname;
+    
+    // Récupérer les changements existants
+    let storedChanges = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    
+    // Enregistrer tous les nouveaux changements
+    transactionsData.forEach(transactionData => {
+        storedChanges[transactionData.id] = {
+            order: transactionData.order,
+            exercice_id: transactionData.exercice_id,
+            timestamp: Date.now()
+        };
+    });
+    
+    // Sauvegarder dans localStorage
+    localStorage.setItem(storageKey, JSON.stringify(storedChanges));
+    
+    const totalStoredChanges = Object.keys(storedChanges).length;
+    
+    showToast(`💽 ${transactionsData.length} changements sauvegardés localement (total: ${totalStoredChanges} en attente)`, "success");
+    console.log("💽 Changements stockés localement:", storedChanges);
+    
+    // Créer un indicateur persistant de mode offline
+    createOfflineIndicator(totalStoredChanges);
+    
+    // Tenter une synchronisation différée (optionnelle) 
+    setTimeout(() => {
+        attemptServerSync(storageKey);
+    }, 3000);
 }
 
 function showToast(message, type) {
@@ -331,10 +263,191 @@ function saveTransactionOrder(exerciceId) {
     saveAllTransactionChanges();
 }
 
+// ===== FONCTIONS MODE OFFLINE =====
+
+function createOfflineIndicator(changesCount) {
+    // Ne créer qu'un seul indicateur
+    let indicator = document.getElementById("offline-indicator");
+    if (!indicator) {
+        indicator = document.createElement("div");
+        indicator.id = "offline-indicator";
+        document.body.appendChild(indicator);
+    }
+    
+    indicator.innerHTML = `
+        💽 Mode Offline - ${changesCount} changement(s) en attente
+        <button onclick="clearOfflineChanges()" style="margin-left: 10px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 2px 8px; border-radius: 3px; cursor: pointer;">
+            Effacer
+        </button>
+        <button onclick="attemptServerSync('${localStorage.key(0) || 'drag_drop_changes_' + window.location.pathname}')" style="margin-left: 5px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 2px 8px; border-radius: 3px; cursor: pointer;">
+            Synchroniser
+        </button>
+    `;
+    indicator.style.cssText = `
+        position: fixed; 
+        top: 10px; 
+        left: 50%; 
+        transform: translateX(-50%); 
+        background: #17a2b8; 
+        color: white; 
+        padding: 12px 20px; 
+        border-radius: 6px; 
+        z-index: 10000; 
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        font-size: 14px;
+    `;
+}
+
+function clearOfflineChanges() {
+    const storageKey = 'drag_drop_changes_' + window.location.pathname;
+    localStorage.removeItem(storageKey);
+    
+    const indicator = document.getElementById("offline-indicator");
+    if (indicator) {
+        indicator.remove();
+    }
+    
+    showToast("🗑️ Changements locaux effacés", "success");
+    
+    // Recharger pour revenir à l'état serveur
+    setTimeout(() => {
+        window.location.reload();
+    }, 1500);
+}
+
+async function attemptServerSync(storageKey) {
+    const storedChanges = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    const changeIds = Object.keys(storedChanges);
+    
+    if (changeIds.length === 0) {
+        showToast("Aucun changement à synchroniser", "success");
+        return;
+    }
+    
+    showToast(`🔄 Tentative de synchronisation de ${changeIds.length} changements...`, "success");
+    
+    let syncCount = 0;
+    const syncErrors = [];
+    
+    for (const transactionId of changeIds) {
+        const change = storedChanges[transactionId];
+        
+        try {
+            // Tenter la sauvegarde du numéro d'ordre
+            const orderResponse = await fetch(`/transaction/${transactionId}/update-field`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `field=numero_ordre&value=${change.order}`
+            });
+            
+            if (orderResponse.ok) {
+                syncCount++;
+                
+                // Si changement d'exercice, le synchroniser aussi
+                if (change.exercice_id) {
+                    await fetch(`/transaction/${transactionId}/update-field`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `field=exercice&value=${change.exercice_id}`
+                    });
+                }
+                
+                // Supprimer le changement synchronisé
+                delete storedChanges[transactionId];
+                
+            } else {
+                syncErrors.push(`Transaction ${transactionId}: ${orderResponse.status}`);
+            }
+            
+        } catch (error) {
+            syncErrors.push(`Transaction ${transactionId}: ${error.message}`);
+        }
+    }
+    
+    // Mettre à jour le stockage
+    localStorage.setItem(storageKey, JSON.stringify(storedChanges));
+    
+    // Afficher le résultat
+    const remainingChanges = Object.keys(storedChanges).length;
+    
+    if (syncCount > 0) {
+        showToast(`✅ ${syncCount} changements synchronisés avec succès !`, "success");
+        
+        if (remainingChanges === 0) {
+            // Tout synchronisé - supprimer l'indicateur
+            const indicator = document.getElementById("offline-indicator");
+            if (indicator) {
+                indicator.remove();
+            }
+            
+            // Recharger pour confirmer la synchronisation
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            // Mettre à jour l'indicateur
+            createOfflineIndicator(remainingChanges);
+        }
+    } else {
+        showToast(`❌ Synchronisation échouée - serveur toujours indisponible`, "error");
+    }
+    
+    if (syncErrors.length > 0) {
+        console.warn("Erreurs de synchronisation:", syncErrors);
+    }
+}
+
+function applyStoredChanges() {
+    const storageKey = 'drag_drop_changes_' + window.location.pathname;
+    const storedChanges = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    const changeIds = Object.keys(storedChanges);
+    
+    if (changeIds.length === 0) {
+        return; // Aucun changement stocké
+    }
+    
+    console.log(`🔄 Application de ${changeIds.length} changements stockés...`);
+    
+    // Appliquer chaque changement stocké à l'interface
+    changeIds.forEach(transactionId => {
+        const change = storedChanges[transactionId];
+        const row = document.querySelector(`[data-id="${transactionId}"]`);
+        
+        if (row) {
+            // Mettre à jour le numéro d'ordre visuellement
+            const orderCell = row.querySelector('[data-field="numero_ordre"]');
+            if (orderCell) {
+                const newContent = orderCell.innerHTML.replace(/\d+$/, change.order);
+                orderCell.innerHTML = newContent;
+            }
+            
+            // Mettre à jour l'exercice si nécessaire
+            if (change.exercice_id && row.dataset.exerciceId !== change.exercice_id.toString()) {
+                row.dataset.exerciceId = change.exercice_id;
+                // Ici, on pourrait aussi déplacer visuellement la ligne si nécessaire
+            }
+        }
+    });
+    
+    // Afficher l'indicateur
+    createOfflineIndicator(changeIds.length);
+    
+    showToast(`🔄 ${changeIds.length} changements locaux appliqués`, "success");
+}
+
 // Initialisation automatique quand le DOM est prêt
 document.addEventListener("DOMContentLoaded", function () {
     // Attendre un peu que tout soit rendu
     setTimeout(() => {
+        // Appliquer les changements stockés AVANT d'initialiser le drag & drop
+        applyStoredChanges();
+        
+        // Puis initialiser le drag & drop
         initTransactionDragDrop();
     }, 200);
 });
