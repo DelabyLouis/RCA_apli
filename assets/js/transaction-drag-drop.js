@@ -193,32 +193,35 @@ function saveAllTransactionChanges() {
     showToast("💾 Sauvegarde locale (serveur indisponible)...", "success");
 
     // Clé de stockage unique pour cette page
-    const storageKey = 'drag_drop_changes_' + window.location.pathname;
-    
+    const storageKey = "drag_drop_changes_" + window.location.pathname;
+
     // Récupérer les changements existants
-    let storedChanges = JSON.parse(localStorage.getItem(storageKey) || '{}');
-    
+    let storedChanges = JSON.parse(localStorage.getItem(storageKey) || "{}");
+
     // Enregistrer tous les nouveaux changements
-    transactionsData.forEach(transactionData => {
+    transactionsData.forEach((transactionData) => {
         storedChanges[transactionData.id] = {
             order: transactionData.order,
             exercice_id: transactionData.exercice_id,
-            timestamp: Date.now()
+            timestamp: Date.now(),
         };
     });
-    
+
     // Sauvegarder dans localStorage
     localStorage.setItem(storageKey, JSON.stringify(storedChanges));
-    
+
     const totalStoredChanges = Object.keys(storedChanges).length;
-    
-    showToast(`💽 ${transactionsData.length} changements sauvegardés localement (total: ${totalStoredChanges} en attente)`, "success");
+
+    showToast(
+        `💽 ${transactionsData.length} changements sauvegardés localement (total: ${totalStoredChanges} en attente)`,
+        "success"
+    );
     console.log("💽 Changements stockés localement:", storedChanges);
-    
+
     // Créer un indicateur persistant de mode offline
     createOfflineIndicator(totalStoredChanges);
-    
-    // Tenter une synchronisation différée (optionnelle) 
+
+    // Tenter une synchronisation différée (optionnelle)
     setTimeout(() => {
         attemptServerSync(storageKey);
     }, 3000);
@@ -273,13 +276,16 @@ function createOfflineIndicator(changesCount) {
         indicator.id = "offline-indicator";
         document.body.appendChild(indicator);
     }
-    
+
     indicator.innerHTML = `
         💽 Mode Offline - ${changesCount} changement(s) en attente
         <button onclick="clearOfflineChanges()" style="margin-left: 10px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 2px 8px; border-radius: 3px; cursor: pointer;">
             Effacer
         </button>
-        <button onclick="attemptServerSync('${localStorage.key(0) || 'drag_drop_changes_' + window.location.pathname}')" style="margin-left: 5px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 2px 8px; border-radius: 3px; cursor: pointer;">
+        <button onclick="attemptServerSync('${
+            localStorage.key(0) ||
+            "drag_drop_changes_" + window.location.pathname
+        }')" style="margin-left: 5px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 2px 8px; border-radius: 3px; cursor: pointer;">
             Synchroniser
         </button>
     `;
@@ -300,16 +306,16 @@ function createOfflineIndicator(changesCount) {
 }
 
 function clearOfflineChanges() {
-    const storageKey = 'drag_drop_changes_' + window.location.pathname;
+    const storageKey = "drag_drop_changes_" + window.location.pathname;
     localStorage.removeItem(storageKey);
-    
+
     const indicator = document.getElementById("offline-indicator");
     if (indicator) {
         indicator.remove();
     }
-    
+
     showToast("🗑️ Changements locaux effacés", "success");
-    
+
     // Recharger pour revenir à l'état serveur
     setTimeout(() => {
         window.location.reload();
@@ -317,74 +323,83 @@ function clearOfflineChanges() {
 }
 
 async function attemptServerSync(storageKey) {
-    const storedChanges = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    const storedChanges = JSON.parse(localStorage.getItem(storageKey) || "{}");
     const changeIds = Object.keys(storedChanges);
-    
+
     if (changeIds.length === 0) {
         showToast("Aucun changement à synchroniser", "success");
         return;
     }
-    
-    showToast(`🔄 Tentative de synchronisation de ${changeIds.length} changements...`, "success");
-    
+
+    showToast(
+        `🔄 Tentative de synchronisation de ${changeIds.length} changements...`,
+        "success"
+    );
+
     let syncCount = 0;
     const syncErrors = [];
-    
+
     for (const transactionId of changeIds) {
         const change = storedChanges[transactionId];
-        
+
         try {
             // Tenter la sauvegarde du numéro d'ordre
-            const orderResponse = await fetch(`/transaction/${transactionId}/update-field`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `field=numero_ordre&value=${change.order}`
-            });
-            
+            const orderResponse = await fetch(
+                `/transaction/${transactionId}/update-field`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: `field=numero_ordre&value=${change.order}`,
+                }
+            );
+
             if (orderResponse.ok) {
                 syncCount++;
-                
+
                 // Si changement d'exercice, le synchroniser aussi
                 if (change.exercice_id) {
                     await fetch(`/transaction/${transactionId}/update-field`, {
-                        method: 'POST',
+                        method: "POST",
                         headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
+                            "Content-Type": "application/x-www-form-urlencoded",
                         },
-                        body: `field=exercice&value=${change.exercice_id}`
+                        body: `field=exercice&value=${change.exercice_id}`,
                     });
                 }
-                
+
                 // Supprimer le changement synchronisé
                 delete storedChanges[transactionId];
-                
             } else {
-                syncErrors.push(`Transaction ${transactionId}: ${orderResponse.status}`);
+                syncErrors.push(
+                    `Transaction ${transactionId}: ${orderResponse.status}`
+                );
             }
-            
         } catch (error) {
             syncErrors.push(`Transaction ${transactionId}: ${error.message}`);
         }
     }
-    
+
     // Mettre à jour le stockage
     localStorage.setItem(storageKey, JSON.stringify(storedChanges));
-    
+
     // Afficher le résultat
     const remainingChanges = Object.keys(storedChanges).length;
-    
+
     if (syncCount > 0) {
-        showToast(`✅ ${syncCount} changements synchronisés avec succès !`, "success");
-        
+        showToast(
+            `✅ ${syncCount} changements synchronisés avec succès !`,
+            "success"
+        );
+
         if (remainingChanges === 0) {
             // Tout synchronisé - supprimer l'indicateur
             const indicator = document.getElementById("offline-indicator");
             if (indicator) {
                 indicator.remove();
             }
-            
+
             // Recharger pour confirmer la synchronisation
             setTimeout(() => {
                 window.location.reload();
@@ -394,49 +409,58 @@ async function attemptServerSync(storageKey) {
             createOfflineIndicator(remainingChanges);
         }
     } else {
-        showToast(`❌ Synchronisation échouée - serveur toujours indisponible`, "error");
+        showToast(
+            `❌ Synchronisation échouée - serveur toujours indisponible`,
+            "error"
+        );
     }
-    
+
     if (syncErrors.length > 0) {
         console.warn("Erreurs de synchronisation:", syncErrors);
     }
 }
 
 function applyStoredChanges() {
-    const storageKey = 'drag_drop_changes_' + window.location.pathname;
-    const storedChanges = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    const storageKey = "drag_drop_changes_" + window.location.pathname;
+    const storedChanges = JSON.parse(localStorage.getItem(storageKey) || "{}");
     const changeIds = Object.keys(storedChanges);
-    
+
     if (changeIds.length === 0) {
         return; // Aucun changement stocké
     }
-    
+
     console.log(`🔄 Application de ${changeIds.length} changements stockés...`);
-    
+
     // Appliquer chaque changement stocké à l'interface
-    changeIds.forEach(transactionId => {
+    changeIds.forEach((transactionId) => {
         const change = storedChanges[transactionId];
         const row = document.querySelector(`[data-id="${transactionId}"]`);
-        
+
         if (row) {
             // Mettre à jour le numéro d'ordre visuellement
             const orderCell = row.querySelector('[data-field="numero_ordre"]');
             if (orderCell) {
-                const newContent = orderCell.innerHTML.replace(/\d+$/, change.order);
+                const newContent = orderCell.innerHTML.replace(
+                    /\d+$/,
+                    change.order
+                );
                 orderCell.innerHTML = newContent;
             }
-            
+
             // Mettre à jour l'exercice si nécessaire
-            if (change.exercice_id && row.dataset.exerciceId !== change.exercice_id.toString()) {
+            if (
+                change.exercice_id &&
+                row.dataset.exerciceId !== change.exercice_id.toString()
+            ) {
                 row.dataset.exerciceId = change.exercice_id;
                 // Ici, on pourrait aussi déplacer visuellement la ligne si nécessaire
             }
         }
     });
-    
+
     // Afficher l'indicateur
     createOfflineIndicator(changeIds.length);
-    
+
     showToast(`🔄 ${changeIds.length} changements locaux appliqués`, "success");
 }
 
@@ -446,7 +470,7 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => {
         // Appliquer les changements stockés AVANT d'initialiser le drag & drop
         applyStoredChanges();
-        
+
         // Puis initialiser le drag & drop
         initTransactionDragDrop();
     }, 200);

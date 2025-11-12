@@ -1,132 +1,188 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Mode Offline - Drag & Drop</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
-        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
-        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
-        .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
-        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <h1>🧪 Test du Mode Offline - Drag & Drop Transactions</h1>
-    
-    <div class="info">
-        <h3>État du stockage local :</h3>
-        <div id="storage-status"></div>
-    </div>
-    
-    <div class="status success">
-        <h3>✅ Fonctionnalités implémentées :</h3>
-        <ul>
-            <li><strong>Mode Offline :</strong> Les changements sont stockés localement quand le serveur ne répond pas</li>
-            <li><strong>Persistance :</strong> Les changements restent actifs même après refresh</li>
-            <li><strong>Indicateur visuel :</strong> Bandeau bleu indiquant le nombre de changements en attente</li>
-            <li><strong>Synchronisation :</strong> Bouton pour tenter de re-synchroniser avec le serveur</li>
-            <li><strong>Nettoyage :</strong> Bouton pour effacer les changements locaux et revenir à l'état serveur</li>
-        </ul>
-    </div>
-    
-    <div class="warning">
-        <h3>⚠️ Comment ça fonctionne :</h3>
-        <ol>
-            <li>Faites vos glisser-déposer sur la page des transactions</li>
-            <li>Les changements sont appliqués immédiatement visuellement</li>
-            <li>Si le serveur ne répond pas, les changements sont stockés localement</li>
-            <li>Un bandeau bleu apparaît en haut pour indiquer le mode offline</li>
-            <li>Même après refresh, vos changements restent actifs !</li>
-            <li>Utilisez le bouton "Synchroniser" quand le serveur remarche</li>
-        </ol>
-    </div>
-    
-    <h3>🛠️ Outils de test :</h3>
-    <button onclick="checkStoredChanges()">Vérifier le stockage local</button>
-    <button onclick="clearAllStoredChanges()">Effacer tous les changements stockés</button>
-    <button onclick="simulateChanges()">Simuler des changements (test)</button>
-    
-    <div id="test-results"></div>
-    
-    <script>
-        function checkStoredChanges() {
-            const results = document.getElementById('test-results');
-            const storageStatus = document.getElementById('storage-status');
-            
-            let totalChanges = 0;
-            let changesByPage = {};
-            
-            // Parcourir tout le localStorage
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('drag_drop_changes_')) {
-                    const changes = JSON.parse(localStorage.getItem(key));
-                    const changesCount = Object.keys(changes).length;
-                    totalChanges += changesCount;
-                    changesByPage[key] = changesCount;
-                }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Test Mode Offline - Drag & Drop</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
             }
-            
-            let html = `<strong>Total des changements stockés : ${totalChanges}</strong><br>`;
-            
-            if (totalChanges > 0) {
-                html += '<ul>';
-                Object.keys(changesByPage).forEach(key => {
-                    const pagePath = key.replace('drag_drop_changes_', '');
-                    html += `<li>${pagePath} : ${changesByPage[key]} changement(s)</li>`;
+            .status {
+                padding: 10px;
+                margin: 10px 0;
+                border-radius: 5px;
+            }
+            .success {
+                background-color: #d4edda;
+                border: 1px solid #c3e6cb;
+                color: #155724;
+            }
+            .info {
+                background-color: #d1ecf1;
+                border: 1px solid #bee5eb;
+                color: #0c5460;
+            }
+            .warning {
+                background-color: #fff3cd;
+                border: 1px solid #ffeaa7;
+                color: #856404;
+            }
+            button {
+                padding: 8px 16px;
+                margin: 5px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🧪 Test du Mode Offline - Drag & Drop Transactions</h1>
+
+        <div class="info">
+            <h3>État du stockage local :</h3>
+            <div id="storage-status"></div>
+        </div>
+
+        <div class="status success">
+            <h3>✅ Fonctionnalités implémentées :</h3>
+            <ul>
+                <li>
+                    <strong>Mode Offline :</strong> Les changements sont stockés
+                    localement quand le serveur ne répond pas
+                </li>
+                <li>
+                    <strong>Persistance :</strong> Les changements restent
+                    actifs même après refresh
+                </li>
+                <li>
+                    <strong>Indicateur visuel :</strong> Bandeau bleu indiquant
+                    le nombre de changements en attente
+                </li>
+                <li>
+                    <strong>Synchronisation :</strong> Bouton pour tenter de
+                    re-synchroniser avec le serveur
+                </li>
+                <li>
+                    <strong>Nettoyage :</strong> Bouton pour effacer les
+                    changements locaux et revenir à l'état serveur
+                </li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ Comment ça fonctionne :</h3>
+            <ol>
+                <li>Faites vos glisser-déposer sur la page des transactions</li>
+                <li>
+                    Les changements sont appliqués immédiatement visuellement
+                </li>
+                <li>
+                    Si le serveur ne répond pas, les changements sont stockés
+                    localement
+                </li>
+                <li>
+                    Un bandeau bleu apparaît en haut pour indiquer le mode
+                    offline
+                </li>
+                <li>Même après refresh, vos changements restent actifs !</li>
+                <li>
+                    Utilisez le bouton "Synchroniser" quand le serveur remarche
+                </li>
+            </ol>
+        </div>
+
+        <h3>🛠️ Outils de test :</h3>
+        <button onclick="checkStoredChanges()">
+            Vérifier le stockage local
+        </button>
+        <button onclick="clearAllStoredChanges()">
+            Effacer tous les changements stockés
+        </button>
+        <button onclick="simulateChanges()">
+            Simuler des changements (test)
+        </button>
+
+        <div id="test-results"></div>
+
+        <script>
+            function checkStoredChanges() {
+                const results = document.getElementById("test-results");
+                const storageStatus = document.getElementById("storage-status");
+
+                let totalChanges = 0;
+                let changesByPage = {};
+
+                // Parcourir tout le localStorage
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith("drag_drop_changes_")) {
+                        const changes = JSON.parse(localStorage.getItem(key));
+                        const changesCount = Object.keys(changes).length;
+                        totalChanges += changesCount;
+                        changesByPage[key] = changesCount;
+                    }
+                }
+
+                let html = `<strong>Total des changements stockés : ${totalChanges}</strong><br>`;
+
+                if (totalChanges > 0) {
+                    html += "<ul>";
+                    Object.keys(changesByPage).forEach((key) => {
+                        const pagePath = key.replace("drag_drop_changes_", "");
+                        html += `<li>${pagePath} : ${changesByPage[key]} changement(s)</li>`;
+                    });
+                    html += "</ul>";
+                } else {
+                    html += "<em>Aucun changement stocké localement</em>";
+                }
+
+                storageStatus.innerHTML = html;
+                results.innerHTML =
+                    '<div class="info">✅ Vérification terminée</div>';
+            }
+
+            function clearAllStoredChanges() {
+                let cleared = 0;
+                const keysToRemove = [];
+
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith("drag_drop_changes_")) {
+                        keysToRemove.push(key);
+                    }
+                }
+
+                keysToRemove.forEach((key) => {
+                    localStorage.removeItem(key);
+                    cleared++;
                 });
-                html += '</ul>';
-            } else {
-                html += '<em>Aucun changement stocké localement</em>';
+
+                document.getElementById(
+                    "test-results"
+                ).innerHTML = `<div class="success">🗑️ ${cleared} stockage(s) local/aux effacé(s)</div>`;
+
+                checkStoredChanges();
             }
-            
-            storageStatus.innerHTML = html;
-            results.innerHTML = '<div class="info">✅ Vérification terminée</div>';
-        }
-        
-        function clearAllStoredChanges() {
-            let cleared = 0;
-            const keysToRemove = [];
-            
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('drag_drop_changes_')) {
-                    keysToRemove.push(key);
-                }
+
+            function simulateChanges() {
+                const storageKey = "drag_drop_changes_/transaction/";
+                const testChanges = {
+                    123: { order: 1, exercice_id: 5, timestamp: Date.now() },
+                    456: { order: 2, exercice_id: 5, timestamp: Date.now() },
+                    789: { order: 3, exercice_id: 6, timestamp: Date.now() },
+                };
+
+                localStorage.setItem(storageKey, JSON.stringify(testChanges));
+
+                document.getElementById("test-results").innerHTML =
+                    '<div class="success">🧪 Changements de test simulés</div>';
+
+                checkStoredChanges();
             }
-            
-            keysToRemove.forEach(key => {
-                localStorage.removeItem(key);
-                cleared++;
-            });
-            
-            document.getElementById('test-results').innerHTML = 
-                `<div class="success">🗑️ ${cleared} stockage(s) local/aux effacé(s)</div>`;
-            
+
+            // Vérification initiale
             checkStoredChanges();
-        }
-        
-        function simulateChanges() {
-            const storageKey = 'drag_drop_changes_/transaction/';
-            const testChanges = {
-                '123': { order: 1, exercice_id: 5, timestamp: Date.now() },
-                '456': { order: 2, exercice_id: 5, timestamp: Date.now() },
-                '789': { order: 3, exercice_id: 6, timestamp: Date.now() }
-            };
-            
-            localStorage.setItem(storageKey, JSON.stringify(testChanges));
-            
-            document.getElementById('test-results').innerHTML = 
-                '<div class="success">🧪 Changements de test simulés</div>';
-            
-            checkStoredChanges();
-        }
-        
-        // Vérification initiale
-        checkStoredChanges();
-    </script>
-</body>
+        </script>
+    </body>
 </html>
