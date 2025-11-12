@@ -9,6 +9,30 @@ function setTransactionReorderUrl(url) {
     console.log("URL configurée:", TRANSACTION_REORDER_URL);
 }
 
+// Fonction pour mettre à jour les numéros d'ordre dans le DOM sans recharger
+function updateTransactionOrdersInDOM() {
+    const tbody = document.getElementById("transactions-tbody");
+    if (!tbody) return;
+    
+    const transactionRows = tbody.querySelectorAll(".transaction-row");
+    let currentOrder = 1;
+    
+    transactionRows.forEach((row) => {
+        // Mettre à jour l'attribut data-order
+        row.setAttribute("data-order", currentOrder);
+        
+        // Mettre à jour le numéro d'ordre affiché dans la cellule correspondante
+        const orderCell = row.querySelector("td:first-child"); // Première colonne = N° d'ordre
+        if (orderCell) {
+            orderCell.textContent = currentOrder;
+        }
+        
+        currentOrder++;
+    });
+    
+    console.log(`✅ ${transactionRows.length} numéros d'ordre mis à jour visuellement`);
+}
+
 // Fonction d'initialisation principale
 function initTransactionDragDrop() {
     const tbody = document.getElementById("transactions-tbody");
@@ -249,10 +273,10 @@ function saveAllTransactionChanges() {
                 );
                 console.log("✅ Sauvegarde réussie:", data);
 
-                // Recharger la page après sauvegarde réussie
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
+                // Mettre à jour les numéros d'ordre visuellement au lieu de recharger
+                updateTransactionOrdersInDOM();
+                
+                showToast("✅ Ordre des transactions mis à jour", "success");
             } else {
                 console.error("❌ Erreur serveur:", data);
                 showToast(
@@ -398,10 +422,8 @@ function clearOfflineChanges() {
 
     showToast("🗑️ Changements locaux effacés", "success");
 
-    // Recharger pour revenir à l'état serveur
-    setTimeout(() => {
-        window.location.reload();
-    }, 1500);
+    // Mode offline activé - pas besoin de recharger
+    console.log("🔄 Mode offline activé - les changements seront synchronisés plus tard");
 }
 
 async function attemptServerSync(storageKey) {
@@ -482,10 +504,9 @@ async function attemptServerSync(storageKey) {
                 indicator.remove();
             }
 
-            // Recharger pour confirmer la synchronisation
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+            // Synchronisation réussie - mettre à jour visuellement
+            updateTransactionOrdersInDOM();
+            showToast("✅ Synchronisation terminée", "success");
         } else {
             // Mettre à jour l'indicateur
             createOfflineIndicator(remainingChanges);
