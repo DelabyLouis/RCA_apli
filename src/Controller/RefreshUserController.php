@@ -49,6 +49,7 @@ class RefreshUserController extends AbstractController
                 'roles_details' => []
             ];
             
+            /** @var \App\Entity\Role $role */
             foreach ($user->getUserRoles() as $role) {
                 $result['after_refresh']['roles_details'][] = [
                     'id' => $role->getIdRole(),

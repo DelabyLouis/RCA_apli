@@ -79,6 +79,7 @@ class PermissionService
         }
         
         // Vérifier si l'utilisateur a un rôle qui donne accès à cette permission
+        /** @var \App\Entity\Role $role */
         foreach ($user->getUserRoles() as $role) {
             if ($role->getPermissions()->contains($permission)) {
                 return true;
@@ -117,7 +118,9 @@ class PermissionService
         }
         
         // Ajouter les permissions des rôles de l'utilisateur
+        /** @var \App\Entity\Role $role */
         foreach ($user->getUserRoles() as $role) {
+            /** @var \App\Entity\Permission $permission */
             foreach ($role->getPermissions() as $permission) {
                 if (!in_array($permission, $permissions)) {
                     $permissions[] = $permission;
@@ -139,6 +142,7 @@ class PermissionService
         }
         
         $maxLevel = 0;
+        /** @var \App\Entity\Role $role */
         foreach ($user->getUserRoles() as $role) {
             if ($role->getHierarchyLevel() > $maxLevel) {
                 $maxLevel = $role->getHierarchyLevel();
@@ -159,6 +163,7 @@ class PermissionService
         }
         
         $maxLevel = 0;
+        /** @var \App\Entity\Role $role */
         foreach ($user->getUserRoles() as $role) {
             if ($role->getHierarchyLevel() > $maxLevel) {
                 $maxLevel = $role->getHierarchyLevel();
