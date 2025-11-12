@@ -13,24 +13,26 @@ function setTransactionReorderUrl(url) {
 function updateTransactionOrdersInDOM() {
     const tbody = document.getElementById("transactions-tbody");
     if (!tbody) return;
-    
+
     const transactionRows = tbody.querySelectorAll(".transaction-row");
     let currentOrder = 1;
-    
+
     transactionRows.forEach((row) => {
         // Mettre à jour l'attribut data-order
         row.setAttribute("data-order", currentOrder);
-        
+
         // Mettre à jour le numéro d'ordre affiché dans la cellule correspondante
         const orderCell = row.querySelector("td:first-child"); // Première colonne = N° d'ordre
         if (orderCell) {
             orderCell.textContent = currentOrder;
         }
-        
+
         currentOrder++;
     });
-    
-    console.log(`✅ ${transactionRows.length} numéros d'ordre mis à jour visuellement`);
+
+    console.log(
+        `✅ ${transactionRows.length} numéros d'ordre mis à jour visuellement`
+    );
 }
 
 // Fonction d'initialisation principale
@@ -275,7 +277,7 @@ function saveAllTransactionChanges() {
 
                 // Mettre à jour les numéros d'ordre visuellement au lieu de recharger
                 updateTransactionOrdersInDOM();
-                
+
                 showToast("✅ Ordre des transactions mis à jour", "success");
             } else {
                 console.error("❌ Erreur serveur:", data);
@@ -423,7 +425,9 @@ function clearOfflineChanges() {
     showToast("🗑️ Changements locaux effacés", "success");
 
     // Mode offline activé - pas besoin de recharger
-    console.log("🔄 Mode offline activé - les changements seront synchronisés plus tard");
+    console.log(
+        "🔄 Mode offline activé - les changements seront synchronisés plus tard"
+    );
 }
 
 async function attemptServerSync(storageKey) {
