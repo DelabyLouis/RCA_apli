@@ -1,7 +1,18 @@
-// ===== TRANSACTION PAGE INLINE SCRIPTS =====
-// Ce fichier contient tous les scripts qui étaient inline dans le template
+// ===== TRANSACTION PAGE SCRIPTS - STYLE EXERCICES =====
+// Inspiré de la structure propre des exercices
 
 console.log("Transaction page scripts loaded");
+
+// Fonction principale d'initialisation (comme pour les exercices)
+function initTransactionPage() {
+    console.log("Initialisation page transactions (style exercices)");
+
+    // Initialiser toutes les fonctionnalités
+    initInlineEditing();
+    initDeleteButtons();
+    initExerciceCollapse();
+    autoCollapseClosedExercices();
+}
 
 // Fonction pour afficher une notification
 function showNotification(message, type) {
@@ -37,17 +48,15 @@ function initInlineEditing() {
         "Initialisation édition inline pour transactions (page principale)"
     );
 
-    // Données des exercices et types (à définir depuis le template)
-    let exercices = [];
-    let typesTransaction = [];
-    let modesPaiement = [];
-
-    // Fonction pour définir les données depuis le template
-    window.setTransactionData = function (exercicesData, typesData, modesData) {
-        exercices = exercicesData;
-        typesTransaction = typesData;
-        modesPaiement = modesData;
+    // Récupérer les données depuis la variable globale définie dans le template
+    const selectData = window.transactionSelectData || {
+        exercices: [],
+        types: [],
+        modes: [],
     };
+    const exercices = selectData.exercices;
+    const typesTransaction = selectData.types;
+    const modesPaiement = selectData.modes;
 
     // Gestion de l'édition inline simple
     document.querySelectorAll(".editable-field").forEach(function (element) {
