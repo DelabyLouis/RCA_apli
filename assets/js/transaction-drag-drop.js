@@ -185,46 +185,59 @@ function saveAllTransactionChanges() {
         return;
     }
 
-    // ===== SOLUTION DÉFINITIVE - MODE OFFLINE =====
-    // Le serveur ne fonctionne pas - mode hors ligne avec stockage local
-    // Les changements restent actifs même après refresh !
+    // ===== SAUVEGARDE DIRECTE SUR SERVEUR =====
+    // Utilisation de l'API bulk-update-order qui devrait fonctionner
 
-    console.log("💾 Mode offline: sauvegarde locale des changements...");
-    showToast("💾 Sauvegarde locale (serveur indisponible)...", "success");
+    console.log("💾 Sauvegarde des changements sur le serveur...");
+    showToast("💾 Sauvegarde en cours...", "success");
 
-    // Clé de stockage unique pour cette page
-    const storageKey = "drag_drop_changes_" + window.location.pathname;
+    fetch(TRANSACTION_REORDER_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({
+            transactions: transactionsData,
+        }),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                showToast(
+                    "🎉 Changements sauvegardés avec succès !",
+                    "success"
+                );
+                console.log("✅ Sauvegarde réussie:", data);
 
-    // Récupérer les changements existants
-    let storedChanges = JSON.parse(localStorage.getItem(storageKey) || "{}");
+                // Recharger la page après sauvegarde réussie
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                console.error("❌ Erreur serveur:", data);
+                showToast(
+                    "❌ Erreur: " +
+                        (data.error ||
+                            data.message ||
+                            "Échec de la sauvegarde"),
+                    "error"
+                );
 
-    // Enregistrer tous les nouveaux changements
-    transactionsData.forEach((transactionData) => {
-        storedChanges[transactionData.id] = {
-            order: transactionData.order,
-            exercice_id: transactionData.exercice_id,
-            timestamp: Date.now(),
-        };
-    });
+                // En cas d'échec, activer le mode offline comme fallback
+                activateOfflineMode(transactionsData);
+            }
+        })
+        .catch((error) => {
+            console.error("❌ Erreur de connexion:", error);
+            showToast(
+                "❌ Erreur de connexion - activation du mode offline",
+                "error"
+            );
 
-    // Sauvegarder dans localStorage
-    localStorage.setItem(storageKey, JSON.stringify(storedChanges));
-
-    const totalStoredChanges = Object.keys(storedChanges).length;
-
-    showToast(
-        `💽 ${transactionsData.length} changements sauvegardés localement (total: ${totalStoredChanges} en attente)`,
-        "success"
-    );
-    console.log("💽 Changements stockés localement:", storedChanges);
-
-    // Créer un indicateur persistant de mode offline
-    createOfflineIndicator(totalStoredChanges);
-
-    // Tenter une synchronisation différée (optionnelle)
-    setTimeout(() => {
-        attemptServerSync(storageKey);
-    }, 3000);
+            // En cas d'erreur de connexion, activer le mode offline
+            activateOfflineMode(transactionsData);
+        });
 }
 
 function showToast(message, type) {
@@ -266,7 +279,40 @@ function saveTransactionOrder(exerciceId) {
     saveAllTransactionChanges();
 }
 
-// ===== FONCTIONS MODE OFFLINE =====
+// ===== FONCTIONS MODE OFFLINE (FALLBACK) =====
+
+function activateOfflineMode(transactionsData) {
+    console.log("🔄 Activation du mode offline (fallback)...");
+
+    // Clé de stockage unique pour cette page
+    const storageKey = "drag_drop_changes_" + window.location.pathname;
+
+    // Récupérer les changements existants
+    let storedChanges = JSON.parse(localStorage.getItem(storageKey) || "{}");
+
+    // Enregistrer tous les nouveaux changements
+    transactionsData.forEach((transactionData) => {
+        storedChanges[transactionData.id] = {
+            order: transactionData.order,
+            exercice_id: transactionData.exercice_id,
+            timestamp: Date.now(),
+        };
+    });
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem(storageKey, JSON.stringify(storedChanges));
+
+    const totalStoredChanges = Object.keys(storedChanges).length;
+
+    showToast(
+        `💽 ${transactionsData.length} changements sauvegardés localement (total: ${totalStoredChanges} en attente)`,
+        "success"
+    );
+    console.log("💽 Changements stockés localement:", storedChanges);
+
+    // Créer un indicateur persistant de mode offline
+    createOfflineIndicator(totalStoredChanges);
+}
 
 function createOfflineIndicator(changesCount) {
     // Ne créer qu'un seul indicateur
