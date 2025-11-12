@@ -319,6 +319,129 @@ final class TransactionController extends AbstractController
         return $response;
     }
 
+    #[Route('/bulk-update-order', name: 'app_transaction_bulk_update_order', methods: ['POST'])]
+    public function bulkUpdateOrder(Request $request, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        // Log de débogage avec environnement
+        error_log("=== BULK UPDATE ORDER CALLED ===");
+        error_log("Environment: " . ($_ENV['APP_ENV'] ?? 'undefined'));
+        error_log("Database URL: " . (isset($_ENV['DATABASE_URL']) ? 'configured' : 'not configured'));
+        error_log("Request method: " . $request->getMethod());
+        error_log("Content-Type: " . $request->headers->get('Content-Type'));
+        error_log("User authenticated: " . ($this->getUser() ? 'YES' : 'NO'));
+        
+        try {
+            $rawContent = $request->getContent();
+            error_log("Raw content: " . $rawContent);
+            
+            $data = json_decode($rawContent, true);
+            error_log("Decoded data: " . print_r($data, true));
+            
+            if (!$data || !isset($data['transactions'])) {
+                error_log("Données invalides: " . print_r($data, true));
+                return new JsonResponse(['success' => false, 'error' => 'Données invalides'], 400);
+            }
+
+            $updated = 0;
+            $errors = [];
+            $transactionsToUpdate = [];
+            
+            // ÉTAPE 1: Préparer et valider toutes les transactions
+            foreach ($data['transactions'] as $item) {
+                if (!isset($item['id']) || !isset($item['order'])) {
+                    $errors[] = "Élément manquant id ou order: " . print_r($item, true);
+                    continue;
+                }
+                
+                $transaction = $transactionRepository->findOneBy(['id_transaction' => (int)$item['id']]);
+                if (!$transaction) {
+                    $errors[] = "Transaction non trouvée: " . $item['id'];
+                    continue;
+                }
+                
+                // Vérifier que l'exercice n'est pas clôturé
+                if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+                    $errors[] = "Exercice clôturé pour transaction: " . $item['id'];
+                    continue;
+                }
+                
+                $transactionsToUpdate[] = [
+                    'transaction' => $transaction,
+                    'newOrder' => (int)$item['order'],
+                    'exerciceId' => isset($item['exercice_id']) ? (int)$item['exercice_id'] : null
+                ];
+            }
+            
+            if (empty($transactionsToUpdate)) {
+                return new JsonResponse(['success' => false, 'error' => 'Aucune transaction valide à mettre à jour'], 400);
+            }
+            
+            // ÉTAPE 2: Assigner des numéros d'ordre temporaires pour éviter les conflits
+            // On utilise des nombres négatifs temporaires
+            error_log("Assignation de numéros temporaires...");
+            foreach ($transactionsToUpdate as $index => $item) {
+                $transaction = $item['transaction'];
+                $tempOrder = -1000 - $index; // Numéros négatifs temporaires
+                $transaction->setNumeroOrdre($tempOrder);
+                error_log("Transaction " . $transaction->getIdTransaction() . " -> ordre temporaire: " . $tempOrder);
+            }
+            
+            // Flush intermédiaire pour libérer les anciens numéros d'ordre
+            $entityManager->flush();
+            error_log("Flush intermédiaire terminé");
+            
+            // ÉTAPE 3: Assigner les nouveaux numéros d'ordre définitifs
+            error_log("Assignation des nouveaux numéros d'ordre...");
+            foreach ($transactionsToUpdate as $item) {
+                $transaction = $item['transaction'];
+                $newOrder = $item['newOrder'];
+                $exerciceId = $item['exerciceId'];
+                
+                $transaction->setNumeroOrdre($newOrder);
+                error_log("Transaction " . $transaction->getIdTransaction() . " -> ordre final: " . $newOrder);
+                
+                // Changement d'exercice si spécifié
+                if ($exerciceId) {
+                    $newExercice = $exerciceRepository->findOneBy(['id_exercice' => $exerciceId]);
+                    if ($newExercice && !$newExercice->isClos()) {
+                        $transaction->setExercice($newExercice);
+                        error_log("Changement exercice pour transaction " . $transaction->getIdTransaction() . " vers " . $exerciceId);
+                    } else {
+                        $errors[] = "Exercice non trouvé ou clôturé: " . $exerciceId;
+                    }
+                }
+                
+                $updated++;
+            }
+            
+            // ÉTAPE 4: Flush final
+            error_log("Flush final...");
+            $entityManager->flush();
+            error_log("Flush final terminé avec succès");
+            
+            $response = ['success' => true, 'message' => "{$updated} transactions mises à jour", 'errors' => $errors];
+            error_log("Réponse: " . print_r($response, true));
+            
+            return new JsonResponse($response);
+            
+        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+            error_log("ERREUR CONTRAINTE UNIQUE: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['success' => false, 'error' => 'Conflit de numéro d\'ordre: ' . $e->getMessage()], 500);
+        } catch (\Doctrine\DBAL\Exception $e) {
+            error_log("ERREUR BASE DE DONNÉES: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['success' => false, 'error' => 'Erreur base de données: ' . $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            error_log("ERREUR GÉNÉRALE BULK UPDATE: " . $e->getMessage());
+            error_log("Classe d'exception: " . get_class($e));
+            error_log("Code d'erreur: " . $e->getCode());
+            error_log("Fichier: " . $e->getFile() . " ligne: " . $e->getLine());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return new JsonResponse(['success' => false, 'error' => 'Erreur serveur: ' . $e->getMessage(), 'class' => get_class($e)], 500);
+        }
+    }
+
     #[Route('/{id_transaction}', name: 'app_transaction_show', methods: ['GET'])]
     public function show(Request $request, int $id_transaction, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository): Response
     {
@@ -620,113 +743,5 @@ final class TransactionController extends AbstractController
             return new JsonResponse(['success' => false, 'error' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
         }
     }
-
-    #[Route('/bulk-update-order', name: 'app_transaction_bulk_update_order', methods: ['POST'])]
-    public function bulkUpdateOrder(Request $request, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
-    {
-        // Log de débogage
-        error_log("=== BULK UPDATE ORDER CALLED ===");
-        
-        try {
-            $rawContent = $request->getContent();
-            error_log("Raw content: " . $rawContent);
-            
-            $data = json_decode($rawContent, true);
-            error_log("Decoded data: " . print_r($data, true));
-            
-            if (!$data || !isset($data['transactions'])) {
-                error_log("Données invalides: " . print_r($data, true));
-                return new JsonResponse(['success' => false, 'error' => 'Données invalides'], 400);
-            }
-
-            $updated = 0;
-            $errors = [];
-            $transactionsToUpdate = [];
-            
-            // ÉTAPE 1: Préparer et valider toutes les transactions
-            foreach ($data['transactions'] as $item) {
-                if (!isset($item['id']) || !isset($item['order'])) {
-                    $errors[] = "Élément manquant id ou order: " . print_r($item, true);
-                    continue;
-                }
-                
-                $transaction = $transactionRepository->findOneBy(['id_transaction' => (int)$item['id']]);
-                if (!$transaction) {
-                    $errors[] = "Transaction non trouvée: " . $item['id'];
-                    continue;
-                }
-                
-                // Vérifier que l'exercice n'est pas clôturé
-                if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
-                    $errors[] = "Exercice clôturé pour transaction: " . $item['id'];
-                    continue;
-                }
-                
-                $transactionsToUpdate[] = [
-                    'transaction' => $transaction,
-                    'newOrder' => (int)$item['order'],
-                    'exerciceId' => isset($item['exercice_id']) ? (int)$item['exercice_id'] : null
-                ];
-            }
-            
-            if (empty($transactionsToUpdate)) {
-                return new JsonResponse(['success' => false, 'error' => 'Aucune transaction valide à mettre à jour'], 400);
-            }
-            
-            // ÉTAPE 2: Assigner des numéros d'ordre temporaires pour éviter les conflits
-            // On utilise des nombres négatifs temporaires
-            error_log("Assignation de numéros temporaires...");
-            foreach ($transactionsToUpdate as $index => $item) {
-                $transaction = $item['transaction'];
-                $tempOrder = -1000 - $index; // Numéros négatifs temporaires
-                $transaction->setNumeroOrdre($tempOrder);
-                error_log("Transaction " . $transaction->getIdTransaction() . " -> ordre temporaire: " . $tempOrder);
-            }
-            
-            // Flush intermédiaire pour libérer les anciens numéros d'ordre
-            $entityManager->flush();
-            error_log("Flush intermédiaire terminé");
-            
-            // ÉTAPE 3: Assigner les nouveaux numéros d'ordre définitifs
-            error_log("Assignation des nouveaux numéros d'ordre...");
-            foreach ($transactionsToUpdate as $item) {
-                $transaction = $item['transaction'];
-                $newOrder = $item['newOrder'];
-                $exerciceId = $item['exerciceId'];
-                
-                $transaction->setNumeroOrdre($newOrder);
-                error_log("Transaction " . $transaction->getIdTransaction() . " -> ordre final: " . $newOrder);
-                
-                // Changement d'exercice si spécifié
-                if ($exerciceId) {
-                    $newExercice = $exerciceRepository->findOneBy(['id_exercice' => $exerciceId]);
-                    if ($newExercice && !$newExercice->isClos()) {
-                        $transaction->setExercice($newExercice);
-                        error_log("Changement exercice pour transaction " . $transaction->getIdTransaction() . " vers " . $exerciceId);
-                    } else {
-                        $errors[] = "Exercice non trouvé ou clôturé: " . $exerciceId;
-                    }
-                }
-                
-                $updated++;
-            }
-            
-            // ÉTAPE 4: Flush final
-            error_log("Flush final...");
-            $entityManager->flush();
-            error_log("Flush final terminé avec succès");
-            
-            $response = ['success' => true, 'message' => "{$updated} transactions mises à jour", 'errors' => $errors];
-            error_log("Réponse: " . print_r($response, true));
-            
-            return new JsonResponse($response);
-            
-        } catch (\Exception $e) {
-            error_log("ERREUR BULK UPDATE: " . $e->getMessage());
-            error_log("Stack trace: " . $e->getTraceAsString());
-            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
-        }
-    }
-
 
 }
