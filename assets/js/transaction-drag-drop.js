@@ -191,6 +191,8 @@ function saveAllTransactionChanges() {
     console.log("💾 Sauvegarde des changements sur le serveur...");
     showToast("💾 Sauvegarde en cours...", "success");
 
+    console.log("📤 Données envoyées:", { transactions: transactionsData });
+
     fetch(TRANSACTION_REORDER_URL, {
         method: "POST",
         headers: {
@@ -201,8 +203,45 @@ function saveAllTransactionChanges() {
             transactions: transactionsData,
         }),
     })
-        .then((response) => response.json())
+        .then((response) => {
+            console.log(
+                "📥 Réponse reçue:",
+                response.status,
+                response.statusText
+            );
+
+            // Vérifier le statut avant de parser le JSON
+            if (!response.ok) {
+                return response.text().then((text) => {
+                    console.error(
+                        "❌ Réponse non-JSON (erreur " + response.status + "):",
+                        text
+                    );
+                    throw new Error(
+                        `Erreur serveur ${response.status}: ${text.substring(
+                            0,
+                            200
+                        )}`
+                    );
+                });
+            }
+
+            return response.text().then((text) => {
+                console.log("📄 Réponse brute:", text);
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error("❌ Erreur parsing JSON:", e);
+                    console.error("📄 Texte reçu:", text.substring(0, 500));
+                    throw new Error(
+                        "Réponse serveur invalide: " + text.substring(0, 100)
+                    );
+                }
+            });
+        })
         .then((data) => {
+            console.log("✅ Données parsées:", data);
+
             if (data.success) {
                 showToast(
                     "🎉 Changements sauvegardés avec succès !",
@@ -230,10 +269,7 @@ function saveAllTransactionChanges() {
         })
         .catch((error) => {
             console.error("❌ Erreur de connexion:", error);
-            showToast(
-                "❌ Erreur de connexion - activation du mode offline",
-                "error"
-            );
+            showToast("❌ " + error.message, "error");
 
             // En cas d'erreur de connexion, activer le mode offline
             activateOfflineMode(transactionsData);

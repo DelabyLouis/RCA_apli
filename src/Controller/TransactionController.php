@@ -624,26 +624,43 @@ final class TransactionController extends AbstractController
     #[Route('/bulk-update-order', name: 'app_transaction_bulk_update_order', methods: ['POST'])]
     public function bulkUpdateOrder(Request $request, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
     {
+        // Log de débogage
+        error_log("=== BULK UPDATE ORDER CALLED ===");
+        
         try {
-            $data = json_decode($request->getContent(), true);
+            $rawContent = $request->getContent();
+            error_log("Raw content: " . $rawContent);
+            
+            $data = json_decode($rawContent, true);
+            error_log("Decoded data: " . print_r($data, true));
             
             if (!$data || !isset($data['transactions'])) {
+                error_log("Données invalides: " . print_r($data, true));
                 return new JsonResponse(['success' => false, 'error' => 'Données invalides'], 400);
             }
 
             $updated = 0;
+            $errors = [];
             
             foreach ($data['transactions'] as $item) {
-                if (!isset($item['id']) || !isset($item['order'])) continue;
-                
-                $transaction = $transactionRepository->findOneBy(['id_transaction' => (int)$item['id']]);
-                if (!$transaction) continue;
-                
-                // Vérifier que l'exercice n'est pas clôturé
-                if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+                if (!isset($item['id']) || !isset($item['order'])) {
+                    $errors[] = "Élément manquant id ou order: " . print_r($item, true);
                     continue;
                 }
                 
+                $transaction = $transactionRepository->findOneBy(['id_transaction' => (int)$item['id']]);
+                if (!$transaction) {
+                    $errors[] = "Transaction non trouvée: " . $item['id'];
+                    continue;
+                }
+                
+                // Vérifier que l'exercice n'est pas clôturé
+                if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+                    $errors[] = "Exercice clôturé pour transaction: " . $item['id'];
+                    continue;
+                }
+                
+                error_log("Mise à jour transaction " . $item['id'] . " ordre: " . $item['order']);
                 $transaction->setNumeroOrdre((int)$item['order']);
                 
                 // Changement d'exercice si spécifié
@@ -651,17 +668,27 @@ final class TransactionController extends AbstractController
                     $newExercice = $exerciceRepository->findOneBy(['id_exercice' => (int)$item['exercice_id']]);
                     if ($newExercice && !$newExercice->isClos()) {
                         $transaction->setExercice($newExercice);
+                        error_log("Changement exercice pour transaction " . $item['id'] . " vers " . $item['exercice_id']);
+                    } else {
+                        $errors[] = "Exercice non trouvé ou clôturé: " . $item['exercice_id'];
                     }
                 }
                 
                 $updated++;
             }
             
+            error_log("Flush entity manager...");
             $entityManager->flush();
+            error_log("Flush terminé avec succès");
             
-            return new JsonResponse(['success' => true, 'message' => "{$updated} transactions mises à jour"]);
+            $response = ['success' => true, 'message' => "{$updated} transactions mises à jour", 'errors' => $errors];
+            error_log("Réponse: " . print_r($response, true));
+            
+            return new JsonResponse($response);
             
         } catch (\Exception $e) {
+            error_log("ERREUR BULK UPDATE: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
