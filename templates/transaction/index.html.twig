@@ -566,8 +566,7 @@
             });
         });
 
-        // Enrouler automatiquement les exercices clôturés au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
+            // Enrouler automatiquement les exercices clôturés au chargement de la page
             document.querySelectorAll('.exercice-separator').forEach(function(separator) {
                 const exerciceId = separator.dataset.exerciceId;
                 // Vérifier si l'exercice est clôturé (présence du badge "CLÔTURÉ")
@@ -595,7 +594,6 @@
                 }
             });
         });
-    });
     
     // Le drag & drop est maintenant géré par le fichier externe transaction-drag-drop.js
     </script>
