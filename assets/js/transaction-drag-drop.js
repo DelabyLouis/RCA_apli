@@ -190,52 +190,103 @@ function saveAllTransactionChanges() {
     // On essaie de sauvegarder sur le serveur, mais en cas d'échec,
     // les changements visuels restent actifs
 
-    console.log("💾 Tentative de sauvegarde sur le serveur...");
+    // ===== SOLUTION DÉGRADÉE INTELLIGENTE =====
+    // Au lieu d'utiliser l'API bulk qui ne fonctionne pas,
+    // sauvegarder chaque transaction individuellement via l'API d'édition de champ
+
+    console.log("💾 Sauvegarde intelligente des changements...");
     showToast("💾 Sauvegarde en cours...", "success");
 
-    fetch(TRANSACTION_REORDER_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            transactions: transactionsData,
-        }),
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            return response.json();
-        })
-        .then((data) => {
-            if (data.success) {
-                showToast(
-                    "✅ Sauvegarde réussie ! Les changements sont permanents.",
-                    "success"
-                );
-                console.log("✅ Sauvegarde serveur réussie");
-            } else {
-                throw new Error(data.error || "Erreur serveur inconnue");
-            }
-        })
-        .catch((error) => {
-            console.warn("⚠️ Sauvegarde serveur échouée:", error);
-            showToast(
-                "⚠️ Changements effectués localement. La sauvegarde serveur a échoué - les changements seront perdus au rechargement.",
-                "error"
+    let savedCount = 0;
+    let totalCount = transactionsData.length;
+    let errors = [];
+
+    // Fonction pour sauvegarder une transaction individuelle
+    async function saveIndividualTransaction(transactionData) {
+        try {
+            // Sauvegarder le numéro d'ordre via l'API d'édition de champ
+            const orderResponse = await fetch(
+                `/transaction/${transactionData.id}/update-field`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: `field=numero_ordre&value=${transactionData.order}`,
+                }
             );
 
-            // Ajouter une indication visuelle que les changements ne sont pas sauvegardés
-            document.body.classList.add("unsaved-changes");
+            if (!orderResponse.ok) {
+                throw new Error(`Erreur ordre: ${orderResponse.status}`);
+            }
 
-            // Ajouter un style pour indiquer les changements non sauvegardés
+            // Si changement d'exercice, le sauvegarder aussi
+            if (transactionData.exercice_id) {
+                const exerciceResponse = await fetch(
+                    `/transaction/${transactionData.id}/update-field`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                        body: `field=exercice&value=${transactionData.exercice_id}`,
+                    }
+                );
+
+                if (!exerciceResponse.ok) {
+                    console.warn(
+                        `Changement d'exercice échoué pour transaction ${transactionData.id}`
+                    );
+                }
+            }
+
+            savedCount++;
+            console.log(
+                `✅ Transaction ${transactionData.id} sauvegardée (${savedCount}/${totalCount})`
+            );
+        } catch (error) {
+            errors.push(`Transaction ${transactionData.id}: ${error.message}`);
+            console.error(
+                `❌ Erreur sauvegarde transaction ${transactionData.id}:`,
+                error
+            );
+        }
+    }
+
+    // Sauvegarder toutes les transactions une par une
+    Promise.all(transactionsData.map(saveIndividualTransaction))
+        .then(() => {
+            if (savedCount === totalCount) {
+                showToast(
+                    `🎉 Tous les changements sauvegardés avec succès ! (${savedCount}/${totalCount})`,
+                    "success"
+                );
+                console.log("🎉 Sauvegarde complète réussie !");
+
+                // Rechargement automatique après succès complet
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                showToast(
+                    `⚠️ Sauvegarde partielle: ${savedCount}/${totalCount} réussies`,
+                    "error"
+                );
+                console.warn("Erreurs:", errors);
+            }
+        })
+        .catch(() => {
+            showToast("❌ Erreur générale de sauvegarde", "error");
+
+            // Indicateur de changements non sauvegardés
             if (!document.getElementById("unsaved-indicator")) {
                 const indicator = document.createElement("div");
                 indicator.id = "unsaved-indicator";
-                indicator.innerHTML = "⚠️ Changements non sauvegardés";
+                indicator.innerHTML =
+                    "⚠️ Changements non sauvegardés - Cliquez pour recharger";
                 indicator.style.cssText =
-                    "position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: #ff6b35; color: white; padding: 8px 16px; border-radius: 4px; z-index: 10000; font-weight: bold;";
+                    "position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: #ff6b35; color: white; padding: 10px 20px; border-radius: 6px; z-index: 10000; font-weight: bold; cursor: pointer;";
+                indicator.onclick = () => window.location.reload();
                 document.body.appendChild(indicator);
             }
         });

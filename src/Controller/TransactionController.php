@@ -621,72 +621,50 @@ final class TransactionController extends AbstractController
         }
     }
 
-    #[Route('/reorder', name: 'app_transaction_reorder', methods: ['POST'])]
-    public function reorder(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    #[Route('/bulk-update-order', name: 'app_transaction_bulk_update_order', methods: ['POST'])]
+    public function bulkUpdateOrder(Request $request, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         try {
-            $content = $request->getContent();
-            if (empty($content)) {
-                return new JsonResponse(['success' => false, 'error' => 'Pas de données reçues'], 400);
+            $data = json_decode($request->getContent(), true);
+            
+            if (!$data || !isset($data['transactions'])) {
+                return new JsonResponse(['success' => false, 'error' => 'Données invalides'], 400);
             }
 
-            $data = json_decode($content, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return new JsonResponse(['success' => false, 'error' => 'JSON invalide: ' . json_last_error_msg()], 400);
-            }
+            $updated = 0;
             
-            if (!isset($data['transactions']) || !is_array($data['transactions'])) {
-                return new JsonResponse(['success' => false, 'error' => 'Format de données invalide'], 400);
-            }
-
-            $transactionRepository = $entityManager->getRepository(\App\Entity\Transaction::class);
-            $exerciceRepository = $entityManager->getRepository(\App\Entity\Exercice::class);
-            
-            $updatedCount = 0;
-            
-            foreach ($data['transactions'] as $transactionData) {
-                if (!isset($transactionData['id']) || !isset($transactionData['order'])) {
-                    continue;
-                }
-
-                $transactionId = (int) $transactionData['id'];
-                $newOrder = (int) $transactionData['order'];
+            foreach ($data['transactions'] as $item) {
+                if (!isset($item['id']) || !isset($item['order'])) continue;
                 
-                $transaction = $transactionRepository->findOneBy(['id_transaction' => $transactionId]);
-                if (!$transaction) {
+                $transaction = $transactionRepository->findOneBy(['id_transaction' => (int)$item['id']]);
+                if (!$transaction) continue;
+                
+                // Vérifier que l'exercice n'est pas clôturé
+                if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
                     continue;
                 }
                 
-                $transaction->setNumeroOrdre($newOrder);
+                $transaction->setNumeroOrdre((int)$item['order']);
                 
-                // Gérer le changement d'exercice si spécifié
-                if (isset($transactionData['exercice_id'])) {
-                    $newExerciceId = (int) $transactionData['exercice_id'];
-                    $currentExerciceId = $transaction->getExercice() ? $transaction->getExercice()->getIdExercice() : null;
-                    
-                    if ($newExerciceId !== $currentExerciceId) {
-                        $newExercice = $exerciceRepository->findOneBy(['id_exercice' => $newExerciceId]);
-                        if ($newExercice && !$newExercice->isClos()) {
-                            $transaction->setExercice($newExercice);
-                        }
+                // Changement d'exercice si spécifié
+                if (isset($item['exercice_id'])) {
+                    $newExercice = $exerciceRepository->findOneBy(['id_exercice' => (int)$item['exercice_id']]);
+                    if ($newExercice && !$newExercice->isClos()) {
+                        $transaction->setExercice($newExercice);
                     }
                 }
                 
-                $updatedCount++;
+                $updated++;
             }
             
             $entityManager->flush();
             
-            return new JsonResponse([
-                'success' => true, 
-                'message' => "{$updatedCount} transaction(s) mise(s) à jour"
-            ]);
+            return new JsonResponse(['success' => true, 'message' => "{$updated} transactions mises à jour"]);
             
         } catch (\Exception $e) {
-            return new JsonResponse([
-                'success' => false, 
-                'error' => $e->getMessage()
-            ], 500);
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
+
+
 }

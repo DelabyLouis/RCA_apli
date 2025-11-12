@@ -307,13 +307,20 @@
 
     <script src="{{ asset('js/transaction-drag-drop.js') }}"></script>
     <script>
-        // Configuration de l'URL pour le fichier JavaScript externe  
-        setTransactionReorderUrl('{{ path("app_transaction_reorder") }}');
+        // Configuration Turbo-safe
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuration de l'URL pour le fichier JavaScript externe  
+            if (typeof setTransactionReorderUrl === 'function') {
+                setTransactionReorderUrl('{{ path("app_transaction_bulk_update_order") }}');
+            }
+        });
         
         // Fonction pour afficher une notification
         function showNotification(message, type) {
             if (typeof type === 'undefined') type = 'danger';
             const notificationsContainer = document.getElementById('notifications');
+            
+            if (!notificationsContainer) return;
             
             const notification = document.createElement('div');
             notification.className = 'alert alert-' + type + ' alert-dismissible fade show';
