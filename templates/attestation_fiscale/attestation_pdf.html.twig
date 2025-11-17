@@ -424,7 +424,8 @@
         <tr>
             <td colspan="2" class="donateur-adresse">
                 <span class="field-label">Adresse :</span><br>
-                <strong>{{ donateur.adresse ?? '' }}</strong><br>
+                {% set adresse_complete = [donateur.numeroVoie, donateur.rue, donateur.complementAdresse]|join(' ')|trim %}
+                <strong>{{ adresse_complete }}</strong><br>
                 <span class="underline long"></span><br>
                 Code postal <span class="underline short center"><strong>{{ donateur.codePostal ?? '' }}</strong></span> 
                 Commune <span class="underline medium"><strong>{{ donateur.ville ?? '' }}</strong></span>

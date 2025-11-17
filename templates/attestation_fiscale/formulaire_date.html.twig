@@ -49,8 +49,11 @@
                             {% if personne.email %}
                                 <p class="text-muted mb-0">{{ personne.email }}</p>
                             {% endif %}
-                            {% if personne.adresse %}
-                                <p class="text-muted mb-0">{{ personne.adresse }}</p>
+                            {% set adresse_complete = [personne.numeroVoie, personne.rue, personne.complementAdresse]|join(' ')|trim %}
+                            {% if adresse_complete %}
+                                <p class="text-muted mb-0">{{ adresse_complete }}</p>
+                            {% endif %}
+                            {% if personne.codePostal or personne.ville %}
                                 <p class="text-muted mb-0">{{ personne.codePostal }} {{ personne.ville }}</p>
                             {% endif %}
                         </div>
