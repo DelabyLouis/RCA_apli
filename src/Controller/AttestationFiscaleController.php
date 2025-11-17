@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use ZipArchive;
 
 #[Route('/attestation-fiscale')]
 final class AttestationFiscaleController extends AbstractController
@@ -283,10 +284,10 @@ final class AttestationFiscaleController extends AbstractController
         }
         
         // Créer un ZIP avec tous les PDFs
-        $zip = new \ZipArchive();
+        $zip = new ZipArchive();
         $zipFilename = tempnam(sys_get_temp_dir(), 'attestations_') . '.zip';
         
-        if ($zip->open($zipFilename, \ZipArchive::CREATE) !== TRUE) {
+        if ($zip->open($zipFilename, ZipArchive::CREATE) !== TRUE) {
             throw new \Exception('Impossible de créer le fichier ZIP');
         }
         
@@ -311,18 +312,7 @@ final class AttestationFiscaleController extends AbstractController
         
         $zip->close();
         
-        // Si une seule cotisation dans le ZIP, retourner directement le PDF
-        if (count($cotisations) === 1) {
-            $pdfContent = file_get_contents($zipFilename);
-            unlink($zipFilename);
-            
-            $response = new Response($pdfContent);
-            $response->headers->set('Content-Type', 'application/pdf');
-            $response->headers->set('Content-Disposition', 'inline; filename="Attestation_' . $personne->getNom() . '.pdf"');
-            return $response;
-        }
-        
-        // Nom du fichier ZIP
+        // Nom du fichier ZIP  
         $zipName = sprintf(
             'Attestations_%s_%s.zip',
             $personne->getPrenom(),
