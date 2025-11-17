@@ -146,11 +146,12 @@ final class AttestationFiscaleController extends AbstractController
         TypeTransactionRepository $typeTransactionRepository,
         EntityManagerInterface $entityManager
     ): Response {
-        $personne = $entityManager->getRepository(Personne::class)->find($personne_id);
-        
-        if (!$personne) {
-            throw $this->createNotFoundException('Personne non trouvée.');
-        }
+        try {
+            $personne = $entityManager->getRepository(Personne::class)->find($personne_id);
+            
+            if (!$personne) {
+                throw $this->createNotFoundException('Personne non trouvée.');
+            }
         
         // Récupérer les IDs des cotisations sélectionnées
         $cotisationIds = $request->request->all('cotisations') ?: $request->query->all('cotisations');
@@ -196,12 +197,16 @@ final class AttestationFiscaleController extends AbstractController
         // Calculer le montant total
         $montantTotal = array_sum(array_map(fn($c) => (float)$c->getMontant(), $cotisations));
         
-        return $this->render('attestation_fiscale/formulaire_date.html.twig', [
-            'personne' => $personne,
-            'cotisations' => $cotisations,
-            'montant_total' => $montantTotal,
-            'date_defaut' => $cotisations[0]->getDateTransaction(),
-        ]);
+            return $this->render('attestation_fiscale/formulaire_date.html.twig', [
+                'personne' => $personne,
+                'cotisations' => $cotisations,
+                'montant_total' => $montantTotal,
+                'date_defaut' => $cotisations[0]->getDateTransaction(),
+            ]);
+        } catch (\Exception $e) {
+            // En cas d'erreur, retourner un message d'erreur détaillé
+            return new Response('Erreur 500: ' . $e->getMessage() . ' dans ' . $e->getFile() . ':' . $e->getLine() . '<br><br>Trace:<br>' . nl2br($e->getTraceAsString()), 500);
+        }
     }
     
     #[Route('/generer-selection/{personne_id}', name: 'app_attestation_fiscale_generer_selection', methods: ['GET', 'POST'])]
