@@ -190,6 +190,13 @@
             padding-bottom: 2px;
         }
         
+        .date-value {
+            font-weight: bold;
+            padding: 2px 8px;
+            border: 1px solid #000;
+            background-color: #f9f9f9;
+        }
+        
         /* Signatures */
         .signatures-section {
             margin-top: 15px;
@@ -447,7 +454,11 @@
         
         <div class="date-versement">
             <strong>Date du versement ou du don :</strong> 
-            <span class="date-dots">...../............../...................</span>
+            {% if date_versement %}
+                <span class="date-value">{{ date_versement|date('d/m/Y') }}</span>
+            {% else %}
+                <span class="date-dots">...../............../...................</span>
+            {% endif %}
         </div>
         
         <div class="certification">

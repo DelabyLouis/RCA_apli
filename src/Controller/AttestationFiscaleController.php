@@ -137,6 +137,72 @@ final class AttestationFiscaleController extends AbstractController
         ]);
     }
     
+    #[Route('/formulaire-date/{personne_id}', name: 'app_attestation_fiscale_formulaire_date', methods: ['GET', 'POST'])]
+    public function formulaireDateVersement(
+        int $personne_id,
+        Request $request,
+        TransactionRepository $transactionRepository,
+        TypeTransactionRepository $typeTransactionRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $personne = $entityManager->getRepository(Personne::class)->find($personne_id);
+        
+        if (!$personne) {
+            throw $this->createNotFoundException('Personne non trouvée.');
+        }
+        
+        // Récupérer les IDs des cotisations sélectionnées
+        $cotisationIds = $request->request->all('cotisations') ?: $request->query->all('cotisations');
+        
+        if (empty($cotisationIds)) {
+            $this->addFlash('error', 'Aucune cotisation sélectionnée.');
+            return $this->redirectToRoute('app_attestation_fiscale_index');
+        }
+        
+        // Récupérer le type de transaction "cotisation"
+        $typeCotisation = $typeTransactionRepository->findOneBy(['libelle' => 'Cotisation']);
+        
+        if (!$typeCotisation) {
+            throw $this->createNotFoundException('Le type de transaction "Cotisation" n\'existe pas.');
+        }
+        
+        // Récupérer les cotisations sélectionnées
+        $cotisations = $transactionRepository->createQueryBuilder('t')
+            ->leftJoin('t.modeDePaiement', 'mdp')
+            ->addSelect('mdp')
+            ->where('t.id_transaction IN (:ids)')
+            ->andWhere('t.type_transaction = :typeCotisation')
+            ->andWhere('t.personne = :personne')
+            ->andWhere('t.montant > 0')
+            ->setParameter('ids', $cotisationIds)
+            ->setParameter('typeCotisation', $typeCotisation)
+            ->setParameter('personne', $personne)
+            ->orderBy('t.date_transaction', 'ASC')
+            ->getQuery()
+            ->getResult();
+        
+        if (empty($cotisations)) {
+            $this->addFlash('error', 'Aucune cotisation valide trouvée.');
+            return $this->redirectToRoute('app_attestation_fiscale_index');
+        }
+        
+        // Si formulaire soumis avec date
+        if ($request->isMethod('POST') && $request->request->get('date_versement')) {
+            $dateVersement = $request->request->get('date_versement');
+            return $this->genererAttestationAvecDate($personne, $cotisations, $dateVersement);
+        }
+        
+        // Calculer le montant total
+        $montantTotal = array_sum(array_map(fn($c) => (float)$c->getMontant(), $cotisations));
+        
+        return $this->render('attestation_fiscale/formulaire_date.html.twig', [
+            'personne' => $personne,
+            'cotisations' => $cotisations,
+            'montant_total' => $montantTotal,
+            'date_defaut' => $cotisations[0]->getDateTransaction(),
+        ]);
+    }
+    
     #[Route('/generer-selection/{personne_id}', name: 'app_attestation_fiscale_generer_selection', methods: ['GET', 'POST'])]
     public function genererAttestationSelection(
         int $personne_id,
@@ -196,6 +262,81 @@ final class AttestationFiscaleController extends AbstractController
         
         // Générer plusieurs PDF séparés (un par cotisation)
         return $this->genererMultiplesPDF($personne, $cotisations, $anneeAttestation);
+    }
+    
+    private function genererAttestationAvecDate($personne, array $cotisations, string $dateVersement): Response
+    {
+        // Valider et parser la date
+        try {
+            $dateVersementObj = new \DateTime($dateVersement);
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Date de versement invalide.');
+            return $this->redirectToRoute('app_attestation_fiscale_index');
+        }
+        
+        // Si une seule cotisation, générer un seul PDF
+        if (count($cotisations) === 1) {
+            $cotisation = $cotisations[0];
+            $anneeCotisation = $cotisation->getDateTransaction()->format('Y');
+            $numeroOrdre = $this->genererNumeroOrdreSelection($anneeCotisation, $personne->getIdPersonne(), [$cotisation->getIdTransaction()]);
+            return $this->genererPDFAvecDate($personne, 'personne', [$cotisation], (float)$cotisation->getMontant(), $anneeCotisation, $numeroOrdre, $dateVersementObj);
+        }
+        
+        // Créer un ZIP avec tous les PDFs
+        $zip = new \ZipArchive();
+        $zipFilename = tempnam(sys_get_temp_dir(), 'attestations_') . '.zip';
+        
+        if ($zip->open($zipFilename, \ZipArchive::CREATE) !== TRUE) {
+            throw new \Exception('Impossible de créer le fichier ZIP');
+        }
+        
+        foreach ($cotisations as $index => $cotisation) {
+            $anneeCotisation = $cotisation->getDateTransaction()->format('Y');
+            $numeroOrdre = $this->genererNumeroOrdreSelection($anneeCotisation, $personne->getIdPersonne(), [$cotisation->getIdTransaction()]);
+            
+            // Créer un PDF temporaire pour cette cotisation avec la date personnalisée
+            $pdfResponse = $this->genererPDFAvecDate($personne, 'personne', [$cotisation], (float)$cotisation->getMontant(), $anneeCotisation, $numeroOrdre, $dateVersementObj);
+            
+            // Nom du fichier PDF
+            $pdfFilename = sprintf(
+                'Attestation_%s_%s_%s_%d.pdf',
+                $anneeCotisation,
+                $personne->getPrenom(),
+                $personne->getNom(),
+                $index + 1
+            );
+            
+            $zip->addFromString($pdfFilename, $pdfResponse->getContent());
+        }
+        
+        $zip->close();
+        
+        // Si une seule cotisation dans le ZIP, retourner directement le PDF
+        if (count($cotisations) === 1) {
+            $pdfContent = file_get_contents($zipFilename);
+            unlink($zipFilename);
+            
+            $response = new Response($pdfContent);
+            $response->headers->set('Content-Type', 'application/pdf');
+            $response->headers->set('Content-Disposition', 'inline; filename="Attestation_' . $personne->getNom() . '.pdf"');
+            return $response;
+        }
+        
+        // Nom du fichier ZIP
+        $zipName = sprintf(
+            'Attestations_%s_%s.zip',
+            $personne->getPrenom(),
+            $personne->getNom()
+        );
+        
+        // Retourner le ZIP
+        $response = new Response(file_get_contents($zipFilename));
+        $response->headers->set('Content-Type', 'application/zip');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $zipName . '"');
+        
+        unlink($zipFilename);
+        
+        return $response;
     }
     
     #[Route('/generer/{donateur_type}/{donateur_id}', name: 'app_attestation_fiscale_generer', methods: ['GET'])]
@@ -283,6 +424,11 @@ final class AttestationFiscaleController extends AbstractController
     
     private function genererPDF($donateur, string $donateurType, array $cotisations, float $montantTotal, string $annee, string $numeroOrdre): Response
     {
+        return $this->genererPDFAvecDate($donateur, $donateurType, $cotisations, $montantTotal, $annee, $numeroOrdre, null);
+    }
+    
+    private function genererPDFAvecDate($donateur, string $donateurType, array $cotisations, float $montantTotal, string $annee, string $numeroOrdre, ?\DateTime $dateVersement = null): Response
+    {
         // Configuration de Dompdf
         $options = new Options();
         $options->set('defaultFont', 'DejaVu Sans');
@@ -308,6 +454,11 @@ final class AttestationFiscaleController extends AbstractController
             $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
         }
         
+        // Si aucune date de versement fournie, utiliser la date de la première cotisation
+        if (!$dateVersement && !empty($cotisations)) {
+            $dateVersement = $cotisations[0]->getDateTransaction();
+        }
+        
         // Générer le HTML de l'attestation
         $html = $this->renderView('attestation_fiscale/attestation_pdf.html.twig', [
             'donateur' => $donateur,
@@ -317,6 +468,7 @@ final class AttestationFiscaleController extends AbstractController
             'annee' => $annee,
             'numero_ordre' => $numeroOrdre,
             'date_generation' => new \DateTime(),
+            'date_versement' => $dateVersement,
             'signature_base64' => $signatureBase64,
             'logo_base64' => $logoBase64,
         ]);

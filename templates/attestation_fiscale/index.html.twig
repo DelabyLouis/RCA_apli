@@ -117,13 +117,12 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    <a href="{{ path('app_attestation_fiscale_generer_selection', {
+                                                    <a href="{{ path('app_attestation_fiscale_formulaire_date', {
                                                         'personne_id': cotisation.personne.idPersonne
                                                     }) }}?cotisations[]={{ cotisation.idTransaction }}" 
                                                        class="btn btn-sm btn-success" 
-                                                       title="Générer l'attestation pour cette cotisation"
-                                                       target="_blank">
-                                                        <i class="fas fa-file-pdf me-1"></i>Générer PDF
+                                                       title="Choisir la date et générer l'attestation">
+                                                        <i class="fas fa-calendar-alt me-1"></i>Générer PDF
                                                     </a>
                                                     <a href="{{ path('app_attestation_fiscale_personne_details', {
                                                         'personne_id': cotisation.personne.idPersonne

@@ -1,0 +1,182 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choisir la date de versement - RCA Application{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ path('app_attestation_fiscale_index') }}">
+                            <i class="fas fa-file-invoice me-1"></i>Attestations Fiscales
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Choisir la date de versement
+                    </li>
+                </ol>
+            </nav>
+
+            <!-- En-tête -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-calendar-alt fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0">Choisir la date de versement</h4>
+                            <p class="text-muted mb-0">Sélectionnez la date à mentionner dans l'attestation fiscale</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations sur la personne et les cotisations -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user me-2"></i>Bénéficiaire
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6><strong>{{ personne.prenom }} {{ personne.nom }}</strong></h6>
+                            {% if personne.email %}
+                                <p class="text-muted mb-0">{{ personne.email }}</p>
+                            {% endif %}
+                            {% if personne.adresse %}
+                                <p class="text-muted mb-0">{{ personne.adresse }}</p>
+                                <p class="text-muted mb-0">{{ personne.codePostal }} {{ personne.ville }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-euro-sign me-2"></i>Résumé
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Nombre de cotisations :</strong> {{ cotisations|length }}</p>
+                            <p><strong>Montant total :</strong> <span class="text-success fs-5">{{ montant_total|number_format(2, ',', ' ') }} €</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Détail des cotisations -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Cotisations sélectionnées
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Libellé</th>
+                                    <th>Mode de paiement</th>
+                                    <th>Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cotisation in cotisations %}
+                                    <tr>
+                                        <td>{{ cotisation.dateTransaction|date('d/m/Y') }}</td>
+                                        <td>{{ cotisation.libelle }}</td>
+                                        <td>
+                                            {% if cotisation.modeDePaiement %}
+                                                <span class="badge bg-light text-dark">
+                                                    {{ cotisation.modeDePaiement.libelle }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><strong>{{ cotisation.montant|number_format(2, ',', ' ') }} €</strong></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulaire de choix de date -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>Date de versement ou du don
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" data-turbo="false">
+                        {% for cotisation in cotisations %}
+                            <input type="hidden" name="cotisations[]" value="{{ cotisation.idTransaction }}">
+                        {% endfor %}
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Information :</strong> Cette date apparaîtra sur l'attestation fiscale dans le champ "Date du versement ou du don". 
+                            Par défaut, la date de la première cotisation est proposée, mais vous pouvez la modifier selon vos besoins.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="date_versement" class="form-label">
+                                        <strong>Date du versement ou du don *</strong>
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control form-control-lg" 
+                                           id="date_versement" 
+                                           name="date_versement" 
+                                           value="{{ date_defaut|date('Y-m-d') }}" 
+                                           required
+                                           max="{{ 'now'|date('Y-m-d') }}">
+                                    <div class="form-text">
+                                        La date ne peut pas être dans le futur
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ path('app_attestation_fiscale_index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                            </a>
+                            
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-file-pdf me-2"></i>Générer l'attestation PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function(e) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Génération en cours...';
+    });
+});
+</script>
+{% endblock %}
