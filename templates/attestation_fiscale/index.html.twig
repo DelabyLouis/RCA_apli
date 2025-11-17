@@ -50,8 +50,8 @@
                     pour pouvoir générer des attestations fiscales.
                 </div>
             {% else %}
-                <!-- Liste des donateurs -->
-                {% if cotisations_groupees is empty %}
+                <!-- Liste des cotisations -->
+                {% if cotisations is empty %}
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
                         Aucune cotisation trouvée avec les filtres sélectionnés.
@@ -61,7 +61,8 @@
                         <div class="card-header">
                             <h5 class="card-title mb-0">
                                 <i class="fas fa-list me-2"></i>
-                                Personnes éligibles aux attestations fiscales
+                                Cotisations éligibles aux attestations fiscales
+                                <span class="badge bg-primary ms-2">{{ cotisations|length }} cotisation{{ cotisations|length > 1 ? 's' : '' }}</span>
                             </h5>
                         </div>
                         <div class="card-body">
@@ -69,45 +70,67 @@
                                 <table class="table attestations-liste-table fs-5">
                                     <thead>
                                         <tr>
+                                            <th class="fs-5">Date</th>
                                             <th class="fs-5">Personne</th>
-                                            <th class="fs-5">Nombre de cotisations</th>
-                                            <th class="fs-5">Montant total</th>
-                                            <th class="fs-5">Années</th>
+                                            <th class="fs-5">Libellé</th>
+                                            <th class="fs-5">Mode de paiement</th>
+                                            <th class="fs-5">Montant</th>
+                                            <th class="fs-5">Exercice</th>
                                             <th class="fs-5">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for cle, groupe in cotisations_groupees %}
+                                        {% for cotisation in cotisations %}
                                             <tr>
+                                                <td>{{ cotisation.dateTransaction|date('d/m/Y') }}</td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <div class="me-2">
                                                             <i class="fas fa-user text-primary"></i>
                                                         </div>
                                                         <div>
-                                                            <strong>{{ groupe.personne.prenom }} {{ groupe.personne.nom }}</strong>
-                                                            {% if groupe.personne.email %}
-                                                                <br><small class="text-muted">{{ groupe.personne.email }}</small>
+                                                            <strong>{{ cotisation.personne.prenom }} {{ cotisation.personne.nom }}</strong>
+                                                            {% if cotisation.personne.email %}
+                                                                <br><small class="text-muted">{{ cotisation.personne.email }}</small>
                                                             {% endif %}
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td>{{ groupe.cotisations|length }}</td>
+                                                <td>{{ cotisation.libelle }}</td>
                                                 <td>
-                                                    <strong>{{ groupe.montant_total|number_format(2, ',', ' ') }} €</strong>
+                                                    {% if cotisation.modeDePaiement %}
+                                                        <span class="badge bg-light text-dark">
+                                                            {{ cotisation.modeDePaiement.libelle }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
                                                 </td>
                                                 <td>
-                                                    {% for annee in groupe.annees %}
-                                                        <span class="badge bg-secondary me-1">{{ annee }}</span>
-                                                    {% endfor %}
+                                                    <strong>{{ cotisation.montant|number_format(2, ',', ' ') }} €</strong>
                                                 </td>
                                                 <td>
+                                                    {% if cotisation.exercice %}
+                                                        <small class="text-muted">{{ cotisation.exercice.libelle }}</small>
+                                                    {% else %}
+                                                        <small class="text-muted">-</small>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <a href="{{ path('app_attestation_fiscale_generer_selection', {
+                                                        'personne_id': cotisation.personne.idPersonne
+                                                    }) }}?cotisations[]={{ cotisation.idTransaction }}" 
+                                                       class="btn btn-sm btn-success" 
+                                                       title="Générer l'attestation pour cette cotisation"
+                                                       target="_blank">
+                                                        <i class="fas fa-file-pdf me-1"></i>Générer PDF
+                                                    </a>
                                                     <a href="{{ path('app_attestation_fiscale_personne_details', {
-                                                        'personne_id': groupe.personne.idPersonne
+                                                        'personne_id': cotisation.personne.idPersonne
                                                     }) }}" 
-                                                       class="btn btn-sm btn-primary" 
-                                                       title="Sélectionner les cotisations pour l'attestation">
-                                                        <i class="fas fa-check-square me-1"></i>Sélectionner cotisations
+                                                       class="btn btn-sm btn-outline-primary" 
+                                                       title="Voir toutes les cotisations de cette personne">
+                                                        <i class="fas fa-eye me-1"></i>Détails
                                                     </a>
                                                 </td>
                                             </tr>

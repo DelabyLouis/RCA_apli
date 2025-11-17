@@ -39,23 +39,22 @@ final class AttestationFiscaleController extends AbstractController
         $cotisations = $transactionRepository->createQueryBuilder('t')
             ->leftJoin('t.personne', 'p')
             ->leftJoin('t.exercice', 'ex')
+            ->leftJoin('t.modeDePaiement', 'mdp')
             ->addSelect('p')
             ->addSelect('ex')
+            ->addSelect('mdp')
             ->where('t.type_transaction = :typeCotisation')
             ->andWhere('t.montant > 0') // Seulement les montants positifs (recettes)
             ->andWhere('t.personne IS NOT NULL') // Seulement les cotisations liées à une personne
             ->setParameter('typeCotisation', $typeCotisation)
-            ->orderBy('p.nom', 'ASC')
+            ->orderBy('t.date_transaction', 'DESC')
+            ->addOrderBy('p.nom', 'ASC')
             ->addOrderBy('p.prenom', 'ASC')
-            ->addOrderBy('t.date_transaction', 'DESC')
             ->getQuery()
             ->getResult();
         
-        // Grouper les cotisations par personne
-        $cotisationsGroupees = $this->grouperCotisationsParPersonne($cotisations);
-        
         return $this->render('attestation_fiscale/index.html.twig', [
-            'cotisations_groupees' => $cotisationsGroupees,
+            'cotisations' => $cotisations,
             'type_cotisation' => $typeCotisation,
         ]);
     }
@@ -265,42 +264,7 @@ final class AttestationFiscaleController extends AbstractController
         return $this->genererPDF($donateur, $donateur_type, $cotisations, $montantTotal, $annee, $numeroOrdre);
     }
     
-    private function grouperCotisationsParPersonne(array $cotisations): array
-    {
-        $groupes = [];
-        
-        foreach ($cotisations as $cotisation) {
-            // Ne traiter que les cotisations liées à une personne
-            if ($cotisation->getPersonne()) {
-                $personne = $cotisation->getPersonne();
-                $cle = 'personne_' . $personne->getIdPersonne();
-                
-                if (!isset($groupes[$cle])) {
-                    $groupes[$cle] = [
-                        'personne' => $personne,
-                        'cotisations' => [],
-                        'montant_total' => 0,
-                        'annees' => []
-                    ];
-                }
-                
-                $groupes[$cle]['cotisations'][] = $cotisation;
-                $groupes[$cle]['montant_total'] += (float)$cotisation->getMontant();
-                
-                $annee = $cotisation->getDateTransaction()->format('Y');
-                if (!in_array($annee, $groupes[$cle]['annees'])) {
-                    $groupes[$cle]['annees'][] = $annee;
-                }
-            }
-        }
-        
-        // Trier les années pour chaque personne
-        foreach ($groupes as &$groupe) {
-            sort($groupe['annees']);
-        }
-        
-        return $groupes;
-    }
+
     
     private function genererNumeroOrdre(string $annee, string $donateurType, int $donateurId): string
     {
