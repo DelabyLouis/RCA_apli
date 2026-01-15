@@ -1,0 +1,118 @@
+@startuml Architecture_Application_RCA
+
+!theme plain
+skinparam backgroundColor #F8F9FA
+skinparam component {
+    BackgroundColor #E8F5E8
+    BorderColor #388E3C
+}
+skinparam node {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+}
+
+title 🏗️ Architecture de l'Application RCA\n🧱 Comment l'application est construite
+
+' =============================================================================
+' 👤 UTILISATEURS
+' =============================================================================
+
+actor "👤 Membres\ndu Club" as Membres
+actor "💼 Trésorier" as Tresorier
+actor "🔧 Administrateur" as Admin
+
+' =============================================================================
+' 🌐 COUCHE WEB (Ce que voient les utilisateurs)
+' =============================================================================
+
+node "🌐 Navigation Web" as Web {
+    component "🏠 Page d'Accueil" as Accueil
+    component "📊 Tableau de Bord" as Dashboard
+    component "💳 Gestion Transactions" as TransactionUI
+    component "👥 Gestion Contacts" as ContactsUI
+    component "📄 Attestations" as AttestationsUI
+    component "⚙️ Administration" as AdminUI
+}
+
+' =============================================================================
+' 🔐 COUCHE SÉCURITÉ
+' =============================================================================
+
+node "🔐 Sécurité" as Security {
+    component "🔑 Authentification" as Auth
+    component "👮 Contrôle des Droits" as Permissions
+    component "🛡️ Protection RGPD" as RGPD
+}
+
+' =============================================================================
+' ⚙️ COUCHE MÉTIER (Logique de l'application)
+' =============================================================================
+
+node "⚙️ Logique Métier" as Business {
+    component "💰 Gestionnaire\nTransactions" as TransactionLogic
+    component "👥 Gestionnaire\nContacts" as ContactsLogic
+    component "📅 Gestionnaire\nExercices" as ExercicesLogic
+    component "🏦 Calculateur\nSoldes" as SoldesLogic
+    component "📄 Générateur\nPDF" as PDFLogic
+}
+
+' =============================================================================
+' 💾 COUCHE DONNÉES
+' =============================================================================
+
+node "💾 Stockage des Données" as Data {
+    database "🗄️ Base de Données\nMySQL/SQLite" as Database
+    component "💼 Gestion Fichiers" as Files
+    component "🔄 Sauvegardes" as Backup
+}
+
+' =============================================================================
+' 🔗 CONNEXIONS ENTRE LES COUCHES
+' =============================================================================
+
+' Utilisateurs vers Web
+Membres --> Accueil
+Membres --> Dashboard
+Tresorier --> TransactionUI
+Tresorier --> ContactsUI
+Tresorier --> AttestationsUI
+Admin --> AdminUI
+
+' Web vers Sécurité
+Web --> Auth : "🔐 Vérification identité"
+Web --> Permissions : "👮 Contrôle droits"
+Web --> RGPD : "🛡️ Respect vie privée"
+
+' Sécurité vers Logique Métier
+Security --> Business : "✅ Accès autorisé"
+
+' Logique Métier interne
+TransactionLogic --> SoldesLogic : "📊 Calcul soldes"
+TransactionLogic --> PDFLogic : "📄 Attestations"
+ContactsLogic --> TransactionLogic : "👥 Liens transactions"
+ExercicesLogic --> TransactionLogic : "📅 Périodes comptables"
+
+' Logique Métier vers Données
+Business --> Database : "💾 Lecture/Écriture"
+Business --> Files : "📁 Gestion fichiers"
+Database --> Backup : "🔄 Sauvegarde auto"
+
+' =============================================================================
+' 📝 EXPLICATIONS
+' =============================================================================
+
+note right of Web : **Interface Utilisateur**\nCe que voient et utilisent\nles membres du club
+
+note left of Security : **Sécurité**\nProtège l'accès et\nles données personnelles
+
+note right of Business : **Cœur de l'Application**\nToute la logique comptable\net les calculs automatiques
+
+note left of Data : **Stockage Sécurisé**\nToutes les données du club\nsont sauvegardées ici
+
+' =============================================================================
+' 🌐 TECHNOLOGIES UTILISÉES
+' =============================================================================
+
+note bottom : **🛠️ Technologies :**\n   • 🌐 **Web** : HTML, CSS, JavaScript (interface moderne)\n   • 🔧 **Serveur** : PHP Symfony (framework professionnel)\n   • 💾 **Base** : MySQL/SQLite (stockage fiable)\n   • 🔐 **Sécurité** : Cryptage, HTTPS, RGPD\n   • 📱 **Compatible** : Ordinateur, tablette, smartphone
+
+@enduml

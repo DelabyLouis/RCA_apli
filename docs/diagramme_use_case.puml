@@ -1,0 +1,124 @@
+@startuml Fonctionnalites_Application_RCA
+
+!theme plain
+skinparam backgroundColor #F8F9FA
+skinparam actor {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+}
+skinparam usecase {
+    BackgroundColor #E8F5E8
+    BorderColor #388E3C
+}
+
+title 🏉 Application RCA - Que peut faire chaque utilisateur ?\n📋 Guide des fonctionnalités disponibles
+
+' =============================================================================
+' 👥 TYPES D'UTILISATEURS
+' =============================================================================
+
+actor "🌐 Visiteur\n(non connecté)" as Visiteur
+actor "👤 Membre\n(connecté)" as Membre
+actor "👨‍💼 Trésorier" as Tresorier
+actor "🔧 Administrateur" as Admin
+
+' Hiérarchie des droits
+Membre --|> Visiteur : hérite des droits
+Tresorier --|> Membre : hérite des droits
+Admin --|> Tresorier : hérite des droits
+
+package "🏉 Application Rugby Club Audomarois" {
+
+  ' =============================================================================
+  ' 🌐 ACCÈS PUBLIC (pour tous)
+  ' =============================================================================
+  
+  package "🌐 Accès libre" #LightBlue {
+    usecase "🔐 Se connecter" as Connexion
+    usecase "📝 S'inscrire" as Inscription
+    usecase "ℹ️ Voir page d'accueil" as Accueil
+  }
+
+  ' =============================================================================
+  ' 👤 FONCTIONS MEMBRE (utilisateur connecté)
+  ' =============================================================================
+  
+  package "👤 Espace Membre" #LightGreen {
+    usecase "📊 Tableau de bord\n(voir les soldes)" as Dashboard
+    usecase "👁️ Consulter\nses données" as VoirDonnees
+    usecase "🛡️ Gérer ses\ndonnées RGPD" as RGPD
+  }
+
+  ' =============================================================================
+  ' 👨‍💼 FONCTIONS TRÉSORIER (gestion financière)
+  ' =============================================================================
+  
+  package "💰 Gestion Financière" #LightYellow {
+    usecase "💳 Créer/Modifier\ntransactions" as GererTransactions
+    usecase "📅 Gérer exercices\ncomptables" as GererExercices
+    usecase "💰 Gérer livret\nd'épargne" as GererLivret
+    usecase "📄 Générer attestations\nfiscales" as Attestations
+    usecase "📊 Exporter données\nExcel" as ExportExcel
+  }
+  
+  package "👥 Gestion Contacts" #LightCyan {
+    usecase "👤 Gérer les\npersonnes" as GererPersonnes
+    usecase "🏢 Gérer les\nentreprises" as GererEntreprises
+  }
+
+  ' =============================================================================
+  ' 🔧 FONCTIONS ADMINISTRATEUR (administration système)
+  ' =============================================================================
+  
+  package "🔧 Administration" #LightPink {
+    usecase "👥 Gérer\nutilisateurs" as GererUsers
+    usecase "🎭 Gérer rôles\net permissions" as GererRoles
+    usecase "🏷️ Gérer types\ntransactions" as GererTypes
+    usecase "💳 Gérer modes\nde paiement" as GererModes
+    usecase "🗄️ Administration\nbase de données" as AdminBD
+  }
+}
+
+' =============================================================================
+' 🔗 RELATIONS : QUI PEUT FAIRE QUOI ?
+' =============================================================================
+
+' Visiteur (non connecté)
+Visiteur --> Connexion
+Visiteur --> Inscription
+Visiteur --> Accueil
+
+' Membre (utilisateur connecté)
+Membre --> Dashboard
+Membre --> VoirDonnees
+Membre --> RGPD
+
+' Trésorier (gestion financière)
+Tresorier --> GererTransactions
+Tresorier --> GererExercices
+Tresorier --> GererLivret
+Tresorier --> Attestations
+Tresorier --> ExportExcel
+Tresorier --> GererPersonnes
+Tresorier --> GererEntreprises
+
+' Administrateur (administration système)
+Admin --> GererUsers
+Admin --> GererRoles
+Admin --> GererTypes
+Admin --> GererModes
+Admin --> AdminBD
+
+' =============================================================================
+' 📝 NOTES EXPLICATIVES
+' =============================================================================
+
+note right of Admin : L'administrateur a accès\nà toutes les fonctions\ndu système
+
+note right of Tresorier : Le trésorier gère\ntoute la partie\nfinancière et contacts
+
+note right of Membre : Le membre peut consulter\nles informations\nmais pas les modifier
+
+note bottom : 🔑 **Système de permissions flexible**\n   Chaque utilisateur peut avoir plusieurs rôles\n   Les droits s'ajoutent selon les besoins\n\n**Admin**: Tout + gestion système\n  - Suppressions\n  - Utilisateurs/rôles\n  - Base de données\n\n**Trésorier**: Gestion quotidienne\n  - Finances (selon permissions)\n  - Contacts\n  - Rapports\n\n**Visiteur**: Accès limité\n  - Connexion/Inscription seulement\nend note
+
+@enduml

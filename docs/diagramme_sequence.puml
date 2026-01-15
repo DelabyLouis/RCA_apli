@@ -1,0 +1,96 @@
+@startuml Parcours_Utilisateur_RCA
+
+title Comment fonctionne l'application RCA ?\nExemple : Ajouter une cotisation membre
+
+actor "Tresorier" as Tresorier
+participant "Site Web" as Web
+participant "Systeme Securite" as Securite
+participant "Gestionnaire Transactions" as GestTrans
+participant "Base de Donnees" as BD
+
+note over Tresorier, BD : Scenario : Le tresorier veut enregistrer\nune cotisation de 25 euros de Pierre Dupont
+
+== 1. Connexion au systeme ==
+
+Tresorier -> Web : ⭐ Se connecte sur le site
+Web -> Tresorier : 📝 Affiche le formulaire de connexion
+
+Tresorier -> Web : 🔑 Saisit login + mot de passe
+Web -> Securite : ✅ Vérifie les identifiants
+Securite -> BD : 🔍 Recherche l'utilisateur
+BD -> Securite : ✅ Utilisateur trouvé + ses droits
+Securite -> Web : ✅ Connexion autorisée
+Web -> Tresorier : 🏠 Affiche le tableau de bord
+
+note right : Le trésorier voit maintenant\nles soldes du club et\npeut accéder aux fonctions
+
+' =============================================================================
+' 💰 ÉTAPE 2 : CRÉATION D'UNE TRANSACTION
+' =============================================================================
+
+== 💳 2. Ajout d'une nouvelle transaction ==
+
+Tresorier -> Web : 🆕 Clique sur "Nouvelle Transaction"
+Web -> Securite : ❓ Vérifie si autorisé à créer
+Securite -> BD : 🔍 Vérifie les permissions
+BD -> Securite : ✅ Permission accordée
+Securite -> Web : ✅ Accès autorisé
+
+Web -> GestTrans : 📋 Demande le formulaire
+GestTrans -> BD : 📊 Récupère les listes de choix
+BD -> GestTrans : 📋 Retourne :
+  note right : • Liste des membres\n• Types de transaction\n• Exercices ouverts\n• Modes de paiement
+
+GestTrans -> Web : 📝 Prépare le formulaire
+Web -> Tresorier : 🖥️ Affiche le formulaire de saisie
+
+' =============================================================================
+' ✍️ ÉTAPE 3 : SAISIE ET VALIDATION
+' =============================================================================
+
+== ✍️ 3. Saisie des informations ==
+
+Tresorier -> Web : 📝 Remplit le formulaire :
+  note right : • Libellé : "Cotisation Pierre Dupont"\n• Montant : 25,00 €\n• Membre : Pierre Dupont\n• Type : Cotisation\n• Mode : Virement
+
+Tresorier -> Web : ✅ Valide le formulaire
+Web -> GestTrans : 💾 Envoie les données
+
+GestTrans -> GestTrans : 🔍 Vérifie les données
+alt ✅ **Données correctes**
+    GestTrans -> BD : 🔢 Génère le numéro d'ordre
+    BD -> GestTrans : 📊 Numéro : 47
+    
+    GestTrans -> BD : 💾 Enregistre la transaction
+    BD -> GestTrans : ✅ Transaction sauvegardée
+    
+    GestTrans -> Web : 🎉 Transaction créée avec succès
+    Web -> Tresorier : ✅ Message : "Cotisation enregistrée !"
+    Web -> Tresorier : 📋 Retour à la liste des transactions
+    
+else ❌ **Erreur dans les données**
+    GestTrans -> Web : ⚠️ Erreurs détectées
+    Web -> Tresorier : 🚫 Affiche les erreurs à corriger
+    note right : Exemples d'erreurs :\n• Montant obligatoire\n• Membre non sélectionné\n• Format incorrect
+end
+
+' =============================================================================
+' 📊 ÉTAPE 4 : MISE À JOUR DES SOLDES
+' =============================================================================
+
+== 📊 4. Mise à jour automatique ==
+
+Tresorier -> Web : 🏠 Retourne au tableau de bord
+Web -> BD : 🔢 Recalcule les soldes
+BD -> Web : 💰 Nouveaux soldes
+Web -> Tresorier : 📊 Affiche les soldes mis à jour
+
+note over Tresorier, BD : **Résultat :** La cotisation de 25€ est enregistrée\nLe solde du club augmente de 25€\nL'historique est conservé
+
+' =============================================================================
+' 💡 NOTES IMPORTANTES
+' =============================================================================
+
+note bottom : Points cles :\n   Toutes les actions sont verifiees (securite)\n   Les numeros d'ordre sont automatiques\n   Rien n'est perdu (tout est sauvegarde)\n   Les calculs sont automatiques\n   L'historique est complet
+
+@enduml

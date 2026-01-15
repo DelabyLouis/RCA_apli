@@ -1,0 +1,157 @@
+@startuml ApliRCA_Database_Diagram_Simple
+
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FEFEFE
+skinparam entity {
+    BackgroundColor #E1F5FE
+    BorderColor #0277BD
+}
+
+title Base de données RCA - Vue Simplifiée\n(Application de gestion financière pour amicale sportive)
+
+' =============================================================================
+' GESTION DES UTILISATEURS ET PERMISSIONS
+' =============================================================================
+
+entity "User" as User {
+  **id_user** : INT <<PK>>
+  --
+  username : VARCHAR(50) UNIQUE
+  password : VARCHAR(255)
+  //id_personne// : INT <<FK>>
+}
+
+entity "Role" as Role {
+  **id_role** : INT <<PK>>
+  --
+  libelle : VARCHAR(50) UNIQUE
+  description : VARCHAR(255)
+}
+
+entity "UserRole" as UserRole {
+  //user_id// : INT <<FK>>
+  //role_id// : INT <<FK>>
+}
+
+' =============================================================================
+' GESTION DES CONTACTS
+' =============================================================================
+
+entity "Personne" as Personne {
+  **id_personne** : INT <<PK>>
+  --
+  nom : VARCHAR(100)
+  prenom : VARCHAR(100)
+  email : VARCHAR(255)
+  telephone : INT
+  rue : VARCHAR(200)
+  ville : VARCHAR(100)
+  code_postal : INT
+}
+
+entity "Entreprise" as Entreprise {
+  **id_entreprise** : INT <<PK>>
+  --
+  nom_entreprise : VARCHAR(255)
+  siret : VARCHAR(14)
+  email : VARCHAR(255)
+  rue : VARCHAR(200)
+  ville : VARCHAR(100)
+  code_postal : INT
+}
+
+' =============================================================================
+' GESTION FINANCIÈRE
+' =============================================================================
+
+entity "Exercice" as Exercice {
+  **id_exercice** : INT <<PK>>
+  --
+  libelle : VARCHAR(100)
+  date_debut : DATE
+  date_fin : DATE
+  clos : BOOLEAN
+}
+
+entity "TypeTransaction" as TypeTransaction {
+  **id_type** : INT <<PK>>
+  --
+  libelle : VARCHAR(100) UNIQUE
+  description : VARCHAR(255)
+}
+
+entity "ModeDePaiement" as ModeDePaiement {
+  **id** : INT <<PK>>
+  --
+  libelle : VARCHAR(255)
+}
+
+entity "Transaction" as Transaction {
+  **id_transaction** : INT <<PK>>
+  --
+  libelle : VARCHAR(255) UNIQUE
+  numero_ordre : INT
+  date_transaction : DATE
+  montant : DECIMAL(15,2)
+  type_compte : VARCHAR(50)
+  --
+  //id_exercice// : INT <<FK>>
+  //id_type// : INT <<FK>>
+  //id_personne// : INT <<FK>> (optionnel)
+  //id_entreprise// : INT <<FK>> (optionnel)
+  //mode_de_paiement_id// : INT <<FK>>
+}
+
+' =============================================================================
+' RELATIONS PRINCIPALES
+' =============================================================================
+
+' Gestion des utilisateurs
+User ||--|| Personne : "Chaque utilisateur\nest une personne"
+User }o--o{ Role : "Un utilisateur peut\navoir plusieurs rôles"
+UserRole }o--|| User
+UserRole }o--|| Role
+
+' Transactions financières
+Transaction }o--|| Exercice : "Chaque transaction\nappartient à un exercice"
+Transaction }o--|| TypeTransaction : "Type obligatoire\n(recette/dépense)"
+Transaction }o--o| Personne : "Bénéficiaire\n(personne OU entreprise)"
+Transaction }o--o| Entreprise : "Bénéficiaire\n(personne OU entreprise)"
+Transaction }o--o| ModeDePaiement : "Mode de paiement\noptionnel"
+
+' =============================================================================
+' NOTES EXPLICATIVES
+' =============================================================================
+
+note right of Transaction : **Cœur du système**\n• Gestion des recettes/dépenses\n• Deux types de comptes : courant et livret\n• Soit une personne SOIT une entreprise\n• Numérotation séquentielle par exercice
+
+note top of User : **Système d'authentification**\n• Chaque utilisateur = une personne\n• Rôles : Visiteur, Utilisateur, Admin\n• Permissions selon le rôle
+
+note bottom of Personne : **Contacts physiques**\nMembres de l'amicale,\ndonateurs individuels
+
+note bottom of Entreprise : **Contacts moraux**\nSponsors, fournisseurs,\npartenaires commerciaux
+
+' =============================================================================
+' LÉGENDE
+' =============================================================================
+
+legend bottom right
+**But de l'application RCA :**
+Gestion financière simplifiée pour l'amicale 
+du Rugby Club Audomarois
+
+**Fonctionnalités principales :**
+• Suivi des recettes et dépenses
+• Gestion des membres et partenaires
+• Organisation par exercices comptables
+• Séparation compte courant / livret épargne
+• Système de permissions par rôles
+
+**Utilisateurs types :**
+• Trésorier : gestion quotidienne
+• Président : consultation et validation
+• Membres : consultation selon permissions
+end legend
+
+@enduml

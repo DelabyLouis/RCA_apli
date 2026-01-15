@@ -1,0 +1,98 @@
+@startuml Schema_Simplifie_RCA
+
+!theme plain
+skinparam backgroundColor #F8F9FA
+skinparam class {
+    BackgroundColor #E8F5E8
+    BorderColor #388E3C
+    FontSize 12
+}
+
+title 📋 Vue d'ensemble simplifiée - Données du Club\n🎯 Les informations essentielles en un coup d'œil
+
+' =============================================================================
+' 📊 DONNÉES PRINCIPALES
+' =============================================================================
+
+class "👥 MEMBRES & CONTACTS" as Contacts {
+    **Ce qu'on stocke :**
+    --
+    📝 Nom, Prénom
+    📧 Email, Téléphone
+    🏠 Adresse
+    🏢 Entreprise (optionnel)
+    ===
+    **Exemples :**
+    • Jean Dupont
+    • Marie Martin  
+    • Boulangerie Durand
+}
+
+class "💰 ARGENT DU CLUB" as Finances {
+    **Ce qu'on suit :**
+    --
+    💳 Chaque entrée/sortie d'argent
+    📅 Date de l'opération
+    📝 Description claire
+    👤 Qui est concerné
+    💳 Comment c'est payé
+    ===
+    **Exemples :**
+    • Cotisation Jean : +25€
+    • Achat ballons : -120€
+    • Don Marie : +50€
+}
+
+class "📅 SAISONS SPORTIVES" as Saisons {
+    **Organisation par année :**
+    --
+    📅 Saison 2023-2024
+    📅 Saison 2024-2025 (actuelle)
+    🔒 Fermé / 🔓 Ouvert
+    📊 Bilan de chaque saison
+    ===
+    **Avantage :**
+    Comptes séparés par saison
+    = historique clair
+}
+
+class "👤 UTILISATEURS" as Users {
+    **Qui accède à quoi :**
+    --
+    🔑 Login / Mot de passe
+    👥 Membre simple
+    💼 Trésorier  
+    🔧 Administrateur
+    ===
+    **Sécurité :**
+    Chacun voit seulement
+    ce qu'il a le droit de voir
+}
+
+' =============================================================================
+' 🔗 COMMENT TOUT EST RELIÉ
+' =============================================================================
+
+Contacts ||--o{ Finances : "💳 Les transactions\nconcernent des membres"
+Saisons ||--o{ Finances : "📅 Chaque transaction\nappartient à une saison"
+Users ||--o| Contacts : "👤 Chaque utilisateur\nest un membre du club"
+
+' =============================================================================
+' 💡 EXEMPLES CONCRETS
+' =============================================================================
+
+note top of Contacts : **👥 Exemple de contact :**\nJean Dupont\n📧 jean.dupont@email.com\n📱 06.12.34.56.78\n🏠 123 rue de la Paix, Saint-Omer
+
+note top of Finances : **💰 Exemple de transaction :**\nLibellé : "Cotisation Jean Dupont"\nMontant : +25,00€\nDate : 15/01/2026\nType : Cotisation\nMode : Virement
+
+note right of Saisons : **📅 Organisation :**\nChaque saison = 1 an\nToutes les transactions\nde l'année sont groupées\n→ Bilan annuel facile
+
+note left of Users : **🔐 Droits d'accès :**\n• Membre : voir les soldes\n• Trésorier : gérer l'argent\n• Admin : gérer les utilisateurs
+
+' =============================================================================
+' 🎯 RÉSULTAT POUR LE CLUB
+' =============================================================================
+
+note bottom : **🏆 Ce que ça apporte au club :**\n   ✅ **Transparence** : tout est tracé et visible\n   ✅ **Simplicité** : plus facile qu'Excel\n   ✅ **Sécurité** : impossible de perdre les données\n   ✅ **Rapidité** : calculs automatiques\n   ✅ **Légalité** : attestations fiscales automatiques
+
+@enduml
