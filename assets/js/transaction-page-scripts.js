@@ -546,7 +546,8 @@ function applyFilters() {
 
     // pour debug on peut afficher l'URL générée
     console.log("URL filtrée :", url.toString());
-    // Rediriger vers l'URL filtrée
+    // Avant de rediriger, ré-initialiser le collapse des exercices sur la nouvelle page
+    // (On redirige donc le navigateur vers l'URL filtrée, ce qui rechargera la page)
     window.location.href = url.toString();
 }
 
