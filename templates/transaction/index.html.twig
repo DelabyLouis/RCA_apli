@@ -42,7 +42,7 @@
                     <!-- Filtre Libellé -->
                     <div class="col-md-2 mb-3">
                         <label for="filter-libelle" class="form-label">Libellé</label>
-                        <input type="text" class="form-control" id="filter-libelle" placeholder="Rechercher par libellé...">
+                        <input type="text" class="form-control" id="filter-libelle" placeholder="Rechercher par libellé..." value="{{ libelle_filter }}">
                     </div>
                     
                     <!-- Filtre Tiers avec cases à cocher -->
@@ -60,7 +60,8 @@
                                 <div class="form-check">
                                     <input class="form-check-input tiers-checkbox" type="checkbox" 
                                            value="personne_{{ personne.idPersonne }}" 
-                                           id="tiers-personne-{{ personne.idPersonne }}">
+                                           id="tiers-personne-{{ personne.idPersonne }}"
+                                           {% if tiers_filter is defined and 'personne_' ~ personne.idPersonne in tiers_filter %}checked{% endif %}>
                                     <label class="form-check-label" for="tiers-personne-{{ personne.idPersonne }}">
                                         {{ personne.prenom }} {{ personne.nom }}
                                     </label>
@@ -76,7 +77,8 @@
                                 <div class="form-check">
                                     <input class="form-check-input tiers-checkbox" type="checkbox" 
                                            value="entreprise_{{ entreprise.idEntreprise }}" 
-                                           id="tiers-entreprise-{{ entreprise.idEntreprise }}">
+                                           id="tiers-entreprise-{{ entreprise.idEntreprise }}"
+                                           {% if tiers_filter is defined and 'entreprise_' ~ entreprise.idEntreprise in tiers_filter %}checked{% endif %}>
                                     <label class="form-check-label" for="tiers-entreprise-{{ entreprise.idEntreprise }}">
                                         {{ entreprise.nomEntreprise }}
                                     </label>
@@ -103,11 +105,11 @@
                         <div class="input-group">
                             <select class="form-select" id="filter-type-montant" style="max-width: 160px;">
                                 <option value="">Tous</option>
-                                <option value="credit">🟢 Crédit (Entrées)</option>
-                                <option value="debit">🔴 Débit (Sorties)</option>
+                                <option value="credit" {% if type_montant_filter == 'credit' %}selected{% endif %}>🟢 Crédit (Entrées)</option>
+                                <option value="debit" {% if type_montant_filter == 'debit' %}selected{% endif %}>🔴 Débit (Sorties)</option>
                             </select>
-                            <input type="number" class="form-control" id="filter-montant-min" placeholder="Min" step="0.01" style="max-width: 100px;">
-                            <input type="number" class="form-control" id="filter-montant-max" placeholder="Max" step="0.01" style="max-width: 100px;">
+                            <input type="number" class="form-control" id="filter-montant-min" placeholder="Min" step="0.01" style="max-width: 100px;" value="{{ montant_min_filter }}">
+                            <input type="number" class="form-control" id="filter-montant-max" placeholder="Max" step="0.01" style="max-width: 100px;" value="{{ montant_max_filter }}">
                         </div>
                         <small class="text-muted">Filtre combiné : type + montant min/max</small>
                     </div>
@@ -116,8 +118,8 @@
                     <div class="col-md-4 mb-3">
                         <label for="filter-date" class="form-label">Date de transaction</label>
                         <div class="input-group">
-                            <input type="date" class="form-control" id="filter-date-min" placeholder="Date min">
-                            <input type="date" class="form-control" id="filter-date-max" placeholder="Date max">
+                            <input type="date" class="form-control" id="filter-date-min" placeholder="Date min" value="{{ date_min_filter }}">
+                            <input type="date" class="form-control" id="filter-date-max" placeholder="Date max" value="{{ date_max_filter }}">
                         </div>
                         <small class="text-muted">Période : date min/max</small>
                     </div>

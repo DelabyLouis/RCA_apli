@@ -37,6 +37,15 @@ final class TransactionController extends AbstractController
             $exerciceFilter = $exerciceRepository->findOneBy(['id_exercice' => $exerciceId]);
         }
         
+        // Récupérer les paramètres de filtrage
+        $libelleFilter = $request->query->get('libelle');
+        $tiersFilter = $request->query->all()['tiers'] ?? []; // Array of personne_XX or entreprise_XX
+        $typeMontantFilter = $request->query->get('type_montant');
+        $montantMinFilter = $request->query->get('montant_min');
+        $montantMaxFilter = $request->query->get('montant_max');
+        $dateMinFilter = $request->query->get('date_min');
+        $dateMaxFilter = $request->query->get('date_max');
+        
         // Récupérer les transactions triées par numéro d'ordre avec leurs relations pour éviter les requêtes N+1
         $queryBuilder = $transactionRepository->createQueryBuilder('t')
             ->leftJoin('t.personne', 'p')
@@ -50,6 +59,77 @@ final class TransactionController extends AbstractController
         if ($exerciceFilter) {
             $queryBuilder->where('t.exercice = :exercice')
                         ->setParameter('exercice', $exerciceFilter);
+        }
+        
+        // Appliquer le filtre par libellé
+        if ($libelleFilter) {
+            $queryBuilder->andWhere('t.libelle LIKE :libelle')
+                        ->setParameter('libelle', '%' . $libelleFilter . '%');
+        }
+        
+        // Appliquer le filtre par tiers
+        if (!empty($tiersFilter)) {
+            $personnesIds = [];
+            $entreprisesIds = [];
+            
+            foreach ($tiersFilter as $tier) {
+                if (strpos($tier, 'personne_') === 0) {
+                    $personnesIds[] = str_replace('personne_', '', $tier);
+                } elseif (strpos($tier, 'entreprise_') === 0) {
+                    $entreprisesIds[] = str_replace('entreprise_', '', $tier);
+                }
+            }
+            
+            $orConditions = [];
+            $params = [];
+            
+            if (!empty($personnesIds)) {
+                $orConditions[] = 't.personne IN (:personnes)';
+                $params['personnes'] = $personnesIds;
+            }
+            
+            if (!empty($entreprisesIds)) {
+                $orConditions[] = 't.entreprise IN (:entreprises)';
+                $params['entreprises'] = $entreprisesIds;
+            }
+            
+            if (!empty($orConditions)) {
+                $queryBuilder->andWhere('(' . implode(' OR ', $orConditions) . ')');
+                foreach ($params as $key => $value) {
+                    $queryBuilder->setParameter($key, $value);
+                }
+            }
+        }
+        
+        // Appliquer le filtre par type de montant
+        if ($typeMontantFilter) {
+            if ($typeMontantFilter === 'credit') {
+                $queryBuilder->andWhere('t.montant > 0');
+            } elseif ($typeMontantFilter === 'debit') {
+                $queryBuilder->andWhere('t.montant < 0');
+            }
+        }
+        
+        // Appliquer le filtre par montant min/max
+        if ($montantMinFilter !== null && $montantMinFilter !== '') {
+            $queryBuilder->andWhere('ABS(t.montant) >= :montant_min')
+                        ->setParameter('montant_min', (float)$montantMinFilter);
+        }
+        
+        if ($montantMaxFilter !== null && $montantMaxFilter !== '') {
+            $queryBuilder->andWhere('ABS(t.montant) <= :montant_max')
+                        ->setParameter('montant_max', (float)$montantMaxFilter);
+        }
+        
+        // Appliquer le filtre par date
+        if ($dateMinFilter) {
+            $queryBuilder->andWhere('t.date_transaction >= :date_min')
+                        ->setParameter('date_min', new \DateTime($dateMinFilter));
+        }
+        
+        if ($dateMaxFilter) {
+            $queryBuilder->andWhere('t.date_transaction <= :date_max')
+                        ->setParameter('date_max', new \DateTime($dateMaxFilter . ' 23:59:59'));
         }
         
         $transactions = $queryBuilder
@@ -105,6 +185,16 @@ final class TransactionController extends AbstractController
                 'exercice_precedent_existe' => $soldePrecedent != 0,
                 'exercice_filter' => $exerciceFilter,
                 'types_transaction' => $typeTransactionRepository->findAll(),
+                'personnes' => $personneRepository->findAll(),
+                'entreprises' => $entrepriseRepository->findAll(),
+                // Filtres
+                'libelle_filter' => $libelleFilter,
+                'tiers_filter' => $tiersFilter,
+                'type_montant_filter' => $typeMontantFilter,
+                'montant_min_filter' => $montantMinFilter,
+                'montant_max_filter' => $montantMaxFilter,
+                'date_min_filter' => $dateMinFilter,
+                'date_max_filter' => $dateMaxFilter,
             ]);
         }
         
@@ -119,6 +209,14 @@ final class TransactionController extends AbstractController
             'types_transaction' => $typeTransactionRepository->findAll(),
             'modes_de_paiement' => $modeDePaiementRepository->findAll(),
             'exercice_filter' => $exerciceFilter,
+            // Filtres
+            'libelle_filter' => $libelleFilter,
+            'tiers_filter' => $tiersFilter,
+            'type_montant_filter' => $typeMontantFilter,
+            'montant_min_filter' => $montantMinFilter,
+            'montant_max_filter' => $montantMaxFilter,
+            'date_min_filter' => $dateMinFilter,
+            'date_max_filter' => $dateMaxFilter,
         ]);
     }
 

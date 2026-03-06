@@ -72,45 +72,97 @@
             <div class="card-body">
                 <div class="row">
                     <!-- Filtre Libellé -->
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-2 mb-3">
                         <label for="filter-libelle" class="form-label">Libellé</label>
-                        <input type="text" class="form-control" id="filter-libelle" placeholder="Rechercher par libellé...">
+                        <input type="text" class="form-control" id="filter-libelle" placeholder="Rechercher par libellé..." value="{{ libelle_filter }}">
                     </div>
                     
-                    <!-- Filtre Type -->
+                    <!-- Filtre Tiers avec cases à cocher -->
                     <div class="col-md-3 mb-3">
-                        <label for="filter-type" class="form-label">Type</label>
-                        <select class="form-select" id="filter-type">
-                            <option value="">Tous les types</option>
-                            {% for type in types_transaction %}
-                                <option value="{{ type.libelle }}">{{ type.libelle }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <!-- Filtre Tiers -->
-                    <div class="col-md-3 mb-3">
-                        <label for="filter-tiers" class="form-label">Tiers</label>
-                        <input type="text" class="form-control" id="filter-tiers" placeholder="Nom du tiers...">
-                    </div>
-                    
-                    <!-- Filtre Montant -->
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Montant</label>
-                        <div class="input-group input-group-sm">
-                            <input type="number" class="form-control" id="filter-montant-min" placeholder="Min" step="0.01">
-                            <span class="input-group-text">€</span>
-                            <input type="number" class="form-control" id="filter-montant-max" placeholder="Max" step="0.01">
+                        <label class="form-label">Tiers</label>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="filter-tiers-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span id="selected-tiers-text">Sélectionner des tiers...</span>
+                            </button>
+                            <div class="dropdown-menu p-3" style="min-width: 300px;" aria-labelledby="filter-tiers-dropdown">
+                                <div class="mb-2">
+                                    <strong>Personnes</strong>
+                                </div>
+                                {% for personne in personnes %}
+                                <div class="form-check">
+                                    <input class="form-check-input tiers-checkbox" type="checkbox" 
+                                           value="personne_{{ personne.idPersonne }}" 
+                                           id="tiers-personne-{{ personne.idPersonne }}"
+                                           {% if tiers_filter is defined and 'personne_' ~ personne.idPersonne in tiers_filter %}checked{% endif %}>
+                                    <label class="form-check-label" for="tiers-personne-{{ personne.idPersonne }}">
+                                        {{ personne.prenom }} {{ personne.nom }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                                
+                                <hr class="my-2">
+                                
+                                <div class="mb-2">
+                                    <strong>Entreprises</strong>
+                                </div>
+                                {% for entreprise in entreprises %}
+                                <div class="form-check">
+                                    <input class="form-check-input tiers-checkbox" type="checkbox" 
+                                           value="entreprise_{{ entreprise.idEntreprise }}" 
+                                           id="tiers-entreprise-{{ entreprise.idEntreprise }}"
+                                           {% if tiers_filter is defined and 'entreprise_' ~ entreprise.idEntreprise in tiers_filter %}checked{% endif %}>
+                                    <label class="form-check-label" for="tiers-entreprise-{{ entreprise.idEntreprise }}">
+                                        {{ entreprise.nomEntreprise }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                                
+                                <hr class="my-2">
+                                
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-tiers-selection">
+                                        Tout décocher
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-primary" id="apply-tiers-filter">
+                                        Appliquer
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                    
+                    <!-- Filtre Débit/Crédit -->
+                    <div class="col-md-3 mb-3">
+                        <label for="filter-type-montant" class="form-label"><i class="fas fa-exchange-alt me-1"></i>Type de montant</label>
+                        <div class="input-group">
+                            <select class="form-select" id="filter-type-montant" style="max-width: 160px;">
+                                <option value="">Tous</option>
+                                <option value="credit" {% if type_montant_filter == 'credit' %}selected{% endif %}>🟢 Crédit (Entrées)</option>
+                                <option value="debit" {% if type_montant_filter == 'debit' %}selected{% endif %}>🔴 Débit (Sorties)</option>
+                            </select>
+                            <input type="number" class="form-control" id="filter-montant-min" placeholder="Min" step="0.01" style="max-width: 100px;" value="{{ montant_min_filter }}">
+                            <input type="number" class="form-control" id="filter-montant-max" placeholder="Max" step="0.01" style="max-width: 100px;" value="{{ montant_max_filter }}">
+                        </div>
+                        <small class="text-muted">Filtre combiné : type + montant min/max</small>
+                    </div>
+                    
+                    <!-- Filtre Date -->
+                    <div class="col-md-4 mb-3">
+                        <label for="filter-date" class="form-label">Date de transaction</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" id="filter-date-min" placeholder="Date min" value="{{ date_min_filter }}">
+                            <input type="date" class="form-control" id="filter-date-max" placeholder="Date max" value="{{ date_max_filter }}">
+                        </div>
+                        <small class="text-muted">Période : date min/max</small>
                     </div>
                 </div>
                 
                 <div class="row">
                     <div class="col-12">
-                        <button type="button" class="btn btn-primary" onclick="applyFilters()">
-                            <i class="fas fa-search me-1"></i>Appliquer les filtres
+                        <button type="button" class="btn btn-primary me-2" id="apply-filters">
+                            <i class="fas fa-search me-1"></i>Filtrer
                         </button>
-                        <button type="button" class="btn btn-outline-secondary ms-2" onclick="clearFilters()">
+                        <button type="button" class="btn btn-outline-secondary" id="clear-filters">
                             <i class="fas fa-times me-1"></i>Effacer les filtres
                         </button>
                         <a href="{{ path('app_transaction_export_excel') }}?exercice_id={{ exercice_filter.idExercice }}" class="btn btn-success ms-3">
@@ -258,57 +310,178 @@
         </div>
     </div>
 
+    <script src="{{ asset('js/transaction-drag-drop.js') }}"></script>
+    <script src="{{ asset('js/transaction-page-scripts.js') }}"></script>
+    <script>
+        // Configuration simple comme pour les exercices
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuration URL pour drag & drop
+            if (typeof setTransactionReorderUrl === 'function') {
+                setTransactionReorderUrl('{{ path("app_transaction_bulk_update_order") }}');
+            }
+            
+            // Configuration des données pour les selects
+            window.transactionSelectData = {
+                exercices: [
+                    { id: {{ exercice_filter.idExercice }}, libelle: "{{ exercice_filter.libelle }}" },
+                ],
+                types: [
+                    {% for type in types_transaction %}
+                    { id: {{ type.idType }}, libelle: "{{ type.libelle }}" },
+                    {% endfor %}
+                ],
+                modes: []
+            };
+            
+            // Initialisation des fonctionnalités (comme pour les exercices)
+            initTransactionPage();
+        });
+    
+    // Le drag & drop est maintenant géré par le fichier externe transaction-drag-drop.js
+    </script>
+
 <script>
-// Fonction pour appliquer les filtres
+// Fonction pour appliquer les filtres (côté client pour compatibilité)
 function applyFilters() {
-    const libelle = document.getElementById('filter-libelle').value.toLowerCase();
-    const type = document.getElementById('filter-type').value.toLowerCase();
-    const tiers = document.getElementById('filter-tiers').value.toLowerCase();
-    const montantMin = parseFloat(document.getElementById('filter-montant-min').value) || null;
-    const montantMax = parseFloat(document.getElementById('filter-montant-max').value) || null;
-    
-    const rows = document.querySelectorAll('#transactions-table tbody .transaction-row');
-    
-    rows.forEach(row => {
-        const libelleText = row.cells[2].textContent.toLowerCase();
-        const typeText = row.cells[3].textContent.toLowerCase();
-        const tiersText = row.cells[4].textContent.toLowerCase();
-        const montantText = row.cells[6].textContent.replace(/[^\d,-]/g, '').replace(',', '.');
-        const montant = parseFloat(montantText) || 0;
-        
-        let visible = true;
-        
-        if (libelle && !libelleText.includes(libelle)) visible = false;
-        if (type && !typeText.includes(type)) visible = false;
-        if (tiers && !tiersText.includes(tiers)) visible = false;
-        if (montantMin !== null && montant < montantMin) visible = false;
-        if (montantMax !== null && montant > montantMax) visible = false;
-        
-        row.style.display = visible ? '' : 'none';
+    // Rediriger vers le serveur pour appliquer les filtres
+    const libelle = document.getElementById('filter-libelle').value.trim();
+    const typeMontant = document.getElementById('filter-type-montant').value;
+    const montantMin = document.getElementById('filter-montant-min').value.trim();
+    const montantMax = document.getElementById('filter-montant-max').value.trim();
+    const dateMin = document.getElementById('filter-date-min').value;
+    const dateMax = document.getElementById('filter-date-max').value;
+
+    // Récupérer les tiers sélectionnés
+    const selectedTiers = [];
+    document.querySelectorAll('.tiers-checkbox:checked').forEach(function(checkbox) {
+        selectedTiers.push(checkbox.value);
     });
+
+    // Construire l'URL avec les paramètres
+    const url = new URL(window.location);
+
+    // Supprimer les anciens paramètres de filtre
+    url.searchParams.delete('libelle');
+    url.searchParams.delete('tiers');
+    url.searchParams.delete('type_montant');
+    url.searchParams.delete('montant_min');
+    url.searchParams.delete('montant_max');
+    url.searchParams.delete('date_min');
+    url.searchParams.delete('date_max');
+
+    // Ajouter les nouveaux paramètres si ils ont des valeurs
+    if (libelle) {
+        url.searchParams.set('libelle', libelle);
+    }
+
+    selectedTiers.forEach(function(tier) {
+        url.searchParams.append('tiers[]', tier);
+    });
+
+    if (typeMontant) {
+        url.searchParams.set('type_montant', typeMontant);
+    }
+
+    if (montantMin) {
+        url.searchParams.set('montant_min', montantMin);
+    }
+
+    if (montantMax) {
+        url.searchParams.set('montant_max', montantMax);
+    }
+
+    if (dateMin) {
+        url.searchParams.set('date_min', dateMin);
+    }
+
+    if (dateMax) {
+        url.searchParams.set('date_max', dateMax);
+    }
+
+    // Rediriger vers l'URL filtrée
+    window.location.href = url.toString();
 }
 
 // Fonction pour effacer les filtres
 function clearFilters() {
+    // Vider les champs
     document.getElementById('filter-libelle').value = '';
-    document.getElementById('filter-type').value = '';
-    document.getElementById('filter-tiers').value = '';
+    document.getElementById('filter-type-montant').value = '';
     document.getElementById('filter-montant-min').value = '';
     document.getElementById('filter-montant-max').value = '';
-    
-    // Afficher toutes les lignes
-    const rows = document.querySelectorAll('#transactions-table tbody .transaction-row');
-    rows.forEach(row => {
-        row.style.display = '';
+    document.getElementById('filter-date-min').value = '';
+    document.getElementById('filter-date-max').value = '';
+
+    // Décocher tous les tiers
+    document.querySelectorAll('.tiers-checkbox').forEach(function(checkbox) {
+        checkbox.checked = false;
     });
+    updateTiersDropdownText();
+
+    // Rediriger vers l'URL sans paramètres de filtre
+    const url = new URL(window.location);
+    url.searchParams.delete('libelle');
+    url.searchParams.delete('tiers');
+    url.searchParams.delete('type_montant');
+    url.searchParams.delete('montant_min');
+    url.searchParams.delete('montant_max');
+    url.searchParams.delete('date_min');
+    url.searchParams.delete('date_max');
+
+    window.location.href = url.toString();
 }
 
-// Appliquer les filtres en temps réel
-document.getElementById('filter-libelle').addEventListener('input', applyFilters);
-document.getElementById('filter-type').addEventListener('change', applyFilters);
-document.getElementById('filter-tiers').addEventListener('input', applyFilters);
-document.getElementById('filter-montant-min').addEventListener('input', applyFilters);
-document.getElementById('filter-montant-max').addEventListener('input', applyFilters);
+// Fonction pour mettre à jour le texte du dropdown tiers
+function updateTiersDropdownText() {
+    const selectedTiers = document.querySelectorAll('.tiers-checkbox:checked');
+    const textElement = document.getElementById('selected-tiers-text');
+
+    if (!textElement) return;
+
+    if (selectedTiers.length === 0) {
+        textElement.textContent = 'Sélectionner des tiers...';
+    } else if (selectedTiers.length === 1) {
+        const label = selectedTiers[0].closest('.form-check').querySelector('.form-check-label');
+        textElement.textContent = label ? label.textContent.trim() : '1 tiers sélectionné';
+    } else {
+        textElement.textContent = selectedTiers.length + ' tiers sélectionnés';
+    }
+}
+
+// Initialisation des filtres
+document.addEventListener('DOMContentLoaded', function() {
+    // Mettre à jour le texte du dropdown tiers au chargement
+    updateTiersDropdownText();
+
+    // Gestion du dropdown tiers
+    const applyTiersBtn = document.getElementById('apply-tiers-filter');
+    if (applyTiersBtn) {
+        applyTiersBtn.addEventListener('click', function() {
+            // Fermer le dropdown
+            const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('filter-tiers-dropdown'));
+            if (dropdown) {
+                dropdown.hide();
+            }
+            updateTiersDropdownText();
+        });
+    }
+
+    // Tout décocher
+    const clearTiersBtn = document.getElementById('clear-tiers-selection');
+    if (clearTiersBtn) {
+        clearTiersBtn.addEventListener('click', function() {
+            document.querySelectorAll('.tiers-checkbox').forEach(function(checkbox) {
+                checkbox.checked = false;
+            });
+            updateTiersDropdownText();
+        });
+    }
+
+    // Mettre à jour le texte quand on coche/décoche
+    document.querySelectorAll('.tiers-checkbox').forEach(function(checkbox) {
+        checkbox.addEventListener('change', updateTiersDropdownText);
+    });
+});
 </script>
 
 {% endblock %}

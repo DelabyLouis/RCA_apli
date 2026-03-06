@@ -12,6 +12,7 @@ function initTransactionPage() {
     initDeleteButtons();
     initExerciceCollapse();
     autoCollapseClosedExercices();
+    initFilters();
 }
 
 // Fonction pour afficher une notification
@@ -400,10 +401,183 @@ function autoCollapseClosedExercices() {
         });
 }
 
+// Gestion des filtres
+function initFilters() {
+    console.log("Initialisation des filtres");
+
+    // Bouton appliquer les filtres
+    const applyFiltersBtn = document.getElementById("apply-filters");
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener("click", applyFilters);
+    }
+
+    // Bouton effacer les filtres
+    const clearFiltersBtn = document.getElementById("clear-filters");
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener("click", clearFilters);
+    }
+
+    // Gestion du dropdown tiers
+    initTiersDropdown();
+
+    // Mettre à jour le texte du dropdown tiers au chargement
+    updateTiersDropdownText();
+}
+
+function initTiersDropdown() {
+    // Appliquer le filtre tiers
+    const applyTiersBtn = document.getElementById("apply-tiers-filter");
+    if (applyTiersBtn) {
+        applyTiersBtn.addEventListener("click", function () {
+            // Fermer le dropdown
+            const dropdown = bootstrap.Dropdown.getInstance(
+                document.getElementById("filter-tiers-dropdown")
+            );
+            if (dropdown) {
+                dropdown.hide();
+            }
+            updateTiersDropdownText();
+        });
+    }
+
+    // Tout décocher
+    const clearTiersBtn = document.getElementById("clear-tiers-selection");
+    if (clearTiersBtn) {
+        clearTiersBtn.addEventListener("click", function () {
+            document
+                .querySelectorAll(".tiers-checkbox")
+                .forEach(function (checkbox) {
+                    checkbox.checked = false;
+                });
+            updateTiersDropdownText();
+        });
+    }
+
+    // Mettre à jour le texte quand on coche/décoche
+    document.querySelectorAll(".tiers-checkbox").forEach(function (checkbox) {
+        checkbox.addEventListener("change", updateTiersDropdownText);
+    });
+}
+
+function updateTiersDropdownText() {
+    const selectedTiers = document.querySelectorAll(".tiers-checkbox:checked");
+    const textElement = document.getElementById("selected-tiers-text");
+
+    if (!textElement) return;
+
+    if (selectedTiers.length === 0) {
+        textElement.textContent = "Sélectionner des tiers...";
+    } else if (selectedTiers.length === 1) {
+        const label = selectedTiers[0]
+            .closest(".form-check")
+            .querySelector(".form-check-label");
+        textElement.textContent = label
+            ? label.textContent.trim()
+            : "1 tiers sélectionné";
+    } else {
+        textElement.textContent = selectedTiers.length + " tiers sélectionnés";
+    }
+}
+
+function applyFilters() {
+    console.log("Application des filtres");
+
+    // Récupérer les valeurs des filtres
+    const libelle = document.getElementById("filter-libelle").value.trim();
+    const typeMontant = document.getElementById("filter-type-montant").value;
+    const montantMin = document
+        .getElementById("filter-montant-min")
+        .value.trim();
+    const montantMax = document
+        .getElementById("filter-montant-max")
+        .value.trim();
+    const dateMin = document.getElementById("filter-date-min").value;
+    const dateMax = document.getElementById("filter-date-max").value;
+
+    // Récupérer les tiers sélectionnés
+    const selectedTiers = [];
+    document
+        .querySelectorAll(".tiers-checkbox:checked")
+        .forEach(function (checkbox) {
+            selectedTiers.push(checkbox.value);
+        });
+
+    // Construire l'URL avec les paramètres
+    const url = new URL(window.location);
+
+    // Supprimer les anciens paramètres de filtre
+    url.searchParams.delete("libelle");
+    url.searchParams.delete("tiers");
+    url.searchParams.delete("type_montant");
+    url.searchParams.delete("montant_min");
+    url.searchParams.delete("montant_max");
+    url.searchParams.delete("date_min");
+    url.searchParams.delete("date_max");
+
+    // Ajouter les nouveaux paramètres si ils ont des valeurs
+    if (libelle) {
+        url.searchParams.set("libelle", libelle);
+    }
+
+    selectedTiers.forEach(function (tier) {
+        url.searchParams.append("tiers[]", tier);
+    });
+
+    if (typeMontant) {
+        url.searchParams.set("type_montant", typeMontant);
+    }
+
+    if (montantMin) {
+        url.searchParams.set("montant_min", montantMin);
+    }
+
+    if (montantMax) {
+        url.searchParams.set("montant_max", montantMax);
+    }
+
+    if (dateMin) {
+        url.searchParams.set("date_min", dateMin);
+    }
+
+    if (dateMax) {
+        url.searchParams.set("date_max", dateMax);
+    }
+
+    // Rediriger vers l'URL filtrée
+    window.location.href = url.toString();
+}
+
+function clearFilters() {
+    console.log("Effacement des filtres");
+
+    // Vider les champs
+    document.getElementById("filter-libelle").value = "";
+    document.getElementById("filter-type-montant").value = "";
+    document.getElementById("filter-montant-min").value = "";
+    document.getElementById("filter-montant-max").value = "";
+    document.getElementById("filter-date-min").value = "";
+    document.getElementById("filter-date-max").value = "";
+
+    // Décocher tous les tiers
+    document.querySelectorAll(".tiers-checkbox").forEach(function (checkbox) {
+        checkbox.checked = false;
+    });
+    updateTiersDropdownText();
+
+    // Rediriger vers l'URL sans paramètres de filtre
+    const url = new URL(window.location);
+    url.searchParams.delete("libelle");
+    url.searchParams.delete("tiers");
+    url.searchParams.delete("type_montant");
+    url.searchParams.delete("montant_min");
+    url.searchParams.delete("montant_max");
+    url.searchParams.delete("date_min");
+    url.searchParams.delete("date_max");
+
+    window.location.href = url.toString();
+}
+
 // Initialisation globale
 document.addEventListener("DOMContentLoaded", function () {
-    initInlineEditing();
-    initDeleteButtons();
-    initExerciceCollapse();
-    autoCollapseClosedExercices();
+    initTransactionPage();
 });
