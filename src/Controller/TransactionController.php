@@ -101,12 +101,23 @@ final class TransactionController extends AbstractController
             }
         }
         
-        // Appliquer le filtre par type de montant
+        // Appliquer le filtre par type de montant (crédit/débit).
+        // Note : les transactions de type "livret" ont leur signe inversé
+        // lors de l'affichage, il faut donc tenir compte de cette inversion
+        // dans les conditions de requête.
         if ($typeMontantFilter) {
             if ($typeMontantFilter === 'credit') {
-                $queryBuilder->andWhere('t.montant > 0');
+                // montant positif sur compte courant OR montant négatif sur livret
+                $queryBuilder->andWhere(
+                    '( (t.typeCompte != :livret AND t.montant > 0) OR (t.typeCompte = :livret AND t.montant < 0) )'
+                )
+                ->setParameter('livret', 'livret');
             } elseif ($typeMontantFilter === 'debit') {
-                $queryBuilder->andWhere('t.montant < 0');
+                // opposé de crédit
+                $queryBuilder->andWhere(
+                    '( (t.typeCompte != :livret AND t.montant < 0) OR (t.typeCompte = :livret AND t.montant > 0) )'
+                )
+                ->setParameter('livret', 'livret');
             }
         }
         

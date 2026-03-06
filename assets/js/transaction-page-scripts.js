@@ -520,7 +520,8 @@ function applyFilters() {
     }
 
     selectedTiers.forEach(function (tier) {
-        url.searchParams.append("tiers[]", tier);
+        // use plain 'tiers' key so Symfony returns an array via $request->query->all()['tiers']
+        url.searchParams.append("tiers", tier);
     });
 
     if (typeMontant) {
@@ -543,6 +544,8 @@ function applyFilters() {
         url.searchParams.set("date_max", dateMax);
     }
 
+    // pour debug on peut afficher l'URL générée
+    console.log("URL filtrée :", url.toString());
     // Rediriger vers l'URL filtrée
     window.location.href = url.toString();
 }
