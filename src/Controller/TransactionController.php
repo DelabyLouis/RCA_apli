@@ -109,13 +109,13 @@ final class TransactionController extends AbstractController
             if ($typeMontantFilter === 'credit') {
                 // montant positif sur compte courant OR montant négatif sur livret
                 $queryBuilder->andWhere(
-                    '( (t.typeCompte != :livret AND t.montant > 0) OR (t.typeCompte = :livret AND t.montant < 0) )'
+                    '( (t.type_compte != :livret AND t.montant > 0) OR (t.type_compte = :livret AND t.montant < 0) )'
                 )
                 ->setParameter('livret', 'livret');
             } elseif ($typeMontantFilter === 'debit') {
                 // opposé de crédit
                 $queryBuilder->andWhere(
-                    '( (t.typeCompte != :livret AND t.montant < 0) OR (t.typeCompte = :livret AND t.montant > 0) )'
+                    '( (t.type_compte != :livret AND t.montant < 0) OR (t.type_compte = :livret AND t.montant > 0) )'
                 )
                 ->setParameter('livret', 'livret');
             }
@@ -143,11 +143,23 @@ final class TransactionController extends AbstractController
                         ->setParameter('date_max', new \DateTime($dateMaxFilter . ' 23:59:59'));
         }
         
-        $transactions = $queryBuilder
-            ->orderBy('ex.numero_ordre', 'ASC')
-            ->addOrderBy('t.numero_ordre', 'ASC')
-            ->getQuery()
-            ->getResult();
+        // exécution encapsulée pour capturer les erreurs DQL/SQL en cas de 500
+        try {
+            $transactions = $queryBuilder
+                ->orderBy('ex.numero_ordre', 'ASC')
+                ->addOrderBy('t.numero_ordre', 'ASC')
+                ->getQuery()
+                ->getResult();
+        } catch (\Exception $e) {
+            error_log('Erreur exécution requête transactions: ' . $e->getMessage());
+            error_log('DQL: ' . $queryBuilder->getQuery()->getDQL());
+            $params = [];
+            foreach ($queryBuilder->getParameters() as $param) {
+                $params[$param->getName()] = $param->getValue();
+            }
+            error_log('Paramètres: ' . json_encode($params));
+            throw $e;
+        }
         
         // Calculer le solde de l'exercice précédent si on filtre par exercice
         $soldePrecedent = 0;
