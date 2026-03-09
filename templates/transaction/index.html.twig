@@ -311,7 +311,7 @@
     <script src="{{ asset('js/transaction-page-scripts.js') }}"></script>
     <script>
         // Configuration simple comme pour les exercices
-        document.addEventListener('DOMContentLoaded', function() {
+        function initializeTransactionConfig() {
             // Configuration URL pour drag & drop
             if (typeof setTransactionReorderUrl === 'function') {
                 setTransactionReorderUrl('{{ path("app_transaction_bulk_update_order") }}');
@@ -335,10 +335,14 @@
                     {% endfor %}
                 ]
             };
-            
-            // Initialisation des fonctionnalités (comme pour les exercices)
-            initTransactionPage();
-        });
+        }
+        
+        // Vérifier si le DOM est déjà chargé
+        if (document.readyState === "loading") {
+            document.addEventListener('DOMContentLoaded', initializeTransactionConfig);
+        } else {
+            initializeTransactionConfig();
+        }
     
     // Le drag & drop est maintenant géré par le fichier externe transaction-drag-drop.js
     </script>
@@ -356,6 +360,26 @@
     
     .drag-handle:hover {
         color: #2196f3 !important;
+    }
+    
+    /* Styles pour les séparateurs d'exercice */
+    .exercice-separator {
+        cursor: pointer;
+        background-color: #f8f9fa !important;
+        font-weight: bold;
+    }
+    
+    .exercice-separator:hover {
+        background-color: #e9ecef !important;
+    }
+    
+    .collapse-indicator {
+        font-size: 1.2em;
+        transition: transform 0.3s ease;
+    }
+    
+    .exercice-separator.collapsed .collapse-indicator {
+        transform: rotate(-90deg);
     }
     </style>
 {% endblock %}

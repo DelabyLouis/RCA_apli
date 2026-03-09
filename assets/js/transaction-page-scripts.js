@@ -46,7 +46,7 @@ function showNotification(message, type) {
 // Gestion de l'édition inline
 function initInlineEditing() {
     console.log(
-        "Initialisation édition inline pour transactions (page principale)"
+        "Initialisation édition inline pour transactions (page principale)",
     );
 
     // Récupérer les données depuis la variable globale définie dans le template
@@ -74,7 +74,7 @@ function initInlineEditing() {
                 "Édition de:",
                 field,
                 "pour transaction:",
-                transactionId
+                transactionId,
             );
 
             if (field === "date_transaction") {
@@ -213,15 +213,15 @@ function initInlineEditing() {
                                     setTimeout(
                                         () =>
                                             element.classList.remove(
-                                                "text-success"
+                                                "text-success",
                                             ),
-                                        1000
+                                        1000,
                                     );
                                 } else {
                                     alert(
                                         "Erreur: " +
                                             (data.error ||
-                                                "Impossible de sauvegarder")
+                                                "Impossible de sauvegarder"),
                                     );
                                     element.textContent = currentValue;
                                 }
@@ -257,7 +257,7 @@ function initDeleteButtons() {
 
             if (
                 !confirm(
-                    "Êtes-vous sûr de vouloir supprimer cette transaction ?"
+                    "Êtes-vous sûr de vouloir supprimer cette transaction ?",
                 )
             ) {
                 return;
@@ -279,7 +279,7 @@ function initDeleteButtons() {
                     if (data.success) {
                         showNotification(
                             "Transaction supprimée avec succès !",
-                            "success"
+                            "success",
                         );
                         row.remove();
                         // Réafficher "Aucune transaction" si plus de lignes
@@ -291,7 +291,7 @@ function initDeleteButtons() {
                         showNotification(
                             data.error ||
                                 "Impossible de supprimer la transaction",
-                            "danger"
+                            "danger",
                         );
                     }
                 })
@@ -299,7 +299,7 @@ function initDeleteButtons() {
                     console.error("Erreur:", error);
                     showNotification(
                         "Erreur de connexion ou serveur indisponible",
-                        "danger"
+                        "danger",
                     );
                 });
         });
@@ -308,58 +308,63 @@ function initDeleteButtons() {
 
 // Gestion du collapse/expand des exercices
 function initExerciceCollapse() {
-    document
-        .querySelectorAll(".exercice-separator")
-        .forEach(function (separator) {
-            separator.addEventListener("click", function () {
-                const exerciceId = this.dataset.exerciceId;
-                const transactionRows = document.querySelectorAll(
-                    `tr.transaction-row[data-exercice-id="${exerciceId}"]`
-                );
-                const montantCollapsed = this.querySelector(
-                    ".exercice-montant-collapsed"
-                );
-                const chevron = this.querySelector(".collapse-indicator i");
-                const isCollapsed = this.classList.contains("collapsed");
+    const separators = document.querySelectorAll(".exercice-separator");
+    console.log(
+        "Initialisation collapse - Séparateurs trouvés:",
+        separators.length,
+    );
 
-                if (isCollapsed) {
-                    // Dérouler - afficher toutes les transactions de cet exercice
-                    transactionRows.forEach(function (row) {
-                        row.style.display = "";
-                    });
-                    this.classList.remove("collapsed");
-                    // Masquer le montant final
-                    if (montantCollapsed) {
-                        montantCollapsed.style.display = "none";
-                    }
-                    // Changer l'icône du chevron
-                    if (chevron) {
-                        chevron.className = "fas fa-chevron-up";
-                    }
-                } else {
-                    // Enrouler - masquer toutes les transactions de cet exercice
-                    transactionRows.forEach(function (row) {
-                        row.style.display = "none";
-                    });
-                    this.classList.add("collapsed");
-                    // Afficher le montant final
-                    if (montantCollapsed) {
-                        montantCollapsed.style.display = "block";
-                    }
-                    // Changer l'icône du chevron
-                    if (chevron) {
-                        chevron.className = "fas fa-chevron-down";
-                    }
+    separators.forEach(function (separator) {
+        separator.addEventListener("click", function () {
+            const exerciceId = this.dataset.exerciceId;
+            console.log("Clic sur exercice:", exerciceId);
+            const transactionRows = document.querySelectorAll(
+                `tr.transaction-row[data-exercice-id="${exerciceId}"]`,
+            );
+            const montantCollapsed = this.querySelector(
+                ".exercice-montant-collapsed",
+            );
+            const chevron = this.querySelector(".collapse-indicator i");
+            const isCollapsed = this.classList.contains("collapsed");
+
+            if (isCollapsed) {
+                // Dérouler - afficher toutes les transactions de cet exercice
+                transactionRows.forEach(function (row) {
+                    row.style.display = "";
+                });
+                this.classList.remove("collapsed");
+                // Masquer le montant final
+                if (montantCollapsed) {
+                    montantCollapsed.style.display = "none";
                 }
+                // Changer l'icône du chevron
+                if (chevron) {
+                    chevron.className = "fas fa-chevron-up";
+                }
+            } else {
+                // Enrouler - masquer toutes les transactions de cet exercice
+                transactionRows.forEach(function (row) {
+                    row.style.display = "none";
+                });
+                this.classList.add("collapsed");
+                // Afficher le montant final
+                if (montantCollapsed) {
+                    montantCollapsed.style.display = "block";
+                }
+                // Changer l'icône du chevron
+                if (chevron) {
+                    chevron.className = "fas fa-chevron-down";
+                }
+            }
 
-                console.log(
-                    "Exercice " +
-                        exerciceId +
-                        " " +
-                        (isCollapsed ? "déroulé" : "enroulé")
-                );
-            });
+            console.log(
+                "Exercice " +
+                    exerciceId +
+                    " " +
+                    (isCollapsed ? "déroulé" : "enroulé"),
+            );
         });
+    });
 }
 
 // Auto-collapse des exercices clôturés
@@ -375,13 +380,13 @@ function autoCollapseClosedExercices() {
             if (isClosedExercice) {
                 // Enrouler cet exercice clôturé
                 const transactionRows = document.querySelectorAll(
-                    `tr.transaction-row[data-exercice-id="${exerciceId}"]`
+                    `tr.transaction-row[data-exercice-id="${exerciceId}"]`,
                 );
                 const montantCollapsed = separator.querySelector(
-                    ".exercice-montant-collapsed"
+                    ".exercice-montant-collapsed",
                 );
                 const chevron = separator.querySelector(
-                    ".collapse-indicator i"
+                    ".collapse-indicator i",
                 );
 
                 transactionRows.forEach(function (row) {
@@ -431,7 +436,7 @@ function initTiersDropdown() {
         applyTiersBtn.addEventListener("click", function () {
             // Fermer le dropdown
             const dropdown = bootstrap.Dropdown.getInstance(
-                document.getElementById("filter-tiers-dropdown")
+                document.getElementById("filter-tiers-dropdown"),
             );
             if (dropdown) {
                 dropdown.hide();
@@ -582,6 +587,12 @@ function clearFilters() {
 }
 
 // Initialisation globale
-document.addEventListener("DOMContentLoaded", function () {
+// Vérifier si le DOM est déjà chargé (cas où le script est chargé après</body>)
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+        initTransactionPage();
+    });
+} else {
+    // Le DOM est déjà chargé, initialiser directement
     initTransactionPage();
-});
+}
