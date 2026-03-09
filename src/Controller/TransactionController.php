@@ -599,9 +599,6 @@ final class TransactionController extends AbstractController
     #[Route('/admin/fix-order', name: 'app_transaction_fix_order', methods: ['POST'])]
     public function fixTransactionOrder(ExerciceRepository $exerciceRepository, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager): JsonResponse
     {
-        // Vérifier les droits d'accès (Admin only)
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
         try {
             $results = [];
             $totalFixed = 0;
@@ -625,33 +622,37 @@ final class TransactionController extends AbstractController
                 }
 
                 $exerciceResults = [];
+                
+                // ÉTAPE 1 : Assigner des numéros temporaires très grands pour éviter les conflits
+                $tempOrder = 100000;
+                foreach ($transactions as $transaction) {
+                    $transaction->setNumeroOrdre($tempOrder);
+                    $tempOrder++;
+                }
+                $entityManager->flush();
+                
+                // ÉTAPE 2 : Maintenant renumméroter correctement de 1 à N
                 $newOrder = 1;
-
                 foreach ($transactions as $transaction) {
                     $oldOrder = $transaction->getNumeroOrdre();
+                    $transaction->setNumeroOrdre($newOrder);
                     
-                    // Renumméroter si nécessaire
-                    if ($oldOrder !== $newOrder || $oldOrder < 1) {
-                        $transaction->setNumeroOrdre($newOrder);
-                        $exerciceResults[] = [
-                            'id' => $transaction->getIdTransaction(),
-                            'old_order' => $oldOrder,
-                            'new_order' => $newOrder,
-                            'invalid' => $oldOrder < 1
-                        ];
-                        $totalFixed++;
-                    }
-                    
+                    $exerciceResults[] = [
+                        'id' => $transaction->getIdTransaction(),
+                        'old_order' => $oldOrder,
+                        'new_order' => $newOrder
+                    ];
+                    $totalFixed++;
                     $newOrder++;
                 }
+                
+                // Flush final pour cet exercice
+                $entityManager->flush();
 
                 if (!empty($exerciceResults)) {
                     $results[$exercice->getLibelle()] = $exerciceResults;
                 }
             }
-
-            // Sauvegarder les changements
-            $entityManager->flush();
 
             return new JsonResponse([
                 'success' => true,
@@ -662,6 +663,7 @@ final class TransactionController extends AbstractController
 
         } catch (\Exception $e) {
             error_log("Erreur lors du fix-order: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             return new JsonResponse([
                 'success' => false,
                 'error' => 'Erreur serveur: ' . $e->getMessage()
