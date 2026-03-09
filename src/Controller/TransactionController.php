@@ -596,6 +596,79 @@ final class TransactionController extends AbstractController
         }
     }
 
+    #[Route('/admin/fix-order', name: 'app_transaction_fix_order', methods: ['POST'])]
+    public function fixTransactionOrder(ExerciceRepository $exerciceRepository, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        // Vérifier les droits d'accès (Admin only)
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        try {
+            $results = [];
+            $totalFixed = 0;
+
+            // Récupérer tous les exercices
+            $exercices = $exerciceRepository->findAll();
+            
+            if (empty($exercices)) {
+                return new JsonResponse(['success' => false, 'error' => 'Aucun exercice trouvé'], 400);
+            }
+
+            foreach ($exercices as $exercice) {
+                // Récupérer toutes les transactions de cet exercice triées par numéro d'ordre actuel
+                $transactions = $transactionRepository->findBy(
+                    ['exercice' => $exercice],
+                    ['numero_ordre' => 'ASC']
+                );
+
+                if (empty($transactions)) {
+                    continue;
+                }
+
+                $exerciceResults = [];
+                $newOrder = 1;
+
+                foreach ($transactions as $transaction) {
+                    $oldOrder = $transaction->getNumeroOrdre();
+                    
+                    // Renumméroter si nécessaire
+                    if ($oldOrder !== $newOrder || $oldOrder < 1) {
+                        $transaction->setNumeroOrdre($newOrder);
+                        $exerciceResults[] = [
+                            'id' => $transaction->getIdTransaction(),
+                            'old_order' => $oldOrder,
+                            'new_order' => $newOrder,
+                            'invalid' => $oldOrder < 1
+                        ];
+                        $totalFixed++;
+                    }
+                    
+                    $newOrder++;
+                }
+
+                if (!empty($exerciceResults)) {
+                    $results[$exercice->getLibelle()] = $exerciceResults;
+                }
+            }
+
+            // Sauvegarder les changements
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => "{$totalFixed} transactions renummérotées avec succès",
+                'total_fixed' => $totalFixed,
+                'details' => $results
+            ]);
+
+        } catch (\Exception $e) {
+            error_log("Erreur lors du fix-order: " . $e->getMessage());
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Erreur serveur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     #[Route('/{id_transaction}', name: 'app_transaction_show', methods: ['GET'])]
     public function show(Request $request, int $id_transaction, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository): Response
     {

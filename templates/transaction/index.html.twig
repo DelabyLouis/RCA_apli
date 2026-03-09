@@ -29,6 +29,12 @@
                 <a href="{{ path('app_transaction_export_excel') }}{% if exercice_filter %}?exercice_id={{ exercice_filter.idExercice }}{% endif %}" class="btn btn-primary ms-2">
                     <i class="fas fa-file-excel me-2"></i>Exporter Excel
                 </a>
+                
+                {% if is_granted('ROLE_ADMIN') %}
+                <button class="btn btn-warning ms-2" id="btn-fix-order" title="Renumérote toutes les transactions par exercice (Admin only)">
+                    <i class="fas fa-wrench me-1"></i>Nettoyer les N° d'ordre
+                </button>
+                {% endif %}
             </div>
         </div>
         
@@ -359,6 +365,48 @@
             document.addEventListener('DOMContentLoaded', initializeTransactionConfig);
         } else {
             initializeTransactionConfig();
+        }
+        
+        // Gestion du bouton de nettoyage des numéros d'ordre (Admin only)
+        const btnFixOrder = document.getElementById('btn-fix-order');
+        if (btnFixOrder) {
+            btnFixOrder.addEventListener('click', fixTransactionOrder);
+        }
+        
+        function fixTransactionOrder() {
+            const confirmed = confirm('⚠️  Êtes-vous sûr ? Ceci va renumméroter TOUTES les transactions par exercice (1, 2, 3...).\n\nCette opération ne peut pas être annulée.');
+            
+            if (!confirmed) return;
+            
+            const btn = document.getElementById('btn-fix-order');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Traitement en cours...';
+            
+            fetch('{{ path("app_transaction_fix_order") }}', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(`✅ ${data.message}`, 'success');
+                    // Recharger la page après 2 secondes
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showNotification(`❌ Erreur: ${data.error}`, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showNotification('❌ Erreur de connexion au serveur', 'danger');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-wrench me-1"></i>Nettoyer les N° d\'ordre';
+            });
         }
     
     // Le drag & drop est maintenant géré par le fichier externe transaction-drag-drop.js
