@@ -671,6 +671,115 @@ final class TransactionController extends AbstractController
         }
     }
 
+    #[Route('/sort-by-date', name: 'app_transaction_sort_by_date', methods: ['POST'])]
+    public function sortByDate(Request $request, ExerciceRepository $exerciceRepository, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $exerciceId = $data['exercice_id'] ?? null;
+            
+            $results = [];
+            $totalSorted = 0;
+
+            if ($exerciceId) {
+                // Trier un exercice spécifique
+                $exercice = $exerciceRepository->findOneBy(['id_exercice' => $exerciceId]);
+                if (!$exercice) {
+                    return new JsonResponse(['success' => false, 'error' => 'Exercice non trouvé'], 400);
+                }
+                
+                // Récupérer les transactions de cet exercice, TRIÉES PAR DATE (plus ancienne = 1)
+                $transactions = $transactionRepository->findBy(
+                    ['exercice' => $exercice],
+                    ['date_transaction' => 'ASC', 'id_transaction' => 'ASC']  // Date croissante, puis par ID pour stabilité
+                );
+
+                if (!empty($transactions)) {
+                    // ÉTAPE 1 : Numéros temporaires
+                    $tempOrder = 100000;
+                    foreach ($transactions as $transaction) {
+                        $transaction->setNumeroOrdre($tempOrder);
+                        $tempOrder++;
+                    }
+                    $entityManager->flush();
+                    
+                    // ÉTAPE 2 : Renumméroter par date de 1 à N
+                    $newOrder = 1;
+                    $exerciceResults = [];
+                    foreach ($transactions as $transaction) {
+                        $transaction->setNumeroOrdre($newOrder);
+                        $exerciceResults[] = [
+                            'id' => $transaction->getIdTransaction(),
+                            'date' => $transaction->getDateTransaction()?->format('Y-m-d'),
+                            'new_order' => $newOrder
+                        ];
+                        $totalSorted++;
+                        $newOrder++;
+                    }
+                    $entityManager->flush();
+                    
+                    $results[$exercice->getLibelle()] = $exerciceResults;
+                }
+            } else {
+                // Trier TOUS les exercices
+                $exercices = $exerciceRepository->findAll();
+                
+                foreach ($exercices as $exercice) {
+                    $transactions = $transactionRepository->findBy(
+                        ['exercice' => $exercice],
+                        ['date_transaction' => 'ASC', 'id_transaction' => 'ASC']
+                    );
+
+                    if (empty($transactions)) {
+                        continue;
+                    }
+
+                    // ÉTAPE 1 : Numéros temporaires
+                    $tempOrder = 100000;
+                    foreach ($transactions as $transaction) {
+                        $transaction->setNumeroOrdre($tempOrder);
+                        $tempOrder++;
+                    }
+                    $entityManager->flush();
+                    
+                    // ÉTAPE 2 : Renumméroter par date de 1 à N
+                    $newOrder = 1;
+                    $exerciceResults = [];
+                    foreach ($transactions as $transaction) {
+                        $transaction->setNumeroOrdre($newOrder);
+                        $exerciceResults[] = [
+                            'id' => $transaction->getIdTransaction(),
+                            'date' => $transaction->getDateTransaction()?->format('Y-m-d'),
+                            'new_order' => $newOrder
+                        ];
+                        $totalSorted++;
+                        $newOrder++;
+                    }
+                    $entityManager->flush();
+
+                    if (!empty($exerciceResults)) {
+                        $results[$exercice->getLibelle()] = $exerciceResults;
+                    }
+                }
+            }
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => "{$totalSorted} transactions triées par date avec succès",
+                'total_sorted' => $totalSorted,
+                'details' => $results
+            ]);
+
+        } catch (\Exception $e) {
+            error_log("Erreur lors du sort-by-date: " . $e->getMessage());
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Erreur serveur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     #[Route('/{id_transaction}', name: 'app_transaction_show', methods: ['GET'])]
     public function show(Request $request, int $id_transaction, TransactionRepository $transactionRepository, ExerciceRepository $exerciceRepository): Response
     {
