@@ -30,11 +30,9 @@
                     <i class="fas fa-file-excel me-2"></i>Exporter Excel
                 </a>
                 
-                {% if is_granted('ROLE_ADMIN') %}
-                <button class="btn btn-warning ms-2" id="btn-fix-order" title="Renumérote toutes les transactions par exercice (Admin only)">
-                    <i class="fas fa-wrench me-1"></i>Nettoyer les N° d'ordre
+                <button class="btn btn-warning ms-2" id="btn-fix-order" title="Renumérote toutes les transactions par exercice">
+                    <i class="fas fa-wrench me-1"></i>🧹 Nettoyer les N° d'ordre
                 </button>
-                {% endif %}
             </div>
         </div>
         
