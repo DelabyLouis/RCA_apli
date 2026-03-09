@@ -68,9 +68,9 @@ class FixTransactionOrderCommand extends Command
                     
                     // Log si le numéro était négatif ou invalide
                     if ($oldOrder < 1) {
-                        $io->line("  ⚠️  [ID: {$transaction->getIdTransaction()}] {$oldOrder} → {$newOrder} (NUMÉRO INVALIDE CORRIGÉ)");
+                        $io->writeln("  ⚠️  [ID: {$transaction->getIdTransaction()}] {$oldOrder} → {$newOrder} (NUMÉRO INVALIDE CORRIGÉ)");
                     } else {
-                        $io->line("  ✓ [ID: {$transaction->getIdTransaction()}] {$oldOrder} → {$newOrder}");
+                        $io->writeln("  ✓ [ID: {$transaction->getIdTransaction()}] {$oldOrder} → {$newOrder}");
                     }
                     
                     $totalFixed++;
