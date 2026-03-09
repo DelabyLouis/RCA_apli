@@ -380,8 +380,22 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Tri en cours...';
             
-            // Récupérer l'exercice filtré s'il existe
-            const exerciceId = document.querySelector('[data-exercice-id]')?.dataset.exerciceId || null;
+            // Récupérer l'exercice filtré depuis l'URL ou depuis le premier exercice-separator visible
+            let exerciceId = null;
+            
+            // Chercher dans l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('exercice_id')) {
+                exerciceId = parseInt(urlParams.get('exercice_id'));
+            } else {
+                // Récupérer depuis le premier élément exercice-separator
+                const firstExerciceSeparator = document.querySelector('.exercice-separator');
+                if (firstExerciceSeparator && firstExerciceSeparator.dataset.exerciceId) {
+                    exerciceId = parseInt(firstExerciceSeparator.dataset.exerciceId);
+                }
+            }
+            
+            console.log('Tri par date - exerciceId:', exerciceId);
             
             fetch('{{ path("app_transaction_sort_by_date") }}', {
                 method: 'POST',
@@ -393,8 +407,12 @@
                     exercice_id: exerciceId
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Réponse reçue:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Données reçues:', data);
                 if (data.success) {
                     showNotification(`✅ ${data.message}`, 'success');
                     // Recharger la page après 2 secondes
