@@ -467,6 +467,42 @@ function initTiersDropdown() {
 function updateTiersDropdownText() {
     const selectedTiers = document.querySelectorAll(".tiers-checkbox:checked");
     const textElement = document.getElementById("selected-tiers-text");
+    const tiersCount = document.getElementById("tiers-count");
+
+    // Compter les personnels et entreprises sélectionnées
+    const selectedPersonnes = document.querySelectorAll(
+        "input[id^='tiers-personne-']:checked",
+    ).length;
+    const selectedEntreprises = document.querySelectorAll(
+        "input[id^='tiers-entreprise-']:checked",
+    ).length;
+
+    // Mettre à jour les compteurs dans le dropdown
+    const personnesCountEl = document.getElementById("personnes-count");
+    const entreprisesCountEl = document.getElementById("entreprises-count");
+
+    if (personnesCountEl) {
+        personnesCountEl.textContent =
+            selectedPersonnes +
+            " sélectionnée" +
+            (selectedPersonnes > 1 ? "s" : "");
+    }
+    if (entreprisesCountEl) {
+        entreprisesCountEl.textContent =
+            selectedEntreprises +
+            " sélectionnée" +
+            (selectedEntreprises > 1 ? "s" : "");
+    }
+
+    // Mettre à jour le badge et le texte du bouton
+    if (tiersCount) {
+        if (selectedTiers.length > 0) {
+            tiersCount.textContent = selectedTiers.length;
+            tiersCount.style.display = "inline-block";
+        } else {
+            tiersCount.style.display = "none";
+        }
+    }
 
     if (!textElement) return;
 
