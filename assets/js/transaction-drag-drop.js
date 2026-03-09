@@ -31,7 +31,7 @@ function updateTransactionOrdersInDOM() {
     });
 
     console.log(
-        `✅ ${transactionRows.length} numéros d'ordre mis à jour visuellement`
+        `✅ ${transactionRows.length} numéros d'ordre mis à jour visuellement`,
     );
 }
 
@@ -104,7 +104,7 @@ function addDragEventListeners(row, tbody) {
         if (draggingRow && draggingRow !== this) {
             console.log(
                 "Dragging exercice ID:",
-                draggingRow.dataset.exerciceId
+                draggingRow.dataset.exerciceId,
             );
             console.log("Target exercice ID:", this.dataset.exerciceId);
 
@@ -113,7 +113,7 @@ function addDragEventListeners(row, tbody) {
                 "Drop de transaction:",
                 draggingRow.dataset.id,
                 "sur",
-                this.dataset.id
+                this.dataset.id,
             );
 
             const oldExerciceId = draggingRow.dataset.exerciceId;
@@ -139,7 +139,7 @@ function addDragEventListeners(row, tbody) {
                     "Changement d'exercice de",
                     oldExerciceId,
                     "vers",
-                    newExerciceId
+                    newExerciceId,
                 );
                 draggingRow.dataset.exerciceId = newExerciceId;
             }
@@ -156,7 +156,7 @@ function updateTransactionExerciseVisually(transactionRow, newExerciceId) {
     // Cette fonction pourrait être étendue pour mettre à jour visuellement
     // d'autres éléments liés à l'exercice dans la ligne de transaction
     console.log(
-        `Transaction ${transactionRow.dataset.id} déplacée vers exercice ${newExerciceId}`
+        `Transaction ${transactionRow.dataset.id} déplacée vers exercice ${newExerciceId}`,
     );
 }
 
@@ -181,12 +181,12 @@ function saveAllTransactionChanges() {
         transactionsByExercice[exerciceId].push(row);
     });
 
-    // Pour chaque exercice, recalculer les ordres
+    // Pour chaque exercice, recalculer les ordres de 1 à N
     Object.keys(transactionsByExercice).forEach((exerciceId) => {
         const exerciceRows = transactionsByExercice[exerciceId];
         exerciceRows.forEach((row, index) => {
             const transactionId = parseInt(row.dataset.id);
-            const newOrder = index + 1;
+            const newOrder = index + 1; // Commence à 1, pas 0
             const currentExerciceId = parseInt(row.dataset.exerciceId);
 
             transactionsData.push({
@@ -198,11 +198,17 @@ function saveAllTransactionChanges() {
             // Mettre à jour visuellement le numéro d'ordre
             const orderCell = row.querySelector('[data-field="numero_ordre"]');
             if (orderCell) {
-                const newContent = orderCell.innerHTML.replace(
-                    /\d+$/,
-                    newOrder
-                );
-                orderCell.innerHTML = newContent;
+                // Trouver le premier enfant qui n'est pas l'icône de drag
+                const gripIcon = orderCell.querySelector(".drag-handle");
+                const textNode =
+                    orderCell.childNodes[orderCell.childNodes.length - 1];
+
+                if (gripIcon) {
+                    // Remplacer le contenu après l'icône
+                    orderCell.innerHTML = gripIcon.outerHTML + "\n" + newOrder;
+                } else {
+                    orderCell.textContent = newOrder;
+                }
             }
         });
     });
@@ -212,11 +218,8 @@ function saveAllTransactionChanges() {
     }
 
     // ===== SAUVEGARDE DIRECTE SUR SERVEUR =====
-    // Utilisation de l'API bulk-update-order qui devrait fonctionner
-
     console.log("💾 Sauvegarde des changements sur le serveur...");
     showToast("💾 Sauvegarde en cours...", "success");
-
     console.log("📤 Données envoyées:", { transactions: transactionsData });
 
     fetch(TRANSACTION_REORDER_URL, {
@@ -233,7 +236,7 @@ function saveAllTransactionChanges() {
             console.log(
                 "📥 Réponse reçue:",
                 response.status,
-                response.statusText
+                response.statusText,
             );
 
             // Vérifier le statut avant de parser le JSON
@@ -241,13 +244,13 @@ function saveAllTransactionChanges() {
                 return response.text().then((text) => {
                     console.error(
                         "❌ Réponse non-JSON (erreur " + response.status + "):",
-                        text
+                        text,
                     );
                     throw new Error(
                         `Erreur serveur ${response.status}: ${text.substring(
                             0,
-                            200
-                        )}`
+                            200,
+                        )}`,
                     );
                 });
             }
@@ -260,7 +263,7 @@ function saveAllTransactionChanges() {
                     console.error("❌ Erreur parsing JSON:", e);
                     console.error("📄 Texte reçu:", text.substring(0, 500));
                     throw new Error(
-                        "Réponse serveur invalide: " + text.substring(0, 100)
+                        "Réponse serveur invalide: " + text.substring(0, 100),
                     );
                 }
             });
@@ -271,7 +274,7 @@ function saveAllTransactionChanges() {
             if (data.success) {
                 showToast(
                     "🎉 Changements sauvegardés avec succès !",
-                    "success"
+                    "success",
                 );
                 console.log("✅ Sauvegarde réussie:", data);
 
@@ -286,7 +289,7 @@ function saveAllTransactionChanges() {
                         (data.error ||
                             data.message ||
                             "Échec de la sauvegarde"),
-                    "error"
+                    "error",
                 );
 
                 // En cas d'échec, activer le mode offline comme fallback
@@ -331,7 +334,7 @@ function showToast(message, type) {
                 toast.remove();
             }
         },
-        type === "success" ? 4000 : 8000
+        type === "success" ? 4000 : 8000,
     ); // Erreurs restent plus longtemps
 }
 
@@ -368,7 +371,7 @@ function activateOfflineMode(transactionsData) {
 
     showToast(
         `💽 ${transactionsData.length} changements sauvegardés localement (total: ${totalStoredChanges} en attente)`,
-        "success"
+        "success",
     );
     console.log("💽 Changements stockés localement:", storedChanges);
 
@@ -426,7 +429,7 @@ function clearOfflineChanges() {
 
     // Mode offline activé - pas besoin de recharger
     console.log(
-        "🔄 Mode offline activé - les changements seront synchronisés plus tard"
+        "🔄 Mode offline activé - les changements seront synchronisés plus tard",
     );
 }
 
@@ -441,7 +444,7 @@ async function attemptServerSync(storageKey) {
 
     showToast(
         `🔄 Tentative de synchronisation de ${changeIds.length} changements...`,
-        "success"
+        "success",
     );
 
     let syncCount = 0;
@@ -460,7 +463,7 @@ async function attemptServerSync(storageKey) {
                         "Content-Type": "application/x-www-form-urlencoded",
                     },
                     body: `field=numero_ordre&value=${change.order}`,
-                }
+                },
             );
 
             if (orderResponse.ok) {
@@ -481,7 +484,7 @@ async function attemptServerSync(storageKey) {
                 delete storedChanges[transactionId];
             } else {
                 syncErrors.push(
-                    `Transaction ${transactionId}: ${orderResponse.status}`
+                    `Transaction ${transactionId}: ${orderResponse.status}`,
                 );
             }
         } catch (error) {
@@ -498,7 +501,7 @@ async function attemptServerSync(storageKey) {
     if (syncCount > 0) {
         showToast(
             `✅ ${syncCount} changements synchronisés avec succès !`,
-            "success"
+            "success",
         );
 
         if (remainingChanges === 0) {
@@ -518,7 +521,7 @@ async function attemptServerSync(storageKey) {
     } else {
         showToast(
             `❌ Synchronisation échouée - serveur toujours indisponible`,
-            "error"
+            "error",
         );
     }
 
@@ -549,7 +552,7 @@ function applyStoredChanges() {
             if (orderCell) {
                 const newContent = orderCell.innerHTML.replace(
                     /\d+$/,
-                    change.order
+                    change.order,
                 );
                 orderCell.innerHTML = newContent;
             }

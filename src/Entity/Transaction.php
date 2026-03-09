@@ -31,6 +31,8 @@ class Transaction
     private ?string $libelle = null;
 
     #[ORM\Column]
+    #[Assert\Positive(message: 'Le numéro d\'ordre doit être un entier positif')]
+    #[Assert\NotNull(message: 'Le numéro d\'ordre est obligatoire')]
     private ?int $numero_ordre = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]

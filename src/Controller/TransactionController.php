@@ -528,26 +528,28 @@ final class TransactionController extends AbstractController
                 return new JsonResponse(['success' => false, 'error' => 'Aucune transaction valide à mettre à jour'], 400);
             }
             
-            // ÉTAPE 2: Assigner des numéros d'ordre temporaires pour éviter les conflits
-            // On utilise des nombres négatifs temporaires
-            error_log("Assignation de numéros temporaires...");
+            // ÉTAPE 2: Assigner les numéros d'ordre définitifs DIRECTEMENT
+            // On utilise une structure temporaire pour éviter les conflits
+            error_log("Assignation des numéros d'ordre définitifs...");
+            
+            // Créer un mapping temporaire ID -> nouvel ordre
+            $orderMap = [];
             foreach ($transactionsToUpdate as $index => $item) {
                 $transaction = $item['transaction'];
-                $tempOrder = -1000 - $index; // Numéros négatifs temporaires
-                $transaction->setNumeroOrdre($tempOrder);
-                error_log("Transaction " . $transaction->getIdTransaction() . " -> ordre temporaire: " . $tempOrder);
+                $orderMap[$transaction->getIdTransaction()] = $item['newOrder'];
             }
             
-            // Flush intermédiaire pour libérer les anciens numéros d'ordre
-            $entityManager->flush();
-            error_log("Flush intermédiaire terminé");
-            
-            // ÉTAPE 3: Assigner les nouveaux numéros d'ordre définitifs
-            error_log("Assignation des nouveaux numéros d'ordre...");
+            // Assigner les ordres depuis le mapping
             foreach ($transactionsToUpdate as $item) {
                 $transaction = $item['transaction'];
-                $newOrder = $item['newOrder'];
+                $newOrder = $orderMap[$transaction->getIdTransaction()];
                 $exerciceId = $item['exerciceId'];
+                
+                // Vérifier que le nouvel ordre est valide (>= 1)
+                if ($newOrder < 1) {
+                    $errors[] = "Numéro d'ordre invalide pour transaction " . $transaction->getIdTransaction() . ": " . $newOrder;
+                    continue;
+                }
                 
                 $transaction->setNumeroOrdre($newOrder);
                 error_log("Transaction " . $transaction->getIdTransaction() . " -> ordre final: " . $newOrder);
@@ -566,7 +568,7 @@ final class TransactionController extends AbstractController
                 $updated++;
             }
             
-            // ÉTAPE 4: Flush final
+            // ÉTAPE 3: Flush final
             error_log("Flush final...");
             $entityManager->flush();
             error_log("Flush final terminé avec succès");
