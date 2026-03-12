@@ -111,13 +111,15 @@ final class TransactionController extends AbstractController
         
         // Appliquer le filtre par tiers
         // FIX: Normaliser tiersFilter en array (Symfony retourne string si un seul paramètre)
-        $tiersFilterArray = is_array($tiersFilter) ? $tiersFilter : (is_string($tiersFilter) ? [$tiersFilter] : []);
+        if (is_string($tiersFilter)) {
+            $tiersFilter = array($tiersFilter);
+        }
         
-        if (!empty($tiersFilterArray)) {
+        if (!empty($tiersFilter)) {
             $personnesIds = [];
             $entreprisesIds = [];
             
-            foreach ($tiersFilterArray as $tier) {
+            foreach ($tiersFilter as $tier) {
                 if (strpos($tier, 'personne_') === 0) {
                     $id = (int)str_replace('personne_', '', $tier);
                     $personnesIds[] = $id;
