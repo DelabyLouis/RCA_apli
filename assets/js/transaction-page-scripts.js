@@ -430,6 +430,25 @@ function initFilters() {
 }
 
 function initTiersDropdown() {
+    // Toggle du panneau des tiers
+    const toggleBtn = document.getElementById("toggle-tiers-filter");
+    const tiersPanel = document.getElementById("tiers-filter-panel");
+
+    if (toggleBtn && tiersPanel) {
+        toggleBtn.addEventListener("click", function () {
+            const isVisible = tiersPanel.style.display !== "none";
+            tiersPanel.style.display = isVisible ? "none" : "block";
+
+            // Mettre à jour l'icône du bouton
+            const icon = toggleBtn.querySelector("i");
+            if (icon) {
+                icon.className = isVisible
+                    ? "fas fa-chevron-down me-2"
+                    : "fas fa-chevron-up me-2";
+            }
+        });
+    }
+
     // Appliquer le filtre tiers
     const applyTiersBtn = document.getElementById("apply-tiers-filter");
     if (applyTiersBtn) {
@@ -459,39 +478,11 @@ function initTiersDropdown() {
 
 function updateTiersDropdownText() {
     const selectedTiers = document.querySelectorAll(".tiers-checkbox:checked");
-    const badge = document.getElementById("tiers-selected-badge");
+    const badge = document.getElementById("tiers-badge");
 
-    // Compter les personnels et entreprises sélectionnées
-    const selectedPersonnes = document.querySelectorAll(
-        "input[id^='tiers-personne-']:checked",
-    ).length;
-    const selectedEntreprises = document.querySelectorAll(
-        "input[id^='tiers-entreprise-']:checked",
-    ).length;
-
-    // Mettre à jour le badge
     if (badge) {
         if (selectedTiers.length > 0) {
-            const personnesText =
-                selectedPersonnes > 0
-                    ? selectedPersonnes +
-                      " personne" +
-                      (selectedPersonnes > 1 ? "s" : "")
-                    : "";
-            const entreprisesText =
-                selectedEntreprises > 0
-                    ? selectedEntreprises +
-                      " entreprise" +
-                      (selectedEntreprises > 1 ? "s" : "")
-                    : "";
-            const separator = personnesText && entreprisesText ? " + " : "";
-
-            badge.textContent =
-                personnesText +
-                separator +
-                entreprisesText +
-                " sélectionné" +
-                (selectedTiers.length > 1 ? "s" : "");
+            badge.textContent = selectedTiers.length;
             badge.style.display = "inline-block";
         } else {
             badge.style.display = "none";
