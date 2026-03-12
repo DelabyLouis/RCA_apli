@@ -40,6 +40,13 @@ final class TransactionController extends AbstractController
         // Récupérer les paramètres de filtrage
         $libelleFilter = $request->query->get('libelle');
         $tiersFilter = $request->query->all()['tiers'] ?? []; // Array of personne_XX or entreprise_XX
+        
+        // FIX: Symfony retourne un string quand un seul paramètre tiers est présent,
+        // et un array quand plusieurs sont présents. Normaliser en array.
+        if (is_string($tiersFilter)) {
+            $tiersFilter = [$tiersFilter];
+        }
+        
         $typeMontantFilter = $request->query->get('type_montant');
         $montantMinFilter = $request->query->get('montant_min');
         $montantMaxFilter = $request->query->get('montant_max');
