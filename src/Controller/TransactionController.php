@@ -109,54 +109,11 @@ final class TransactionController extends AbstractController
                         ->setParameter('libelle', '%' . $libelleFilter . '%');
         }
         
+        // TEMPORAIRE: Filtrer par tiers DÉSACTIVÉ pour debug
         // Appliquer le filtre par tiers
-        // FIX: Normaliser tiersFilter en array (Symfony retourne string si un seul paramètre)
-        if (is_string($tiersFilter)) {
-            $tiersFilter = array($tiersFilter);
-        }
-        
-        if (!empty($tiersFilter)) {
-            $personnesIds = [];
-            $entreprisesIds = [];
-            
-            foreach ($tiersFilter as $tier) {
-                if (strpos($tier, 'personne_') === 0) {
-                    $id = (int)str_replace('personne_', '', $tier);
-                    $personnesIds[] = $id;
-                    error_log('Added personne ID: ' . $id);
-                } elseif (strpos($tier, 'entreprise_') === 0) {
-                    $id = (int)str_replace('entreprise_', '', $tier);
-                    $entreprisesIds[] = $id;
-                    error_log('Added entreprise ID: ' . $id);
-                }
-            }
-            
-            error_log('Final personnesIds: ' . json_encode($personnesIds));
-            error_log('Final entreprisesIds: ' . json_encode($entreprisesIds));
-            
-            $orConditions = [];
-            $params = [];
-            
-            if (!empty($personnesIds)) {
-                $orConditions[] = 't.id_personne IN (:personnes)';
-                $params['personnes'] = $personnesIds;
-            }
-            
-            if (!empty($entreprisesIds)) {
-                $orConditions[] = 't.id_entreprise IN (:entreprises)';
-                $params['entreprises'] = $entreprisesIds;
-            }
-            
-            if (!empty($orConditions)) {
-                $condition = '(' . implode(' OR ', $orConditions) . ')';
-                error_log('Adding WHERE condition: ' . $condition);
-                $queryBuilder->andWhere($condition);
-                foreach ($params as $key => $value) {
-                    error_log('Setting parameter ' . $key . ': ' . json_encode($value));
-                    $queryBuilder->setParameter($key, $value);
-                }
-            }
-        }
+        // if (!empty($tiersFilter)) {
+        //     // ... code temporairement désactivé ...
+        // }
         
         // Appliquer le filtre par type de montant (crédit/débit).
         // Note : les transactions de type "livret" ont leur signe inversé
