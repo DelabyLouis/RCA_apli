@@ -16,6 +16,21 @@ class EntrepriseRepository extends ServiceEntityRepository
         parent::__construct($registry, Entreprise::class);
     }
 
+    /**
+     * Récupère les entreprises ayant au moins une transaction, triées par nom
+     * @return Entreprise[]
+     */
+    public function findEntreprisesWithTransactions(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->innerJoin('e.transactions', 't')
+            ->addSelect('t')
+            ->distinct(true)
+            ->orderBy('e.nomEntreprise', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Entreprise[] Returns an array of Entreprise objects
     //     */

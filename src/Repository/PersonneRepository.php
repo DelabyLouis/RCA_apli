@@ -35,6 +35,22 @@ class PersonneRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Récupère les personnes ayant au moins une transaction, triées par nom/prénom
+     * @return Personne[]
+     */
+    public function findPersonnesWithTransactions(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->innerJoin('p.transactions', 't')
+            ->addSelect('t')
+            ->distinct(true)
+            ->orderBy('p.nom', 'ASC')
+            ->addOrderBy('p.prenom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Personne[] Returns an array of Personne objects
     //     */
