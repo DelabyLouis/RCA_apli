@@ -40,13 +40,6 @@ final class TransactionController extends AbstractController
         // Récupérer les paramètres de filtrage
         $libelleFilter = $request->query->get('libelle');
         $tiersFilter = $request->query->all()['tiers'] ?? []; // Array of personne_XX or entreprise_XX
-        
-        // FIX: Symfony retourne un string quand un seul paramètre tiers est présent,
-        // et un array quand plusieurs sont présents. Normaliser en array.
-        if (is_string($tiersFilter)) {
-            $tiersFilter = [$tiersFilter];
-        }
-        
         $typeMontantFilter = $request->query->get('type_montant');
         $montantMinFilter = $request->query->get('montant_min');
         $montantMaxFilter = $request->query->get('montant_max');
@@ -117,11 +110,14 @@ final class TransactionController extends AbstractController
         }
         
         // Appliquer le filtre par tiers
-        if (!empty($tiersFilter)) {
+        // FIX: Normaliser tiersFilter en array (Symfony retourne string si un seul paramètre)
+        $tiersFilterArray = is_array($tiersFilter) ? $tiersFilter : (is_string($tiersFilter) ? [$tiersFilter] : []);
+        
+        if (!empty($tiersFilterArray)) {
             $personnesIds = [];
             $entreprisesIds = [];
             
-            foreach ($tiersFilter as $tier) {
+            foreach ($tiersFilterArray as $tier) {
                 if (strpos($tier, 'personne_') === 0) {
                     $id = (int)str_replace('personne_', '', $tier);
                     $personnesIds[] = $id;
