@@ -46,6 +46,11 @@ final class TransactionController extends AbstractController
         $dateMinFilter = $request->query->get('date_min');
         $dateMaxFilter = $request->query->get('date_max');
         
+        // DEBUG
+        error_log('=== TRANSACTION FILTER DEBUG ===');
+        error_log('tiersFilter reçue: ' . json_encode($tiersFilter));
+        error_log('tiersFilter is empty: ' . (empty($tiersFilter) ? 'true' : 'false'));
+        
         // Initialiser le solde précédent
         $soldePrecedent = 0;
         if ($exerciceFilter) {
@@ -111,11 +116,18 @@ final class TransactionController extends AbstractController
             
             foreach ($tiersFilter as $tier) {
                 if (strpos($tier, 'personne_') === 0) {
-                    $personnesIds[] = (int)str_replace('personne_', '', $tier);
+                    $id = (int)str_replace('personne_', '', $tier);
+                    $personnesIds[] = $id;
+                    error_log('Added personne ID: ' . $id);
                 } elseif (strpos($tier, 'entreprise_') === 0) {
-                    $entreprisesIds[] = (int)str_replace('entreprise_', '', $tier);
+                    $id = (int)str_replace('entreprise_', '', $tier);
+                    $entreprisesIds[] = $id;
+                    error_log('Added entreprise ID: ' . $id);
                 }
             }
+            
+            error_log('Final personnesIds: ' . json_encode($personnesIds));
+            error_log('Final entreprisesIds: ' . json_encode($entreprisesIds));
             
             $orConditions = [];
             $params = [];
@@ -131,8 +143,11 @@ final class TransactionController extends AbstractController
             }
             
             if (!empty($orConditions)) {
-                $queryBuilder->andWhere('(' . implode(' OR ', $orConditions) . ')');
+                $condition = '(' . implode(' OR ', $orConditions) . ')';
+                error_log('Adding WHERE condition: ' . $condition);
+                $queryBuilder->andWhere($condition);
                 foreach ($params as $key => $value) {
+                    error_log('Setting parameter ' . $key . ': ' . json_encode($value));
                     $queryBuilder->setParameter($key, $value);
                 }
             }

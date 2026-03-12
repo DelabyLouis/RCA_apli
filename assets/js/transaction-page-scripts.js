@@ -526,6 +526,9 @@ function applyFilters() {
             selectedTiers.push(checkbox.value);
         });
 
+    console.log("Tiers sélectionnés:", selectedTiers);
+    console.log("Nombre de tiers:", selectedTiers.length);
+
     // Construire l'URL avec les paramètres
     const url = new URL(window.location);
 
@@ -546,6 +549,7 @@ function applyFilters() {
     selectedTiers.forEach(function (tier) {
         // use plain 'tiers' key so Symfony returns an array via $request->query->all()['tiers']
         url.searchParams.append("tiers", tier);
+        console.log("Ajout tiers:", tier);
     });
 
     if (typeMontant) {
@@ -569,10 +573,13 @@ function applyFilters() {
     }
 
     // pour debug on peut afficher l'URL générée
-    console.log("URL filtrée :", url.toString());
+    const finalUrl = url.toString();
+    console.log("URL filtrée finale:", finalUrl);
+    console.log("Paramètres query string:", url.searchParams.toString());
+
     // Avant de rediriger, ré-initialiser le collapse des exercices sur la nouvelle page
     // (On redirige donc le navigateur vers l'URL filtrée, ce qui rechargera la page)
-    window.location.href = url.toString();
+    window.location.href = finalUrl;
 }
 
 function clearFilters() {
