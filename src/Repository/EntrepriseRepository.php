@@ -22,13 +22,18 @@ class EntrepriseRepository extends ServiceEntityRepository
      */
     public function findEntreprisesWithTransactions(): array
     {
-        return $this->createQueryBuilder('e')
-            ->innerJoin('e.transactions', 't')
-            ->addSelect('t')
-            ->distinct(true)
-            ->orderBy('e.nomEntreprise', 'ASC')
-            ->getQuery()
-            ->getResult();
+        try {
+            return $this->createQueryBuilder('e')
+                ->leftJoin('e.transactions', 't')
+                ->where('t.id_transaction IS NOT NULL')
+                ->groupBy('e.id_entreprise')
+                ->orderBy('e.nomEntreprise', 'ASC')
+                ->getQuery()
+                ->getResult();
+        } catch (\Exception $e) {
+            // En cas d'erreur, retourner toutes les entreprises
+            return $this->findAll();
+        }
     }
 
     //    /**

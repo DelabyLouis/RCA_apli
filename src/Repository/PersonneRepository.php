@@ -41,14 +41,19 @@ class PersonneRepository extends ServiceEntityRepository
      */
     public function findPersonnesWithTransactions(): array
     {
-        return $this->createQueryBuilder('p')
-            ->innerJoin('p.transactions', 't')
-            ->addSelect('t')
-            ->distinct(true)
-            ->orderBy('p.nom', 'ASC')
-            ->addOrderBy('p.prenom', 'ASC')
-            ->getQuery()
-            ->getResult();
+        try {
+            return $this->createQueryBuilder('p')
+                ->leftJoin('p.transactions', 't')
+                ->where('t.id_transaction IS NOT NULL')
+                ->groupBy('p.id_personne')
+                ->orderBy('p.nom', 'ASC')
+                ->addOrderBy('p.prenom', 'ASC')
+                ->getQuery()
+                ->getResult();
+        } catch (\Exception $e) {
+            // En cas d'erreur, retourner toutes les personnes
+            return $this->findAll();
+        }
     }
 
     //    /**
