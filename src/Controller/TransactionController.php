@@ -111,9 +111,9 @@ final class TransactionController extends AbstractController
             
             foreach ($tiersFilter as $tier) {
                 if (strpos($tier, 'personne_') === 0) {
-                    $personnesIds[] = str_replace('personne_', '', $tier);
+                    $personnesIds[] = (int)str_replace('personne_', '', $tier);
                 } elseif (strpos($tier, 'entreprise_') === 0) {
-                    $entreprisesIds[] = str_replace('entreprise_', '', $tier);
+                    $entreprisesIds[] = (int)str_replace('entreprise_', '', $tier);
                 }
             }
             
@@ -121,12 +121,12 @@ final class TransactionController extends AbstractController
             $params = [];
             
             if (!empty($personnesIds)) {
-                $orConditions[] = 't.personne IN (:personnes)';
+                $orConditions[] = 't.id_personne IN (:personnes)';
                 $params['personnes'] = $personnesIds;
             }
             
             if (!empty($entreprisesIds)) {
-                $orConditions[] = 't.entreprise IN (:entreprises)';
+                $orConditions[] = 't.id_entreprise IN (:entreprises)';
                 $params['entreprises'] = $entreprisesIds;
             }
             
