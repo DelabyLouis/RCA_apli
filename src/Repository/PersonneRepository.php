@@ -36,24 +36,16 @@ class PersonneRepository extends ServiceEntityRepository
     }
 
     /**
-     * Récupère les personnes ayant au moins une transaction, triées par nom/prénom
+     * Récupère toutes les personnes triées par nom/prénom
      * @return Personne[]
      */
-    public function findPersonnesWithTransactions(): array
+    public function findAllSorted(): array
     {
-        try {
-            return $this->createQueryBuilder('p')
-                ->leftJoin('p.transactions', 't')
-                ->where('t.id_transaction IS NOT NULL')
-                ->groupBy('p.id_personne')
-                ->orderBy('p.nom', 'ASC')
-                ->addOrderBy('p.prenom', 'ASC')
-                ->getQuery()
-                ->getResult();
-        } catch (\Exception $e) {
-            // En cas d'erreur, retourner toutes les personnes
-            return $this->findAll();
-        }
+        return $this->createQueryBuilder('p')
+            ->orderBy('p.nom', 'ASC')
+            ->addOrderBy('p.prenom', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**

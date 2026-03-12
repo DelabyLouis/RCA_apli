@@ -434,13 +434,6 @@ function initTiersDropdown() {
     const applyTiersBtn = document.getElementById("apply-tiers-filter");
     if (applyTiersBtn) {
         applyTiersBtn.addEventListener("click", function () {
-            // Fermer le dropdown
-            const dropdown = bootstrap.Dropdown.getInstance(
-                document.getElementById("filter-tiers-dropdown"),
-            );
-            if (dropdown) {
-                dropdown.hide();
-            }
             updateTiersDropdownText();
         });
     }
@@ -466,8 +459,7 @@ function initTiersDropdown() {
 
 function updateTiersDropdownText() {
     const selectedTiers = document.querySelectorAll(".tiers-checkbox:checked");
-    const textElement = document.getElementById("selected-tiers-text");
-    const tiersCount = document.getElementById("tiers-count");
+    const badge = document.getElementById("tiers-selected-badge");
 
     // Compter les personnels et entreprises sélectionnées
     const selectedPersonnes = document.querySelectorAll(
@@ -477,46 +469,33 @@ function updateTiersDropdownText() {
         "input[id^='tiers-entreprise-']:checked",
     ).length;
 
-    // Mettre à jour les compteurs dans le dropdown
-    const personnesCountEl = document.getElementById("personnes-count");
-    const entreprisesCountEl = document.getElementById("entreprises-count");
-
-    if (personnesCountEl) {
-        personnesCountEl.textContent =
-            selectedPersonnes +
-            " sélectionnée" +
-            (selectedPersonnes > 1 ? "s" : "");
-    }
-    if (entreprisesCountEl) {
-        entreprisesCountEl.textContent =
-            selectedEntreprises +
-            " sélectionnée" +
-            (selectedEntreprises > 1 ? "s" : "");
-    }
-
-    // Mettre à jour le badge et le texte du bouton
-    if (tiersCount) {
+    // Mettre à jour le badge
+    if (badge) {
         if (selectedTiers.length > 0) {
-            tiersCount.textContent = selectedTiers.length;
-            tiersCount.style.display = "inline-block";
+            const personnesText =
+                selectedPersonnes > 0
+                    ? selectedPersonnes +
+                      " personne" +
+                      (selectedPersonnes > 1 ? "s" : "")
+                    : "";
+            const entreprisesText =
+                selectedEntreprises > 0
+                    ? selectedEntreprises +
+                      " entreprise" +
+                      (selectedEntreprises > 1 ? "s" : "")
+                    : "";
+            const separator = personnesText && entreprisesText ? " + " : "";
+
+            badge.textContent =
+                personnesText +
+                separator +
+                entreprisesText +
+                " sélectionné" +
+                (selectedTiers.length > 1 ? "s" : "");
+            badge.style.display = "inline-block";
         } else {
-            tiersCount.style.display = "none";
+            badge.style.display = "none";
         }
-    }
-
-    if (!textElement) return;
-
-    if (selectedTiers.length === 0) {
-        textElement.textContent = "Sélectionner des tiers...";
-    } else if (selectedTiers.length === 1) {
-        const label = selectedTiers[0]
-            .closest(".form-check")
-            .querySelector(".form-check-label");
-        textElement.textContent = label
-            ? label.textContent.trim()
-            : "1 tiers sélectionné";
-    } else {
-        textElement.textContent = selectedTiers.length + " tiers sélectionnés";
     }
 }
 

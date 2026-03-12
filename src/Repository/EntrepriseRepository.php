@@ -17,23 +17,15 @@ class EntrepriseRepository extends ServiceEntityRepository
     }
 
     /**
-     * Récupère les entreprises ayant au moins une transaction, triées par nom
+     * Récupère toutes les entreprises triées par nom
      * @return Entreprise[]
      */
-    public function findEntreprisesWithTransactions(): array
+    public function findAllSorted(): array
     {
-        try {
-            return $this->createQueryBuilder('e')
-                ->leftJoin('e.transactions', 't')
-                ->where('t.id_transaction IS NOT NULL')
-                ->groupBy('e.id_entreprise')
-                ->orderBy('e.nomEntreprise', 'ASC')
-                ->getQuery()
-                ->getResult();
-        } catch (\Exception $e) {
-            // En cas d'erreur, retourner toutes les entreprises
-            return $this->findAll();
-        }
+        return $this->createQueryBuilder('e')
+            ->orderBy('e.nomEntreprise', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**
