@@ -60,34 +60,6 @@ final class TransactionController extends AbstractController
             }
         }
         
-        // Avant de filtrer, récupérer TOUTES les transactions pour calculer les montants cumulés corrects
-        // (le montant cumulé ne doit pas dépendre des filtres appliqués)
-        $allTransactionsQb = $transactionRepository->createQueryBuilder('t')
-            ->leftJoin('t.exercice', 'ex')
-            ->addSelect('ex')
-            ->orderBy('ex.numero_ordre', 'ASC')
-            ->addOrderBy('t.numero_ordre', 'ASC');
-        
-        // Appliquer uniquement le filtre d'exercice sur les transactions "toutes"
-        if ($exerciceFilter) {
-            $allTransactionsQb->where('t.exercice = :exercice')
-                            ->setParameter('exercice', $exerciceFilter);
-        }
-        
-        $allTransactions = $allTransactionsQb->getQuery()->getResult();
-        
-        // Créer un mapping id_transaction => montant_cumule basé sur TOUTES les transactions
-        $montantCumuleMap = [];
-        $montantCumule = $soldePrecedent;
-        foreach ($allTransactions as $tx) {
-            $montantTx = $tx->getMontant();
-            if ($tx->getTypeCompte() === 'livret') {
-                $montantTx = -$montantTx;
-            }
-            $montantCumule += $montantTx;
-            $montantCumuleMap[$tx->getIdTransaction()] = $montantCumule;
-        }
-        
         // Maintenant, appliquer les filtres pour la requête affichée à l'écran
         $queryBuilder = $transactionRepository->createQueryBuilder('t')
             ->leftJoin('t.personne', 'p')
@@ -203,35 +175,35 @@ final class TransactionController extends AbstractController
             throw $e;
         }
         
-        // Calculer le montant cumulé pour chaque transaction
+        // Calculer le montant cumulé pour chaque transaction (basé UNIQUEMENT sur les transactions filtrées)
         $montantCumule = $soldePrecedent;
         $transactionsAvecMontant = [];
         
         foreach ($transactions as $transaction) {
-            // Utiliser le montant_cumule pré-calculé depuis TOUTES les transactions
-            $montantCumulePourLigne = $montantCumuleMap[$transaction->getIdTransaction()] ?? $montantCumule;
-            
             // Pour l'affichage du montant de la ligne (crédit/débit)
             $montantTransaction = $transaction->getMontant();
             if ($transaction->getTypeCompte() === 'livret') {
                 $montantTransaction = -$montantTransaction;
             }
             
+            // Ajouter à la somme cumulée des transactions filtrées
+            $montantCumule += $montantTransaction;
+            
             $transactionsAvecMontant[] = [
                 'transaction' => $transaction,
-                'montant_cumule' => $montantCumulePourLigne,
+                'montant_cumule' => $montantCumule,
                 'montant_compte_courant' => $montantTransaction
             ];
         }
         
-        // Calculer les montants finaux par exercice (en utilisant TOUTES les transactions, pas les filtrées)
-        // Cela assure que le montant final affiché reste correct même avec des filtres appliqués
+        // Calculer les montants finaux par exercice (basé sur les transactions filtrées)
         $montantsParExercice = [];
-        foreach ($allTransactions as $tx) {
+        foreach ($transactionsAvecMontant as $item) {
+            $tx = $item['transaction'];
             $exercice = $tx->getExercice();
             if ($exercice) {
                 $exerciceId = $exercice->getIdExercice();
-                $montantsParExercice[$exerciceId] = $montantCumuleMap[$tx->getIdTransaction()] ?? 0;
+                $montantsParExercice[$exerciceId] = $item['montant_cumule'];
             }
         }
         
