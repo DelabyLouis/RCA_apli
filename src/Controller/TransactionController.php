@@ -46,10 +46,10 @@ final class TransactionController extends AbstractController
         $dateMinFilter = $request->query->get('date_min');
         $dateMaxFilter = $request->query->get('date_max');
         
-        // DEBUG
-        error_log('=== TRANSACTION FILTER DEBUG ===');
-        error_log('tiersFilter reçue: ' . json_encode($tiersFilter));
-        error_log('tiersFilter is empty: ' . (empty($tiersFilter) ? 'true' : 'false'));
+        // Normaliser tiersFilter en array si c'est une string
+        if (is_string($tiersFilter)) {
+            $tiersFilter = [$tiersFilter];
+        }
         
         // Initialiser le solde précédent
         $soldePrecedent = 0;
@@ -109,11 +109,39 @@ final class TransactionController extends AbstractController
                         ->setParameter('libelle', '%' . $libelleFilter . '%');
         }
         
-        // TEMPORAIRE: Filtrer par tiers DÉSACTIVÉ pour debug
         // Appliquer le filtre par tiers
-        // if (!empty($tiersFilter)) {
-        //     // ... code temporairement désactivé ...
-        // }
+        if (!empty($tiersFilter)) {
+            $personnesIds = [];
+            $entreprisesIds = [];
+            
+            foreach ($tiersFilter as $tier) {
+                if (strpos($tier, 'personne_') === 0) {
+                    $personnesIds[] = (int) str_replace('personne_', '', $tier);
+                } elseif (strpos($tier, 'entreprise_') === 0) {
+                    $entreprisesIds[] = (int) str_replace('entreprise_', '', $tier);
+                }
+            }
+            
+            // Construire la condition: (personne IN (...) OR entreprise IN (...))
+            $tiersConditions = [];
+            
+            if (!empty($personnesIds)) {
+                $tiersConditions[] = $queryBuilder->expr()->in('t.personne', $personnesIds);
+            }
+            
+            if (!empty($entreprisesIds)) {
+                $tiersConditions[] = $queryBuilder->expr()->in('t.entreprise', $entreprisesIds);
+            }
+            
+            if (!empty($tiersConditions)) {
+                // Combine multiple conditions with OR
+                $orExpression = call_user_func_array(
+                    [$queryBuilder->expr(), 'orX'],
+                    $tiersConditions
+                );
+                $queryBuilder->andWhere($orExpression);
+            }
+        }
         
         // Appliquer le filtre par type de montant (crédit/débit).
         // Note : les transactions de type "livret" ont leur signe inversé
