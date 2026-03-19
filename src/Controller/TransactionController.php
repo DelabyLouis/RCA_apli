@@ -45,10 +45,18 @@ final class TransactionController extends AbstractController
         $montantMaxFilter = $request->query->get('montant_max');
         $dateMinFilter = $request->query->get('date_min');
         $dateMaxFilter = $request->query->get('date_max');
+        $typeTransactionFilter = $request->query->all()['type_transaction'] ?? []; // Array of type-transaction_XX
+        $modePaiementFilter = $request->query->all()['mode_paiement'] ?? []; // Array of mode-paiement_XX
         
-        // Normaliser tiersFilter en array si c'est une string
+        // Normaliser filters en array si c'est une string
         if (is_string($tiersFilter)) {
             $tiersFilter = [$tiersFilter];
+        }
+        if (is_string($typeTransactionFilter)) {
+            $typeTransactionFilter = [$typeTransactionFilter];
+        }
+        if (is_string($modePaiementFilter)) {
+            $modePaiementFilter = [$modePaiementFilter];
         }
         
         // Initialiser le solde précédent
@@ -65,6 +73,8 @@ final class TransactionController extends AbstractController
             ->leftJoin('t.personne', 'p')
             ->leftJoin('t.entreprise', 'e')
             ->leftJoin('t.exercice', 'ex')
+            ->leftJoin('t.type_transaction', 'tt')
+            ->leftJoin('t.modeDePaiement', 'mp')
             ->addSelect('p')
             ->addSelect('e')
             ->addSelect('ex');
@@ -157,6 +167,34 @@ final class TransactionController extends AbstractController
                         ->setParameter('date_max', new \DateTime($dateMaxFilter . ' 23:59:59'));
         }
         
+        // Appliquer le filtre par type de transaction
+        if (!empty($typeTransactionFilter)) {
+            $typeIds = [];
+            foreach ($typeTransactionFilter as $typeStr) {
+                if (strpos($typeStr, 'type-transaction_') === 0) {
+                    $typeIds[] = (int) str_replace('type-transaction_', '', $typeStr);
+                }
+            }
+            if (!empty($typeIds)) {
+                $queryBuilder->andWhere('t.type_transaction IN (:type_ids)')
+                            ->setParameter('type_ids', $typeIds);
+            }
+        }
+        
+        // Appliquer le filtre par mode de paiement
+        if (!empty($modePaiementFilter)) {
+            $modeIds = [];
+            foreach ($modePaiementFilter as $modeStr) {
+                if (strpos($modeStr, 'mode-paiement_') === 0) {
+                    $modeIds[] = (int) str_replace('mode-paiement_', '', $modeStr);
+                }
+            }
+            if (!empty($modeIds)) {
+                $queryBuilder->andWhere('t.modeDePaiement IN (:mode_ids)')
+                            ->setParameter('mode_ids', $modeIds);
+            }
+        }
+        
         // exécution encapsulée pour capturer les erreurs DQL/SQL en cas de 500
         try {
             $transactions = $queryBuilder
@@ -226,6 +264,8 @@ final class TransactionController extends AbstractController
                 'montant_max_filter' => $montantMaxFilter,
                 'date_min_filter' => $dateMinFilter,
                 'date_max_filter' => $dateMaxFilter,
+                'type_transaction_filter' => $typeTransactionFilter,
+                'mode_paiement_filter' => $modePaiementFilter,
             ]);
         }
         
@@ -248,6 +288,8 @@ final class TransactionController extends AbstractController
             'montant_max_filter' => $montantMaxFilter,
             'date_min_filter' => $dateMinFilter,
             'date_max_filter' => $dateMaxFilter,
+            'type_transaction_filter' => $typeTransactionFilter,
+            'mode_paiement_filter' => $modePaiementFilter,
         ]);
     }
 

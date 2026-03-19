@@ -667,8 +667,25 @@ function applyFilters() {
             selectedTiers.push(checkbox.value);
         });
 
+    // Récupérer les types de transaction sélectionnés
+    const selectedTypeTransactions = [];
+    document
+        .querySelectorAll(".type-transaction-checkbox:checked")
+        .forEach(function (checkbox) {
+            selectedTypeTransactions.push(checkbox.value);
+        });
+
+    // Récupérer les modes de paiement sélectionnés
+    const selectedModePaiements = [];
+    document
+        .querySelectorAll(".mode-paiement-checkbox:checked")
+        .forEach(function (checkbox) {
+            selectedModePaiements.push(checkbox.value);
+        });
+
     console.log("Tiers sélectionnés:", selectedTiers);
-    console.log("Nombre de tiers:", selectedTiers.length);
+    console.log("Types de transaction sélectionnés:", selectedTypeTransactions);
+    console.log("Modes de paiement sélectionnés:", selectedModePaiements);
 
     // Construire l'URL avec les paramètres
     const url = new URL(window.location);
@@ -681,6 +698,8 @@ function applyFilters() {
     url.searchParams.delete("montant_max");
     url.searchParams.delete("date_min");
     url.searchParams.delete("date_max");
+    url.searchParams.delete("type_transaction");
+    url.searchParams.delete("mode_paiement");
 
     // Ajouter les nouveaux paramètres si ils ont des valeurs
     if (libelle) {
@@ -713,6 +732,18 @@ function applyFilters() {
         url.searchParams.set("date_max", dateMax);
     }
 
+    // Ajouter les types de transaction sélectionnés
+    selectedTypeTransactions.forEach(function (typeTransaction) {
+        url.searchParams.append("type_transaction", typeTransaction);
+        console.log("Ajout type transaction:", typeTransaction);
+    });
+
+    // Ajouter les modes de paiement sélectionnés
+    selectedModePaiements.forEach(function (modePaiement) {
+        url.searchParams.append("mode_paiement", modePaiement);
+        console.log("Ajout mode paiement:", modePaiement);
+    });
+
     // pour debug on peut afficher l'URL générée
     const finalUrl = url.toString();
     console.log("URL filtrée finale:", finalUrl);
@@ -740,6 +771,22 @@ function clearFilters() {
     });
     updateTiersDropdownText();
 
+    // Décocher tous les types de transaction
+    document
+        .querySelectorAll(".type-transaction-checkbox")
+        .forEach(function (checkbox) {
+            checkbox.checked = false;
+        });
+    updateTypeTransactionButtonText();
+
+    // Décocher tous les modes de paiement
+    document
+        .querySelectorAll(".mode-paiement-checkbox")
+        .forEach(function (checkbox) {
+            checkbox.checked = false;
+        });
+    updateModePaiementButtonText();
+
     // Rediriger vers l'URL sans paramètres de filtre
     const url = new URL(window.location);
     url.searchParams.delete("libelle");
@@ -749,6 +796,8 @@ function clearFilters() {
     url.searchParams.delete("montant_max");
     url.searchParams.delete("date_min");
     url.searchParams.delete("date_max");
+    url.searchParams.delete("type_transaction");
+    url.searchParams.delete("mode_paiement");
 
     window.location.href = url.toString();
 }
