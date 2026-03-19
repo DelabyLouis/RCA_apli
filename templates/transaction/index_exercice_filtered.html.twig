@@ -123,9 +123,6 @@
                                     <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-tiers-selection">
                                         Tout décocher
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-primary" id="apply-tiers-filter">
-                                        Appliquer
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -454,17 +451,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTiersDropdownText();
 
     // Gestion du dropdown tiers
-    const applyTiersBtn = document.getElementById('apply-tiers-filter');
-    if (applyTiersBtn) {
-        applyTiersBtn.addEventListener('click', function() {
-            // Fermer le dropdown
-            const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('filter-tiers-dropdown'));
-            if (dropdown) {
-                dropdown.hide();
-            }
-            updateTiersDropdownText();
-        });
-    }
 
     // Tout décocher
     const clearTiersBtn = document.getElementById('clear-tiers-selection');

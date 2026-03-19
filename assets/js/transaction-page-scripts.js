@@ -449,14 +449,6 @@ function initTiersDropdown() {
         });
     }
 
-    // Appliquer le filtre tiers
-    const applyTiersBtn = document.getElementById("apply-tiers-filter");
-    if (applyTiersBtn) {
-        applyTiersBtn.addEventListener("click", function () {
-            applyFilters();
-        });
-    }
-
     // Tout sélectionner
     const selectAllBtn = document.getElementById("select-all-tiers");
     if (selectAllBtn) {
