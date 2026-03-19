@@ -475,6 +475,155 @@ function initTiersDropdown() {
         });
     }
 
+    // ========== FILTRES TYPE DE TRANSACTION ==========
+
+    const toggleTypeTransactionBtn = document.getElementById(
+        "toggle-type-transaction-filter",
+    );
+    const typeTransactionPanel = document.getElementById(
+        "type-transaction-filter-panel",
+    );
+
+    if (toggleTypeTransactionBtn && typeTransactionPanel) {
+        toggleTypeTransactionBtn.addEventListener("click", function () {
+            const isVisible = typeTransactionPanel.style.display !== "none";
+            typeTransactionPanel.style.display = isVisible ? "none" : "block";
+
+            // Mettre à jour l'icône du bouton
+            const icon = toggleTypeTransactionBtn.querySelector("i");
+            if (icon) {
+                icon.className = isVisible
+                    ? "fas fa-chevron-down me-2"
+                    : "fas fa-chevron-up me-2";
+            }
+        });
+    }
+
+    // Tout sélectionner (Type de Transaction)
+    const selectAllTypeTransactionBtn = document.getElementById(
+        "select-all-type-transaction",
+    );
+    if (selectAllTypeTransactionBtn) {
+        selectAllTypeTransactionBtn.addEventListener("click", function () {
+            document
+                .querySelectorAll(".type-transaction-checkbox")
+                .forEach(function (checkbox) {
+                    checkbox.checked = true;
+                });
+            updateTypeTransactionButtonText();
+        });
+    }
+
+    // Tout décocher (Type de Transaction)
+    const clearTypeTransactionBtn = document.getElementById(
+        "clear-type-transaction-selection",
+    );
+    if (clearTypeTransactionBtn) {
+        clearTypeTransactionBtn.addEventListener("click", function () {
+            document
+                .querySelectorAll(".type-transaction-checkbox")
+                .forEach(function (checkbox) {
+                    checkbox.checked = false;
+                });
+            updateTypeTransactionButtonText();
+        });
+    }
+
+    // ========== FILTRES MODE DE PAIEMENT ==========
+
+    const toggleModePaiementBtn = document.getElementById(
+        "toggle-mode-paiement-filter",
+    );
+    const modePaiementPanel = document.getElementById(
+        "mode-paiement-filter-panel",
+    );
+
+    if (toggleModePaiementBtn && modePaiementPanel) {
+        toggleModePaiementBtn.addEventListener("click", function () {
+            const isVisible = modePaiementPanel.style.display !== "none";
+            modePaiementPanel.style.display = isVisible ? "none" : "block";
+
+            // Mettre à jour l'icône du bouton
+            const icon = toggleModePaiementBtn.querySelector("i");
+            if (icon) {
+                icon.className = isVisible
+                    ? "fas fa-chevron-down me-2"
+                    : "fas fa-chevron-up me-2";
+            }
+        });
+    }
+
+    // Tout sélectionner (Mode de Paiement)
+    const selectAllModePaiementBtn = document.getElementById(
+        "select-all-mode-paiement",
+    );
+    if (selectAllModePaiementBtn) {
+        selectAllModePaiementBtn.addEventListener("click", function () {
+            document
+                .querySelectorAll(".mode-paiement-checkbox")
+                .forEach(function (checkbox) {
+                    checkbox.checked = true;
+                });
+            updateModePaiementButtonText();
+        });
+    }
+
+    // Tout décocher (Mode de Paiement)
+    const clearModePaiementBtn = document.getElementById(
+        "clear-mode-paiement-selection",
+    );
+    if (clearModePaiementBtn) {
+        clearModePaiementBtn.addEventListener("click", function () {
+            document
+                .querySelectorAll(".mode-paiement-checkbox")
+                .forEach(function (checkbox) {
+                    checkbox.checked = false;
+                });
+            updateModePaiementButtonText();
+        });
+    }
+
+    // Update button text functions
+    function updateTypeTransactionButtonText() {
+        const selectedCount = document.querySelectorAll(
+            ".type-transaction-checkbox:checked",
+        ).length;
+        const textSpan = document.getElementById(
+            "type-transaction-button-text",
+        );
+        if (textSpan) {
+            textSpan.textContent =
+                selectedCount > 0 ? selectedCount + " sélectionné(s)" : "Tous";
+        }
+    }
+
+    function updateModePaiementButtonText() {
+        const selectedCount = document.querySelectorAll(
+            ".mode-paiement-checkbox:checked",
+        ).length;
+        const textSpan = document.getElementById("mode-paiement-button-text");
+        if (textSpan) {
+            textSpan.textContent =
+                selectedCount > 0 ? selectedCount + " sélectionné(s)" : "Tous";
+        }
+    }
+
+    // Add change event listeners to all filter checkboxes
+    document
+        .querySelectorAll(".type-transaction-checkbox")
+        .forEach(function (checkbox) {
+            checkbox.addEventListener(
+                "change",
+                updateTypeTransactionButtonText,
+            );
+        });
+
+    document
+        .querySelectorAll(".mode-paiement-checkbox")
+        .forEach(function (checkbox) {
+            checkbox.addEventListener("change", updateModePaiementButtonText);
+        });
+
     // Mettre à jour le texte quand on coche/décoche
     document.querySelectorAll(".tiers-checkbox").forEach(function (checkbox) {
         checkbox.addEventListener("change", updateTiersDropdownText);
