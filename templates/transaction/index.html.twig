@@ -48,6 +48,15 @@
                         <label for="filter-libelle" class="form-label">Libellé</label>
                         <input type="text" class="form-control" id="filter-libelle" placeholder="Rechercher par libellé..." value="{{ libelle_filter }}">
                     </div>
+
+                    <!-- Bouton Filtre Tiers -->
+                    <div class="col-md-2 mb-3">
+                        <label for="toggle-tiers-filter" class="form-label"><i class="fas fa-users me-1"></i>Tiers</label>
+                        <button type="button" class="btn btn-outline-secondary w-100" id="toggle-tiers-filter" style="text-align: left;">
+                            <i class="fas fa-chevron-down me-2"></i><span id="tiers-button-text">Filtrer</span>
+                            <span id="tiers-badge" class="badge bg-secondary ms-2" style="display: none;"></span>
+                        </button>
+                    </div>
                     
                     <!-- Filtre Débit/Crédit -->
                     <div class="col-md-3 mb-3">
@@ -72,14 +81,6 @@
                             <input type="date" class="form-control" id="filter-date-max" placeholder="Date max" value="{{ date_max_filter }}">
                         </div>
                         <small class="text-muted">Période : date min/max</small>
-                    </div>
-                    
-                    <!-- Bouton Tiers -->
-                    <div class="col-md-3 mb-3 d-flex align-items-end">
-                        <button type="button" class="btn btn-outline-primary w-100" id="toggle-tiers-filter">
-                            <i class="fas fa-chevron-down me-2"></i>Filtrer par Tiers
-                            <span id="tiers-badge" class="badge bg-primary ms-2" style="display: none;"></span>
-                        </button>
                     </div>
                 </div>
                 
