@@ -583,31 +583,6 @@ function initTiersDropdown() {
         });
     }
 
-    // Update button text functions
-    function updateTypeTransactionButtonText() {
-        const selectedCount = document.querySelectorAll(
-            ".type-transaction-checkbox:checked",
-        ).length;
-        const textSpan = document.getElementById(
-            "type-transaction-button-text",
-        );
-        if (textSpan) {
-            textSpan.textContent =
-                selectedCount > 0 ? selectedCount + " sélectionné(s)" : "Tous";
-        }
-    }
-
-    function updateModePaiementButtonText() {
-        const selectedCount = document.querySelectorAll(
-            ".mode-paiement-checkbox:checked",
-        ).length;
-        const textSpan = document.getElementById("mode-paiement-button-text");
-        if (textSpan) {
-            textSpan.textContent =
-                selectedCount > 0 ? selectedCount + " sélectionné(s)" : "Tous";
-        }
-    }
-
     // Add change event listeners to all filter checkboxes
     document
         .querySelectorAll(".type-transaction-checkbox")
@@ -628,6 +603,29 @@ function initTiersDropdown() {
     document.querySelectorAll(".tiers-checkbox").forEach(function (checkbox) {
         checkbox.addEventListener("change", updateTiersDropdownText);
     });
+}
+
+// Update button text functions - DÉPLACÉES EN DEHORS DE initFilters() pour être accessibles globalement
+function updateTypeTransactionButtonText() {
+    const selectedCount = document.querySelectorAll(
+        ".type-transaction-checkbox:checked",
+    ).length;
+    const textSpan = document.getElementById("type-transaction-button-text");
+    if (textSpan) {
+        textSpan.textContent =
+            selectedCount > 0 ? selectedCount + " sélectionné(s)" : "Tous";
+    }
+}
+
+function updateModePaiementButtonText() {
+    const selectedCount = document.querySelectorAll(
+        ".mode-paiement-checkbox:checked",
+    ).length;
+    const textSpan = document.getElementById("mode-paiement-button-text");
+    if (textSpan) {
+        textSpan.textContent =
+            selectedCount > 0 ? selectedCount + " sélectionné(s)" : "Tous";
+    }
 }
 
 function updateTiersDropdownText() {
