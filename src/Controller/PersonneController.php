@@ -148,7 +148,7 @@ final class PersonneController extends AbstractController
                     $personne->setPays($value ? trim($value) : 'France');
                     break;
                 case 'telephone':
-                    $personne->setTelephone($value ? (int)$value : null);
+                    $personne->setTelephone($value ? trim($value) : null);
                     break;
                 case 'email':
                     $personne->setEmail($value ? trim($value) : null);

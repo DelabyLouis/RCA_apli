@@ -68,7 +68,7 @@ class SecurityController extends AbstractController
             $personne->setPrenom($form->get('prenom')->getData() ?: $user->getUsername());
             $personne->setCivilite($form->get('civilite')->getData());
             $personne->setEmail($form->get('email')->getData());
-            $personne->setTelephone($form->get('telephone')->getData() ? (int)$form->get('telephone')->getData() : null);
+            $personne->setTelephone($form->get('telephone')->getData() ? trim($form->get('telephone')->getData()) : null);
             
             // Adresse
             $personne->setNumeroVoie($form->get('numero_voie')->getData());

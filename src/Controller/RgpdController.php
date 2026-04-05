@@ -225,7 +225,7 @@ class RgpdController extends AbstractController
                     if (!empty($value) && !is_numeric($value)) {
                         return new JsonResponse(['success' => false, 'message' => 'Le téléphone doit être numérique'], 400);
                     }
-                    $personne->setTelephone($value ? (int)$value : null);
+                    $personne->setTelephone($value ? trim($value) : null);
                     break;
                 case 'numero_voie':
                     $personne->setNumeroVoie($value ? trim($value) : null);

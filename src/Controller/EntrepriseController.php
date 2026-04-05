@@ -143,7 +143,7 @@ final class EntrepriseController extends AbstractController
                     $entreprise->setPays($value ? trim($value) : 'France');
                     break;
                 case 'telephone':
-                    $entreprise->setTelephone($value ? (int)$value : null);
+                    $entreprise->setTelephone($value ? trim($value) : null);
                     break;
                 case 'email':
                     $entreprise->setEmail($value ? trim($value) : null);
