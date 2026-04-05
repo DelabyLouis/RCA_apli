@@ -75,7 +75,7 @@ class SecurityController extends AbstractController
             $personne->setRue($form->get('rue')->getData());
             $personne->setComplementAdresse($form->get('complement_adresse')->getData());
             $personne->setVille($form->get('ville')->getData());
-            $personne->setCodePostal($form->get('code_postal')->getData());
+            $personne->setCodePostal($form->get('code_postal')->getData() ? trim($form->get('code_postal')->getData()) : null);
             $personne->setPays($form->get('pays')->getData() ?: 'France');
             
             // Associer la personne au user (grâce au cascade persist, la personne sera automatiquement persistée)
