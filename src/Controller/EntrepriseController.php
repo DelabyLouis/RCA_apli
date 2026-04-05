@@ -137,7 +137,7 @@ final class EntrepriseController extends AbstractController
                     $entreprise->setVille($value ? trim($value) : null);
                     break;
                 case 'code_postal':
-                    $entreprise->setCodePostal($value ? (int)$value : null);
+                    $entreprise->setCodePostal($value ? trim($value) : null);
                     break;
                 case 'pays':
                     $entreprise->setPays($value ? trim($value) : 'France');

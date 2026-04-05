@@ -240,7 +240,7 @@ class RgpdController extends AbstractController
                     if (!empty($value) && !preg_match('/^\d{5}$/', $value)) {
                         return new JsonResponse(['success' => false, 'message' => 'Le code postal doit contenir 5 chiffres'], 400);
                     }
-                    $personne->setCodePostal($value ? (int)$value : null);
+                    $personne->setCodePostal($value ? trim($value) : null);
                     break;
                 case 'ville':
                     $personne->setVille($value ? trim($value) : null);

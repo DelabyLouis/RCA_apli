@@ -53,8 +53,8 @@ class Personne
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $ville = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $code_postal = null;
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $code_postal = null;
 
     #[ORM\Column(length: 50, nullable: true, options: ['default' => 'France'])]
     private ?string $pays = 'France';
@@ -178,12 +178,12 @@ class Personne
         return $this;
     }
 
-    public function getCodePostal(): ?int
+    public function getCodePostal(): ?string
     {
         return $this->code_postal;
     }
 
-    public function setCodePostal(?int $code_postal): static
+    public function setCodePostal(?string $code_postal): static
     {
         $this->code_postal = $code_postal;
 

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Personne;
 use App\Form\PersonneType;
 use App\Repository\PersonneRepository;
+use App\Repository\EntrepriseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -141,7 +142,7 @@ final class PersonneController extends AbstractController
                     $personne->setVille($value ? trim($value) : null);
                     break;
                 case 'code_postal':
-                    $personne->setCodePostal($value ? (int)$value : null);
+                    $personne->setCodePostal($value ? trim($value) : null);
                     break;
                 case 'pays':
                     $personne->setPays($value ? trim($value) : 'France');
@@ -181,6 +182,70 @@ final class PersonneController extends AbstractController
             
         } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // ===== ROUTE TEMPORAIRE: Fixer les codes postaux avec zéros de tête =====
+    #[Route('/admin/fix-postal-codes', name: 'app_personne_fix_postal_codes', methods: ['POST'])]
+    public function fixPostalCodes(PersonneRepository $personneRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        // Sécurité: vérifier que l'utilisateur est admin
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        
+        try {
+            $personnes = $personneRepository->findAll();
+            $fixed = 0;
+            
+            foreach ($personnes as $personne) {
+                $cp = $personne->getCodePostal();
+                // Si c'est un entier (ancien format), le convertir en string avec zéro padding
+                if ($cp !== null && !empty($cp)) {
+                    $newCp = str_pad((string)(int)$cp, 5, '0', STR_PAD_LEFT);
+                    if ($newCp !== $cp) {
+                        $personne->setCodePostal($newCp);
+                        $fixed++;
+                    }
+                }
+            }
+            
+            if ($fixed > 0) {
+                $entityManager->flush();
+            }
+            
+            return new JsonResponse(['success' => true, 'message' => "$fixed codes postaux corrigés"]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // Fixer aussi les entreprises
+    #[Route('/admin/fix-entreprise-postal-codes', name: 'app_entreprise_fix_postal_codes', methods: ['POST'])]
+    public function fixEntreprisePostalCodes(\App\Repository\EntrepriseRepository $entrepriseRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        
+        try {
+            $entreprises = $entrepriseRepository->findAll();
+            $fixed = 0;
+            
+            foreach ($entreprises as $entreprise) {
+                $cp = $entreprise->getCodePostal();
+                if ($cp !== null && !empty($cp)) {
+                    $newCp = str_pad((string)(int)$cp, 5, '0', STR_PAD_LEFT);
+                    if ($newCp !== $cp) {
+                        $entreprise->setCodePostal($newCp);
+                        $fixed++;
+                    }
+                }
+            }
+            
+            if ($fixed > 0) {
+                $entityManager->flush();
+            }
+            
+            return new JsonResponse(['success' => true, 'message' => "$fixed codes postaux entreprises corrigés"]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur: ' . $e->getMessage()], 500);
         }
     }
 }

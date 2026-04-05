@@ -378,7 +378,7 @@ class LivretController extends AbstractController
             $entreprise->setNomEntreprise('Livret');
             $entreprise->setRue('Compte épargne interne');
             $entreprise->setVille('Interne');
-            $entreprise->setCodePostal(00000);
+            $entreprise->setCodePostal('00000');
             $entreprise->setTelephone(null);
             $entreprise->setEmail('');
             $entityManager->persist($entreprise);

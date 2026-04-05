@@ -43,6 +43,10 @@
                 <a href="{{ path('app_personne_new') }}" class="btn btn-success">
                     <i class="fas fa-plus me-2"></i>Nouvelle Personne
                 </a>
+                <!-- TEMPORAIRE: Bouton pour fixer les codes postaux -->
+                <button type="button" class="btn btn-warning ms-2" id="fix-postal-codes-btn" style="font-size: 0.85rem;">
+                    <i class="fas fa-tools me-1"></i>Fixer codes postaux
+                </button>
             </div>
         </div>
         
@@ -316,6 +320,43 @@
                     showNotification('Erreur de connexion ou serveur indisponible', 'danger');
                 });
             });
+        });
+
+        // ========== TEMPORAIRE: Fixer les codes postaux ==========
+        document.getElementById('fix-postal-codes-btn').addEventListener('click', async function() {
+            if (!confirm('Êtes-vous sûr ? Cela va fixer les codes postaux avec des zéros de tête (ex: 06526 -> 06526)')) {
+                return;
+            }
+
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Correction en cours...';
+
+            try {
+                // Fixer les personnes
+                const response = await fetch('{{ path("app_personne_fix_postal_codes") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`✅ ${data.message}`, 'success');
+                    // Recharger après 2 secondes
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showNotification('Erreur lors de la correction', 'danger');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur: ' + error.message, 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-tools me-1"></i>Fixer codes postaux';
+            }
         });
     </script>
 {% endblock %}
