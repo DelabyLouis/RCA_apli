@@ -53,13 +53,13 @@ class Personne
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $ville = null;
 
-    #[ORM\Column(length: 10, nullable: true)]
+    #[ORM\Column(type: 'string', length: 10, nullable: true)]
     private ?string $code_postal = null;
 
     #[ORM\Column(length: 50, nullable: true, options: ['default' => 'France'])]
     private ?string $pays = 'France';
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: 'string', length: 20, nullable: true)]
     private ?string $telephone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
