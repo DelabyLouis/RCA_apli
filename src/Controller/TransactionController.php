@@ -311,17 +311,29 @@ final class TransactionController extends AbstractController
             error_log('Form submitted: ' . ($form->isSubmitted() ? 'OUI' : 'NON'));
             error_log('Form valid: ' . ($form->isValid() ? 'OUI' : 'NON'));
             
-            // Debug du montant spécifiquement
-            $montantFromForm = $transaction->getMontant();
-            error_log('Montant reçu dans l\'entité: ' . var_export($montantFromForm, true));
-            
             if (!$form->isValid()) {
-                error_log('Erreurs de validation: ' . json_encode($form->getErrors(true, false)));
-                foreach ($form->all() as $child) {
-                    if (!$child->isValid()) {
-                        error_log('Erreur champ ' . $child->getName() . ': ' . json_encode($child->getErrors(true, false)));
+                error_log('=== ERREURS DE VALIDATION DÉTAILLÉES ===');
+                
+                // Erreurs du formulaire parent
+                foreach ($form->getErrors(true, false) as $error) {
+                    error_log('ERREUR PARENT: ' . $error->getMessage());
+                }
+                
+                // Erreurs de tous les champs
+                foreach ($form as $child) {
+                    $errors = $child->getErrors(true, false);
+                    if (count($errors) > 0) {
+                        error_log('Champ: ' . $child->getName());
+                        error_log('  Valeur: ' . var_export($child->getData(), true));
+                        foreach ($errors as $error) {
+                            error_log('  ERREUR: ' . $error->getMessage());
+                        }
+                    } else {
+                        error_log('Champ ' . $child->getName() . ': OK (valeur: ' . var_export($child->getData(), true) . ')');
                     }
                 }
+                
+                error_log('=== FIN DES ERREURS ===');
             }
         }
 
