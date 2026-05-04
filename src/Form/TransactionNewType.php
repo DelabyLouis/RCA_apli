@@ -128,8 +128,8 @@ class TransactionNewType extends AbstractType
                 error_log('[TransactionNewType LISTENER] tiersValue est vide/null');
             }
             
-            error_log('[TransactionNewType LISTENER] Transaction finale - personne: ' . var_export($transaction->getPersonne() ? $transaction->getPersonne()->getId() : 'NULL', true));
-            error_log('[TransactionNewType LISTENER] Transaction finale - entreprise: ' . var_export($transaction->getEntreprise() ? $transaction->getEntreprise()->getId() : 'NULL', true));
+            error_log('[TransactionNewType LISTENER] Transaction finale - personne: ' . var_export($transaction->getPersonne() ? $transaction->getPersonne()->getIdPersonne() : 'NULL', true));
+            error_log('[TransactionNewType LISTENER] Transaction finale - entreprise: ' . var_export($transaction->getEntreprise() ? $transaction->getEntreprise()->getIdEntreprise() : 'NULL', true));
         });
     }
 
