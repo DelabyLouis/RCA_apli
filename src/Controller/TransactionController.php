@@ -311,8 +311,22 @@ final class TransactionController extends AbstractController
             error_log('Form submitted: ' . ($form->isSubmitted() ? 'OUI' : 'NON'));
             error_log('Form valid: ' . ($form->isValid() ? 'OUI' : 'NON'));
             
+            // Debug des données dans la transaction
+            error_log('Transaction state:');
+            error_log('  - libelle: ' . $transaction->getLibelle());
+            error_log('  - montant: ' . $transaction->getMontant());
+            error_log('  - date: ' . ($transaction->getDateTransaction() ? $transaction->getDateTransaction()->format('Y-m-d') : 'NULL'));
+            error_log('  - exercice: ' . ($transaction->getExercice() ? $transaction->getExercice()->getLibelle() : 'NULL'));
+            error_log('  - personne: ' . ($transaction->getPersonne() ? $transaction->getPersonne()->getId() : 'NULL'));
+            error_log('  - entreprise: ' . ($transaction->getEntreprise() ? $transaction->getEntreprise()->getId() : 'NULL'));
+            
             if (!$form->isValid()) {
                 error_log('=== ERREURS DE VALIDATION ===');
+                
+                // Erreurs du formulaire parent
+                foreach ($form->getErrors() as $error) {
+                    error_log('ERREUR PARENT: ' . $error->getMessage());
+                }
                 
                 // Erreurs de tous les champs
                 foreach ($form as $child) {

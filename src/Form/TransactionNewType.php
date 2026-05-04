@@ -96,26 +96,40 @@ class TransactionNewType extends AbstractType
             $form = $event->getForm();
             
             $tiersValue = $form->get('tiers')->getData();
+            error_log('[TransactionNewType LISTENER] tiers value: ' . var_export($tiersValue, true));
             
             if ($tiersValue) {
                 if (strpos($tiersValue, 'personne_') === 0) {
                     // C'est une personne
                     $personneId = str_replace('personne_', '', $tiersValue);
+                    error_log('[TransactionNewType LISTENER] Cherche personne ID: ' . $personneId);
                     $personne = $this->entityManager->getRepository(Personne::class)->find($personneId);
                     if ($personne) {
+                        error_log('[TransactionNewType LISTENER] Personne trouvée: ' . $personne->getNom());
                         $transaction->setPersonne($personne);
                         $transaction->setEntreprise(null);
+                    } else {
+                        error_log('[TransactionNewType LISTENER] Personne NON trouvée avec ID: ' . $personneId);
                     }
                 } elseif (strpos($tiersValue, 'entreprise_') === 0) {
                     // C'est une entreprise
                     $entrepriseId = str_replace('entreprise_', '', $tiersValue);
+                    error_log('[TransactionNewType LISTENER] Cherche entreprise ID: ' . $entrepriseId);
                     $entreprise = $this->entityManager->getRepository(Entreprise::class)->find($entrepriseId);
                     if ($entreprise) {
+                        error_log('[TransactionNewType LISTENER] Entreprise trouvée: ' . $entreprise->getNomEntreprise());
                         $transaction->setEntreprise($entreprise);
                         $transaction->setPersonne(null);
+                    } else {
+                        error_log('[TransactionNewType LISTENER] Entreprise NON trouvée avec ID: ' . $entrepriseId);
                     }
                 }
+            } else {
+                error_log('[TransactionNewType LISTENER] tiersValue est vide/null');
             }
+            
+            error_log('[TransactionNewType LISTENER] Transaction finale - personne: ' . var_export($transaction->getPersonne() ? $transaction->getPersonne()->getId() : 'NULL', true));
+            error_log('[TransactionNewType LISTENER] Transaction finale - entreprise: ' . var_export($transaction->getEntreprise() ? $transaction->getEntreprise()->getId() : 'NULL', true));
         });
     }
 
