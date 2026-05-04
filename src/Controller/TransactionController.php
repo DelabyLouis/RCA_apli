@@ -312,28 +312,21 @@ final class TransactionController extends AbstractController
             error_log('Form valid: ' . ($form->isValid() ? 'OUI' : 'NON'));
             
             if (!$form->isValid()) {
-                error_log('=== ERREURS DE VALIDATION DÉTAILLÉES ===');
-                
-                // Erreurs du formulaire parent
-                foreach ($form->getErrors(true, false) as $error) {
-                    error_log('ERREUR PARENT: ' . $error->getMessage());
-                }
+                error_log('=== ERREURS DE VALIDATION ===');
                 
                 // Erreurs de tous les champs
                 foreach ($form as $child) {
-                    $errors = $child->getErrors(true, false);
-                    if (count($errors) > 0) {
-                        error_log('Champ: ' . $child->getName());
-                        error_log('  Valeur: ' . var_export($child->getData(), true));
-                        foreach ($errors as $error) {
-                            error_log('  ERREUR: ' . $error->getMessage());
+                    try {
+                        $childErrors = $child->getErrors();
+                        if ($childErrors && count($childErrors) > 0) {
+                            error_log('ERREUR CHAMP [' . $child->getName() . ']: ' . $childErrors[0]->getMessage());
                         }
-                    } else {
-                        error_log('Champ ' . $child->getName() . ': OK (valeur: ' . var_export($child->getData(), true) . ')');
+                    } catch (\Exception $e) {
+                        error_log('Erreur en lisant erreurs du champ ' . $child->getName() . ': ' . $e->getMessage());
                     }
                 }
                 
-                error_log('=== FIN DES ERREURS ===');
+                error_log('=== FIN ERREURS ===');
             }
         }
 
