@@ -16,6 +16,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\TransactionRepository;
 use PhpParser\Node\Expr\AssignOp\Mod;
 
 class TransactionNewType extends AbstractType
@@ -90,11 +91,44 @@ class TransactionNewType extends AbstractType
             ])
         ;
         
+        // Écouteur PRE_SUBMIT pour calculer automatiquement le numéro d'ordre
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+            $data = $event->getData();
+            
+            // Récupérer l'exercice ID depuis les données POST
+            $exerciceId = $data['exercice'] ?? null;
+            
+            if ($exerciceId) {
+                error_log('[TransactionNewType PRE_SUBMIT] Calcul numero_ordre pour exercice: ' . $exerciceId);
+                
+                $transactionRepo = $this->entityManager->getRepository(Transaction::class);
+                $lastNumeroOrdre = $transactionRepo->getMaxNumeroOrdreForExercice($exerciceId);
+                $nextNumeroOrdre = $lastNumeroOrdre + 1;
+                
+                error_log('[TransactionNewType PRE_SUBMIT] Dernier numero_ordre: ' . $lastNumeroOrdre . ' -> Prochain: ' . $nextNumeroOrdre);
+                
+                // On ne peut pas modifier les données POST directement via $data
+                // Le numero_ordre sera défini dans le listener SUBMIT
+            }
+        });
+        
         // Écouteur pour traiter le champ tiers lors de la soumission
         $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) {
             $transaction = $event->getData();
             $form = $event->getForm();
             
+            // Calculer et définir le numéro d'ordre si pas déjà défini
+            if (!$transaction->getNumeroOrdre() && $transaction->getExercice()) {
+                $exercice = $transaction->getExercice();
+                $transactionRepo = $this->entityManager->getRepository(Transaction::class);
+                $lastNumeroOrdre = $transactionRepo->getMaxNumeroOrdreForExercice($exercice->getIdExercice());
+                $nextNumeroOrdre = $lastNumeroOrdre + 1;
+                
+                error_log('[TransactionNewType SUBMIT] Définition auto numero_ordre: ' . $nextNumeroOrdre);
+                $transaction->setNumeroOrdre($nextNumeroOrdre);
+            }
+            
+            // Traiter le tiers (personne ou entreprise)
             $tiersValue = $form->get('tiers')->getData();
             error_log('[TransactionNewType LISTENER] tiers value: ' . var_export($tiersValue, true));
             
