@@ -309,7 +309,16 @@ final class TransactionController extends AbstractController
             error_log('POST reçu pour création transaction');
             error_log('Données POST: ' . json_encode($request->request->all()));
             error_log('Form submitted: ' . ($form->isSubmitted() ? 'OUI' : 'NON'));
-            error_log('Form valid: ' . ($form->isValid() ? 'OUI' : 'NON'));
+            
+            $isValid = false;
+            try {
+                $isValid = $form->isValid();
+                error_log('Form valid: ' . ($isValid ? 'OUI' : 'NON'));
+            } catch (\Exception $e) {
+                error_log('EXCEPTION EN VALIDANT LE FORMULAIRE: ' . $e->getMessage());
+                error_log('Stack: ' . $e->getTraceAsString());
+                $isValid = false;
+            }
             
             // Debug des données dans la transaction
             error_log('Transaction state:');
@@ -320,19 +329,44 @@ final class TransactionController extends AbstractController
             error_log('  - personne: ' . ($transaction->getPersonne() ? $transaction->getPersonne()->getIdPersonne() : 'NULL'));
             error_log('  - entreprise: ' . ($transaction->getEntreprise() ? $transaction->getEntreprise()->getIdEntreprise() : 'NULL'));
             
-            if (!$form->isValid()) {
+            if (!$isValid) {
                 error_log('=== ERREURS DE VALIDATION ===');
                 
-                // Erreurs de tous les champs
+                // Erreurs au niveau du formulaire lui-même
+                $formErrors = $form->getErrors();
+                if ($formErrors && count($formErrors) > 0) {
+                    error_log('ERREURS FORMULAIRE:');
+                    foreach ($formErrors as $error) {
+                        error_log('  - ' . $error->getMessage());
+                    }
+                } else {
+                    error_log('Aucune erreur au niveau du formulaire');
+                }
+                
+                // Erreurs de tous les champs (récursif)
+                error_log('ERREURS DES CHAMPS:');
+                $hasFieldErrors = false;
                 foreach ($form as $child) {
                     try {
-                        $childErrors = $child->getErrors();
+                        $childErrors = $child->getErrors(true); // true = récursif
                         if ($childErrors && count($childErrors) > 0) {
-                            error_log('ERREUR CHAMP [' . $child->getName() . ']: ' . $childErrors[0]->getMessage());
+                            $hasFieldErrors = true;
+                            error_log('  CHAMP [' . $child->getName() . ']:');
+                            foreach ($childErrors as $error) {
+                                error_log('    - ' . $error->getMessage());
+                                if (method_exists($error, 'getOrigin')) {
+                                    error_log('      (origine: ' . ($error->getOrigin() ? get_class($error->getOrigin()) : 'unknown') . ')');
+                                }
+                            }
                         }
                     } catch (\Exception $e) {
-                        error_log('Erreur en lisant erreurs du champ ' . $child->getName() . ': ' . $e->getMessage());
+                        error_log('  ERREUR EN LISANT CHAMP [' . $child->getName() . ']: ' . $e->getMessage());
+                        $hasFieldErrors = true;
                     }
+                }
+                
+                if (!$hasFieldErrors) {
+                    error_log('  Aucune erreur de champ détectée');
                 }
                 
                 error_log('=== FIN ERREURS ===');
