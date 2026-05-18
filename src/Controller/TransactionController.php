@@ -198,7 +198,7 @@ final class TransactionController extends AbstractController
         // exécution encapsulée pour capturer les erreurs DQL/SQL en cas de 500
         try {
             $transactions = $queryBuilder
-                ->orderBy('t.date_transaction', 'DESC')
+                ->orderBy('t.date_transaction', 'ASC')
                 ->addOrderBy('t.id_transaction', 'ASC')
                 ->getQuery()
                 ->getResult();
@@ -450,7 +450,7 @@ final class TransactionController extends AbstractController
         }
         
         $transactions = $queryBuilder
-            ->orderBy('t.date_transaction', 'DESC')
+            ->orderBy('t.date_transaction', 'ASC')
             ->addOrderBy('t.id_transaction', 'ASC')
             ->getQuery()
             ->getResult();
