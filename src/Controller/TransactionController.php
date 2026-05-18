@@ -198,8 +198,8 @@ final class TransactionController extends AbstractController
         // exécution encapsulée pour capturer les erreurs DQL/SQL en cas de 500
         try {
             $transactions = $queryBuilder
-                ->orderBy('ex.numero_ordre', 'ASC')
-                ->addOrderBy('t.numero_ordre', 'ASC')
+                ->orderBy('t.date_transaction', 'DESC')
+                ->addOrderBy('t.id_transaction', 'ASC')
                 ->getQuery()
                 ->getResult();
         } catch (\Exception $e) {
@@ -450,8 +450,8 @@ final class TransactionController extends AbstractController
         }
         
         $transactions = $queryBuilder
-            ->orderBy('ex.numero_ordre', 'ASC')
-            ->addOrderBy('t.numero_ordre', 'ASC')
+            ->orderBy('t.date_transaction', 'DESC')
+            ->addOrderBy('t.id_transaction', 'ASC')
             ->getQuery()
             ->getResult();
 
@@ -741,139 +741,16 @@ final class TransactionController extends AbstractController
     #[Route('/sort-by-date', name: 'app_transaction_sort_by_date', methods: ['POST'])]
     public function sortByDate(Request $request, ExerciceRepository $exerciceRepository, TransactionRepository $transactionRepository, EntityManagerInterface $entityManager): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
-            $exerciceId = $data['exercice_id'] ?? null;
-            
-            error_log("=== SORT BY DATE ===");
-            error_log("Exercise ID: " . ($exerciceId ?? "null"));
-            
-            $results = [];
-            $totalSorted = 0;
-
-            if ($exerciceId) {
-                // Trier un exercice spécifique
-                $exercice = $exerciceRepository->findOneBy(['id_exercice' => $exerciceId]);
-                if (!$exercice) {
-                    error_log("Exercice not found: " . $exerciceId);
-                    return new JsonResponse(['success' => false, 'error' => 'Exercice non trouvé'], 400);
-                }
-                
-                error_log("Sorting exercice: " . $exercice->getLibelle());
-                
-                // Utiliser DQL au lieu de findBy pour un tri vraiment fiable
-                $qb = $transactionRepository->createQueryBuilder('t')
-                    ->where('t.exercice = :exercice')
-                    ->setParameter('exercice', $exercice)
-                    ->orderBy('t.date_transaction', 'ASC')
-                    ->addOrderBy('t.id_transaction', 'ASC');
-                
-                $transactions = $qb->getQuery()->getResult();
-                error_log("Found " . count($transactions) . " transactions");
-                
-                // Log first 3 transactions before sorting
-                $idx = 0;
-                foreach ($transactions as $tx) {
-                    if ($idx >= 3) break;
-                    error_log("Pre-sort TX " . $tx->getIdTransaction() . ": " . ($tx->getDateTransaction()?->format('Y-m-d') ?? 'NULL'));
-                    $idx++;
-                }
-
-                if (!empty($transactions)) {
-                    // ÉTAPE 1 : Numéros temporaires
-                    $tempOrder = 100000;
-                    foreach ($transactions as $transaction) {
-                        $transaction->setNumeroOrdre($tempOrder);
-                        $tempOrder++;
-                    }
-                    $entityManager->flush();
-                    error_log("Temporary orders assigned");
-                    
-                    // ÉTAPE 2 : Renumméroter par date de 1 à N
-                    $newOrder = 1;
-                    $exerciceResults = [];
-                    foreach ($transactions as $transaction) {
-                        $transaction->setNumeroOrdre($newOrder);
-                        $exerciceResults[] = [
-                            'id' => $transaction->getIdTransaction(),
-                            'date' => $transaction->getDateTransaction()?->format('Y-m-d'),
-                            'new_order' => $newOrder
-                        ];
-                        error_log("TX " . $transaction->getIdTransaction() . " -> order " . $newOrder . " (date: " . ($transaction->getDateTransaction()?->format('Y-m-d') ?? 'NULL') . ")");
-                        $totalSorted++;
-                        $newOrder++;
-                    }
-                    $entityManager->flush();
-                    error_log("Final flush done");
-                    
-                    $results[$exercice->getLibelle()] = $exerciceResults;
-                }
-            } else {
-                // Trier TOUS les exercices
-                $exercices = $exerciceRepository->findAll();
-                error_log("Sorting all " . count($exercices) . " exercices");
-                
-                foreach ($exercices as $exercice) {
-                    error_log("Processing exercice: " . $exercice->getLibelle());
-                    
-                    $qb = $transactionRepository->createQueryBuilder('t')
-                        ->where('t.exercice = :exercice')
-                        ->setParameter('exercice', $exercice)
-                        ->orderBy('t.date_transaction', 'ASC')
-                        ->addOrderBy('t.id_transaction', 'ASC');
-                    
-                    $transactions = $qb->getQuery()->getResult();
-                    error_log("Found " . count($transactions) . " transactions for this exercice");
-
-                    if (empty($transactions)) {
-                        continue;
-                    }
-
-                    // ÉTAPE 1 : Numéros temporaires
-                    $tempOrder = 100000;
-                    foreach ($transactions as $transaction) {
-                        $transaction->setNumeroOrdre($tempOrder);
-                        $tempOrder++;
-                    }
-                    $entityManager->flush();
-                    
-                    // ÉTAPE 2 : Renumméroter par date de 1 à N
-                    $newOrder = 1;
-                    $exerciceResults = [];
-                    foreach ($transactions as $transaction) {
-                        $transaction->setNumeroOrdre($newOrder);
-                        $exerciceResults[] = [
-                            'id' => $transaction->getIdTransaction(),
-                            'date' => $transaction->getDateTransaction()?->format('Y-m-d'),
-                            'new_order' => $newOrder
-                        ];
-                        $totalSorted++;
-                        $newOrder++;
-                    }
-                    $entityManager->flush();
-
-                    if (!empty($exerciceResults)) {
-                        $results[$exercice->getLibelle()] = $exerciceResults;
-                    }
-                }
-            }
-
-            error_log("Total sorted: " . $totalSorted);
-            return new JsonResponse([
-                'success' => true,
-                'message' => "{$totalSorted} transactions triées par date avec succès",
-                'total_sorted' => $totalSorted,
-                'details' => $results
-            ]);
-
-        } catch (\Exception $e) {
-            error_log("Error in sort-by-date: " . $e->getMessage());
-            error_log("Stack: " . $e->getTraceAsString());
-            return new JsonResponse([
-                'success' => false,
-                'error' => 'Erreur serveur: ' . $e->getMessage()
-            ], 500);
-        }
+        // Les transactions sont maintenant triées par date par défaut
+        // Le numéro d'ordre reste fixe et n'est plus affecté par l'ordre d'affichage
+        error_log("=== SORT BY DATE ENDPOINT ===");
+        error_log("Note: numero_ordre is now fixed and independent from display order");
+        error_log("Transactions are sorted by date_transaction in the UI");
+        
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Les transactions sont triées par date. Le numéro d\'ordre reste inchangé.'
+        ]);
     }
 
 

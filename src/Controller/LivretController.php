@@ -41,7 +41,7 @@ class LivretController extends AbstractController
             ->where('t.type_compte = :type')
             ->setParameter('type', 'livret')
             ->orderBy('t.date_transaction', 'ASC')
-            ->addOrderBy('t.numero_ordre', 'ASC');
+            ->addOrderBy('t.id_transaction', 'ASC');
             
         // Si filtrage par exercice
         if ($exerciceFilter) {
