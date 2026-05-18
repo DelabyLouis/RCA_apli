@@ -1124,20 +1124,20 @@ body:has([href*="attestation"]) .table tbody tr:hover,
     padding: 0.75rem 0.5rem !important;
 }
 
-/* Colonne Libellé - Plus large */
+/* Colonne N° Ordre - Plus large */
 .transactions-table th:nth-child(1),
 .transactions-table td:nth-child(1) {
+    width: 8% !important;
+    text-align: center !important;
+}
+
+/* Colonne Libellé - Assez large pour être lisible */
+.transactions-table th:nth-child(2),
+.transactions-table td:nth-child(2) {
     width: 25% !important;
     white-space: normal !important;
     word-wrap: break-word !important;
     text-align: left !important;
-}
-
-/* Colonne N° Ordre - Assez large pour être lisible */
-.transactions-table th:nth-child(2),
-.transactions-table td:nth-child(2) {
-    width: 8% !important;
-    text-align: center !important;
 }
 
 /* Colonne Date */
