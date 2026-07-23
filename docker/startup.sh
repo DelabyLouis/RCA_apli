@@ -13,9 +13,10 @@ php bin/console doctrine:database:create --if-not-exists || true
 # Exécuter les migrations (remplace doctrine:schema:create)
 echo "🔧 Exécution des migrations..." >&2
 php bin/console doctrine:migrations:migrate --no-interaction || {
-    echo "Erreur migrations, création du schéma de base..." >&2
-    php bin/console doctrine:schema:create || echo "Schema déjà créé" >&2
-    php bin/console doctrine:migrations:migrate --no-interaction || echo "Migrations échouées" >&2
+    echo "⚠️  Migrations failed, trying schema:create fallback..." >&2
+    php bin/console doctrine:schema:create || {
+        echo "Schema creation failed or already exists" >&2
+    }
 }
 
 # CRITICAL: Drop unique constraint on numero_ordre to allow duplicates
