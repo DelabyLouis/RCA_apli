@@ -20,18 +20,7 @@ php bin/console doctrine:migrations:migrate --no-interaction || {
 }
 
 echo "════════════════════════════════════════" >&2
-echo "🔧 Post-migration: Dropping numero_ordre constraints via Symfony command" >&2
-echo "════════════════════════════════════════" >&2
-
-# Use the custom Symfony command (runs every time, not limited by migrations)
-php bin/console app:drop-numero-constraint >&2 || {
-    echo "⚠️  Command failed, trying direct SQL fallback..." >&2
-    php bin/console dbal:run-sql "ALTER TABLE \"transaction\" DROP CONSTRAINT IF EXISTS unique_numero_ordre_exercice;" 2>&1 | head -3 >&2 || true
-    php bin/console dbal:run-sql "ALTER TABLE \"transaction\" DROP CONSTRAINT IF EXISTS unique_numero_ordem_exercice;" 2>&1 | head -3 >&2 || true
-}
-
-echo "════════════════════════════════════════" >&2
-echo "✅ Constraint drop step complete" >&2
+echo "✅ Migrations complete - constraint will be dropped by EventListener on first request" >&2
 echo "════════════════════════════════════════" >&2
 
 # Créer utilisateur admin si nécessaire
