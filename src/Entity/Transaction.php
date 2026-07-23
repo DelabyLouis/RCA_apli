@@ -9,7 +9,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
-#[ORM\Table(name: "`transaction`")]
+#[ORM\Table(
+    name: "`transaction`",
+    uniqueConstraints: []  // Explicitly no UNIQUE constraints - allow duplicate numero_ordre per exercice
+)]
 #[UniqueEntity(fields: ['libelle'], message: 'Ce libellé existe déjà pour une autre transaction')]
 #[Assert\Callback(callback: 'validatePersonneOrEntreprise')]
 class Transaction

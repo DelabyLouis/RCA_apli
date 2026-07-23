@@ -446,7 +446,6 @@ CREATE TABLE transaction (
 
     -- Contrainte d'unicité sur numéro d'ordre par exerciceJOIN Personne p ON u.id_personne = p.id_personne
 
-    CONSTRAINT unique_numero_ordre_exercice UNIQUE (numero_ordre, id_exercice),JOIN Role r ON u.id_role = r.id_role;
 
     
 

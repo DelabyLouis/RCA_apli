@@ -12,7 +12,7 @@ final class Version20260723200000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '[FINAL] Drop unique_numero_ordre_exercice constraint with aggressive verification';
+        return '[FINAL] Drop unique_numero_ordre_exercice constraint - COMPOSITE UNIQUE on (numero_ordem, id_exercice)';
     }
 
     public function up(Schema $schema): void
@@ -26,6 +26,7 @@ final class Version20260723200000 extends AbstractMigration
         }
         
         error_log("[Migration 20260723200000] ✅ STARTING on PostgreSQL");
+        error_log("[Migration 20260723200000] Goal: Remove UNIQUE constraint on (numero_ordre, id_exercice)");
         
         // Step 1: Check table existence
         $tableExists = $this->checkTableExists();
@@ -35,69 +36,67 @@ final class Version20260723200000 extends AbstractMigration
         }
         error_log("[Migration 20260723200000] ✅ Table 'transaction' exists");
         
-        // Step 2: List ALL constraints BEFORE
-        $constraintsBefore = $this->listConstraints();
+        // Step 2: List ALL constraints BEFORE with TYPE info
+        $constraintsBefore = $this->listConstraintsWithType();
         error_log("[Migration 20260723200000] BEFORE constraints: " . count($constraintsBefore) . " total");
         foreach ($constraintsBefore as $constraint) {
-            error_log("[Migration 20260723200000]   - " . $constraint);
+            error_log("[Migration 20260723200000]   - {$constraint['name']} ({$constraint['type']})");
         }
         
-        // Step 3: Find numero_ordem constraints
-        $numeroConstraints = array_filter($constraintsBefore, function($c) {
-            return stripos($c, 'numero') !== false;
+        // Step 3: Find UNIQUE constraints containing numero
+        $numeroUniqueConstraints = array_filter($constraintsBefore, function($c) {
+            return $c['type'] === 'UNIQUE' && stripos($c['name'], 'numero') !== false;
         });
-        error_log("[Migration 20260723200000] Found numero* constraints: " . count($numeroConstraints));
-        foreach ($numeroConstraints as $constraint) {
-            error_log("[Migration 20260723200000]   FOUND: " . $constraint);
+        error_log("[Migration 20260723200000] Found UNIQUE numero* constraints: " . count($numeroUniqueConstraints));
+        foreach ($numeroUniqueConstraints as $constraint) {
+            error_log("[Migration 20260723200000]   UNIQUE CONSTRAINT: " . $constraint['name']);
         }
         
-        // Step 4: Drop each constraint found
-        foreach ($numeroConstraints as $constraint) {
+        // Step 4: Drop each UNIQUE constraint found
+        foreach ($numeroUniqueConstraints as $constraint) {
             try {
-                error_log("[Migration 20260723200000] Dropping: $constraint");
-                $this->addSql('ALTER TABLE "transaction" DROP CONSTRAINT IF EXISTS ' . $constraint);
-                error_log("[Migration 20260723200000] ✅ DROP executed: $constraint");
+                error_log("[Migration 20260723200000] 🔨 Dropping UNIQUE constraint: {$constraint['name']}");
+                $this->addSql('ALTER TABLE "transaction" DROP CONSTRAINT IF EXISTS "' . $constraint['name'] . '"');
+                error_log("[Migration 20260723200000] ✅ DROP executed: {$constraint['name']}");
             } catch (\Exception $e) {
-                error_log("[Migration 20260723200000] ❌ DROP failed for $constraint: " . $e->getMessage());
+                error_log("[Migration 20260723200000] ❌ DROP failed for {$constraint['name']}: " . $e->getMessage());
             }
         }
         
-        // Step 5: Also try by name explicitly (in case search missed it)
+        // Step 5: Also try by name explicitly
         $namesToTry = [
             'unique_numero_ordre_exercice',
             'unique_numero_ordem_exercice',
-            'pk_numero_ordre',
-            'uk_numero_ordre_exercice',
         ];
         
         foreach ($namesToTry as $name) {
             try {
-                error_log("[Migration 20260723200000] Attempting explicit DROP: $name");
-                $this->addSql('ALTER TABLE "transaction" DROP CONSTRAINT IF EXISTS ' . $name);
-                error_log("[Migration 20260723200000] ✅ Executed DROP IF EXISTS for $name");
+                error_log("[Migration 20260723200000] 🔨 Attempting explicit DROP IF EXISTS: $name");
+                $this->addSql('ALTER TABLE "transaction" DROP CONSTRAINT IF EXISTS "' . $name . '"');
+                error_log("[Migration 20260723200000] ✅ DROP IF EXISTS executed: $name");
             } catch (\Exception $e) {
-                error_log("[Migration 20260723200000] ⚠️  DROP IF EXISTS for $name returned: " . $e->getMessage());
+                error_log("[Migration 20260723200000] ⚠️  DROP IF EXISTS returned: " . $e->getMessage());
             }
         }
         
-        // Step 6: List ALL constraints AFTER
-        $constraintsAfter = $this->listConstraints();
+        // Step 6: List ALL constraints AFTER with TYPE info
+        $constraintsAfter = $this->listConstraintsWithType();
         error_log("[Migration 20260723200000] AFTER constraints: " . count($constraintsAfter) . " total");
         foreach ($constraintsAfter as $constraint) {
-            error_log("[Migration 20260723200000]   - " . $constraint);
+            error_log("[Migration 20260723200000]   - {$constraint['name']} ({$constraint['type']})");
         }
         
-        // Step 7: Verify numero_ordem constraints are gone
-        $numeroConstraintsAfter = array_filter($constraintsAfter, function($c) {
-            return stripos($c, 'numero') !== false;
+        // Step 7: Verify numero_ordem UNIQUE constraints are gone
+        $numeroUniqueAfter = array_filter($constraintsAfter, function($c) {
+            return $c['type'] === 'UNIQUE' && stripos($c['name'], 'numero') !== false;
         });
         
-        if (count($numeroConstraintsAfter) === 0) {
-            error_log("[Migration 20260723200000] ✅✅✅ SUCCESS: All numero* constraints removed!");
+        if (count($numeroUniqueAfter) === 0) {
+            error_log("[Migration 20260723200000] ✅✅✅ SUCCESS: UNIQUE constraint on numero_ordem successfully removed!");
         } else {
-            error_log("[Migration 20260723200000] ❌ FAILED: " . count($numeroConstraintsAfter) . " numero* constraints still exist:");
-            foreach ($numeroConstraintsAfter as $constraint) {
-                error_log("[Migration 20260723200000]   STILL EXISTS: " . $constraint);
+            error_log("[Migration 20260723200000] ❌ FAILED: " . count($numeroUniqueAfter) . " numero* UNIQUE constraints still exist:");
+            foreach ($numeroUniqueAfter as $constraint) {
+                error_log("[Migration 20260723200000]   STILL EXISTS: {$constraint['name']}");
             }
         }
         
@@ -126,17 +125,21 @@ final class Version20260723200000 extends AbstractMigration
     }
     
     /**
-     * List all constraints on transaction table
+     * List all constraints on transaction table WITH TYPE
      */
-    private function listConstraints(): array
+    private function listConstraintsWithType(): array
     {
         try {
             $result = $this->connection->fetchAllAssociative(
-                "SELECT constraint_name FROM information_schema.table_constraints 
+                "SELECT constraint_name, constraint_type 
+                 FROM information_schema.table_constraints 
                  WHERE table_name = 'transaction' AND table_schema = 'public'"
             );
             return array_map(function($row) {
-                return $row['constraint_name'];
+                return [
+                    'name' => $row['constraint_name'],
+                    'type' => $row['constraint_type']
+                ];
             }, $result ?: []);
         } catch (\Exception $e) {
             error_log("[Migration 20260723200000] ❌ Error listing constraints: " . $e->getMessage());
