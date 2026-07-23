@@ -19,7 +19,7 @@ class TransactionType extends AbstractType
     {
         $builder
             ->add('libelle')
-            // Le numéro d'ordre est généré automatiquement, on ne l'affiche pas dans le formulaire
+            ->add('numero_ordre')
             ->add('date_transaction')
             ->add('montant')
             ->add('exercice', EntityType::class, [

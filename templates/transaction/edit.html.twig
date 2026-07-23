@@ -18,13 +18,23 @@
                     {{ form_start(form) }}
                     
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form_label(form.numero_ordre, 'Numéro d\'ordre') }}
+                                {{ form_widget(form.numero_ordre, {'attr': {'class': 'form-control', 'type': 'number'}}) }}
+                                {{ form_errors(form.numero_ordre) }}
+                            </div>
+                        </div>
+                        <div class="col-md-8">
                             <div class="mb-3">
                                 {{ form_label(form.libelle, 'Libelle') }}
                                 {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
                                 {{ form_errors(form.libelle) }}
                             </div>
                         </div>
+                    </div>
+
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 {{ form_label(form.montant, 'Montant') }}
@@ -33,6 +43,30 @@
                                     <span class="input-group-text">€</span>
                                 </div>
                                 {{ form_errors(form.montant) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.date_transaction, 'Date de transaction') }}
+                                {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.date_transaction) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.exercice, 'Exercice') }}
+                                {{ form_widget(form.exercice, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.exercice) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.type_transaction, 'Type de transaction') }}
+                                {{ form_widget(form.type_transaction, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.type_transaction) }}
                             </div>
                         </div>
                     </div>
@@ -57,33 +91,9 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                {{ form_label(form.type_transaction, 'Type de transaction') }}
-                                {{ form_widget(form.type_transaction, {'attr': {'class': 'form-select'}}) }}
-                                {{ form_errors(form.type_transaction) }}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
                                 {{ form_label(form.modeDePaiement, 'Mode de paiement') }}
                                 {{ form_widget(form.modeDePaiement, {'attr': {'class': 'form-select'}}) }}
                                 {{ form_errors(form.modeDePaiement) }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                {{ form_label(form.exercice, 'Exercice') }}
-                                {{ form_widget(form.exercice, {'attr': {'class': 'form-select'}}) }}
-                                {{ form_errors(form.exercice) }}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                {{ form_label(form.date_transaction, 'Date de transaction') }}
-                                {{ form_widget(form.date_transaction, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.date_transaction) }}
                             </div>
                         </div>
                     </div>

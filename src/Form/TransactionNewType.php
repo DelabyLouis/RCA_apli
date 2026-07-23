@@ -57,6 +57,7 @@ class TransactionNewType extends AbstractType
 
         $builder
             ->add('libelle')
+            ->add('numero_ordre')
             ->add('date_transaction')
             ->add('montant')
             ->add('exercice', EntityType::class, [
