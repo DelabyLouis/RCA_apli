@@ -92,21 +92,22 @@ class ForceDropConstraintCommand extends Command
         $io->section('📋 Final verification...');
         error_log("[ForceDropConstraintCommand] Running final verification");
         try {
-            $query = "SELECT COUNT(*) as cnt FROM information_schema.table_constraints WHERE table_name = 'transaction' AND constraint_schema = 'public' AND constraint_name LIKE '%numero_ordem%'";
-            error_log("[ForceDropConstraintCommand] Verification query");
+            $query = "SELECT COUNT(*) as cnt FROM information_schema.table_constraints WHERE table_name = 'transaction' AND constraint_schema = 'public' AND constraint_name LIKE '%numero_ordre%'";
+            error_log("[ForceDropConstraintCommand] Verification query: {$query}");
             $stmt = $pdo->query($query);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-            error_log("[ForceDropConstraintCommand] Final count: {$result['cnt']}");
+            $count = $result['cnt'] ?? 0;
+            error_log("[ForceDropConstraintCommand] Final count: {$count}");
 
-            if ($result['cnt'] == 0) {
-                $io->success('✅ ALL numero_ordem constraints successfully removed!');
-                $io->note('You can now edit numero_ordem fields without unique constraint errors');
+            if ($count == 0) {
+                $io->success('✅ ALL numero_ordre constraints successfully removed!');
+                $io->note('You can now edit numero_ordre fields without unique constraint errors');
                 error_log("[ForceDropConstraintCommand] 🎉 SUCCESS - All constraints removed!");
                 error_log("═════════════════════════════════════════════════════════");
                 return Command::SUCCESS;
             } else {
-                $io->error('❌ Some constraints still exist: ' . $result['cnt']);
-                error_log("[ForceDropConstraintCommand] ❌ FAILED - {$result['cnt']} constraints still exist");
+                $io->error("❌ Some constraints still exist: {$count}");
+                error_log("[ForceDropConstraintCommand] ❌ FAILED - {$count} constraints still exist");
                 return Command::FAILURE;
             }
         } catch (\Exception $e) {
