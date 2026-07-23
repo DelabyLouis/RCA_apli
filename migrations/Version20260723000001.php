@@ -22,15 +22,30 @@ final class Version20260723000001 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // NOOP: The unique constraint on numero_ordre + exercice was never created in production,
-        // so there's nothing to drop. This migration exists as a marker for the codebase changes.
-        // 
-        // The Entity Transaction.php now allows duplicate numero_ordre values.
-        // The form fields are configured to allow editing of numero_ordre.
+        $platform = $this->connection->getDatabasePlatform();
+
+        if ($platform instanceof PostgreSQLPlatform) {
+            // PostgreSQL: Try to drop the constraint using DO block to ignore if it doesn't exist
+            $this->addSql("
+                DO $$
+                BEGIN
+                    ALTER TABLE transaction DROP CONSTRAINT IF EXISTS unique_numero_ordre_exercice;
+                    RAISE NOTICE 'Constraint dropped or did not exist';
+                EXCEPTION WHEN OTHERS THEN
+                    RAISE NOTICE 'Error dropping constraint: %', SQLERRM;
+                END$$;
+            ");
+        } elseif ($platform instanceof MySQLPlatform) {
+            // MySQL: Check if index exists and drop it
+            $this->addSql("
+                ALTER TABLE `transaction` DROP INDEX IF EXISTS unique_numero_ordre_exercice
+            ");
+        }
+        // SQLite doesn't need special handling for constraint dropping
     }
 
     public function down(Schema $schema): void
     {
-        // NOOP: Rollback would require recreating the constraint, but it never existed in production
+        // No rollback needed - recreating constraints would break existing data
     }
 }
