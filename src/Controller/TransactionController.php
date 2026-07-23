@@ -865,21 +865,31 @@ final class TransactionController extends AbstractController
     #[Route('/{id_transaction}/update-field', name: 'app_transaction_update_field', methods: ['POST'])]
     public function updateField(Request $request, int $id_transaction, TransactionRepository $transactionRepository, PersonneRepository $personneRepository, EntrepriseRepository $entrepriseRepository, ExerciceRepository $exerciceRepository, TypeTransactionRepository $typeTransactionRepository, ModeDePaiementRepository $modeDePaiementRepository, EntityManagerInterface $entityManager): JsonResponse
     {
+        error_log("=== [updateField START] Transaction ID: $id_transaction ===");
+        
         $transaction = $transactionRepository->findOneBy(['id_transaction' => $id_transaction]);
         
         if (!$transaction) {
+            error_log("❌ [updateField] Transaction non trouvée pour ID: $id_transaction");
             return new JsonResponse(['success' => false, 'message' => 'Transaction non trouvée'], 404);
         }
+        
+        error_log("✅ [updateField] Transaction trouvée");
 
         // Vérifier si l'exercice de la transaction est clôturé
         if ($transaction->getExercice() && $transaction->getExercice()->isClos()) {
+            error_log("❌ [updateField] Exercice clôturé");
             return new JsonResponse(['success' => false, 'message' => 'Impossible de modifier une transaction d\'un exercice clôturé'], 403);
         }
 
         $field = $request->request->get('field');
         $value = $request->request->get('value');
+        
+        error_log("[updateField] Field: $field | Value: $value");
 
         try {
+            error_log("[updateField] Avant switch - Processing field: $field");
+            
             switch ($field) {
                 case 'libelle':
                     if (empty(trim($value))) {
@@ -893,13 +903,18 @@ final class TransactionController extends AbstractController
                     }
                     
                     $transaction->setLibelle(trim($value));
+                    error_log("✅ [updateField] Libelle défini: " . trim($value));
                     break;
                     
                 case 'numero_ordre':
+                    error_log("[updateField] CAS numero_ordre - Value reçu: $value (type: " . gettype($value) . ")");
+                    
                     if (!is_numeric($value) || intval($value) < 1) {
+                        error_log("❌ [updateField] Validation numero_ordre échouée - is_numeric: " . (is_numeric($value) ? 'true' : 'false') . ", value: $value");
                         return new JsonResponse(['success' => false, 'message' => 'Le numéro d\'ordre doit être un nombre positif'], 400);
                     }
                     $transaction->setNumeroOrdre(intval($value));
+                    error_log("✅ [updateField] Numero ordre défini: " . intval($value));
                     break;
                     
                 case 'date_transaction':
@@ -1009,11 +1024,21 @@ final class TransactionController extends AbstractController
                     return new JsonResponse(['success' => false, 'message' => 'Champ non autorisé'], 400);
             }
 
+            error_log("[updateField] Avant flush - Field: $field");
+            error_log("[updateField] Transaction ID: " . $transaction->getIdTransaction() . 
+                      " | Numero ordre actuel: " . ($transaction->getNumeroOrdre() ?? 'NULL') . 
+                      " | Libelle: " . ($transaction->getLibelle() ?? 'NULL'));
+            
             $entityManager->flush();
+            error_log("✅ [updateField] Flush réussi!");
             
             return new JsonResponse(['success' => true]);
         } catch (\Exception $e) {
-            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de la modification : ' . $e->getMessage()], 500);
+            $errorMsg = "Erreur lors de la modification : " . $e->getMessage();
+            $errorClass = get_class($e);
+            error_log("❌ [updateField] EXCEPTION - Class: $errorClass | Message: " . $e->getMessage());
+            error_log("❌ [updateField] Stack Trace: " . $e->getTraceAsString());
+            return new JsonResponse(['success' => false, 'message' => $errorMsg], 500);
         }
     }
 
