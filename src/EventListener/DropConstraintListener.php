@@ -18,15 +18,13 @@ class DropConstraintListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
-        // Run on the VERY FIRST request, before anything else
         return [
-            KernelEvents::REQUEST => ['onKernelRequest', 256], // Very high priority
+            KernelEvents::REQUEST => ['onKernelRequest', 256],
         ];
     }
 
     public function onKernelRequest(RequestEvent $event): void
     {
-        // Only run once per process
         if ($this->done) {
             return;
         }
@@ -38,37 +36,54 @@ class DropConstraintListener implements EventSubscriberInterface
         }
 
         try {
-            // CRITICAL: Disable constraints checking temporarily
-            $this->connection->executeStatement('SET CONSTRAINTS ALL DEFERRED');
-            error_log("[DropConstraintListener] Set constraints deferred");
+            error_log("[DropConstraintListener] 🚀 START - Finding and dropping numero* constraints");
 
-            // Try to drop the constraint
-            $this->connection->executeStatement(
-                'ALTER TABLE "transaction" DROP CONSTRAINT IF EXISTS "unique_numero_ordre_exercice"'
-            );
-            error_log("[DropConstraintListener] ✅ Dropped unique_numero_ordre_exercice");
+            // Find the EXACT constraint name
+            $constraints = $this->connection->executeQuery(
+                "SELECT constraint_name FROM information_schema.table_constraints 
+                 WHERE table_name = 'transaction' 
+                 AND constraint_type = 'UNIQUE' 
+                 AND table_schema = 'public'"
+            )->fetchAllAssociative();
 
-            // Try alternate name
-            $this->connection->executeStatement(
-                'ALTER TABLE "transaction" DROP CONSTRAINT IF EXISTS "unique_numero_ordem_exercice"'
-            );
-            error_log("[DropConstraintListener] ✅ Dropped alternate name");
+            error_log("[DropConstraintListener] Found " . count($constraints) . " UNIQUE constraints");
 
-            // CRITICAL: Commit the changes immediately
-            $this->connection->commit();
-            error_log("[DropConstraintListener] ✅ Committed constraint drop");
+            $found = false;
+            foreach ($constraints as $row) {
+                $name = $row['constraint_name'];
+                
+                if (stripos($name, 'numero') !== false) {
+                    error_log("[DropConstraintListener] 🎯 Dropping: $name");
+                    $found = true;
 
-            // Re-enable constraints
-            $this->connection->executeStatement('SET CONSTRAINTS ALL IMMEDIATE');
-            error_log("[DropConstraintListener] ✅ Constraints re-enabled");
+                    $sql = 'ALTER TABLE "transaction" DROP CONSTRAINT "' . str_replace('"', '""', $name) . '"';
+                    $this->connection->executeStatement($sql);
+                    error_log("[DropConstraintListener] ✅ Dropped: $name");
+                }
+            }
+
+            if (!$found) {
+                error_log("[DropConstraintListener] ⚠️  No numero* UNIQUE constraint found");
+            }
+
+            // Verify
+            $verify = $this->connection->executeQuery(
+                "SELECT COUNT(*) as cnt FROM information_schema.table_constraints 
+                 WHERE table_name = 'transaction' 
+                 AND constraint_type = 'UNIQUE' 
+                 AND table_schema = 'public'
+                 AND constraint_name LIKE '%numero%'"
+            )->fetchAssociative();
+
+            $cnt = (int)($verify['cnt'] ?? 0);
+            if ($cnt === 0) {
+                error_log("[DropConstraintListener] ✅✅ SUCCESS: All numero constraints removed!");
+            } else {
+                error_log("[DropConstraintListener] ❌ FAILED: $cnt constraints still exist");
+            }
 
         } catch (\Exception $e) {
-            error_log("[DropConstraintListener] ❌ Error: " . $e->getMessage());
-            try {
-                $this->connection->rollback();
-            } catch (\Exception $rollbackEx) {
-                error_log("[DropConstraintListener] Rollback error: " . $rollbackEx->getMessage());
-            }
+            error_log("[DropConstraintListener] ❌ Exception: " . $e->getMessage());
         }
     }
 }
