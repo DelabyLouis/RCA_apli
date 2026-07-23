@@ -24,22 +24,27 @@ final class Version20260723150000 extends AbstractMigration
         $platform = $this->connection->getDatabasePlatform();
 
         if ($platform instanceof PostgreSQLPlatform) {
-            // PostgreSQL: Find and drop the constraint by querying information_schema
+            // PostgreSQL: First try to drop by exact name
+            $this->addSql('ALTER TABLE transaction DROP CONSTRAINT IF EXISTS unique_numero_ordre_exercice');
+            
+            // If the above didn't work, try dropping by column pattern
             $this->addSql(<<<'SQL'
                 DO $$
                 DECLARE
                     constraint_name TEXT;
                 BEGIN
+                    -- Look for unique constraint on numero_ordre
                     SELECT constraint_name INTO constraint_name
                     FROM information_schema.table_constraints
                     WHERE table_name = 'transaction'
                       AND constraint_type = 'UNIQUE'
                       AND constraint_schema = 'public'
+                      AND constraint_name LIKE '%numero_ordre%'
                     LIMIT 1;
                     
                     IF constraint_name IS NOT NULL THEN
                         EXECUTE 'ALTER TABLE transaction DROP CONSTRAINT ' || constraint_name;
-                        RAISE NOTICE 'Dropped constraint: %', constraint_name;
+                        RAISE NOTICE 'Dropped numero_ordre constraint: %', constraint_name;
                     END IF;
                 END $$;
             SQL
