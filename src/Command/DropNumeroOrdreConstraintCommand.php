@@ -41,28 +41,51 @@ class DropNumeroOrdreConstraintCommand extends Command
                 SQL;
                 
                 $constraints = $this->connection->fetchAllAssociative($query);
-                $io->writeln("Found " . count($constraints) . " constraints:");
+                $io->writeln("📋 Found " . count($constraints) . " constraints BEFORE drop:");
                 foreach ($constraints as $constraint) {
                     $io->writeln("  - {$constraint['constraint_name']} ({$constraint['constraint_type']})");
                 }
                 
-                // Try to drop the specific constraint
+                // Drop the constraint
                 $io->writeln("\n🔨 Attempting to drop 'unique_numero_ordre_exercice'...");
                 try {
-                    $this->connection->exec('ALTER TABLE "transaction" DROP CONSTRAINT IF EXISTS "unique_numero_ordre_exercice"');
-                    $io->success("✅ Constraint dropped successfully!");
-                } catch (\Exception $e) {
-                    $io->error("Failed: " . $e->getMessage());
+                    // First drop attempt
+                    $this->connection->executeStatement('ALTER TABLE transaction DROP CONSTRAINT unique_numero_ordre_exercice');
+                    $io->success("✅ Constraint dropped!");
                     
-                    // Try without quotes
-                    $io->writeln("⚠️  Trying without quotes...");
+                    // Force commit
+                    $this->connection->commit();
+                    $io->writeln("💾 Commit forced");
+                } catch (\Exception $e) {
+                    $io->warning("⚠️  First attempt failed: " . $e->getMessage());
+                    
+                    // Try with IF EXISTS
                     try {
-                        $this->connection->exec('ALTER TABLE transaction DROP CONSTRAINT IF EXISTS unique_numero_ordre_exercice');
-                        $io->success("✅ Constraint dropped successfully (without quotes)!");
+                        $this->connection->executeStatement('ALTER TABLE transaction DROP CONSTRAINT IF EXISTS unique_numero_ordre_exercice');
+                        $this->connection->commit();
+                        $io->success("✅ Constraint dropped (with IF EXISTS)!");
                     } catch (\Exception $e2) {
-                        $io->error("Also failed: " . $e2->getMessage());
+                        $io->error("❌ Both attempts failed: " . $e2->getMessage());
                         return Command::FAILURE;
                     }
+                }
+                
+                // VERIFY: Check constraints AFTER drop
+                $io->writeln("\n🔍 Verifying constraints AFTER drop...");
+                $constraintsAfter = $this->connection->fetchAllAssociative($query);
+                $io->writeln("📋 Found " . count($constraintsAfter) . " constraints AFTER drop:");
+                foreach ($constraintsAfter as $constraint) {
+                    $io->writeln("  - {$constraint['constraint_name']} ({$constraint['constraint_type']})");
+                }
+                
+                // Check if unique_numero_ordre_exercice still exists
+                $stillExists = array_filter($constraintsAfter, fn($c) => $c['constraint_name'] === 'unique_numero_ordre_exercice');
+                if (empty($stillExists)) {
+                    $io->success("✅ VERIFIED: unique_numero_ordre_exercice constraint successfully removed!");
+                    return Command::SUCCESS;
+                } else {
+                    $io->error("❌ ERROR: unique_numero_ordre_exercice constraint STILL EXISTS!");
+                    return Command::FAILURE;
                 }
                 
             } elseif ($platform === 'mysql') {
