@@ -96,12 +96,16 @@ class Transaction
 
     public function getNumeroOrdre(): ?int
     {
-        return $this->numero_ordre;
+        $value = $this->numero_ordre;
+        error_log("[Transaction::getNumeroOrdre] ID={$this->id_transaction}, Value={$value}");
+        return $value;
     }
 
     public function setNumeroOrdre(int $numero_ordre): static
     {
+        error_log("[Transaction::setNumeroOrdre] ID={$this->id_transaction}, OldValue={$this->numero_ordre}, NewValue={$numero_ordre}");
         $this->numero_ordre = $numero_ordre;
+        error_log("[Transaction::setNumeroOrdre] ✅ Setter executed, current value: {$this->numero_ordre}");
 
         return $this;
     }

@@ -21,6 +21,8 @@ class TransactionRepository extends ServiceEntityRepository
      */
     public function getLastNumeroOrdreByExercice(int $exerciceId): ?int
     {
+        error_log("[TransactionRepository::getLastNumeroOrdreByExercice] Exercice ID: {$exerciceId}");
+        
         $result = $this->createQueryBuilder('t')
             ->select('MAX(t.numero_ordre)')
             ->where('t.exercice = :exerciceId')
@@ -28,16 +30,21 @@ class TransactionRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
         
-        return $result ? (int) $result : 0;
+        $max = $result ? (int) $result : 0;
+        error_log("[TransactionRepository::getLastNumeroOrdreByExercice] Result: {$max}");
+        return $max;
     }
 
     /**
-     * Alias pour getLastNumeroOrdreByExercice
+     * Alias pour getLastNumeroOdreByExercice
      */
     public function getMaxNumeroOrdreForExercice($exercice): int
     {
         $exerciceId = is_object($exercice) ? $exercice->getIdExercice() : $exercice;
-        return $this->getLastNumeroOrdreByExercice($exerciceId);
+        error_log("[TransactionRepository::getMaxNumeroOrdreForExercice] Exercice ID: {$exerciceId}");
+        $max = $this->getLastNumeroOrdreByExercice($exerciceId);
+        error_log("[TransactionRepository::getMaxNumeroOrdreForExercice] Result: {$max}");
+        return $max;
     }
 
     /**
@@ -46,6 +53,7 @@ class TransactionRepository extends ServiceEntityRepository
      */
     public function getLastNumeroOrdre(): ?int
     {
+        error_log("[TransactionRepository::getLastNumeroOrdre] Getting last numero_ordre across all exercices");
         $result = $this->createQueryBuilder('t')
             ->select('MAX(t.numero_ordre)')
             ->getQuery()

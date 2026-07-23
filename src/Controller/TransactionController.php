@@ -1029,6 +1029,12 @@ final class TransactionController extends AbstractController
                       " | Numero ordre actuel: " . ($transaction->getNumeroOrdre() ?? 'NULL') . 
                       " | Libelle: " . ($transaction->getLibelle() ?? 'NULL'));
             
+            // Log exercise info for constraint checking
+            if ($transaction->getExercice()) {
+                error_log("[updateField] Exercice: " . $transaction->getExercice()->getIdExercice());
+            }
+            
+            error_log("[updateField] Attempting flush...");
             $entityManager->flush();
             error_log("✅ [updateField] Flush réussi!");
             
@@ -1038,6 +1044,17 @@ final class TransactionController extends AbstractController
             $errorClass = get_class($e);
             error_log("❌ [updateField] EXCEPTION - Class: $errorClass | Message: " . $e->getMessage());
             error_log("❌ [updateField] Stack Trace: " . $e->getTraceAsString());
+            
+            // Additional logging for constraint violations
+            if (strpos($e->getMessage(), 'unique') !== false || strpos($e->getMessage(), 'unique constraint') !== false) {
+                error_log("❌ [updateField] UNIQUE CONSTRAINT VIOLATION detected!");
+                error_log("[updateField] Current Transaction State:");
+                error_log("  - ID: " . $transaction->getIdTransaction());
+                error_log("  - NumeroOrdre: " . ($transaction->getNumeroOrdre() ?? 'NULL'));
+                error_log("  - Exercice: " . ($transaction->getExercice()?->getIdExercice() ?? 'NULL'));
+                error_log("  - Libelle: " . ($transaction->getLibelle() ?? 'NULL'));
+            }
+            
             return new JsonResponse(['success' => false, 'message' => $errorMsg], 500);
         }
     }

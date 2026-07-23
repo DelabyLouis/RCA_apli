@@ -19,9 +19,33 @@ php bin/console doctrine:migrations:migrate --no-interaction || {
     }
 }
 
+echo "════════════════════════════════════════" >&2
+echo "🔧 CRITICAL STEP: Dropping numero_ordem constraint" >&2
+echo "════════════════════════════════════════" >&2
+
 # CRITICAL: Drop unique constraint on numero_ordre to allow duplicates
-echo "🔧 Suppression forcée de la contrainte unique sur numero_ordre..." >&2
-php bin/console app:force-drop-constraint || echo "⚠️  Force drop failed" >&2
+echo "🔧 Suppression forcée de la contrainte unique sur numero_ordem..." >&2
+echo "[startup.sh] About to execute: php bin/console app:force-drop-constraint" >&2
+
+# Capture output and exit code
+CONSTRAINT_OUTPUT=$(php bin/console app:force-drop-constraint 2>&1)
+CONSTRAINT_EXIT_CODE=$?
+
+echo "[startup.sh] Command exit code: $CONSTRAINT_EXIT_CODE" >&2
+echo "[startup.sh] Command output:" >&2
+echo "$CONSTRAINT_OUTPUT" >&2
+
+if [ $CONSTRAINT_EXIT_CODE -ne 0 ]; then
+    echo "❌ Force drop FAILED (exit code: $CONSTRAINT_EXIT_CODE) - constraint may still exist!" >&2
+    echo "[startup.sh] Full error output:" >&2
+    echo "$CONSTRAINT_OUTPUT" >&2
+else
+    echo "✅ Force drop completed successfully!" >&2
+fi
+
+echo "════════════════════════════════════════" >&2
+echo "✅ Constraint drop step complete" >&2
+echo "════════════════════════════════════════" >&2
 
 # Créer utilisateur admin si nécessaire
 echo "🔧 Vérification de l'utilisateur admin..." >&2
