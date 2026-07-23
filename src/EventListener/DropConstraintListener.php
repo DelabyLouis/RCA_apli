@@ -36,50 +36,63 @@ class DropConstraintListener implements EventSubscriberInterface
         }
 
         try {
-            error_log("[DropConstraintListener] 🚀 START - Finding and dropping numero* constraints");
+            error_log("[DropConstraintListener] 🚀 START");
 
-            // Find the EXACT constraint name
-            $constraints = $this->connection->executeQuery(
-                "SELECT constraint_name FROM information_schema.table_constraints 
-                 WHERE table_name = 'transaction' 
-                 AND constraint_type = 'UNIQUE' 
-                 AND table_schema = 'public'"
+            // Use pg_constraint directly - more reliable than information_schema
+            $result = $this->connection->executeQuery(
+                "SELECT c.conname as constraint_name, 
+                        (SELECT relname FROM pg_class WHERE oid = c.conrelid) as table_name,
+                        CASE WHEN c.contype = 'u' THEN 'UNIQUE' 
+                             WHEN c.contype = 'p' THEN 'PRIMARY KEY'
+                             WHEN c.contype = 'f' THEN 'FOREIGN KEY'
+                             ELSE c.contype END as constraint_type
+                 FROM pg_constraint c
+                 JOIN pg_class t ON c.conrelid = t.oid
+                 JOIN pg_namespace n ON t.relnamespace = n.oid
+                 WHERE t.relname = 'transaction' AND n.nspname = 'public'
+                 ORDER BY c.conname"
             )->fetchAllAssociative();
 
-            error_log("[DropConstraintListener] Found " . count($constraints) . " UNIQUE constraints");
+            error_log("[DropConstraintListener] Found " . count($result) . " constraints on transaction table:");
 
             $found = false;
-            foreach ($constraints as $row) {
+            foreach ($result as $row) {
                 $name = $row['constraint_name'];
+                $type = $row['constraint_type'];
+                error_log("[DropConstraintListener]   - $name ($type)");
                 
                 if (stripos($name, 'numero') !== false) {
-                    error_log("[DropConstraintListener] 🎯 Dropping: $name");
+                    error_log("[DropConstraintListener] 🎯 TARGET FOUND: $name");
                     $found = true;
 
-                    $sql = 'ALTER TABLE "transaction" DROP CONSTRAINT "' . str_replace('"', '""', $name) . '"';
-                    $this->connection->executeStatement($sql);
-                    error_log("[DropConstraintListener] ✅ Dropped: $name");
+                    try {
+                        $sql = 'ALTER TABLE "transaction" DROP CONSTRAINT "' . str_replace('"', '""', $name) . '"';
+                        error_log("[DropConstraintListener] Executing: $sql");
+                        $this->connection->executeStatement($sql);
+                        error_log("[DropConstraintListener] ✅ Dropped: $name");
+                    } catch (\Exception $e) {
+                        error_log("[DropConstraintListener] ❌ Failed to drop $name: " . $e->getMessage());
+                    }
                 }
             }
 
             if (!$found) {
-                error_log("[DropConstraintListener] ⚠️  No numero* UNIQUE constraint found");
+                error_log("[DropConstraintListener] ⚠️  No numero* constraint found");
             }
 
-            // Verify
+            // Final verification
             $verify = $this->connection->executeQuery(
-                "SELECT COUNT(*) as cnt FROM information_schema.table_constraints 
-                 WHERE table_name = 'transaction' 
-                 AND constraint_type = 'UNIQUE' 
-                 AND table_schema = 'public'
-                 AND constraint_name LIKE '%numero%'"
-            )->fetchAssociative();
+                "SELECT c.conname FROM pg_constraint c
+                 JOIN pg_class t ON c.conrelid = t.oid
+                 JOIN pg_namespace n ON t.relnamespace = n.oid
+                 WHERE t.relname = 'transaction' AND n.nspname = 'public'
+                 AND c.conname LIKE '%numero%'"
+            )->fetchAllAssociative();
 
-            $cnt = (int)($verify['cnt'] ?? 0);
-            if ($cnt === 0) {
-                error_log("[DropConstraintListener] ✅✅ SUCCESS: All numero constraints removed!");
+            if (count($verify) === 0) {
+                error_log("[DropConstraintListener] ✅ FINAL: All numero constraints successfully removed!");
             } else {
-                error_log("[DropConstraintListener] ❌ FAILED: $cnt constraints still exist");
+                error_log("[DropConstraintListener] ❌ FINAL: " . count($verify) . " numero constraint(s) still exist");
             }
 
         } catch (\Exception $e) {
