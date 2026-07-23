@@ -20,24 +20,15 @@ php bin/console doctrine:migrations:migrate --no-interaction || {
 }
 
 echo "════════════════════════════════════════" >&2
-echo "🔧 Post-migration: Ensuring numero_ordre constraints are dropped" >&2
+echo "🔧 Post-migration: Dropping numero_ordre constraints via Symfony command" >&2
 echo "════════════════════════════════════════" >&2
 
-# Direct SQL fallback - drop any remaining numero_ordre constraints
-echo "[startup.sh] Executing direct DROP for numero_ordre constraints..." >&2
-php bin/console dbal:run-sql "ALTER TABLE \"transaction\" DROP CONSTRAINT IF EXISTS unique_numero_ordre_exercice;" 2>&1 | head -5 >&2 || echo "[startup.sh] First DROP attempt done"
-php bin/console dbal:run-sql "ALTER TABLE \"transaction\" DROP CONSTRAINT IF EXISTS unique_numero_ordem_exercice;" 2>&1 | head -5 >&2 || echo "[startup.sh] Second DROP attempt done"
-
-# Verify
-echo "[startup.sh] Verifying constraint removal..." >&2
-VERIFY=$(php bin/console dbal:run-sql "SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name='transaction' AND constraint_name LIKE '%numero%'" 2>&1 | grep -oE "[0-9]+" | head -1)
-echo "[startup.sh] Remaining numero_* constraints: $VERIFY" >&2
-
-if [ "$VERIFY" == "0" ] || [ -z "$VERIFY" ]; then
-    echo "✅ Constraints successfully removed!" >&2
-else
-    echo "⚠️  Some constraints may still exist - will proceed anyway" >&2
-fi
+# Use the custom Symfony command (runs every time, not limited by migrations)
+php bin/console app:drop-numero-constraint >&2 || {
+    echo "⚠️  Command failed, trying direct SQL fallback..." >&2
+    php bin/console dbal:run-sql "ALTER TABLE \"transaction\" DROP CONSTRAINT IF EXISTS unique_numero_ordre_exercice;" 2>&1 | head -3 >&2 || true
+    php bin/console dbal:run-sql "ALTER TABLE \"transaction\" DROP CONSTRAINT IF EXISTS unique_numero_ordem_exercice;" 2>&1 | head -3 >&2 || true
+}
 
 echo "════════════════════════════════════════" >&2
 echo "✅ Constraint drop step complete" >&2
