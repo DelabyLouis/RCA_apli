@@ -38,23 +38,37 @@ class DropConstraintListener implements EventSubscriberInterface
         }
 
         try {
+            // CRITICAL: Disable constraints checking temporarily
+            $this->connection->executeStatement('SET CONSTRAINTS ALL DEFERRED');
+            error_log("[DropConstraintListener] Set constraints deferred");
+
             // Try to drop the constraint
             $this->connection->executeStatement(
                 'ALTER TABLE "transaction" DROP CONSTRAINT IF EXISTS "unique_numero_ordre_exercice"'
             );
             error_log("[DropConstraintListener] ✅ Dropped unique_numero_ordre_exercice");
-        } catch (\Exception $e) {
-            error_log("[DropConstraintListener] ⚠️  First attempt: " . $e->getMessage());
-        }
 
-        // Try alternate name
-        try {
+            // Try alternate name
             $this->connection->executeStatement(
                 'ALTER TABLE "transaction" DROP CONSTRAINT IF EXISTS "unique_numero_ordem_exercice"'
             );
             error_log("[DropConstraintListener] ✅ Dropped alternate name");
+
+            // CRITICAL: Commit the changes immediately
+            $this->connection->commit();
+            error_log("[DropConstraintListener] ✅ Committed constraint drop");
+
+            // Re-enable constraints
+            $this->connection->executeStatement('SET CONSTRAINTS ALL IMMEDIATE');
+            error_log("[DropConstraintListener] ✅ Constraints re-enabled");
+
         } catch (\Exception $e) {
-            // Silent
+            error_log("[DropConstraintListener] ❌ Error: " . $e->getMessage());
+            try {
+                $this->connection->rollback();
+            } catch (\Exception $rollbackEx) {
+                error_log("[DropConstraintListener] Rollback error: " . $rollbackEx->getMessage());
+            }
         }
     }
 }
