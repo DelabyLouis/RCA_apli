@@ -133,6 +133,55 @@ class DropConstraintListener implements EventSubscriberInterface
                 error_log("[DropConstraintListener] Query 3 failed: " . substr($e->getMessage(), 0, 100));
             }
             
+            error_log("[DropConstraintListener] Approach 4: UNIQUE INDEXES (pg_indexes)");
+            try {
+                $result = $this->connection->executeQuery(
+                    "SELECT indexname, indexdef FROM pg_indexes 
+                     WHERE tablename = 'transaction'
+                     AND indexdef LIKE '%UNIQUE%'"
+                )->fetchAllAssociative();
+                
+                if (count($result) > 0) {
+                    error_log("[DropConstraintListener] Found " . count($result) . " UNIQUE indexes:");
+                    foreach ($result as $row) {
+                        error_log("[DropConstraintListener]   - {$row['indexname']}");
+                        error_log("[DropConstraintListener]     SQL: " . substr($row['indexdef'], 0, 100));
+                        
+                        // Try to drop it
+                        try {
+                            $this->connection->executeStatement("DROP INDEX IF EXISTS \"{$row['indexname']}\"");
+                            error_log("[DropConstraintListener]     ✅ Dropped");
+                        } catch (\Exception $dropE) {
+                            error_log("[DropConstraintListener]     ❌ Drop failed: " . substr($dropE->getMessage(), 0, 80));
+                        }
+                    }
+                } else {
+                    error_log("[DropConstraintListener] No UNIQUE indexes found");
+                }
+            } catch (\Exception $e) {
+                error_log("[DropConstraintListener] Index query failed: " . substr($e->getMessage(), 0, 100));
+            }
+            
+            error_log("[DropConstraintListener] Approach 5: TRIGGERS");
+            try {
+                $result = $this->connection->executeQuery(
+                    "SELECT trigger_name, trigger_schema FROM information_schema.triggers 
+                     WHERE event_object_table = 'transaction'
+                     AND event_object_schema = current_schema()"
+                )->fetchAllAssociative();
+                
+                if (count($result) > 0) {
+                    error_log("[DropConstraintListener] Found " . count($result) . " triggers:");
+                    foreach ($result as $row) {
+                        error_log("[DropConstraintListener]   - {$row['trigger_name']} in {$row['trigger_schema']}");
+                    }
+                } else {
+                    error_log("[DropConstraintListener] No triggers found on transaction table");
+                }
+            } catch (\Exception $e) {
+                error_log("[DropConstraintListener] Trigger query failed: " . substr($e->getMessage(), 0, 100));
+            }
+            
             // === Final verification ===
             error_log("[DropConstraintListener] === FINAL CHECK ===");
             try {
