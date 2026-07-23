@@ -20,8 +20,8 @@ php bin/console doctrine:migrations:migrate --no-interaction || {
 }
 
 # CRITICAL: Drop unique constraint on numero_ordre to allow duplicates
-echo "🔧 Suppression de la contrainte unique sur numero_ordre..." >&2
-php bin/console app:drop-numero-ordre-constraint || echo "⚠️  Constraint drop command failed - it may already be dropped" >&2
+echo "🔧 Suppression forcée de la contrainte unique sur numero_ordre..." >&2
+php bin/console app:force-drop-constraint || echo "⚠️  Force drop failed" >&2
 
 # Créer utilisateur admin si nécessaire
 echo "🔧 Vérification de l'utilisateur admin..." >&2
